@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.util;
 
-import java.util.function.Supplier;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -12,17 +10,19 @@ public final class Lazy<T> {
     T realObj;
 
     @Nonnull
-    Supplier<T> supplier;
+    LazyInitializer<T> supplier;
 
-    public Lazy(@Nonnull Supplier<T> supplier) {
+    public Lazy(@Nonnull LazyInitializer<T> supplier) {
         isInited = false;
         this.supplier = supplier;
     }
 
+    @Nonnull
     public T get() {
-        if (realObj == null)
-            return realObj = supplier.get();
+        T obj = realObj;
+        if (obj == null)
+            return realObj = supplier.init();
         else
-            return realObj;
+            return obj;
     }
 }

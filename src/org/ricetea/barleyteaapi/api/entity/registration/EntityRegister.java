@@ -20,6 +20,10 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     @Nonnull
     private final Hashtable<NamespacedKey, BaseEntity> lookupTable = new Hashtable<>();
 
+    private EntityRegister() {
+    }
+
+    @Nonnull
     public static EntityRegister getInstance() {
         return inst.get();
     }
@@ -33,8 +37,12 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     }
 
     @Nullable
-    public BaseEntity lookupEntity(@Nonnull NamespacedKey key) {
+    public BaseEntity lookupEntityType(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
+    }
+
+    public boolean hasEntityType(@Nonnull NamespacedKey key) {
+        return lookupTable.containsKey(key);
     }
 
     @Nonnull

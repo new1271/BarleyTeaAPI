@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityTypes;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.api.entity.feature.ICommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public final class BarleySummonEntityProvider extends CompletionProviders {
     private static SuggestionProvider<CommandListenerWrapper> provider;
@@ -27,7 +28,8 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
     public static SuggestionProvider<CommandListenerWrapper> getProvider() {
         if (provider == null) {
             provider = CompletionProviders.a(
-                    new MinecraftKey("barleyteaapi", "summonable_entities_" + ThreadLocalRandom.current().nextInt()),
+                    new MinecraftKey(NamespacedKeyUtils.Namespace,
+                            "summonable_entities_" + ThreadLocalRandom.current().nextInt()),
                     new EntitySuggestionProvider());
         }
         return provider;

@@ -107,7 +107,7 @@ public final class BarleySummonCommand {
         } else {
             EntityRegister register = EntityRegister.getInstance();
             NamespacedKey key = new NamespacedKey(namespace, entityKey.a());
-            BaseEntity baseEntity = register.lookupEntity(key);
+            BaseEntity baseEntity = register.lookupEntityType(key);
             if (baseEntity != null && baseEntity instanceof ICommandSummon) {
                 ICommandSummon summonEntity = (ICommandSummon) baseEntity;
                 NBTTagCompound nbttagcompound1 = nbt.h();
