@@ -8,11 +8,8 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHorse;
 import org.bukkit.entity.Creature;
-import org.bukkit.entity.LivingEntity;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;

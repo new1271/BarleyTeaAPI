@@ -3,11 +3,9 @@ package org.ricetea.barleyteaapi.api.entity.feature;
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataEntityDamagedByNothing {

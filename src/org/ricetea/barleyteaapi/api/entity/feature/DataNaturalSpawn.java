@@ -6,25 +6,21 @@ import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataCreatureNaturalSpawn {
+public final class DataNaturalSpawn {
     @Nonnull
     private final CreatureSpawnEvent event;
 
     @Nonnull
     private final Lazy<BarleyTeaEntityType> entityType;
 
-    public DataCreatureNaturalSpawn(@Nonnull CreatureSpawnEvent event) {
+    public DataNaturalSpawn(@Nonnull CreatureSpawnEvent event) {
         this.event = event;
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
     }

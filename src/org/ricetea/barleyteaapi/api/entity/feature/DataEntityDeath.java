@@ -4,12 +4,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataEntityDeath {

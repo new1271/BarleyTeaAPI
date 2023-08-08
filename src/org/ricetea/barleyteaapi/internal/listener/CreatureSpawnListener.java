@@ -8,8 +8,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataCreatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 
@@ -33,10 +34,16 @@ public final class CreatureSpawnListener implements Listener {
                         && e instanceof FeatureNaturalSpawn)) {
             FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
             if (rnd.nextDouble() < spawnEntityType.getPosibility()) {
-                if (!spawnEntityType.handleNaturalSpawn(new DataCreatureNaturalSpawn(event))) {
-                    event.setCancelled(true);
+                StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
+                switch (result) {
+                    case Handled:
+                        return;
+                    case Cancelled:
+                        event.setCancelled(true);
+                        return;
+                    case Skipped:
+                        break;
                 }
-                break;
             }
         }
     }

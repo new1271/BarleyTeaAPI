@@ -10,7 +10,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public abstract class BaseEntity implements Keyed {
