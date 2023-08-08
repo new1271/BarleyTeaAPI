@@ -1,0 +1,73 @@
+package org.ricetea.barleyteaapi.api.entity.feature;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.util.Either;
+import org.ricetea.barleyteaapi.util.Lazy;
+
+public final class DataEntityDeath {
+    @Nonnull
+    private final EntityDeathEvent event;
+
+    @Nullable
+    private final Entity killer;
+
+    @Nonnull
+    private final Lazy<Either<EntityType, BaseEntity>> decedentType;
+
+    @Nullable
+    private final Lazy<Either<EntityType, BaseEntity>> killerType;
+
+    public DataEntityDeath(@Nonnull EntityDeathEvent event,
+            @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
+        this.event = event;
+        decedentType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
+        if (lastDamageCauseByEntityEvent == null) {
+            killer = null;
+            killerType = null;
+        } else {
+            killer = lastDamageCauseByEntityEvent.getDamager();
+            killerType = new Lazy<>(() -> BaseEntity.getEntityType(killer));
+        }
+    }
+
+    @SuppressWarnings("null")
+    @Nonnull
+    public Entity getDecedent() {
+        return event.getEntity();
+    }
+
+    @Nonnull
+    public Either<EntityType, BaseEntity> getDecedentType() {
+        return decedentType.get();
+    }
+
+    @Nullable
+    public Entity getKiller() {
+        return killer;
+    }
+
+    @Nullable
+    public Either<EntityType, BaseEntity> getKillerType() {
+        Lazy<Either<EntityType, BaseEntity>> killerType = this.killerType;
+        if (killerType == null)
+            return null;
+        else
+            return killerType.get();
+    }
+
+    public boolean hasKiller() {
+        return killer != null;
+    }
+
+    @Nonnull
+    public EntityDeathEvent getBaseEvent() {
+        return event;
+    }
+}

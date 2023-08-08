@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.ricetea.barleyteaapi.internal.listener.EntityDamageListener;
+import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 
 public final class BarleyTeaAPI extends JavaPlugin {
@@ -18,5 +18,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
     private void registerEventListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);
+        pluginManager.registerEvents(EntityDeathListener.getInstance(), this);
     }
 }
