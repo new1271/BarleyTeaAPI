@@ -18,7 +18,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.entity.EntityTypes;
 
 import org.bukkit.NamespacedKey;
-import org.ricetea.barleyteaapi.api.entity.feature.ICommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
@@ -41,7 +41,7 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
         public EntitySuggestionProvider() {
             BuiltInRegistries.h.s().filter(EntityTypes::c).forEach(entity -> entities.add(EntityTypes.a(entity)));
             for (NamespacedKey namespacedKey : EntityRegister.getInstance()
-                    .getEntityIDs(e -> e instanceof ICommandSummon)) {
+                    .getEntityIDs(e -> e instanceof FeatureCommandSummon)) {
                 entities.add(MinecraftKey.a(namespacedKey.getNamespace(), namespacedKey.getKey()));
             }
         }

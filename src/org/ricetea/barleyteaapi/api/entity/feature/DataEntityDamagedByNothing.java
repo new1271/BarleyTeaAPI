@@ -2,31 +2,23 @@ package org.ricetea.barleyteaapi.api.entity.feature;
 
 import javax.annotation.Nonnull;
 
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class EntityDamagedByBlockData {
+public final class DataEntityDamagedByNothing {
     @Nonnull
-    private final EntityDamageByBlockEvent event;
+    private final EntityDamageEvent event;
 
     @Nonnull
     private final Lazy<Either<EntityType, BaseEntity>> damageeType;
 
-    public EntityDamagedByBlockData(@Nonnull EntityDamageByBlockEvent event) {
+    public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {
         this.event = event;
         damageeType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
-    }
-
-    @SuppressWarnings("null")
-    @Nonnull
-    public Block getDamager() {
-        return event.getDamager();
     }
 
     @SuppressWarnings("null")
@@ -55,7 +47,7 @@ public final class EntityDamagedByBlockData {
     }
 
     @Nonnull
-    public EntityDamageByBlockEvent getBaseEvent() {
+    public EntityDamageEvent getBaseEvent() {
         return event;
     }
 }

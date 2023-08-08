@@ -33,7 +33,7 @@ import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.phys.Vec3D;
 
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.ICommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 
 public final class BarleySummonCommand {
@@ -108,8 +108,8 @@ public final class BarleySummonCommand {
             EntityRegister register = EntityRegister.getInstance();
             NamespacedKey key = new NamespacedKey(namespace, entityKey.a());
             BaseEntity baseEntity = register.lookupEntityType(key);
-            if (baseEntity != null && baseEntity instanceof ICommandSummon) {
-                ICommandSummon summonEntity = (ICommandSummon) baseEntity;
+            if (baseEntity != null && baseEntity instanceof FeatureCommandSummon) {
+                FeatureCommandSummon summonEntity = (FeatureCommandSummon) baseEntity;
                 NBTTagCompound nbttagcompound1 = nbt.h();
                 nbttagcompound1.a("id", baseEntity.getEntityTypeBasedOn().getKey().toString());
                 Entity entity = EntityTypes.a(nbttagcompound1, (World) worldserver, loadedEntity -> {

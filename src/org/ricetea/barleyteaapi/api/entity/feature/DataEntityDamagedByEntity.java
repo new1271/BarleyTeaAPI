@@ -10,14 +10,14 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class EntityDamagedByEntityData {
+public final class DataEntityDamagedByEntity {
     @Nonnull
     private final EntityDamageByEntityEvent event;
 
     @Nonnull
     private final Lazy<Either<EntityType, BaseEntity>> damagerType, damageeType;
 
-    public EntityDamagedByEntityData(@Nonnull EntityDamageByEntityEvent event) {
+    public DataEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event) {
         this.event = event;
         damagerType = new Lazy<>(() -> BaseEntity.getEntityType(event.getDamager()));
         damageeType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
