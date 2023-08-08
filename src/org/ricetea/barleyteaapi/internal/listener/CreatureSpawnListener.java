@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
@@ -27,6 +28,10 @@ public final class CreatureSpawnListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenCreatureSpawn(CreatureSpawnEvent event) {
         if (event == null || event.isCancelled())
+            return;
+        SpawnReason reason = event.getSpawnReason();
+        if (reason == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND)
+                || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
         for (BaseEntity entityType : EntityRegister.getInstance()
