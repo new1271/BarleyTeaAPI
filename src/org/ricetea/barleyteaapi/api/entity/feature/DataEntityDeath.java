@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
@@ -19,10 +20,10 @@ public final class DataEntityDeath {
     private final Entity killer;
 
     @Nonnull
-    private final Lazy<Either<EntityType, BaseEntity>> decedentType;
+    private final Lazy<BarleyTeaEntityType> decedentType;
 
     @Nullable
-    private final Lazy<Either<EntityType, BaseEntity>> killerType;
+    private final Lazy<BarleyTeaEntityType> killerType;
 
     public DataEntityDeath(@Nonnull EntityDeathEvent event,
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
@@ -44,7 +45,7 @@ public final class DataEntityDeath {
     }
 
     @Nonnull
-    public Either<EntityType, BaseEntity> getDecedentType() {
+    public BarleyTeaEntityType getDecedentType() {
         return decedentType.get();
     }
 
@@ -54,8 +55,8 @@ public final class DataEntityDeath {
     }
 
     @Nullable
-    public Either<EntityType, BaseEntity> getKillerType() {
-        Lazy<Either<EntityType, BaseEntity>> killerType = this.killerType;
+    public BarleyTeaEntityType getKillerType() {
+        Lazy<BarleyTeaEntityType> killerType = this.killerType;
         if (killerType == null)
             return null;
         else

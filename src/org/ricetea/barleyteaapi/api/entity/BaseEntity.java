@@ -81,16 +81,16 @@ public abstract class BaseEntity implements Keyed {
     }
 
     @Nonnull
-    public static Either<EntityType, BaseEntity> getEntityType(Entity entity) {
+    public static BarleyTeaEntityType getEntityType(Entity entity) {
         NamespacedKey entityTypeID = BaseEntity.getEntityID(entity);
         if (entityTypeID == null) {
-            return Either.left(entity.getType());
+            return BarleyTeaEntityType.create(entity.getType());
         } else {
             BaseEntity baseEntity = EntityRegister.getInstance().lookupEntityType(entityTypeID);
             if (baseEntity == null)
-                return Either.left(entity.getType());
+                return BarleyTeaEntityType.create(entity.getType());
             else
-                return Either.right(baseEntity);
+                return BarleyTeaEntityType.create(baseEntity);
         }
     }
 }

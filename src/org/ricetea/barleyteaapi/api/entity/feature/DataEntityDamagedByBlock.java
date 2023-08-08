@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
@@ -16,7 +17,7 @@ public final class DataEntityDamagedByBlock {
     private final EntityDamageByBlockEvent event;
 
     @Nonnull
-    private final Lazy<Either<EntityType, BaseEntity>> damageeType;
+    private final Lazy<BarleyTeaEntityType> damageeType;
 
     public DataEntityDamagedByBlock(@Nonnull EntityDamageByBlockEvent event) {
         this.event = event;
@@ -36,7 +37,7 @@ public final class DataEntityDamagedByBlock {
     }
 
     @Nonnull
-    public Either<EntityType, BaseEntity> getDamageeType() {
+    public BarleyTeaEntityType getDamageeType() {
         return damageeType.get();
     }
 

@@ -12,7 +12,7 @@ public class Either<L, R> {
     @Nullable
     final R right;
 
-    private Either(L left, R right) {
+    protected Either(L left, R right) {
         this.left = left;
         this.right = right;
     }
@@ -37,11 +37,11 @@ public class Either<L, R> {
         return right;
     }
 
-    public boolean hasLeft() {
+    public boolean isLeft() {
         return left != null;
     }
 
-    public boolean hasRight() {
+    public boolean isRight() {
         return right != null;
     }
 

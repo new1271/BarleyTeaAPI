@@ -8,9 +8,15 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHorse;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.LivingEntity;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
@@ -25,11 +31,19 @@ public final class EntityRegister implements IRegister<BaseEntity> {
 
     @Nonnull
     public static EntityRegister getInstance() {
+        BarleyTeaAPI.checkPluginUsable();
         return inst.get();
     }
 
     public void register(@Nonnull BaseEntity entity) {
+        BarleyTeaAPI.checkPluginUsable();
         lookupTable.put(entity.getKey(), entity);
+        if (entity instanceof FeatureNaturalSpawn) {
+            if (!Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
+                        + " isn't based on a creature that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
+            }
+        }
     }
 
     public void unregister(@Nonnull BaseEntity entity) {
@@ -54,6 +68,16 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             result = lookupTable.entrySet().stream().filter(new EntityFilter(filter)).map(e -> e.getKey())
                     .toArray(NamespacedKey[]::new);
         return result != null ? result : new NamespacedKey[0];
+    }
+
+    @Nonnull
+    public BaseEntity[] getEntityTypes(@Nullable Predicate<BaseEntity> filter) {
+        BaseEntity[] result;
+        if (filter == null)
+            result = lookupTable.values().toArray(BaseEntity[]::new);
+        else
+            result = lookupTable.values().stream().filter(filter).toArray(BaseEntity[]::new);
+        return result != null ? result : new BaseEntity[0];
     }
 
     private static class EntityFilter implements Predicate<Map.Entry<NamespacedKey, BaseEntity>> {

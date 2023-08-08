@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
@@ -14,7 +15,7 @@ public final class DataEntityDamagedByNothing {
     private final EntityDamageEvent event;
 
     @Nonnull
-    private final Lazy<Either<EntityType, BaseEntity>> damageeType;
+    private final Lazy<BarleyTeaEntityType> damageeType;
 
     public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {
         this.event = event;
@@ -28,7 +29,7 @@ public final class DataEntityDamagedByNothing {
     }
 
     @Nonnull
-    public Either<EntityType, BaseEntity> getDamageeType() {
+    public BarleyTeaEntityType getDamageeType() {
         return damageeType.get();
     }
 

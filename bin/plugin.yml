@@ -1,6 +1,6 @@
 name: BarleyTeaAPI
 version: "1.0.0"
-description: a mob/item API for Paper server software
+description: 櫻之城專用插件
 author: new1271 (RiceTeaInMC)
 main: org.ricetea.barleyteaapi.BarleyTeaAPI
 api-version: 1.20
