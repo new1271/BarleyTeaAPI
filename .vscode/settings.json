@@ -3,5 +3,10 @@
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
-    ]
+    ],
+    "yaml.schemas": {
+        "file:///c%3A/Users/User/.vscode/extensions/atlassian.atlascode-3.0.4/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
+        "https://json.schemastore.org/bukkit-plugin.json": "file:///d%3A/Java%20Projects/BarleyTeaAPI/src/plugin.yml"
+    },
+    "java.compile.nullAnalysis.mode": "automatic"
 }

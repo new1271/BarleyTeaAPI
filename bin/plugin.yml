@@ -1,0 +1,8 @@
+name: BarleyTeaAPI
+version: "1.0.0"
+description: 櫻之城專用插件
+author: new1271 (RiceTeaInMC)
+main: org.ricetea.barleyteaapi.BarleyTeaAPI
+api-version: 1.20
+depend:
+  - "ProtocolLib"
