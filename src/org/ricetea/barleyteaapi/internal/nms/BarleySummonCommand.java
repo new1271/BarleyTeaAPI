@@ -134,7 +134,9 @@ public final class BarleySummonCommand {
                     throw summonFailedMessage.create();
                 }
                 source.a(() -> IChatBaseComponent.a("commands.summon.success",
-                        new Object[] { IChatBaseComponent.c(baseEntity.getNameInTranslateKey()) }), true);
+                        new Object[] { IChatBaseComponent.a(baseEntity.getNameInTranslateKey(),
+                                baseEntity.getDefaultName()) }),
+                        true);
             } else {
                 throw summonFailedMessage.create();
             }

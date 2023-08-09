@@ -16,7 +16,7 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import net.kyori.adventure.text.Component;
 
 public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base Entity Class
-        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath { // implements entity features
+        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillEntity { // implements entity features
 
     private static final Lazy<TestEntity> inst = new Lazy<>(TestEntity::new);
 
@@ -27,6 +27,12 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
 
     private TestEntity() {
         super(NamespacedKeyUtils.BarleyTeaAPI("test_entity"), EntityType.ZOMBIE);
+    }
+
+    @Override
+    @Nonnull
+    public String getDefaultName() { //set default display name for /summonbarley command's result in chat bar
+        return "Test Entity";
     }
 
     @Override
@@ -41,7 +47,7 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
                     killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!")));
             }
         }
-        return true; //accept entity death
+        return true; //accept decedent(the entity) deaths
     }
 
     @Override
@@ -51,17 +57,17 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
                     .append(Component.text(" is dealed ")).append(Component.text(data.getDamage()))
                     .append(Component.text(" damage!")));
         }
-        return true; //accept entity damaged by another entity
+        return true; //accept the entity is damaged by another entity
     }
 
     @Override
     public boolean handleEntityDamagedByBlock(DataEntityDamagedByBlock data) {
-        return true; //accept entity damaged by block
+        return true; //accept the entity is damaged by block
     }
 
     @Override
     public boolean handleEntityDamagedByNothing(DataEntityDamagedByNothing data) {
-        return true; //accept entity damaged by nothing(environment)
+        return true; //accept the entity is damaged by nothing(environment)
     }
 
     @Override
@@ -71,12 +77,20 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
                     .append(Component.text(" damages you ")).append(Component.text(data.getFinalDamage()))
                     .append(Component.text(" !")));
         }
-        return true; //accept entity attack another entity
+        return true; //accept the entity attacks another entity
     }
 
     @Override
     public boolean handleCommandSummon(@Nonnull Entity entitySummoned, @Nullable String nbt) {
-        return true; //accept entity summon by command
+        return true; //accept the entity summoned by command
     }
 
+    @Override
+    public boolean handleKillEntity(DataKillEntity data) {
+        Entity decedent = data.getDecedent();
+        if (decedent instanceof Player) //if decedent is player
+            decedent.sendMessage(Component.text("You're killed by ").append(data.getKiller().name())
+                    .append(Component.text(" !")));
+        return true; //accept the decedent death
+    }
 }

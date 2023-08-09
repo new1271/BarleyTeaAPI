@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDeath;
+import org.ricetea.barleyteaapi.api.entity.feature.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
@@ -64,7 +65,7 @@ public final class EntityDeathListener implements Listener {
                 if (entityType != null && entityType instanceof FeatureKillEntity) {
                     FeatureKillEntity entityDeath = (FeatureKillEntity) entityType;
                     boolean cancelled = !entityDeath
-                            .handleKillEntity(new DataEntityDeath(event, eventLastDamageCausedByEntity));
+                            .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
                     if (cancelled) {
                         event.setCancelled(true);
                         return;
