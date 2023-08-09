@@ -48,7 +48,7 @@ public final class EntityDamageListener implements Listener {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
             if (entity != null && entity instanceof FeatureEntityDamage) {
                 FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
-                boolean cancelled = entityDamage.handleEntityAttack(new DataEntityDamagedByEntity(event));
+                boolean cancelled = !entityDamage.handleEntityAttack(new DataEntityDamagedByEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;
@@ -60,7 +60,7 @@ public final class EntityDamageListener implements Listener {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
             if (entity != null && entity instanceof FeatureEntityDamage) {
                 FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
-                boolean cancelled = entityDamage.handleEntityDamagedByEntity(new DataEntityDamagedByEntity(event));
+                boolean cancelled = !entityDamage.handleEntityDamagedByEntity(new DataEntityDamagedByEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;
@@ -75,7 +75,7 @@ public final class EntityDamageListener implements Listener {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
             if (entity != null && entity instanceof FeatureEntityDamage) {
                 FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
-                boolean cancelled = entityDamage.handleEntityDamagedByBlock(new DataEntityDamagedByBlock(event));
+                boolean cancelled = !entityDamage.handleEntityDamagedByBlock(new DataEntityDamagedByBlock(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;
@@ -90,7 +90,7 @@ public final class EntityDamageListener implements Listener {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
             if (entity != null && entity instanceof FeatureEntityDamage) {
                 FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
-                boolean cancelled = entityDamage.handleEntityDamagedByNothing(new DataEntityDamagedByNothing(event));
+                boolean cancelled = !entityDamage.handleEntityDamagedByNothing(new DataEntityDamagedByNothing(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;

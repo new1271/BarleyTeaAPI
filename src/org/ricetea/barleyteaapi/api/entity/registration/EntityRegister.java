@@ -16,6 +16,7 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
+import org.ricetea.barleyteaapi.internal.nms.BarleySummonEntityProvider;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
@@ -36,7 +37,6 @@ public final class EntityRegister implements IRegister<BaseEntity> {
 
     public void register(@Nonnull BaseEntity entity) {
         BarleyTeaAPI.checkPluginUsable();
-        lookupTable.put(entity.getKey(), entity);
         if (entity instanceof FeatureNaturalSpawn) {
             if (!Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
                 BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
@@ -49,10 +49,13 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                         + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
             }
         }
+        lookupTable.put(entity.getKey(), entity);
+        BarleySummonEntityProvider.updateRegisterList();
     }
 
     public void unregister(@Nonnull BaseEntity entity) {
         lookupTable.remove(entity.getKey());
+        BarleySummonEntityProvider.updateRegisterList();
     }
 
     @Nullable

@@ -49,7 +49,7 @@ public final class EntityDeathListener implements Listener {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
             if (entityType != null && entityType instanceof FeatureEntityDeath) {
                 FeatureEntityDeath entityDeath = (FeatureEntityDeath) entityType;
-                boolean cancelled = entityDeath
+                boolean cancelled = !entityDeath
                         .handleEntityDeath(new DataEntityDeath(event, eventLastDamageCausedByEntity));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -63,7 +63,7 @@ public final class EntityDeathListener implements Listener {
                 BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
                 if (entityType != null && entityType instanceof FeatureKillEntity) {
                     FeatureKillEntity entityDeath = (FeatureKillEntity) entityType;
-                    boolean cancelled = entityDeath
+                    boolean cancelled = !entityDeath
                             .handleKillEntity(new DataEntityDeath(event, eventLastDamageCausedByEntity));
                     if (cancelled) {
                         event.setCancelled(true);

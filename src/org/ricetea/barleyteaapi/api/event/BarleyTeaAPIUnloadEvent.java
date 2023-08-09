@@ -11,7 +11,6 @@ public final class BarleyTeaAPIUnloadEvent extends Event {
     static final Lazy<HandlerList> lazyHandlerList = new Lazy<>(HandlerList::new);
 
     public BarleyTeaAPIUnloadEvent() {
-        super(true);
     }
 
     @Override

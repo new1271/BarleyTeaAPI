@@ -34,7 +34,7 @@ public final class SlimeSplitListener implements Listener {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
             if (entity != null && entity instanceof FeatureEntityDamage) {
                 FeatureSlimeSplit slimeSplitEntity = (FeatureSlimeSplit) entity;
-                boolean cancelled = slimeSplitEntity.handleSlimeSplit(new DataSlimeSplit(event));
+                boolean cancelled = !slimeSplitEntity.handleSlimeSplit(new DataSlimeSplit(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;

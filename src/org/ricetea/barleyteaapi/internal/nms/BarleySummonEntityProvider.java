@@ -1,6 +1,9 @@
 package org.ricetea.barleyteaapi.internal.nms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,33 +20,40 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.entity.EntityTypes;
 
-import org.bukkit.NamespacedKey;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public final class BarleySummonEntityProvider extends CompletionProviders {
-    private static SuggestionProvider<CommandListenerWrapper> provider;
+    private static final Lazy<SuggestionProvider<CommandListenerWrapper>> provider = new Lazy<>(
+            BarleySummonEntityProvider::build);
+    private static final Lazy<EntitySuggestionProvider> suggestionProvider = new Lazy<>(EntitySuggestionProvider::new);
 
-    public static SuggestionProvider<CommandListenerWrapper> getProvider() {
-        if (provider == null) {
-            provider = CompletionProviders.a(
-                    new MinecraftKey(NamespacedKeyUtils.Namespace,
-                            "summonable_entities_" + ThreadLocalRandom.current().nextInt()),
-                    new EntitySuggestionProvider());
-        }
-        return provider;
+    private static SuggestionProvider<CommandListenerWrapper> build() {
+        return CompletionProviders.a(
+                new MinecraftKey(NamespacedKeyUtils.Namespace,
+                        "summonable_entities_" + ThreadLocalRandom.current().nextInt()),
+                suggestionProvider.get());
     }
 
-    private static class EntitySuggestionProvider implements SuggestionProvider<ICompletionProvider> {
-        ArrayList<MinecraftKey> entities = new ArrayList<>();
+    public static SuggestionProvider<CommandListenerWrapper> getProvider() {
+        return provider.get();
+    }
+
+    public static void updateRegisterList() {
+        EntitySuggestionProvider suggestionProvider = BarleySummonEntityProvider.suggestionProvider.getUnsafe();
+        if (suggestionProvider != null)
+            suggestionProvider.updateRegisterList();
+    }
+
+    private static class EntitySuggestionProvider
+            implements SuggestionProvider<ICompletionProvider>, Iterable<MinecraftKey> {
+        final ArrayList<MinecraftKey> builtinKeys = new ArrayList<>();
+        List<MinecraftKey> customKeys = null;
 
         public EntitySuggestionProvider() {
-            BuiltInRegistries.h.s().filter(EntityTypes::c).forEach(entity -> entities.add(EntityTypes.a(entity)));
-            for (NamespacedKey namespacedKey : EntityRegister.getInstance()
-                    .getEntityIDs(e -> e instanceof FeatureCommandSummon)) {
-                entities.add(MinecraftKey.a(namespacedKey.getNamespace(), namespacedKey.getKey()));
-            }
+            BuiltInRegistries.h.s().filter(EntityTypes::c)
+                    .forEach(entity -> builtinKeys.add(EntityTypes.a(entity)));
         }
 
         @Override
@@ -52,9 +62,17 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
             String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
             if (!lowerCasedRemaining.contains("/")) {
                 if (lowerCasedRemaining.isBlank() || lowerCasedRemaining.contains(":")) {
-                    return ICompletionProvider.a(entities, suggestionsBuilder);
+                    return ICompletionProvider.a(this, suggestionsBuilder);
                 } else {
-                    entities.stream()
+                    if (customKeys == null) {
+                        customKeys = Arrays.stream(EntityRegister.getInstance().getEntityIDs(null))
+                                .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                    }
+                    builtinKeys.stream()
+                            .filter(key -> key.a().startsWith(lowerCasedRemaining)
+                                    || key.b().startsWith(lowerCasedRemaining))
+                            .forEach(key -> suggestionsBuilder.suggest(key.toString()));
+                    customKeys.stream()
                             .filter(key -> key.a().startsWith(lowerCasedRemaining)
                                     || key.b().startsWith(lowerCasedRemaining))
                             .forEach(key -> suggestionsBuilder.suggest(key.toString()));
@@ -63,5 +81,55 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
             return suggestionsBuilder.buildFuture();
         }
 
+        public void updateRegisterList() {
+            customKeys = null;
+        }
+
+        public Iterator<MinecraftKey> iterator() {
+            if (customKeys == null) {
+                customKeys = Arrays.stream(EntityRegister.getInstance().getEntityIDs(null))
+                        .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+            }
+            return new IteratorForEntityKey(builtinKeys, customKeys);
+        }
+
+        private static class IteratorForEntityKey implements Iterator<MinecraftKey> {
+
+            boolean isInBuiltin = true;
+            ArrayList<MinecraftKey> _builtins;
+            List<MinecraftKey> _another;
+            Iterator<MinecraftKey> currentIterator;
+
+            public IteratorForEntityKey(ArrayList<MinecraftKey> builtins, List<MinecraftKey> another) {
+                _builtins = builtins;
+                _another = another;
+            }
+
+            @Override
+            public boolean hasNext() {
+                Iterator<MinecraftKey> iterator = currentIterator;
+                if (iterator == null)
+                    currentIterator = iterator = isInBuiltin ? _builtins.iterator() : _another.iterator();
+                boolean result = iterator.hasNext();
+                if (!result && isInBuiltin) {
+                    isInBuiltin = false;
+                    currentIterator = iterator = _another.iterator();
+                    result = iterator.hasNext();
+                }
+                return result;
+            }
+
+            @Override
+            public MinecraftKey next() {
+                Iterator<MinecraftKey> iterator = currentIterator;
+                if (iterator == null)
+                    currentIterator = iterator = isInBuiltin ? _builtins.iterator() : _another.iterator();
+                if (!iterator.hasNext() && isInBuiltin) {
+                    isInBuiltin = false;
+                    currentIterator = iterator = _another.iterator();
+                }
+                return iterator.next();
+            }
+        }
     }
 }

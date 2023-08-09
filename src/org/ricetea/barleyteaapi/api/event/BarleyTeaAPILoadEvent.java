@@ -11,7 +11,6 @@ public final class BarleyTeaAPILoadEvent extends Event {
     static final Lazy<HandlerList> lazyHandlerList = new Lazy<>(HandlerList::new);
 
     public BarleyTeaAPILoadEvent() {
-        super(true);
     }
 
     @Override
