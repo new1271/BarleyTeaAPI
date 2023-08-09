@@ -64,6 +64,10 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         return lookupTable.containsKey(key);
     }
 
+    public boolean hasAnyRegisteredMob() {
+        return lookupTable.size() > 0;
+    }
+
     @Nonnull
     public NamespacedKey[] getEntityIDs(@Nullable Predicate<BaseEntity> filter) {
         NamespacedKey[] result;

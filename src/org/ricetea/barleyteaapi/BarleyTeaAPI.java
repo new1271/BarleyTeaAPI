@@ -12,7 +12,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
@@ -49,17 +48,20 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     private void announceEntitiesAPILoaded() {
-        for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
-            World world = worldIterator.next();
-            if (world != null) {
-                for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
-                    Entity entity = entityIterator.next();
-                    NamespacedKey id = BaseEntity.getEntityID(entity);
-                    if (id != null) {
-                        BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                        if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
-                            FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
-                            apiLoadEntity.handleAPILoaded(entity);
+        EntityRegister register = EntityRegister.getInstance();
+        if (register.hasAnyRegisteredMob()) {
+            for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
+                World world = worldIterator.next();
+                if (world != null) {
+                    for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
+                        Entity entity = entityIterator.next();
+                        NamespacedKey id = BaseEntity.getEntityID(entity);
+                        if (id != null) {
+                            BaseEntity entityType = register.lookupEntityType(id);
+                            if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
+                                FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                                apiLoadEntity.handleAPILoaded(entity);
+                            }
                         }
                     }
                 }
@@ -68,17 +70,20 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     private void announceEntitiesAPIUnloaded() {
-        for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
-            World world = worldIterator.next();
-            if (world != null) {
-                for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
-                    Entity entity = entityIterator.next();
-                    NamespacedKey id = BaseEntity.getEntityID(entity);
-                    if (id != null) {
-                        BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                        if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
-                            FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
-                            apiLoadEntity.handleAPIUnloaded(entity);
+        EntityRegister register = EntityRegister.getInstance();
+        if (register.hasAnyRegisteredMob()) {
+            for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
+                World world = worldIterator.next();
+                if (world != null) {
+                    for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
+                        Entity entity = entityIterator.next();
+                        NamespacedKey id = BaseEntity.getEntityID(entity);
+                        if (id != null) {
+                            BaseEntity entityType = register.lookupEntityType(id);
+                            if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
+                                FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                                apiLoadEntity.handleAPIUnloaded(entity);
+                            }
                         }
                     }
                 }

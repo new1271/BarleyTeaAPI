@@ -31,14 +31,17 @@ public final class ChunkListener implements Listener {
     public void listenEntitiesLoad(EntitiesLoadEvent event) {
         if (event == null)
             return;
-        for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
-            Entity entity = iterator.next();
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                if (entityType != null && entityType instanceof FeatureChunkLoad) {
-                    FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
-                    entityChunkLoad.handleChunkLoaded(entity);
+        EntityRegister register = EntityRegister.getInstance();
+        if (register.hasAnyRegisteredMob()) {
+            for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
+                Entity entity = iterator.next();
+                NamespacedKey id = BaseEntity.getEntityID(entity);
+                if (id != null) {
+                    BaseEntity entityType = register.lookupEntityType(id);
+                    if (entityType != null && entityType instanceof FeatureChunkLoad) {
+                        FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
+                        entityChunkLoad.handleChunkLoaded(entity);
+                    }
                 }
             }
         }
@@ -48,14 +51,17 @@ public final class ChunkListener implements Listener {
     public void listenEntitiesUnload(EntitiesUnloadEvent event) {
         if (event == null)
             return;
-        for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
-            Entity entity = iterator.next();
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                if (entityType != null && entityType instanceof FeatureChunkLoad) {
-                    FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
-                    entityChunkLoad.handleChunkUnloaded(entity);
+        EntityRegister register = EntityRegister.getInstance();
+        if (register.hasAnyRegisteredMob()) {
+            for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
+                Entity entity = iterator.next();
+                NamespacedKey id = BaseEntity.getEntityID(entity);
+                if (id != null) {
+                    BaseEntity entityType = register.lookupEntityType(id);
+                    if (entityType != null && entityType instanceof FeatureChunkLoad) {
+                        FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
+                        entityChunkLoad.handleChunkUnloaded(entity);
+                    }
                 }
             }
         }
