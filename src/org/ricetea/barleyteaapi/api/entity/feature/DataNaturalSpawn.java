@@ -9,19 +9,17 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataNaturalSpawn {
-    @Nonnull
-    private final CreatureSpawnEvent event;
-
+public final class DataNaturalSpawn extends DataEntityBase<CreatureSpawnEvent> {
     @Nonnull
     private final Lazy<BarleyTeaEntityType> entityType;
 
     public DataNaturalSpawn(@Nonnull CreatureSpawnEvent event) {
-        this.event = event;
+        super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
     }
 
@@ -58,10 +56,5 @@ public final class DataNaturalSpawn {
         NamespacedKey locWorldKey = locWorld.getKey();
         NamespacedKey tarWorldKey = world.getKey();
         return locWorldKey.equals(tarWorldKey);
-    }
-
-    @Nonnull
-    public CreatureSpawnEvent getBaseEvent() {
-        return event;
     }
 }

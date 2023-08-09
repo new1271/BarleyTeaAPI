@@ -6,14 +6,12 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataEntityDeath {
-    @Nonnull
-    private final EntityDeathEvent event;
-
+public final class DataEntityDeath extends DataEntityBase<EntityDeathEvent> {
     @Nullable
     private final Entity killer;
 
@@ -25,7 +23,7 @@ public final class DataEntityDeath {
 
     public DataEntityDeath(@Nonnull EntityDeathEvent event,
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
-        this.event = event;
+        super(event);
         decedentType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
         if (lastDamageCauseByEntityEvent == null) {
             killer = null;
@@ -63,10 +61,5 @@ public final class DataEntityDeath {
 
     public boolean hasKiller() {
         return killer != null;
-    }
-
-    @Nonnull
-    public EntityDeathEvent getBaseEvent() {
-        return event;
     }
 }

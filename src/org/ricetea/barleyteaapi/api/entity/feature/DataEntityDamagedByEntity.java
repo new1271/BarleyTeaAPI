@@ -6,20 +6,18 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
 import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.util.Either;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataEntityDamagedByEntity {
-    @Nonnull
-    private final EntityDamageByEntityEvent event;
-
+public final class DataEntityDamagedByEntity extends DataEntityBase<EntityDamageByEntityEvent> {
     @Nonnull
     private final Lazy<BarleyTeaEntityType> damagerType, damageeType;
 
     public DataEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event) {
-        this.event = event;
+        super(event);
         damagerType = new Lazy<>(() -> BaseEntity.getEntityType(event.getDamager()));
         damageeType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
     }
@@ -62,10 +60,5 @@ public final class DataEntityDamagedByEntity {
 
     public boolean isCritical() {
         return event.isCritical();
-    }
-
-    @Nonnull
-    public EntityDamageByEntityEvent getBaseEvent() {
-        return event;
     }
 }
