@@ -16,4 +16,8 @@ public abstract class DataEntityBase<T extends Event> {
     public final T getBaseEvent() {
         return event;
     }
+
+    public final boolean isAsync() {
+        return event.isAsynchronous();
+    }
 }

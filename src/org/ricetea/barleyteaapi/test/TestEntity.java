@@ -82,6 +82,7 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
 
     @Override
     public boolean handleCommandSummon(@Nonnull Entity entitySummoned, @Nullable String nbt) {
+        setEntityName(entitySummoned);
         return true; //accept the entity summoned by command
     }
 
