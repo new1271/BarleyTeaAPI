@@ -1,10 +1,20 @@
 package org.ricetea.barleyteaapi;
 
+import java.util.Iterator;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDamagedByEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
+import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 
@@ -23,6 +33,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
         registerEventListeners();
         getLogger().info("registering '/summonbarley' command...");
         BarleySummonCommand.register();
+        getLogger().info("initializing API...");
+        announceEntitiesAPILoaded();
         getLogger().info("BarleyTeaAPI successfully loaded!");
     }
 
@@ -35,8 +47,47 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(SlimeSplitListener.getInstance(), this);
     }
 
+    private void announceEntitiesAPILoaded() {
+        for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
+            World world = worldIterator.next();
+            if (world != null) {
+                for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
+                    Entity entity = entityIterator.next();
+                    NamespacedKey id = BaseEntity.getEntityID(entity);
+                    if (id != null) {
+                        BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
+                        if (entityType != null && entityType instanceof FeatureEntityDamage) {
+                            FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                            apiLoadEntity.handleAPILoaded(entity);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void announceEntitiesAPIUnloaded() {
+        for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
+            World world = worldIterator.next();
+            if (world != null) {
+                for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
+                    Entity entity = entityIterator.next();
+                    NamespacedKey id = BaseEntity.getEntityID(entity);
+                    if (id != null) {
+                        BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
+                        if (entityType != null && entityType instanceof FeatureEntityDamage) {
+                            FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                            apiLoadEntity.handleAPIUnloaded(entity);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void onDisable() {
+        announceEntitiesAPIUnloaded();
         _inst = null;
     }
 
