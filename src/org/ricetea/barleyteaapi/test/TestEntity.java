@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.test;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -82,7 +83,8 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
 
     @Override
     public boolean handleCommandSummon(@Nonnull Entity entitySummoned, @Nullable String nbt) {
-        setEntityName(entitySummoned);
+        //Named entity as "default"(the name that is getDefaultName() set), and set color&style as ChatColor.BLUE + ChatColor.BOLD
+        setEntityName(entitySummoned, ChatColor.BLUE, ChatColor.BOLD);
         return true; //accept the entity summoned by command
     }
 
