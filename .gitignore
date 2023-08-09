@@ -11,7 +11,8 @@
 .mtj.tmp/
 
 # Package Files #
-bin\*.jar
+bin/*.jar
+./*.jar
 *.war
 *.nar
 *.ear
