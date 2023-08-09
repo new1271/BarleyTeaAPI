@@ -13,6 +13,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
+import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 import org.ricetea.barleyteaapi.test.TestEntity;
@@ -36,6 +38,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         announceEntitiesAPILoaded();
         EntityRegister.getInstance().register(TestEntity.getInstance());
         getLogger().info("BarleyTeaAPI successfully loaded!");
+        Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }
 
     private void registerEventListeners() {
@@ -93,6 +96,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
         announceEntitiesAPIUnloaded();
         _inst = null;
     }
