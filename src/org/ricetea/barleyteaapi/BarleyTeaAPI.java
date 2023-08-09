@@ -11,12 +11,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDamagedByEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
+import org.ricetea.barleyteaapi.test.TestEntity;
 
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
@@ -35,6 +35,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         BarleySummonCommand.register();
         getLogger().info("initializing API...");
         announceEntitiesAPILoaded();
+        EntityRegister.getInstance().register(TestEntity.getInstance());
         getLogger().info("BarleyTeaAPI successfully loaded!");
     }
 

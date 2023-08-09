@@ -24,6 +24,7 @@ public final class EntityDamageListener implements Listener {
     private EntityDamageListener() {
     }
 
+    @Nonnull
     public static EntityDamageListener getInstance() {
         return inst.get();
     }

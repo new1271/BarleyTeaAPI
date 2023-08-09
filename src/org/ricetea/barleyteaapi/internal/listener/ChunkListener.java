@@ -2,6 +2,8 @@ package org.ricetea.barleyteaapi.internal.listener;
 
 import java.util.Iterator;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -20,6 +22,7 @@ public final class ChunkListener implements Listener {
     private ChunkListener() {
     }
 
+    @Nonnull
     public static ChunkListener getInstance() {
         return inst.get();
     }

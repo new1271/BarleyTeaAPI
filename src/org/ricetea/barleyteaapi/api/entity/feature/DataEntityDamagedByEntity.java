@@ -52,6 +52,10 @@ public final class DataEntityDamagedByEntity extends DataEntityBase<EntityDamage
         event.setDamage(damage);
     }
 
+    public double getFinalDamage() {
+        return event.getFinalDamage();
+    }
+
     @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {

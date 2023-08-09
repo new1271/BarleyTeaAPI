@@ -10,10 +10,12 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Creature;
+import org.bukkit.entity.Slime;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
@@ -39,6 +41,12 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             if (!Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
                 BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
                         + " isn't based on a creature that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
+            }
+        }
+        if (entity instanceof FeatureSlimeSplit) {
+            if (!Slime.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
+                        + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
             }
         }
     }

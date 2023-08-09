@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +20,7 @@ public final class SlimeSplitListener implements Listener {
     private SlimeSplitListener() {
     }
 
+    @Nonnull
     public static SlimeSplitListener getInstance() {
         return inst.get();
     }

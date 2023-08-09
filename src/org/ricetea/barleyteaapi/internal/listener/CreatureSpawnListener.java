@@ -3,6 +3,8 @@ package org.ricetea.barleyteaapi.internal.listener;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,6 +23,7 @@ public final class CreatureSpawnListener implements Listener {
     private CreatureSpawnListener() {
     }
 
+    @Nonnull
     public static CreatureSpawnListener getInstance() {
         return inst.get();
     }

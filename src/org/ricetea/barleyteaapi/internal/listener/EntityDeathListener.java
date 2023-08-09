@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -21,6 +23,7 @@ public final class EntityDeathListener implements Listener {
     private EntityDeathListener() {
     }
 
+    @Nonnull
     public static EntityDeathListener getInstance() {
         return inst.get();
     }
