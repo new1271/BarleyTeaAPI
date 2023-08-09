@@ -57,7 +57,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {
                         BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                        if (entityType != null && entityType instanceof FeatureEntityDamage) {
+                        if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
                             FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
                             apiLoadEntity.handleAPILoaded(entity);
                         }
@@ -76,7 +76,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {
                         BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                        if (entityType != null && entityType instanceof FeatureEntityDamage) {
+                        if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
                             FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
                             apiLoadEntity.handleAPIUnloaded(entity);
                         }
