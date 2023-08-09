@@ -25,4 +25,9 @@ public final class Lazy<T> {
         else
             return obj;
     }
+
+    @Nullable
+    public T getUnsafe() {
+        return realObj;
+    }
 }
