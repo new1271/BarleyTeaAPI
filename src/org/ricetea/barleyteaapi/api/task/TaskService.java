@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public class TaskService {
@@ -17,11 +18,17 @@ public class TaskService {
     }
 
     public static void run(Runnable task) {
-        lazyInst.get().doRun(task);
+        if (BarleyTeaAPI.checkPluginUsable())
+            lazyInst.get().doRun(task);
+        else
+            shutdown();
     }
 
     public static void run(Runnable task, long delay) {
-        lazyInst.get().doRun(task, delay);
+        if (BarleyTeaAPI.checkPluginUsable())
+            lazyInst.get().doRun(task, delay);
+        else
+            shutdown();
     }
 
     public static void shutdown() {
