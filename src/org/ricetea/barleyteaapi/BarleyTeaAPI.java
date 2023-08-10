@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
@@ -103,7 +104,9 @@ public final class BarleyTeaAPI extends JavaPlugin {
     public void onDisable() {
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
         announceEntitiesAPIUnloaded();
+        TickingService.shutdown();
         TaskService.shutdown();
+        Bukkit.getScheduler().cancelTasks(this);
         _inst = null;
     }
 
