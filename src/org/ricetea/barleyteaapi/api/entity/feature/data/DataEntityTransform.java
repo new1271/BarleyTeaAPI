@@ -17,6 +17,7 @@ public final class DataEntityTransform extends DataEntityBase<EntityTransformEve
     @Nonnull
     private final Lazy<DataEntityType> originalEntityType, transformedEntityType;
 
+    @SuppressWarnings("null")
     public DataEntityTransform(@Nonnull EntityTransformEvent event) {
         super(event);
         originalEntityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

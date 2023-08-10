@@ -24,6 +24,7 @@ public final class DataProjectileHitBlock extends DataEntityBase<ProjectileHitEv
     @Nullable
     private final Lazy<DataEntityType> shooterType;
 
+    @SuppressWarnings("null")
     public DataProjectileHitBlock(@Nonnull ProjectileHitEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

@@ -18,6 +18,7 @@ public final class DataNaturalSpawn extends DataEntityBase<CreatureSpawnEvent> {
     @Nonnull
     private final Lazy<DataEntityType> entityType;
 
+    @SuppressWarnings("null")
     public DataNaturalSpawn(@Nonnull CreatureSpawnEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

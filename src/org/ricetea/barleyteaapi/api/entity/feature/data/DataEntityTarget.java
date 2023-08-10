@@ -13,6 +13,7 @@ public final class DataEntityTarget extends DataEntityBase<EntityTargetEvent> {
     @Nonnull
     private final Lazy<DataEntityType> entityType, targetType;
 
+    @SuppressWarnings("null")
     public DataEntityTarget(@Nonnull EntityTargetEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

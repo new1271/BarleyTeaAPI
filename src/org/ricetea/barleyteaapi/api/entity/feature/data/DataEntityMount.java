@@ -13,6 +13,7 @@ public final class DataEntityMount extends DataEntityBase<EntityMountEvent> {
     @Nonnull
     private final Lazy<DataEntityType> entityType, mountType;
 
+    @SuppressWarnings("null")
     public DataEntityMount(@Nonnull EntityMountEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

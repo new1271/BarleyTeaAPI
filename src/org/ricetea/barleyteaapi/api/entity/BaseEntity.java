@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.api.entity;
 
-import java.util.ArrayList;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -13,6 +11,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
@@ -69,7 +68,7 @@ public abstract class BaseEntity implements Keyed {
         entityType.register(entity);
     }
 
-    public static boolean isEntity(@Nullable Entity entity) {
+    public static boolean isBarleyTeaEntity(@Nullable Entity entity) {
         return entity != null && entity.getPersistentDataContainer().has(EntityTagNamespacedKey);
     }
 
@@ -88,7 +87,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     @Nonnull
-    public static DataEntityType getEntityType(Entity entity) {
+    public static DataEntityType getEntityType(@Nonnull Entity entity) {
         NamespacedKey entityTypeID = BaseEntity.getEntityID(entity);
         if (entityTypeID == null) {
             return DataEntityType.create(entity.getType());
@@ -103,167 +102,23 @@ public abstract class BaseEntity implements Keyed {
 
     @Deprecated
     protected final void setEntityName(@Nonnull Entity entity, @Nullable org.bukkit.ChatColor... colorAndStyles) {
-        if (colorAndStyles == null) {
-            setEntityName(entity);
-        } else {
-            TextColor color = null;
-            ArrayList<TextDecoration> decorations = new ArrayList<>();
-            for (org.bukkit.ChatColor chatColor : colorAndStyles) {
-                if (chatColor == org.bukkit.ChatColor.RESET) {
-                    color = null;
-                    decorations.clear();
-                } else {
-                    if (chatColor.isFormat()) {
-                        switch (chatColor) {
-                            case ITALIC:
-                                decorations.add(TextDecoration.ITALIC);
-                                break;
-                            case BOLD:
-                                decorations.add(TextDecoration.BOLD);
-                                break;
-                            case STRIKETHROUGH:
-                                decorations.add(TextDecoration.STRIKETHROUGH);
-                                break;
-                            case UNDERLINE:
-                                decorations.add(TextDecoration.UNDERLINED);
-                                break;
-                            case MAGIC:
-                                decorations.add(TextDecoration.OBFUSCATED);
-                                break;
-                            default:
-                                break;
-                        }
-                    } else if (chatColor.isColor()) {
-                        color = TextColor.color(chatColor.asBungee().getColor().getRGB());
-                    }
-                }
-            }
-            if (decorations.isEmpty()) {
-                setEntityName(entity, color, (TextDecoration[]) null);
-            } else {
-                setEntityName(entity, color, decorations.toArray(TextDecoration[]::new));
-            }
-        }
+        setEntityName(entity, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
     @Deprecated
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name,
             @Nullable org.bukkit.ChatColor... colorAndStyles) {
-        if (colorAndStyles == null) {
-            setEntityName(entity, name, null, (TextDecoration[]) null);
-        } else {
-            TextColor color = null;
-            ArrayList<TextDecoration> decorations = new ArrayList<>();
-            for (org.bukkit.ChatColor chatColor : colorAndStyles) {
-                if (chatColor == org.bukkit.ChatColor.RESET) {
-                    color = null;
-                    decorations.clear();
-                } else {
-                    if (chatColor.isFormat()) {
-                        switch (chatColor) {
-                            case ITALIC:
-                                decorations.add(TextDecoration.ITALIC);
-                                break;
-                            case BOLD:
-                                decorations.add(TextDecoration.BOLD);
-                                break;
-                            case STRIKETHROUGH:
-                                decorations.add(TextDecoration.STRIKETHROUGH);
-                                break;
-                            case UNDERLINE:
-                                decorations.add(TextDecoration.UNDERLINED);
-                                break;
-                            case MAGIC:
-                                decorations.add(TextDecoration.OBFUSCATED);
-                                break;
-                            default:
-                                break;
-                        }
-                    } else if (chatColor.isColor()) {
-                        color = TextColor.color(chatColor.asBungee().getColor().getRGB());
-                    }
-                }
-            }
-            if (decorations.isEmpty()) {
-                setEntityName(entity, name, color, (TextDecoration[]) null);
-            } else {
-                setEntityName(entity, name, color, decorations.toArray(TextDecoration[]::new));
-            }
-        }
+        setEntityName(entity, name, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
     protected final void setEntityName(@Nonnull Entity entity,
             @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
-        if (colorAndStyles == null) {
-            setEntityName(entity, null, (TextDecoration[]) null);
-        } else {
-            TextColor color = null;
-            ArrayList<TextDecoration> decorations = new ArrayList<>();
-            for (net.md_5.bungee.api.ChatColor chatColor : colorAndStyles) {
-                if (chatColor == net.md_5.bungee.api.ChatColor.RESET) {
-                    color = null;
-                    decorations.clear();
-                } else {
-                    java.awt.Color _color = chatColor.getColor();
-                    if (_color == null) {
-                        if (chatColor.equals(net.md_5.bungee.api.ChatColor.ITALIC))
-                            decorations.add(TextDecoration.ITALIC);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.BOLD))
-                            decorations.add(TextDecoration.BOLD);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.STRIKETHROUGH))
-                            decorations.add(TextDecoration.STRIKETHROUGH);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.UNDERLINE))
-                            decorations.add(TextDecoration.UNDERLINED);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.MAGIC))
-                            decorations.add(TextDecoration.OBFUSCATED);
-                    } else {
-                        color = TextColor.color(_color.getRGB());
-                    }
-                }
-            }
-            if (decorations.isEmpty()) {
-                setEntityName(entity, color, (TextDecoration[]) null);
-            } else {
-                setEntityName(entity, color, decorations.toArray(TextDecoration[]::new));
-            }
-        }
+        setEntityName(entity, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name,
             @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
-        if (colorAndStyles == null) {
-            setEntityName(entity, name, null, (TextDecoration[]) null);
-        } else {
-            TextColor color = null;
-            ArrayList<TextDecoration> decorations = new ArrayList<>();
-            for (net.md_5.bungee.api.ChatColor chatColor : colorAndStyles) {
-                if (chatColor == net.md_5.bungee.api.ChatColor.RESET) {
-                    color = null;
-                    decorations.clear();
-                } else {
-                    java.awt.Color _color = chatColor.getColor();
-                    if (_color == null) {
-                        if (chatColor.equals(net.md_5.bungee.api.ChatColor.ITALIC))
-                            decorations.add(TextDecoration.ITALIC);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.BOLD))
-                            decorations.add(TextDecoration.BOLD);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.STRIKETHROUGH))
-                            decorations.add(TextDecoration.STRIKETHROUGH);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.UNDERLINE))
-                            decorations.add(TextDecoration.UNDERLINED);
-                        else if (chatColor.equals(net.md_5.bungee.api.ChatColor.MAGIC))
-                            decorations.add(TextDecoration.OBFUSCATED);
-                    } else {
-                        color = TextColor.color(_color.getRGB());
-                    }
-                }
-            }
-            if (decorations.isEmpty()) {
-                setEntityName(entity, name, color, (TextDecoration[]) null);
-            } else {
-                setEntityName(entity, name, color, decorations.toArray(TextDecoration[]::new));
-            }
-        }
+        setEntityName(entity, name, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
     @SuppressWarnings("null")
@@ -278,13 +133,26 @@ public abstract class BaseEntity implements Keyed {
                 Component.translatable(getNameInTranslateKey(), getDefaultName(), Style.style(color, decoration)));
     }
 
+    @SuppressWarnings("null")
+    protected final void setEntityName(@Nonnull Entity entity, @Nullable Style style) {
+        setEntityName(entity, style == null ? Component.translatable(getNameInTranslateKey(), getDefaultName())
+                : Component.translatable(getNameInTranslateKey(), getDefaultName(), style));
+    }
+
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name) {
         setEntityName(entity, name, null, (TextDecoration[]) null);
     }
 
+    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name, @Nullable TextColor color,
             @Nullable TextDecoration... decorations) {
-        entity.customName(decorations == null ? Component.text(name, color) : Component.text(name, color, decorations));
+        setEntityName(entity,
+                decorations == null ? Component.text(name, color) : Component.text(name, color, decorations));
+    }
+
+    @SuppressWarnings("null")
+    protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name, @Nullable Style style) {
+        setEntityName(entity, style == null ? Component.text(name) : Component.text(name, style));
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull Component component) {

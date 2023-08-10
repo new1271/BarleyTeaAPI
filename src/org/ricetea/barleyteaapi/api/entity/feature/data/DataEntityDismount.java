@@ -13,6 +13,7 @@ public final class DataEntityDismount extends DataEntityBase<EntityDismountEvent
     @Nonnull
     private final Lazy<DataEntityType> entityType, dismountedType;
 
+    @SuppressWarnings("null")
     public DataEntityDismount(@Nonnull EntityDismountEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

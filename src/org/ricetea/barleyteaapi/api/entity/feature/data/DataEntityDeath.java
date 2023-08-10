@@ -21,6 +21,7 @@ public final class DataEntityDeath extends DataEntityBase<EntityDeathEvent> {
     @Nullable
     private final Lazy<DataEntityType> killerType;
 
+    @SuppressWarnings("null")
     public DataEntityDeath(@Nonnull EntityDeathEvent event,
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event);

@@ -13,6 +13,7 @@ public final class DataEntityDamagedByNothing extends DataEntityBase<EntityDamag
     @Nonnull
     private final Lazy<DataEntityType> damageeType;
 
+    @SuppressWarnings("null")
     public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {
         super(event);
         damageeType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

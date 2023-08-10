@@ -15,6 +15,7 @@ public final class DataEntityDamagedByBlock extends DataEntityBase<EntityDamageB
     @Nonnull
     private final Lazy<DataEntityType> damageeType;
 
+    @SuppressWarnings("null")
     public DataEntityDamagedByBlock(@Nonnull EntityDamageByBlockEvent event) {
         super(event);
         damageeType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

@@ -13,6 +13,7 @@ public final class DataEntityLostTarget extends DataEntityBase<EntityTargetEvent
     @Nonnull
     private final Lazy<DataEntityType> entityType;
 
+    @SuppressWarnings("null")
     public DataEntityLostTarget(@Nonnull EntityTargetEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

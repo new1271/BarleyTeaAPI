@@ -22,6 +22,7 @@ public final class DataProjectileLaunch extends DataEntityBase<ProjectileLaunchE
     @Nullable
     private final Lazy<DataEntityType> shooterType;
 
+    @SuppressWarnings("null")
     public DataProjectileLaunch(@Nonnull ProjectileLaunchEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));

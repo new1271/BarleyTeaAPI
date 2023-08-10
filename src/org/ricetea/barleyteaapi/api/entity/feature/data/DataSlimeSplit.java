@@ -14,6 +14,7 @@ public final class DataSlimeSplit extends DataEntityBase<SlimeSplitEvent> {
     @Nonnull
     private final Lazy<DataEntityType> entityType;
 
+    @SuppressWarnings("null")
     public DataSlimeSplit(@Nonnull SlimeSplitEvent event) {
         super(event);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
