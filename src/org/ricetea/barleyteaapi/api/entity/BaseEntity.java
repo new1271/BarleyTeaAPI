@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
@@ -87,16 +88,16 @@ public abstract class BaseEntity implements Keyed {
     }
 
     @Nonnull
-    public static BarleyTeaEntityType getEntityType(Entity entity) {
+    public static DataEntityType getEntityType(Entity entity) {
         NamespacedKey entityTypeID = BaseEntity.getEntityID(entity);
         if (entityTypeID == null) {
-            return BarleyTeaEntityType.create(entity.getType());
+            return DataEntityType.create(entity.getType());
         } else {
             BaseEntity baseEntity = EntityRegister.getInstance().lookupEntityType(entityTypeID);
             if (baseEntity == null)
-                return BarleyTeaEntityType.create(entity.getType());
+                return DataEntityType.create(entity.getType());
             else
-                return BarleyTeaEntityType.create(baseEntity);
+                return DataEntityType.create(baseEntity);
         }
     }
 

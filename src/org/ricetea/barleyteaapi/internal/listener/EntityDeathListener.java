@@ -12,12 +12,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDeath;
-import org.ricetea.barleyteaapi.api.entity.feature.DataKillEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillPlayer;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 

@@ -5,8 +5,8 @@ import javax.annotation.Nonnull;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityTransform;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTransform;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTransform;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 

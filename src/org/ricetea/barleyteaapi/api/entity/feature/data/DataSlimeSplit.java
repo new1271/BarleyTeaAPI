@@ -1,18 +1,18 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataSlimeSplit extends DataEntityBase<SlimeSplitEvent> {
 
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> entityType;
+    private final Lazy<DataEntityType> entityType;
 
     public DataSlimeSplit(@Nonnull SlimeSplitEvent event) {
         super(event);
@@ -26,7 +26,7 @@ public final class DataSlimeSplit extends DataEntityBase<SlimeSplitEvent> {
     }
 
     @Nonnull
-    public BarleyTeaEntityType getEntityType() {
+    public DataEntityType getEntityType() {
         return entityType.get();
     }
 

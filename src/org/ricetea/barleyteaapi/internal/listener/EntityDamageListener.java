@@ -10,10 +10,10 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDamagedByBlock;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDamagedByEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByBlock;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
 
@@ -6,8 +6,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataKillEntity extends DataEntityBase<EntityDeathEvent> {
@@ -15,10 +15,10 @@ public final class DataKillEntity extends DataEntityBase<EntityDeathEvent> {
     private final Entity killer;
 
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> decedentType;
+    private final Lazy<DataEntityType> decedentType;
 
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> killerType;
+    private final Lazy<DataEntityType> killerType;
 
     @SuppressWarnings("null")
     public DataKillEntity(@Nonnull EntityDeathEvent event,
@@ -36,7 +36,7 @@ public final class DataKillEntity extends DataEntityBase<EntityDeathEvent> {
     }
 
     @Nonnull
-    public BarleyTeaEntityType getDecedentType() {
+    public DataEntityType getDecedentType() {
         return decedentType.get();
     }
 
@@ -46,7 +46,7 @@ public final class DataKillEntity extends DataEntityBase<EntityDeathEvent> {
     }
 
     @Nonnull
-    public BarleyTeaEntityType getKillerType() {
+    public DataEntityType getKillerType() {
         return killerType.get();
     }
 }

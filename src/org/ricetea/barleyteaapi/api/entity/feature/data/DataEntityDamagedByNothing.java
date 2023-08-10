@@ -1,17 +1,17 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataEntityDamagedByNothing extends DataEntityBase<EntityDamageEvent> {
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> damageeType;
+    private final Lazy<DataEntityType> damageeType;
 
     public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {
         super(event);
@@ -25,7 +25,7 @@ public final class DataEntityDamagedByNothing extends DataEntityBase<EntityDamag
     }
 
     @Nonnull
-    public BarleyTeaEntityType getDamageeType() {
+    public DataEntityType getDamageeType() {
         return damageeType.get();
     }
 

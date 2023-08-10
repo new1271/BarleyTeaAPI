@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import java.util.List;
 
@@ -8,14 +8,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.EntityTransformEvent.TransformReason;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataEntityTransform extends DataEntityBase<EntityTransformEvent> {
 
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> originalEntityType, transformedEntityType;
+    private final Lazy<DataEntityType> originalEntityType, transformedEntityType;
 
     public DataEntityTransform(@Nonnull EntityTransformEvent event) {
         super(event);
@@ -30,7 +30,7 @@ public final class DataEntityTransform extends DataEntityBase<EntityTransformEve
     }
 
     @Nonnull
-    public BarleyTeaEntityType getOriginalEntityType() {
+    public DataEntityType getOriginalEntityType() {
         return originalEntityType.get();
     }
 
@@ -41,7 +41,7 @@ public final class DataEntityTransform extends DataEntityBase<EntityTransformEve
     }
 
     @Nonnull
-    public BarleyTeaEntityType getTransformedEntityType() {
+    public DataEntityType getTransformedEntityType() {
         return transformedEntityType.get();
     }
 

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -10,13 +10,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class DataNaturalSpawn extends DataEntityBase<CreatureSpawnEvent> {
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> entityType;
+    private final Lazy<DataEntityType> entityType;
 
     public DataNaturalSpawn(@Nonnull CreatureSpawnEvent event) {
         super(event);
@@ -30,7 +30,7 @@ public final class DataNaturalSpawn extends DataEntityBase<CreatureSpawnEvent> {
     }
 
     @Nonnull
-    public BarleyTeaEntityType getEntityType() {
+    public DataEntityType getEntityType() {
         return entityType.get();
     }
 

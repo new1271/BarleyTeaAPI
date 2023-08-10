@@ -10,14 +10,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
-import org.ricetea.barleyteaapi.util.EntityUtils;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByBlock;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByNothing;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
 
 public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base Entity Class
-        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillEntity { // implements entity features
+        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillPlayer { // implements entity features
 
     private static final Lazy<TestEntity> inst = new Lazy<>(TestEntity::new);
 
@@ -43,7 +49,7 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
             if (killer instanceof Player) //if killer is player
                 killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!")));
             else if (killer instanceof Projectile) { //if killer is arrow, fireball or something that is projectile
-                killer = EntityUtils.getProjectileShooterEntity((Projectile) killer);
+                killer = EntityHelper.getProjectileShooterEntity((Projectile) killer);
                 if (killer != null && killer instanceof Player) //if killer is exist and killer is player
                     killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!")));
             }
@@ -89,11 +95,10 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     }
 
     @Override
-    public boolean handleKillEntity(DataKillEntity data) {
-        Entity decedent = data.getDecedent();
-        if (decedent instanceof Player) //if decedent is player
-            decedent.sendMessage(Component.text("You're killed by ").append(data.getKiller().name())
-                    .append(Component.text(" !")));
+    public boolean handleKillPlayer(DataKillPlayer data) {
+        Player decedent = data.getDecedent();
+        decedent.sendMessage(Component.text("You're killed by ").append(data.getKiller().name())
+                .append(Component.text(" !")));
         return true; //accept the decedent death
     }
 }

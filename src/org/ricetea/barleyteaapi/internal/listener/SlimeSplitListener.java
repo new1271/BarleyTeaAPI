@@ -8,9 +8,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.DataSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 

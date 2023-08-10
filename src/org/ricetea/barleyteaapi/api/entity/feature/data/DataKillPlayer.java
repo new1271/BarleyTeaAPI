@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
-import org.ricetea.barleyteaapi.api.entity.BarleyTeaEntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 import net.kyori.adventure.text.Component;
@@ -19,7 +19,7 @@ public final class DataKillPlayer extends DataEntityBase<PlayerDeathEvent> {
     private final Entity killer;
 
     @Nonnull
-    private final Lazy<BarleyTeaEntityType> killerType;
+    private final Lazy<DataEntityType> killerType;
 
     @SuppressWarnings("null")
     public DataKillPlayer(@Nonnull PlayerDeathEvent event,
@@ -41,7 +41,7 @@ public final class DataKillPlayer extends DataEntityBase<PlayerDeathEvent> {
     }
 
     @Nonnull
-    public BarleyTeaEntityType getKillerType() {
+    public DataEntityType getKillerType() {
         return killerType.get();
     }
 
