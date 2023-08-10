@@ -10,11 +10,13 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Creature;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonEntityProvider;
 import org.ricetea.barleyteaapi.util.Lazy;
@@ -47,6 +49,12 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             if (!Slime.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
                 BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
                         + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
+            }
+        }
+        if (entity instanceof FeatureProjectile) {
+            if (!Projectile.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
+                        + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
             }
         }
         lookupTable.put(entity.getKey(), entity);
