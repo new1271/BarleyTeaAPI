@@ -10,11 +10,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.DataKillEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 
@@ -62,10 +65,26 @@ public final class EntityDeathListener implements Listener {
             id = BaseEntity.getEntityID(eventLastDamageCausedByEntity.getDamager());
             if (id != null) {
                 BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                if (entityType != null && entityType instanceof FeatureKillEntity) {
-                    FeatureKillEntity entityDeath = (FeatureKillEntity) entityType;
-                    boolean cancelled = !entityDeath
-                            .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
+                if (entityType != null) {
+                    boolean cancelled;
+                    if (event instanceof PlayerDeathEvent) {
+                        if (entityType instanceof FeatureKillPlayer) {
+                            FeatureKillPlayer entityTypePlayerKill = (FeatureKillPlayer) entityType;
+                            cancelled = !entityTypePlayerKill
+                                    .handleKillPlayer(new DataKillPlayer((PlayerDeathEvent) event,
+                                            eventLastDamageCausedByEntity));
+                        } else {
+                            cancelled = false;
+                        }
+                    } else {
+                        if (entityType instanceof FeatureKillEntity) {
+                            FeatureKillEntity entityTypeEntityKill = (FeatureKillEntity) entityType;
+                            cancelled = !entityTypeEntityKill
+                                    .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
+                        } else {
+                            cancelled = false;
+                        }
+                    }
                     if (cancelled) {
                         event.setCancelled(true);
                         return;
