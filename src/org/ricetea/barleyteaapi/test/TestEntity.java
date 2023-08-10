@@ -32,7 +32,7 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     }
 
     private TestEntity() {
-        //create a custom entity that base on zombie and can spawn with "/summonbarley testonly:test_entity"
+        //create a custom entity that base on zombie and can summon with command "/summonbarley testonly:test_entity"
         super(new NamespacedKey("testonly", "test_entity"), EntityType.ZOMBIE);
     }
 
