@@ -102,10 +102,9 @@ public final class CachedList<T> implements List<T> {
         return listToArray();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T[] toArray(T[] a) {
-        return (T[]) listToArray();
+    public <L> L[] toArray(L[] a) {
+        return arrayToList().toArray(a);
     }
 
     @Nullable
