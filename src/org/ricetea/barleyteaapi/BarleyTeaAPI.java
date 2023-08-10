@@ -28,6 +28,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         return _inst;
     }
 
+    public static void registerTestEntity() {
+        EntityRegister.getInstance().register(TestEntity.getInstance());
+    }
+
     @Override
     public void onEnable() {
         _inst = this;
@@ -37,7 +41,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         BarleySummonCommand.register();
         getLogger().info("initializing API...");
         announceEntitiesAPILoaded();
-        EntityRegister.getInstance().register(TestEntity.getInstance());
         getLogger().info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }

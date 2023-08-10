@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -14,11 +15,9 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByBlock
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
 
@@ -33,7 +32,8 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     }
 
     private TestEntity() {
-        super(NamespacedKeyUtils.BarleyTeaAPI("test_entity"), EntityType.ZOMBIE);
+        //create a custom entity that base on zombie and can spawn with "/summonbarley testonly:test_entity"
+        super(new NamespacedKey("testonly", "test_entity"), EntityType.ZOMBIE);
     }
 
     @Override
