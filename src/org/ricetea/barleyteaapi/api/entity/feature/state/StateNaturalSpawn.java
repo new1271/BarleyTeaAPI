@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity.feature;
+package org.ricetea.barleyteaapi.api.entity.feature.state;
 
 public enum StateNaturalSpawn {
     Handled,
