@@ -76,9 +76,11 @@ public final class BarleySummonCommand {
                                                                 ArgumentVec3.a(commandcontext, "pos"),
                                                                 ArgumentNBTTag.a(commandcontext, "nbt"), false))))));
         dispatcher.register(
-                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summon2").redirect(mainNode)));
+                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summon2")
+                        .requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
         dispatcher.register(
-                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summonb").redirect(mainNode)));
+                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summonb")
+                        .requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
     }
 
     private static int command(CommandListenerWrapper source, MinecraftKey entityKey, Vec3D pos, NBTTagCompound nbt,
