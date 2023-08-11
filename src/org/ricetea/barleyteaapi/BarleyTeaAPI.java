@@ -143,16 +143,21 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     public static boolean checkPluginUsable() {
-        if (_inst == null) {
+        BarleyTeaAPI inst = _inst;
+        if (inst == null) {
             Bukkit.getLogger().warning("BarleyTeaAPI isn't loaded, all of the features won't worked!");
+            return false;
+        } else if (!inst.isEnabled()) {
+            Bukkit.getLogger().warning("BarleyTeaAPI isn't enabled, all of the features won't worked!");
             return false;
         }
         return true;
     }
 
     public static void warnWhenPluginUsable(String warnString) {
-        if (_inst != null) {
-            _inst.getLogger().warning(warnString);
+        BarleyTeaAPI inst = _inst;
+        if (inst == null || !inst.isEnabled()) {
+            Bukkit.getLogger().warning(warnString);
         }
     }
 }

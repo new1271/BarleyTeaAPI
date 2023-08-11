@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,32 +39,38 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     }
 
     public void register(@Nonnull BaseEntity entity) {
-        BarleyTeaAPI.checkPluginUsable();
-        if (entity instanceof FeatureNaturalSpawn) {
-            if (!Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
-                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
-                        + " isn't based on a creature that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
-            }
-        }
-        if (entity instanceof FeatureSlimeSplit) {
-            if (!Slime.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
-                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
-                        + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
-            }
-        }
-        if (entity instanceof FeatureProjectile) {
-            if (!Projectile.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
-                BarleyTeaAPI.warnWhenPluginUsable(entity.getKey().toString()
-                        + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
-            }
-        }
         lookupTable.put(entity.getKey(), entity);
-        BarleySummonEntityProvider.updateRegisterList();
+        if (BarleyTeaAPI.checkPluginUsable()) {
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            if (inst != null) {
+                Logger logger = inst.getLogger();
+                if (entity instanceof FeatureNaturalSpawn
+                        && !Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                    logger.warning(entity.getKey().toString()
+                            + " isn't based on a creature that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
+                }
+                if (entity instanceof FeatureSlimeSplit
+                        && !Slime.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                    logger.warning(entity.getKey().toString()
+                            + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
+                }
+                if (entity instanceof FeatureProjectile
+                        && !Projectile.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
+                    logger.warning(entity.getKey().toString()
+                            + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
+                }
+                BarleySummonEntityProvider.updateRegisterList();
+            }
+        }
+
     }
 
     public void unregister(@Nonnull BaseEntity entity) {
         lookupTable.remove(entity.getKey());
-        BarleySummonEntityProvider.updateRegisterList();
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+        if (inst != null) {
+            BarleySummonEntityProvider.updateRegisterList();
+        }
     }
 
     @Nullable
