@@ -20,6 +20,8 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 
 public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base Entity Class
         implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillPlayer { // implements entity features
@@ -47,11 +49,13 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
         if (data.hasKiller()) {
             Entity killer = data.getKiller();
             if (killer instanceof Player) //if killer is player
-                killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!")));
+                killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!"))
+                        .style(Style.style(NamedTextColor.GOLD)));
             else if (killer instanceof Projectile) { //if killer is arrow, fireball or something that is projectile
                 killer = EntityHelper.getProjectileShooterEntity((Projectile) killer);
                 if (killer != null && killer instanceof Player) //if killer is exist and killer is player
-                    killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!")));
+                    killer.sendMessage(data.getDecedent().name()
+                            .append(Component.text(" is dead!").style(Style.style(NamedTextColor.GOLD))));
             }
         }
         return true; //accept decedent(the entity) deaths
@@ -61,8 +65,9 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     public boolean handleEntityDamagedByEntity(DataEntityDamagedByEntity data) {
         if (data.getDamager() instanceof Player) {
             data.getDamager().sendMessage(data.getDamagee().name()
-                    .append(Component.text(" is dealed ")).append(Component.text(data.getDamage()))
-                    .append(Component.text(" damage!")));
+                    .append(Component.text(" is dealed ").style(Style.style(NamedTextColor.WHITE)))
+                    .append(Component.text(data.getDamage()).style(Style.style(NamedTextColor.GOLD)))
+                    .append(Component.text(" damage!")).style(Style.style(NamedTextColor.WHITE)));
         }
         return true; //accept the entity is damaged by another entity
     }
@@ -81,8 +86,9 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     public boolean handleEntityAttack(DataEntityDamagedByEntity data) {
         if (data.getDamagee() instanceof Player) {
             data.getDamagee().sendMessage(data.getDamager().name()
-                    .append(Component.text(" damages you ")).append(Component.text(data.getFinalDamage()))
-                    .append(Component.text(" !")));
+                    .append(Component.text(" damages you ").style(Style.style(NamedTextColor.WHITE)))
+                    .append(Component.text(data.getFinalDamage()).style(Style.style(NamedTextColor.GOLD)))
+                    .append(Component.text(" !")).style(Style.style(NamedTextColor.WHITE)));
         }
         return true; //accept the entity attacks another entity
     }
@@ -97,8 +103,9 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
     @Override
     public boolean handleKillPlayer(DataKillPlayer data) {
         Player decedent = data.getDecedent();
-        decedent.sendMessage(Component.text("You're killed by ").append(data.getKiller().name())
-                .append(Component.text(" !")));
+        decedent.sendMessage(Component.text("You're killed by ").style(Style.style(NamedTextColor.WHITE))
+                .append(data.getKiller().name())
+                .append(Component.text(" !").style(Style.style(NamedTextColor.WHITE))));
         return true; //accept the decedent death
     }
 }
