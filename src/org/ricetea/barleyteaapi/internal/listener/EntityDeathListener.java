@@ -14,7 +14,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
@@ -67,23 +66,18 @@ public final class EntityDeathListener implements Listener {
                 BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
                 if (entityType != null) {
                     boolean cancelled;
-                    if (event instanceof PlayerDeathEvent) {
-                        if (entityType instanceof FeatureKillPlayer) {
-                            FeatureKillPlayer entityTypePlayerKill = (FeatureKillPlayer) entityType;
-                            cancelled = !entityTypePlayerKill
+                    if (entityType instanceof FeatureKillEntity) {
+                        FeatureKillEntity entityTypeEntityKill = (FeatureKillEntity) entityType;
+                        if (event instanceof PlayerDeathEvent) {
+                            cancelled = !entityTypeEntityKill
                                     .handleKillPlayer(new DataKillPlayer((PlayerDeathEvent) event,
                                             eventLastDamageCausedByEntity));
                         } else {
-                            cancelled = false;
-                        }
-                    } else {
-                        if (entityType instanceof FeatureKillEntity) {
-                            FeatureKillEntity entityTypeEntityKill = (FeatureKillEntity) entityType;
                             cancelled = !entityTypeEntityKill
                                     .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
-                        } else {
-                            cancelled = false;
                         }
+                    } else {
+                        cancelled = false;
                     }
                     if (cancelled) {
                         event.setCancelled(true);

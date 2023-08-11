@@ -11,11 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByBlock;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByNothing;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
+import org.ricetea.barleyteaapi.api.entity.feature.data.*;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 
@@ -24,7 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 
 public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base Entity Class
-        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillPlayer { // implements entity features
+        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillEntity { // implements entity features
 
     private static final Lazy<TestEntity> inst = new Lazy<>(TestEntity::new);
 
@@ -98,6 +94,11 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
         //Named entity as "default"(the name that is getDefaultName() set), and set color&style as ChatColor.BLUE + ChatColor.BOLD
         setEntityName(entitySummoned, ChatColor.BLUE, ChatColor.BOLD);
         return true; //accept the entity summoned by command
+    }
+
+    @Override
+    public boolean handleKillEntity(DataKillEntity data) {
+        return true; //accept the decedent death
     }
 
     @Override
