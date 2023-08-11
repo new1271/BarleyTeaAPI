@@ -7,11 +7,13 @@ import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
@@ -20,6 +22,9 @@ import net.kyori.adventure.text.Component;
 public abstract class BaseItem implements Keyed {
     @Nonnull
     private static final NamespacedKey ItemTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("item_id");
+    @Nonnull
+    private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtils
+            .BarleyTeaAPI("item_damage");
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -64,6 +69,72 @@ public abstract class BaseItem implements Keyed {
                 && key.toString()
                         .equals(itemStack.getItemMeta().getPersistentDataContainer().getOrDefault(
                                 ItemTagNamespacedKey, PersistentDataType.STRING, null));
+    }
+
+    public int getDurabilityDamage(@Nullable ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta())
+            return 0;
+        ItemMeta meta = itemStack.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (container.has(ItemAlternateDamageNamespacedKey)) {
+            Integer damage = container.get(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER);
+            if (damage == null) {
+                container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, 0);
+                damage = 0;
+            }
+            return damage;
+        } else if (meta instanceof Damageable) {
+            Damageable damageable = (Damageable) meta;
+            return damageable.getDamage();
+        }
+        return 0;
+    }
+
+    public void setDurabilityDamage(@Nullable ItemStack itemStack, int damage) {
+        if (itemStack == null || !itemStack.hasItemMeta())
+            return;
+        ItemMeta meta = itemStack.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (this instanceof FeatureCustomDurability || container.has(ItemAlternateDamageNamespacedKey)) {
+            container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
+            damage = 0;
+        } else if (meta instanceof Damageable) {
+            Damageable damageable = (Damageable) meta;
+            damageable.setDamage(damage);
+        } else {
+            return;
+        }
+        itemStack.setItemMeta(meta);
+    }
+
+    public static int getDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType) {
+        if (itemType == null) {
+            if (itemStack == null || !itemStack.hasItemMeta())
+                return 0;
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta instanceof Damageable) {
+                Damageable damageable = (Damageable) meta;
+                return damageable.getDamage();
+            }
+            return 0;
+        } else {
+            return itemType.getDurabilityDamage(itemStack);
+        }
+    }
+
+    public static void setDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType, int damage) {
+        if (itemType == null) {
+            if (itemStack == null || !itemStack.hasItemMeta())
+                return;
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta instanceof Damageable) {
+                Damageable damageable = (Damageable) meta;
+                damageable.setDamage(damage);
+                itemStack.setItemMeta(damageable);
+            }
+        } else {
+            itemType.setDurabilityDamage(itemStack, damage);
+        }
     }
 
     public static void registerItem(@Nullable ItemStack itemStack, @Nonnull BaseItem itemType) {

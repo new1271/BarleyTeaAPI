@@ -12,7 +12,6 @@ import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.internal.nms.BarleySummonEntityProvider;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class ItemRegister implements IRegister<BaseItem> {
@@ -34,12 +33,10 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public void register(@Nonnull BaseItem item) {
         BarleyTeaAPI.checkPluginUsable();
         lookupTable.put(item.getKey(), item);
-        BarleySummonEntityProvider.updateRegisterList();
     }
 
     public void unregister(@Nonnull BaseItem item) {
         lookupTable.remove(item.getKey());
-        BarleySummonEntityProvider.updateRegisterList();
     }
 
     @Nullable
