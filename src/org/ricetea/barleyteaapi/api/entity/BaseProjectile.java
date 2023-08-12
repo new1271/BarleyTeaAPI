@@ -60,7 +60,7 @@ public abstract class BaseProjectile extends BaseEntity implements FeatureComman
     }
 
     @Override
-    public boolean handleProjectileLaunch(DataProjectileLaunch data) {
+    public boolean handleProjectileLaunch(@Nonnull DataProjectileLaunch data) {
         spawn(data.getEntity());
         return true;
     }

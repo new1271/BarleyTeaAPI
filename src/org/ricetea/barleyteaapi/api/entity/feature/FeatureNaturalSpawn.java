@@ -8,9 +8,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 
 public interface FeatureNaturalSpawn {
     @Nonnull
-    StateNaturalSpawn handleNaturalSpawn(DataNaturalSpawn data);
+    StateNaturalSpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data);
 
-    double getPosibility();
-
-    boolean filterSpawnReason(SpawnReason reason);
+    double getSpawnPosibility(@Nonnull SpawnReason reason);
 }

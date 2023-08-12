@@ -40,7 +40,7 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     }
 
     @Override
-    public boolean handleEntityDeath(DataEntityDeath data) {
+    public boolean handleEntityDeath(@Nonnull DataEntityDeath data) {
         if (data.hasKiller()) {
             Entity killer = data.getKiller();
             if (killer instanceof Player) //if killer is player
@@ -57,7 +57,7 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     }
 
     @Override
-    public boolean handleEntityDamagedByEntity(DataEntityDamagedByEntity data) {
+    public boolean handleEntityDamagedByEntity(@Nonnull DataEntityDamagedByEntity data) {
         if (data.getDamager() instanceof Player) {
             data.getDamager().sendMessage(data.getDamagee().name()
                     .append(Component.text(" is dealed ").style(Style.style(NamedTextColor.WHITE)))
@@ -68,17 +68,17 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     }
 
     @Override
-    public boolean handleEntityDamagedByBlock(DataEntityDamagedByBlock data) {
+    public boolean handleEntityDamagedByBlock(@Nonnull DataEntityDamagedByBlock data) {
         return true; //accept the entity is damaged by block
     }
 
     @Override
-    public boolean handleEntityDamagedByNothing(DataEntityDamagedByNothing data) {
+    public boolean handleEntityDamagedByNothing(@Nonnull DataEntityDamagedByNothing data) {
         return true; //accept the entity is damaged by nothing(environment)
     }
 
     @Override
-    public boolean handleEntityAttack(DataEntityDamagedByEntity data) {
+    public boolean handleEntityAttack(@Nonnull DataEntityDamagedByEntity data) {
         if (data.getDamagee() instanceof Player) {
             data.getDamagee().sendMessage(data.getDamager().name()
                     .append(Component.text(" damages you ").style(Style.style(NamedTextColor.WHITE)))
@@ -96,12 +96,12 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     }
 
     @Override
-    public boolean handleKillEntity(DataKillEntity data) {
+    public boolean handleKillEntity(@Nonnull DataKillEntity data) {
         return true; //accept the decedent death
     }
 
     @Override
-    public boolean handleKillPlayer(DataKillPlayer data) {
+    public boolean handleKillPlayer(@Nonnull DataKillPlayer data) {
         Player decedent = data.getDecedent();
         decedent.sendMessage(Component.text("You're killed by ").style(Style.style(NamedTextColor.WHITE))
                 .append(data.getKiller().name())

@@ -1,10 +1,12 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
+import javax.annotation.Nonnull;
+
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 
 public interface FeatureKillEntity {
-    boolean handleKillEntity(DataKillEntity data);
+    boolean handleKillEntity(@Nonnull DataKillEntity data);
 
-    boolean handleKillPlayer(DataKillPlayer data);
+    boolean handleKillPlayer(@Nonnull DataKillPlayer data);
 }

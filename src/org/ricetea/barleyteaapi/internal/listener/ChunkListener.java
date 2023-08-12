@@ -35,11 +35,13 @@ public final class ChunkListener implements Listener {
         if (register.hasAnyRegisteredMob()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
-                NamespacedKey id = BaseEntity.getEntityID(entity);
-                if (id != null) {
-                    BaseEntity entityType = register.lookupEntityType(id);
-                    if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
-                        entityChunkLoad.handleChunkLoaded(entity);
+                if (entity != null) {
+                    NamespacedKey id = BaseEntity.getEntityID(entity);
+                    if (id != null) {
+                        BaseEntity entityType = register.lookupEntityType(id);
+                        if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
+                            entityChunkLoad.handleChunkLoaded(entity);
+                        }
                     }
                 }
             }
@@ -54,11 +56,13 @@ public final class ChunkListener implements Listener {
         if (register.hasAnyRegisteredMob()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
-                NamespacedKey id = BaseEntity.getEntityID(entity);
-                if (id != null) {
-                    BaseEntity entityType = register.lookupEntityType(id);
-                    if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
-                        entityChunkLoad.handleChunkUnloaded(entity);
+                if (entity != null) {
+                    NamespacedKey id = BaseEntity.getEntityID(entity);
+                    if (id != null) {
+                        BaseEntity entityType = register.lookupEntityType(id);
+                        if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
+                            entityChunkLoad.handleChunkUnloaded(entity);
+                        }
                     }
                 }
             }

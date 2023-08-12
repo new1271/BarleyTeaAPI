@@ -42,7 +42,7 @@ public final class CreatureSpawnListener implements Listener {
                         && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
-                if (spawnEntityType.filterSpawnReason(reason) && rnd.nextDouble() < spawnEntityType.getPosibility()) {
+                if (rnd.nextDouble() < spawnEntityType.getSpawnPosibility(reason)) {
                     StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
                     switch (result) {
                         case Handled:
