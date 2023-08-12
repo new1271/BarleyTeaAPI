@@ -39,6 +39,6 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Nullable
     public AbstractItemRenderer getRenderer(@Nullable NamespacedKey rendererKey) {
-        return rendererKey == null ? null : lookupTable.get(rendererKey);
+        return rendererKey == null ? AbstractItemRenderer.getDefault() : lookupTable.get(rendererKey);
     }
 }

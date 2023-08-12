@@ -92,110 +92,112 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                     lores.addAll(customLores);
                 }
                 lores.add(Component.empty());
-                ArrayList<Component> MainHandLore = (isTool ? new ArrayList<>() : null);
-                if (meta.hasAttributeModifiers()) {
-                    ArrayList<Component> AttributeLore = new ArrayList<>();
-                    HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>> map = new HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>>();
-                    for (Entry<Attribute, AttributeModifier> entry : meta.getAttributeModifiers().entries()) {
-                        if (entry.getValue().getAmount() == 0)
-                            continue;
-                        HashMap<Attribute, AttributeModifier> hmap = map.getOrDefault(entry.getValue().getSlot(),
-                                new HashMap<Attribute, AttributeModifier>());
-                        if (isTool && entry.getValue().getSlot().equals(EquipmentSlot.HAND)) {
-                            if (entry.getValue().getOperation().equals(AttributeModifier.Operation.ADD_NUMBER)) {
-                                switch (entry.getKey()) {
-                                    case GENERIC_ATTACK_DAMAGE:
-                                        toolDamage += entry.getValue().getAmount();
-                                        continue;
-                                    case GENERIC_ATTACK_SPEED:
-                                        toolSpeed += entry.getValue().getAmount();
-                                        continue;
-                                    default:
-                                        break;
+                if (!hasItemFlag(itemStack, ItemFlag.HIDE_ATTRIBUTES)) {
+                    ArrayList<Component> MainHandLore = (isTool ? new ArrayList<>() : null);
+                    if (meta.hasAttributeModifiers()) {
+                        ArrayList<Component> AttributeLore = new ArrayList<>();
+                        HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>> map = new HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>>();
+                        for (Entry<Attribute, AttributeModifier> entry : meta.getAttributeModifiers().entries()) {
+                            if (entry.getValue().getAmount() == 0)
+                                continue;
+                            HashMap<Attribute, AttributeModifier> hmap = map.getOrDefault(entry.getValue().getSlot(),
+                                    new HashMap<Attribute, AttributeModifier>());
+                            if (isTool && entry.getValue().getSlot().equals(EquipmentSlot.HAND)) {
+                                if (entry.getValue().getOperation().equals(AttributeModifier.Operation.ADD_NUMBER)) {
+                                    switch (entry.getKey()) {
+                                        case GENERIC_ATTACK_DAMAGE:
+                                            toolDamage += entry.getValue().getAmount();
+                                            continue;
+                                        case GENERIC_ATTACK_SPEED:
+                                            toolSpeed += entry.getValue().getAmount();
+                                            continue;
+                                        default:
+                                            break;
+                                    }
                                 }
                             }
+                            hmap.put(entry.getKey(), entry.getValue());
+                            map.put(entry.getValue().getSlot(), hmap);
                         }
-                        hmap.put(entry.getKey(), entry.getValue());
-                        map.put(entry.getValue().getSlot(), hmap);
-                    }
-                    for (Entry<EquipmentSlot, HashMap<Attribute, AttributeModifier>> entry : map.entrySet()) {
-                        String slot;
-                        boolean isMainHand = false;
-                        switch (entry.getKey()) {
-                            case CHEST:
-                                slot = "item.modifiers.chest";
-                                break;
-                            case FEET:
-                                slot = "item.modifiers.feet";
-                                break;
-                            case HAND:
-                                slot = "item.modifiers.mainhand";
-                                isMainHand = isTool;
-                                break;
-                            case HEAD:
-                                slot = "item.modifiers.head";
-                                break;
-                            case LEGS:
-                                slot = "item.modifiers.legs";
-                                break;
-                            case OFF_HAND:
-                                slot = "item.modifiers.offhand";
-                                break;
-                            default:
-                                continue;
-                        }
-                        if (!isMainHand)
-                            AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
-                                    .decoration(TextDecoration.ITALIC, false));
-                        Object[] entries = entry.getValue().entrySet().toArray();
-                        for (int i = 0; i < entries.length; i++) {
-                            Entry<Attribute, AttributeModifier> entry2 = (Entry<Attribute, AttributeModifier>) entries[i];
-                            final NamespacedKey key = entry2.getKey().getKey();
-                            final String attributeKey = "attribute.name." + key.getKey();
-                            double value = entry2.getValue().getAmount();
-                            String format = "attribute.modifier." + (value >= 0 ? "plus." : "take.")
-                                    + entry2.getValue().getOperation().ordinal();
-                            if (!entry2.getValue().getOperation().equals(AttributeModifier.Operation.ADD_NUMBER))
-                                value *= 100;
-                            else if (entry2.getKey().equals(Attribute.GENERIC_KNOCKBACK_RESISTANCE)) {
-                                value *= 10;
+                        for (Entry<EquipmentSlot, HashMap<Attribute, AttributeModifier>> entry : map.entrySet()) {
+                            String slot;
+                            boolean isMainHand = false;
+                            switch (entry.getKey()) {
+                                case CHEST:
+                                    slot = "item.modifiers.chest";
+                                    break;
+                                case FEET:
+                                    slot = "item.modifiers.feet";
+                                    break;
+                                case HAND:
+                                    slot = "item.modifiers.mainhand";
+                                    isMainHand = isTool;
+                                    break;
+                                case HEAD:
+                                    slot = "item.modifiers.head";
+                                    break;
+                                case LEGS:
+                                    slot = "item.modifiers.legs";
+                                    break;
+                                case OFF_HAND:
+                                    slot = "item.modifiers.offhand";
+                                    break;
+                                default:
+                                    continue;
                             }
-                            value = Math.round(value * 100.0) / 100.0;
-                            String valueString = Double.toString(value);
-                            if (valueString.endsWith(".0"))
-                                valueString = valueString.substring(0, valueString.length() - 2);
-                            AttributeLore.add(Component.translatable(format).args(Component.text(valueString),
-                                    Component.translatable(attributeKey))
-                                    .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
-                                    .decoration(TextDecoration.ITALIC, false));
+                            if (!isMainHand)
+                                AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
+                                        .decoration(TextDecoration.ITALIC, false));
+                            Object[] entries = entry.getValue().entrySet().toArray();
+                            for (int i = 0; i < entries.length; i++) {
+                                Entry<Attribute, AttributeModifier> entry2 = (Entry<Attribute, AttributeModifier>) entries[i];
+                                final NamespacedKey key = entry2.getKey().getKey();
+                                final String attributeKey = "attribute.name." + key.getKey();
+                                double value = entry2.getValue().getAmount();
+                                String format = "attribute.modifier." + (value >= 0 ? "plus." : "take.")
+                                        + entry2.getValue().getOperation().ordinal();
+                                if (!entry2.getValue().getOperation().equals(AttributeModifier.Operation.ADD_NUMBER))
+                                    value *= 100;
+                                else if (entry2.getKey().equals(Attribute.GENERIC_KNOCKBACK_RESISTANCE)) {
+                                    value *= 10;
+                                }
+                                value = Math.round(value * 100.0) / 100.0;
+                                String valueString = Double.toString(value);
+                                if (valueString.endsWith(".0"))
+                                    valueString = valueString.substring(0, valueString.length() - 2);
+                                AttributeLore.add(Component.translatable(format).args(Component.text(valueString),
+                                        Component.translatable(attributeKey))
+                                        .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
+                                        .decoration(TextDecoration.ITALIC, false));
+                            }
                         }
+                        lores.addAll(AttributeLore);
                     }
-                    lores.addAll(AttributeLore);
-                }
-                if (isTool) {
-                    toolDamage = Math.round(toolDamage * 100.0) / 100.0;
-                    String toolDamageString = Double.toString(toolDamage);
-                    if (toolDamageString.endsWith(".0"))
-                        toolDamageString = toolDamageString.substring(0, toolDamageString.length() - 2);
-                    toolSpeed = Math.round(toolSpeed * 100.0) / 100.0;
-                    String toolSpeedString = Double.toString(toolSpeed);
-                    if (toolSpeedString.endsWith(".0"))
-                        toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
-                    MainHandLore.add(0, Component.text(" ").append(
-                            Component.translatable("attribute.modifier.equals.0").args(
-                                    Component.text(toolDamageString),
-                                    Component.translatable("attribute.name.generic.attack_damage")))
-                            .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                    MainHandLore.add(1, Component.text(" ").append(
-                            Component.translatable("attribute.modifier.equals.0").args(
-                                    Component.text(toolSpeedString),
-                                    Component.translatable("attribute.name.generic.attack_speed")))
-                            .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                }
-                if (isTool) {
-                    lores.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false));
-                    lores.addAll(MainHandLore);
+                    if (isTool) {
+                        toolDamage = Math.round(toolDamage * 100.0) / 100.0;
+                        String toolDamageString = Double.toString(toolDamage);
+                        if (toolDamageString.endsWith(".0"))
+                            toolDamageString = toolDamageString.substring(0, toolDamageString.length() - 2);
+                        toolSpeed = Math.round(toolSpeed * 100.0) / 100.0;
+                        String toolSpeedString = Double.toString(toolSpeed);
+                        if (toolSpeedString.endsWith(".0"))
+                            toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
+                        MainHandLore.add(0, Component.text(" ").append(
+                                Component.translatable("attribute.modifier.equals.0").args(
+                                        Component.text(toolDamageString),
+                                        Component.translatable("attribute.name.generic.attack_damage")))
+                                .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
+                        MainHandLore.add(1, Component.text(" ").append(
+                                Component.translatable("attribute.modifier.equals.0").args(
+                                        Component.text(toolSpeedString),
+                                        Component.translatable("attribute.name.generic.attack_speed")))
+                                .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
+                    }
+                    if (isTool) {
+                        lores.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
+                                .decoration(TextDecoration.ITALIC, false));
+                        lores.addAll(MainHandLore);
+                    }
                 }
                 if (itemType instanceof FeatureCustomDurability) {
                     FeatureCustomDurability customDurability = (FeatureCustomDurability) itemType;
@@ -211,7 +213,12 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                         .decoration(TextDecoration.ITALIC, false));
                 meta.lore(lores);
                 itemStack.setItemMeta(meta);
-                setLastRenderer(itemStack, this);
+                if (getLastRenderer(itemStack) == null) {
+                    ItemFlag[] flags = getItemFlags(itemStack);
+                    setLastRenderer(itemStack, this);
+                    addItemFlags(itemStack, flags);
+                }
+                itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
             }
         }
     }
