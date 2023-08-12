@@ -3,7 +3,6 @@ package org.ricetea.barleyteaapi.internal.bridge;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ public class ExcellentEnchantsBridge {
 
     @Nullable
     public static String getEnchantmentName(@Nullable Enchantment enchantment) {
-        return ObjectUtil.callWhenNonnull(ObjectUtil.tryCast(enchantment, ExcellentEnchant.class),
+        return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(enchantment, ExcellentEnchant.class),
                 ExcellentEnchant::getDisplayName);
     }
 
@@ -39,10 +38,9 @@ public class ExcellentEnchantsBridge {
 
     @Nullable
     public static TextColor getEnchantmentTierColorUnsafe(@Nonnull Enchantment enchantment) {
-        Function<Style, TextColor> colorFunc = Style::color;
-        return ObjectUtil.callWhenNonnull(
+        return ObjectUtil.mapWhenNonnull(
                 (Style) ChatColorHelper.toKyoriStyle(((ExcellentEnchant) enchantment).getTier().getColor()),
-                colorFunc);
+                Style::color);
     }
 
     public static boolean isExcellentEnchant(@Nullable Enchantment enchantment) {

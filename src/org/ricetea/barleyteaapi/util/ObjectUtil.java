@@ -43,16 +43,16 @@ public final class ObjectUtil {
     }
 
     @Nullable
-    public static <T, R> R callWhenNonnull(@Nullable T obj, Function<T, R> callFunction) {
-        if (obj == null) {
+    public static <T, R> R mapWhenNonnull(@Nullable T obj, @Nullable Function<T, R> mapFunction) {
+        if (obj == null || mapFunction == null) {
             return null;
         } else {
-            return callFunction.apply(obj);
+            return mapFunction.apply(obj);
         }
     }
 
-    public static <T> void callWhenNonnull(@Nullable T obj, Consumer<T> callFunction) {
-        if (obj != null) {
+    public static <T> void callWhenNonnull(@Nullable T obj, @Nullable Consumer<T> callFunction) {
+        if (obj != null && callFunction != null) {
             callFunction.accept(obj);
         }
     }

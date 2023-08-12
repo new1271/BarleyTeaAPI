@@ -11,7 +11,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.Function;
 
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -107,9 +106,8 @@ public final class BarleyGiveCommand {
             barleyTeaItemType = null;
         } else {
             barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
-            nmsItemType = ObjectUtil.callWhenNonnull(barleyTeaItemType,
-                    (Function<BaseItem, Item>) type -> CraftMagicNumbers
-                            .getItem(type.getMaterialBasedOn()));
+            nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
+                    type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
         }
         if (nmsItemType == null)
             throw giveFailedMessage.create();

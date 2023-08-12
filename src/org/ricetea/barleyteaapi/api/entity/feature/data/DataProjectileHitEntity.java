@@ -30,7 +30,7 @@ public final class DataProjectileHitEntity extends DataEntityBase<ProjectileHitE
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
         hitEntityType = new Lazy<>(() -> BaseEntity.getEntityType(event.getHitEntity()));
         shooter = ObjectUtil.tryCast(event.getEntity().getShooter(), Entity.class);
-        shooterType = ObjectUtil.callWhenNonnull(shooter,
+        shooterType = ObjectUtil.mapWhenNonnull(shooter,
                 (Function<Entity, Lazy<DataEntityType>>) shooter -> new Lazy<>(
                         () -> BaseEntity.getEntityType(shooter)));
     }
