@@ -22,7 +22,9 @@ import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.test.TestEntity;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
@@ -59,7 +61,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
     private void registerEventListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(ChunkListener.getInstance(), this);
-        pluginManager.registerEvents(CreatureSpawnListener.getInstance(), this);
+        pluginManager.registerEvents(EntitySpawnListener.getInstance(), this);
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);
         pluginManager.registerEvents(EntityDeathListener.getInstance(), this);
         pluginManager.registerEvents(EntityMountListener.getInstance(), this);
@@ -93,12 +95,14 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 if (world != null) {
                     for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
                         Entity entity = entityIterator.next();
-                        NamespacedKey id = BaseEntity.getEntityID(entity);
-                        if (id != null) {
-                            BaseEntity entityType = register.lookupEntityType(id);
-                            if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
-                                FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
-                                apiLoadEntity.handleAPILoaded(entity);
+                        if (entity != null) {
+                            NamespacedKey id = BaseEntity.getEntityID(entity);
+                            if (id != null) {
+                                BaseEntity entityType = register.lookupEntityType(id);
+                                if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
+                                    FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                                    apiLoadEntity.handleAPILoaded(entity);
+                                }
                             }
                         }
                     }
@@ -115,12 +119,14 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 if (world != null) {
                     for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator.hasNext();) {
                         Entity entity = entityIterator.next();
-                        NamespacedKey id = BaseEntity.getEntityID(entity);
-                        if (id != null) {
-                            BaseEntity entityType = register.lookupEntityType(id);
-                            if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
-                                FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
-                                apiLoadEntity.handleAPIUnloaded(entity);
+                        if (entity != null) {
+                            NamespacedKey id = BaseEntity.getEntityID(entity);
+                            if (id != null) {
+                                BaseEntity entityType = register.lookupEntityType(id);
+                                if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
+                                    FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
+                                    apiLoadEntity.handleAPIUnloaded(entity);
+                                }
                             }
                         }
                     }
@@ -136,6 +142,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
             ExcellentEnchantsBridge.unregisterTranslations();
         }
         announceEntitiesAPIUnloaded();
+        ObjectUtil.callWhenNonnull(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
         TickingService.shutdown();
         TaskService.shutdown();
         Bukkit.getScheduler().cancelTasks(this);

@@ -53,7 +53,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     @Nonnull
-    public NamespacedKey[] getEntityIDs(@Nullable Predicate<BaseItem> filter) {
+    public NamespacedKey[] getItemIDs(@Nullable Predicate<BaseItem> filter) {
         NamespacedKey[] result;
         if (filter == null)
             result = lookupTable.keySet().toArray(NamespacedKey[]::new);
@@ -64,7 +64,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     @Nonnull
-    public BaseItem[] getEntityTypes(@Nullable Predicate<BaseItem> filter) {
+    public BaseItem[] getItemTypes(@Nullable Predicate<BaseItem> filter) {
         BaseItem[] result;
         if (filter == null)
             result = lookupTable.values().toArray(BaseItem[]::new);

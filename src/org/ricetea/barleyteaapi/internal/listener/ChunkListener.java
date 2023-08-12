@@ -13,7 +13,9 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class ChunkListener implements Listener {
@@ -42,6 +44,9 @@ public final class ChunkListener implements Listener {
                         if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                             entityChunkLoad.handleChunkLoaded(entity);
                         }
+                        if (entityType instanceof FeatureEntityTick) {
+                            EntityTickTask.getInstance().addEntity(entity);
+                        }
                     }
                 }
             }
@@ -62,6 +67,9 @@ public final class ChunkListener implements Listener {
                         BaseEntity entityType = register.lookupEntityType(id);
                         if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                             entityChunkLoad.handleChunkUnloaded(entity);
+                        }
+                        if (entityType instanceof FeatureEntityTick) {
+                            EntityTickTask.getInstance().removeEntity(entity);
                         }
                     }
                 }

@@ -13,11 +13,13 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -50,6 +52,9 @@ public final class EntityDeathListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
+            }
+            if (entityType instanceof FeatureEntityTick) {
+                EntityTickTask.getInstance().removeEntity(entity);
             }
         }
         if (eventLastDamageCausedByEntity != null) {

@@ -89,11 +89,19 @@ public final class TickingService {
                     .iterator(); iterator.hasNext();) {
                 Entry<Entity, CachedList<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
-                if (entity != null) {
-                    AbstractTickCounter[] array = entry.getValue().toArrayCasted();
-                    if (array != null) {
-                        for (AbstractTickCounter counter : array) {
-                            counter.doTick(entity);
+                if (entity == null || entity.isDead()) {
+                    iterator.remove();
+                } else {
+                    CachedList<AbstractTickCounter> list = entry.getValue();
+                    if (list != null) {
+                        AbstractTickCounter[] array;
+                        synchronized (list) {
+                            array = entry.getValue().toArrayCasted();
+                        }
+                        if (array != null) {
+                            for (AbstractTickCounter counter : array) {
+                                counter.doTick(entity);
+                            }
                         }
                     }
                 }
@@ -106,7 +114,9 @@ public final class TickingService {
                 list = new CachedList<>(AbstractTickCounter.class, 1);
                 entityMap.put(entity, list);
             }
-            list.add(counter);
+            synchronized (list) {
+                list.add(counter);
+            }
             if (taskID == 0)
                 taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(BarleyTeaAPI.getInstance(), this, 0, 1);
         }
@@ -114,13 +124,19 @@ public final class TickingService {
         public void removeEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {
             CachedList<AbstractTickCounter> list = entityMap.get(entity);
             if (list != null) {
-                list.remove(counter);
+                synchronized (list) {
+                    list.remove(counter);
+                }
                 counter.cleanCounter(entity);
             }
         }
 
         public void removeEntity(@Nonnull Entity entity) {
             entityMap.remove(entity);
+            if (entityMap.size() <= 0 && taskID != 0) {
+                Bukkit.getScheduler().cancelTask(taskID);
+                taskID = 0;
+            }
         }
 
         public static void shutdown() {
@@ -156,11 +172,19 @@ public final class TickingService {
                     .iterator(); iterator.hasNext();) {
                 Entry<Entity, CachedList<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
-                if (entity != null) {
-                    AbstractTickCounter[] array = entry.getValue().toArrayCasted();
-                    if (array != null) {
-                        for (AbstractTickCounter counter : array) {
-                            counter.doTick(entity);
+                if (entity == null || entity.isDead()) {
+                    iterator.remove();
+                } else {
+                    CachedList<AbstractTickCounter> list = entry.getValue();
+                    if (list != null) {
+                        AbstractTickCounter[] array;
+                        synchronized (list) {
+                            array = entry.getValue().toArrayCasted();
+                        }
+                        if (array != null) {
+                            for (AbstractTickCounter counter : array) {
+                                counter.doTick(entity);
+                            }
                         }
                     }
                 }
@@ -189,6 +213,9 @@ public final class TickingService {
 
         public void removeEntity(@Nonnull Entity entity) {
             entityMap.remove(entity);
+            if (isRunning && entityMap.size() <= 0) {
+                stop();
+            }
         }
 
         public static void shutdown() {

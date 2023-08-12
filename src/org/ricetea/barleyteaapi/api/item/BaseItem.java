@@ -16,6 +16,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -95,11 +96,30 @@ public abstract class BaseItem implements Keyed {
             return;
         ItemMeta meta = itemStack.getItemMeta();
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (this instanceof FeatureCustomDurability || container.has(ItemAlternateDamageNamespacedKey)) {
+        FeatureCustomDurability customDurabilityFeature = ObjectUtil.tryCast(this, FeatureCustomDurability.class);
+        if (customDurabilityFeature != null || container.has(ItemAlternateDamageNamespacedKey)) {
             container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
-            damage = 0;
-        } else if (meta instanceof Damageable) {
-            Damageable damageable = (Damageable) meta;
+            if (customDurabilityFeature != null && meta instanceof Damageable damageable) {
+                if (damage == 0) {
+                    damageable.setDamage(0);
+                } else {
+                    int maxDura = customDurabilityFeature.getMaxDurability(itemStack);
+                    int maxDuraVisual = itemStack.getType().getMaxDurability();
+                    if (damage == maxDura) {
+                        damageable.setDamage(maxDuraVisual);
+                    } else {
+                        int visualDamage = (int) Math
+                                .floor(damage * 1.0 / maxDura * maxDuraVisual);
+                        if (visualDamage <= 0 && damage > 0) {
+                            visualDamage = 1;
+                        } else if (visualDamage >= maxDuraVisual && damage < maxDura) {
+                            visualDamage = maxDuraVisual - 1;
+                        }
+                        damageable.setDamage(visualDamage);
+                    }
+                }
+            }
+        } else if (meta instanceof Damageable damageable) {
             damageable.setDamage(damage);
         } else {
             return;

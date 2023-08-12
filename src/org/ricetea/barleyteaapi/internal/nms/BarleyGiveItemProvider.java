@@ -22,23 +22,23 @@ import net.minecraft.commands.synchronization.CompletionProviders;
 import net.minecraft.core.RegistryBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Item;
 
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
-import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class BarleySummonEntityProvider extends CompletionProviders {
+public final class BarleyGiveItemProvider extends CompletionProviders {
     private static final Lazy<SuggestionProvider<CommandListenerWrapper>> provider = new Lazy<>(
-            BarleySummonEntityProvider::build);
-    private static final Lazy<EntitySuggestionProvider> suggestionProvider = new Lazy<>(EntitySuggestionProvider::new);
+            BarleyGiveItemProvider::build);
+    private static final Lazy<ItemSuggestionProvider> suggestionProvider = new Lazy<>(ItemSuggestionProvider::new);
 
     private static SuggestionProvider<CommandListenerWrapper> build() {
         return CompletionProviders.a(
                 new MinecraftKey(NamespacedKeyUtils.Namespace,
-                        "summonable_entities_" + ThreadLocalRandom.current().nextInt()),
+                        "givable_items_" + ThreadLocalRandom.current().nextInt()),
                 suggestionProvider.get());
     }
 
@@ -47,23 +47,22 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
     }
 
     public static void updateRegisterList() {
-        EntitySuggestionProvider suggestionProvider = BarleySummonEntityProvider.suggestionProvider.getUnsafe();
+        ItemSuggestionProvider suggestionProvider = BarleyGiveItemProvider.suggestionProvider.getUnsafe();
         if (suggestionProvider != null)
             suggestionProvider.updateRegisterList();
     }
 
-    private static class EntitySuggestionProvider
+    private static class ItemSuggestionProvider
             implements SuggestionProvider<ICompletionProvider>, Iterable<MinecraftKey> {
         @Nonnull
         final List<MinecraftKey> builtinKeys;
         @Nullable
         List<MinecraftKey> customKeys = null;
 
-        public EntitySuggestionProvider() {
-            RegistryBlocks<EntityTypes<?>> entityRegistries = BuiltInRegistries.h;
+        public ItemSuggestionProvider() {
+            RegistryBlocks<Item> itemRegistries = BuiltInRegistries.i;
             builtinKeys = ObjectUtil.letNonNull(
-                    entityRegistries.s().filter(EntityTypes::c).map(entityType -> entityRegistries.b(entityType))
-                            .toList(),
+                    itemRegistries.s().map(itemType -> itemRegistries.b(itemType)).toList(),
                     Collections::emptyList);
         }
 
@@ -78,8 +77,8 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
                     List<MinecraftKey> customKeys = this.customKeys;
                     if (customKeys == null) {
                         this.customKeys = customKeys = Arrays
-                                .stream(EntityRegister.getInstance()
-                                        .getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                                .stream(ItemRegister.getInstance()
+                                        .getItemIDs(type -> type instanceof FeatureCommandGive))
                                 .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
                     }
                     builtinKeys.stream()
@@ -103,20 +102,22 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
             List<MinecraftKey> customKeys = this.customKeys;
             if (customKeys == null) {
                 this.customKeys = customKeys = Arrays
-                        .stream(EntityRegister.getInstance().getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                        .stream(ItemRegister.getInstance().getItemIDs(type -> type instanceof FeatureCommandGive))
                         .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
             }
-            return new IteratorForEntityKey(builtinKeys, ObjectUtil.letNonNull(customKeys, Collections::emptyList));
+            return new IteratorForItemKey(builtinKeys, ObjectUtil.letNonNull(customKeys, Collections::emptyList));
         }
 
-        private static class IteratorForEntityKey implements Iterator<MinecraftKey> {
+        private static class IteratorForItemKey implements Iterator<MinecraftKey> {
 
             boolean isInBuiltin = true;
-            final @Nonnull List<MinecraftKey> _builtins;
-            final @Nonnull List<MinecraftKey> _another;
+            @Nonnull
+            List<MinecraftKey> _builtins;
+            @Nonnull
+            List<MinecraftKey> _another;
             Iterator<MinecraftKey> currentIterator;
 
-            public IteratorForEntityKey(@Nonnull List<MinecraftKey> builtins, @Nonnull List<MinecraftKey> another) {
+            public IteratorForItemKey(@Nonnull List<MinecraftKey> builtins, @Nonnull List<MinecraftKey> another) {
                 _builtins = builtins;
                 _another = another;
             }

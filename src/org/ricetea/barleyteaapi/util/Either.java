@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.util;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,5 +53,17 @@ public class Either<L, R> {
             consumerForLeft.accept(left);
         if (right != null)
             consumerForRight.accept(right);
+    }
+
+    @Nullable
+    public <T> T mapLeftOrRight(@Nonnull Function<L, T> mapFunctionForLeft,
+            @Nonnull Function<R, T> mapFunctionForRight) {
+        L left = this.left;
+        R right = this.right;
+        if (left != null)
+            return mapFunctionForLeft.apply(left);
+        if (right != null)
+            return mapFunctionForRight.apply(right);
+        return null;
     }
 }

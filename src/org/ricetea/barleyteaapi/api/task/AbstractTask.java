@@ -28,7 +28,11 @@ public abstract class AbstractTask implements Runnable {
     @Override
     public void run() {
         stopwatch.start();
-        runInternal();
+        try {
+            runInternal();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         stopwatch.stop();
         if (isRunning) {
             long howlongGoes = stopwatch.elapsed(TimeUnit.MILLISECONDS);
