@@ -24,7 +24,7 @@ public abstract class BaseProjectile extends BaseEntity implements FeatureComman
     @Nonnull
     private static EntityType checkEntityType(@Nonnull EntityType entityTypeBasedOn) throws Exception {
         if (!Projectile.class.isAssignableFrom(entityTypeBasedOn.getEntityClass()))
-            throw new Exception("BaseProjectile cannot be used on non-projectile class!");
+            throw new Exception("BaseProjectile cannot be used on non-projectile entity type!");
         return entityTypeBasedOn;
     }
 
