@@ -12,8 +12,10 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 
-public abstract class BaseProjectile extends BaseEntity implements FeatureCommandSummon {
+public abstract class BaseProjectile extends BaseEntity implements FeatureCommandSummon, FeatureProjectile {
 
     public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) throws Exception {
         super(key, checkEntityType(entityTypeBasedOn));
@@ -55,5 +57,11 @@ public abstract class BaseProjectile extends BaseEntity implements FeatureComman
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean handleProjectileLaunch(DataProjectileLaunch data) {
+        spawn(data.getEntity());
+        return true;
     }
 }
