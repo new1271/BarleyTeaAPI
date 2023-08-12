@@ -176,14 +176,20 @@ public final class TickingService {
                     iterator.remove();
                 } else {
                     CachedList<AbstractTickCounter> list = entry.getValue();
-                    if (list != null) {
+                    if (list == null)
+                        iterator.remove();
+                    else {
                         AbstractTickCounter[] array;
                         synchronized (list) {
                             array = entry.getValue().toArrayCasted();
                         }
                         if (array != null) {
                             for (AbstractTickCounter counter : array) {
-                                counter.doTick(entity);
+                                try {
+                                    counter.doTick(entity);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }

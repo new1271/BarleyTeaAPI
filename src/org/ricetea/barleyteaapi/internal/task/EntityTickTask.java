@@ -60,7 +60,11 @@ public final class EntityTickTask extends AbstractTask {
                         } else {
                             BaseEntity baseEntity = register.lookupEntityType(id);
                             if (baseEntity instanceof FeatureEntityTick tickingEntity)
-                                scheduler.runTask(api, () -> tickingEntity.handleTick(entity));
+                                try {
+                                    scheduler.runTask(api, () -> tickingEntity.handleTick(entity));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             else
                                 removeEntity(entity);
                         }
