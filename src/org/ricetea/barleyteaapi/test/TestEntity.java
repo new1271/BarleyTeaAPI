@@ -1,7 +1,6 @@
 package org.ricetea.barleyteaapi.test;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -9,7 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.SpawnableEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.*;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
@@ -19,8 +18,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 
-public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base Entity Class
-        implements FeatureCommandSummon, FeatureEntityDamage, FeatureEntityDeath, FeatureKillEntity { // implements entity features
+public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's Spawnable Entity Class
+        implements FeatureEntityDamage, FeatureEntityDeath, FeatureKillEntity { // implements entity features
 
     private static final Lazy<TestEntity> inst = new Lazy<>(TestEntity::new);
 
@@ -89,11 +88,11 @@ public final class TestEntity extends BaseEntity // based on BarleyTeaAPI's Base
         return true; //accept the entity attacks another entity
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public boolean handleCommandSummon(@Nonnull Entity entitySummoned, @Nullable String nbt) {
+    protected void spawn(@Nonnull Entity entitySummoned) {
         //Named entity as "default"(the name that is getDefaultName() set), and set color&style as ChatColor.BLUE + ChatColor.BOLD
         setEntityName(entitySummoned, ChatColor.BLUE, ChatColor.BOLD);
-        return true; //accept the entity summoned by command
     }
 
     @Override
