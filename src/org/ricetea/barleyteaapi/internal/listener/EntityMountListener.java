@@ -33,8 +33,7 @@ public final class EntityMountListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityMount) {
-                FeatureEntityMount entityMount = (FeatureEntityMount) entity;
+            if (entity instanceof FeatureEntityMount entityMount) {
                 boolean cancelled = !entityMount.handleEntityMount(new DataEntityMount(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -45,8 +44,7 @@ public final class EntityMountListener implements Listener {
         id = BaseEntity.getEntityID(event.getMount());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityMount) {
-                FeatureEntityMount entityMount = (FeatureEntityMount) entity;
+            if (entity instanceof FeatureEntityMount entityMount) {
                 boolean cancelled = !entityMount.handleEntityBeMounted(new DataEntityMount(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -63,8 +61,7 @@ public final class EntityMountListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityMount) {
-                FeatureEntityMount entityMount = (FeatureEntityMount) entity;
+            if (entity instanceof FeatureEntityMount entityMount) {
                 boolean cancelled = !entityMount.handleEntityDismount(new DataEntityDismount(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -75,8 +72,7 @@ public final class EntityMountListener implements Listener {
         id = BaseEntity.getEntityID(event.getDismounted());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityMount) {
-                FeatureEntityMount entityMount = (FeatureEntityMount) entity;
+            if (entity instanceof FeatureEntityMount entityMount) {
                 boolean cancelled = !entityMount.handleEntityBeDismounted(new DataEntityDismount(event));
                 if (cancelled) {
                     event.setCancelled(true);

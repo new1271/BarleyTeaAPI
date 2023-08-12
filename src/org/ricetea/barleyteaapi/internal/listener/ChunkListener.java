@@ -38,8 +38,7 @@ public final class ChunkListener implements Listener {
                 NamespacedKey id = BaseEntity.getEntityID(entity);
                 if (id != null) {
                     BaseEntity entityType = register.lookupEntityType(id);
-                    if (entityType != null && entityType instanceof FeatureChunkLoad) {
-                        FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
+                    if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                         entityChunkLoad.handleChunkLoaded(entity);
                     }
                 }
@@ -58,8 +57,7 @@ public final class ChunkListener implements Listener {
                 NamespacedKey id = BaseEntity.getEntityID(entity);
                 if (id != null) {
                     BaseEntity entityType = register.lookupEntityType(id);
-                    if (entityType != null && entityType instanceof FeatureChunkLoad) {
-                        FeatureChunkLoad entityChunkLoad = (FeatureChunkLoad) entity;
+                    if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                         entityChunkLoad.handleChunkUnloaded(entity);
                     }
                 }

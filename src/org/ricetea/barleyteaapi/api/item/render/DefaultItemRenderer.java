@@ -1,11 +1,14 @@
 package org.ricetea.barleyteaapi.api.item.render;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -16,20 +19,28 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 
 public class DefaultItemRenderer extends AbstractItemRenderer {
+    private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
+    private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
 
     public DefaultItemRenderer() {
         super(NamespacedKeyUtils.BarleyTeaAPI("default_item_renderer"));
@@ -37,7 +48,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
 
     @SuppressWarnings({ "unchecked", "null" })
     @Override
-    public void renderItem(@Nonnull ItemStack itemStack) {
+    public void render(@Nonnull ItemStack itemStack) {
         BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstance();
         if (apiInstance != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
@@ -49,7 +60,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                 double toolDamage = 1;
                 double toolSpeed = 4.0;
                 List<Component> lores = new ArrayList<Component>();
-                if (meta.hasEnchants() && !hasItemFlag(itemStack, ItemFlag.HIDE_ENCHANTS)) {
+                if (meta.hasEnchants() && !hasItemFlag(meta, ItemFlag.HIDE_ENCHANTS)) {
                     final Entry<Enchantment, Integer>[] enchantments = (Entry<Enchantment, Integer>[]) meta
                             .getEnchants()
                             .entrySet().toArray(Entry<?, ?>[]::new);
@@ -72,7 +83,9 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                         if (isExcellentEnchant) {
                             component = Component.translatable(enchantName,
                                     ExcellentEnchantsBridge.getEnchantmentNameUnsafe(enchantment));
-                            color = ExcellentEnchantsBridge.getEnchantmentTierColorUnsafe(enchantment);
+                            color = ObjectUtil.letNonNull(
+                                    ExcellentEnchantsBridge.getEnchantmentTierColorUnsafe(enchantment),
+                                    NamedTextColor.GRAY);
                         } else {
                             component = Component.translatable(enchantName);
                             color = enchantment.isCursed() ? NamedTextColor.RED : NamedTextColor.GRAY;
@@ -92,7 +105,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                     lores.addAll(customLores);
                 }
                 lores.add(Component.empty());
-                if (!hasItemFlag(itemStack, ItemFlag.HIDE_ATTRIBUTES)) {
+                if (!hasItemFlag(meta, ItemFlag.HIDE_ATTRIBUTES)) {
                     ArrayList<Component> MainHandLore = (isTool ? new ArrayList<>() : null);
                     if (meta.hasAttributeModifiers()) {
                         ArrayList<Component> AttributeLore = new ArrayList<>();
@@ -212,15 +225,19 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                 lores.add(Component.text(id.toString(), NamedTextColor.DARK_GRAY)
                         .decoration(TextDecoration.ITALIC, false));
                 meta.lore(lores);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
                 itemStack.setItemMeta(meta);
-                if (getLastRenderer(itemStack) == null) {
-                    ItemFlag[] flags = getItemFlags(itemStack);
-                    setLastRenderer(itemStack, this);
-                    addItemFlags(itemStack, flags);
-                }
-                itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
             }
         }
+    }
+
+    protected void beforeFirstRender(@Nonnull ItemStack itemStack) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            setItemLore(meta, meta.lore());
+            addItemFlags(meta, meta.getItemFlags());
+        }
+        setLastRenderer(itemStack, this);
     }
 
     private static boolean isToolOrWeapon(ItemStack item) {
@@ -260,6 +277,125 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    public @Nullable List<Component> getItemLore(@Nonnull ItemMeta itemMeta) {
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        String loreInJSON = container.getOrDefault(ItemLoreKey, PersistentDataType.STRING, null);
+        if (loreInJSON == null)
+            return null;
+        else {
+            try {
+                JSONArray array = (JSONArray) JSONValue.parse(loreInJSON);
+                int length = array.size();
+                Component[] components = new Component[length];
+                JSONComponentSerializer serializer = JSONComponentSerializer.json();
+                for (int i = 0; i < length; i++) {
+                    try {
+                        components[i] = serializer.deserialize(array.get(i).toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return Arrays.asList(components);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setItemLore(@Nonnull ItemMeta itemMeta, @Nullable List<? extends Component> lores) {
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        if (lores == null) {
+            container.remove(ItemLoreKey);
+        } else {
+            JSONComponentSerializer serializer = JSONComponentSerializer.json();
+            int length = lores.size();
+            JSONArray array = new JSONArray();
+            for (int i = 0; i < length; i++) {
+                Component lore = lores.get(i);
+                if (lore == null)
+                    lore = Component.empty();
+                array.add(serializer.serialize(lore));
+            }
+            container.set(ItemLoreKey, PersistentDataType.STRING, array.toString());
+        }
+    }
+
+    @Nullable
+    public Set<ItemFlag> getItemFlags(@Nonnull ItemMeta itemMeta) {
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        ItemFlag[] values = ItemFlag.values();
+        int length = values.length;
+        ArrayList<ItemFlag> flagList = new ArrayList<>(length);
+        for (int i = 0; i < length; i++) {
+            ItemFlag flag = values[i];
+            if (container.getOrDefault(
+                    NamespacedKeyUtils
+                            .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
+                    PersistentDataType.BOOLEAN, false) == true) {
+                flagList.add(flag);
+            }
+        }
+        return Set.copyOf(flagList);
+    }
+
+    public boolean hasItemFlag(@Nonnull ItemMeta itemMeta, @Nullable ItemFlag flag) {
+        if (flag == null)
+            return false;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        return container.getOrDefault(
+                NamespacedKeyUtils
+                        .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
+                PersistentDataType.BOOLEAN, false) == true;
+    }
+
+    public void addItemFlags(@Nonnull ItemMeta itemMeta, @Nullable Set<ItemFlag> flags) {
+        if (flags == null)
+            return;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        for (ItemFlag flag : flags) {
+            container.set(
+                    NamespacedKeyUtils
+                            .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
+                    PersistentDataType.BOOLEAN, true);
+        }
+    }
+
+    public void addItemFlags(@Nonnull ItemMeta itemMeta, @Nullable ItemFlag... flags) {
+        if (flags == null)
+            return;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        for (ItemFlag flag : flags) {
+            container.set(
+                    NamespacedKeyUtils
+                            .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
+                    PersistentDataType.BOOLEAN, true);
+        }
+    }
+
+    public void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nullable Set<ItemFlag> flags) {
+        if (flags == null)
+            return;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        for (ItemFlag flag : flags) {
+            container.remove(
+                    NamespacedKeyUtils
+                            .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
+        }
+    }
+
+    public void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nullable ItemFlag... flags) {
+        if (flags == null)
+            return;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        for (ItemFlag flag : flags) {
+            container.remove(
+                    NamespacedKeyUtils
+                            .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
         }
     }
 }

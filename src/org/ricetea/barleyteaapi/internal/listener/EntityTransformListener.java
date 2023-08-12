@@ -31,8 +31,7 @@ public final class EntityTransformListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityTransform) {
-                FeatureEntityTransform entityTransform = (FeatureEntityTransform) entity;
+            if (entity instanceof FeatureEntityTransform entityTransform) {
                 boolean cancelled = !entityTransform.handleEntityTransform(new DataEntityTransform(event));
                 if (cancelled) {
                     event.setCancelled(true);

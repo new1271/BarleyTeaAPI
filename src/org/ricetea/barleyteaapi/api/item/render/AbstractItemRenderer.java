@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.render;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,23 +12,19 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
+import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 
 public abstract class AbstractItemRenderer implements Keyed {
 
     private static @Nullable AbstractItemRenderer _inst;
     private static final @Nonnull Lazy<AbstractItemRenderer> _defaultInst = new Lazy<>(DefaultItemRenderer::new);
     private static final @Nonnull NamespacedKey lastRenderingKey = NamespacedKeyUtils.BarleyTeaAPI("last_renderer");
-    private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
-    private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
     private final NamespacedKey key;
 
     @Nonnull
@@ -49,7 +45,7 @@ public abstract class AbstractItemRenderer implements Keyed {
                     PersistentDataType.STRING,
                     null);
             if (resultString != null && resultString.contains(":")) {
-                return ItemRendererRegister.getInstance().getRenderer(NamespacedKey.fromString(resultString));
+                return ItemRendererRegister.getInstance().getRendererOrDefault(NamespacedKey.fromString(resultString));
             }
         }
         return null;
@@ -77,165 +73,181 @@ public abstract class AbstractItemRenderer implements Keyed {
         return key;
     }
 
-    public abstract void renderItem(@Nonnull ItemStack itemStack);
+    protected abstract void render(@Nonnull ItemStack itemStack);
 
-    public void convertBackToNormalItem(@Nonnull ItemStack itemStack) {
-        convertBackToNormalItem(itemStack, getLastRenderer(itemStack));
-    }
+    protected abstract void beforeFirstRender(@Nonnull ItemStack itemStack);
 
-    public void convertBackToNormalItem(@Nonnull ItemStack itemStack, @Nullable AbstractItemRenderer lastRenderer) {
-        if (lastRenderer == this) {
-            if (itemStack.hasItemMeta()) {
-                ItemMeta meta = itemStack.getItemMeta();
-                List<Component> customLores = getItemLore(itemStack);
-                ItemFlag[] flags = getItemFlags(itemStack);
-                if (customLores != null)
-                    meta.lore(customLores);
-                meta.removeItemFlags(ItemFlag.values());
-                if (flags != null && flags.length > 0)
-                    meta.addItemFlags(flags);
-                itemStack.setItemMeta(meta);
-            }
-        } else if (lastRenderer != null) {
-            lastRenderer.convertBackToNormalItem(itemStack, lastRenderer);
-        }
-    }
+    protected abstract @Nullable List<Component> getItemLore(@Nonnull ItemMeta itemMeta);
 
-    public @Nullable List<Component> getItemLore(@Nonnull ItemStack itemStack) {
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                String loreInJSON = container.getOrDefault(ItemLoreKey, PersistentDataType.STRING, null);
-                if (loreInJSON == null)
-                    return null;
-                else {
-                    try {
-                        JSONArray array = (JSONArray) JSONValue.parse(loreInJSON);
-                        int length = array.size();
-                        Component[] components = new Component[length];
-                        JSONComponentSerializer serializer = JSONComponentSerializer.json();
-                        for (int i = 0; i < length; i++) {
-                            try {
-                                components[i] = serializer.deserialize(array.get(i).toString());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        return Arrays.asList(components);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
+    protected abstract void setItemLore(@Nonnull ItemMeta itemMeta, @Nullable List<? extends Component> lore);
+
+    protected abstract void addItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag... flags);
+
+    protected abstract void addItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull Set<ItemFlag> flags);
+
+    protected abstract void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag... flags);
+
+    protected abstract void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull Set<ItemFlag> flags);
+
+    protected abstract boolean hasItemFlag(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag flag);
+
+    protected abstract @Nullable Set<ItemFlag> getItemFlags(@Nonnull ItemMeta itemMeta);
+
+    public static void renderItem(@Nullable ItemStack itemStack) {
+        if (itemStack != null) {
+            if (BaseItem.isBarleyTeaItem(itemStack)) {
+                AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                if (renderer == null) {
+                    renderer = getDefault();
+                    renderer.beforeFirstRender(itemStack);
                 }
+                renderer.render(itemStack);
             }
         }
-        return itemStack.lore();
     }
 
-    @SuppressWarnings("unchecked")
-    public void setItemLore(@Nonnull ItemStack itemStack, @Nullable List<Component> lores) {
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                if (lores == null) {
-                    container.remove(ItemLoreKey);
+    public static @Nullable List<Component> getItemLore(@Nullable ItemStack itemStack) {
+        if (itemStack != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    return renderer.getItemLore(itemMeta);
+                }
+                return itemMeta.lore();
+            }
+        }
+        return null;
+    }
+
+    public static void setItemLore(@Nullable ItemStack itemStack, @Nullable List<? extends Component> lore) {
+        if (itemStack != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    renderer.setItemLore(itemMeta, lore);
                 } else {
-                    JSONComponentSerializer serializer = JSONComponentSerializer.json();
-                    int length = lores.size();
-                    JSONArray array = new JSONArray();
-                    for (int i = 0; i < length; i++) {
-                        Component lore = lores.get(i);
-                        if (lore == null)
-                            lore = Component.empty();
-                        array.add(serializer.serialize(lore));
+                    itemMeta.lore(lore);
+                }
+                itemStack.setItemMeta(itemMeta);
+            }
+        }
+    }
+
+    public static void addItemFlags(@Nullable ItemStack itemStack, @Nullable ItemFlag... flags) {
+        if (itemStack != null && flags != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
                     }
-                    container.set(ItemLoreKey, PersistentDataType.STRING, array.toString());
+                    renderer.addItemFlags(itemMeta, flags);
+                } else {
+                    itemMeta.addItemFlags(flags);
                 }
-                itemStack.setItemMeta(meta);
-                return;
+                itemStack.setItemMeta(itemMeta);
             }
         }
-        itemStack.lore(lores);
     }
 
-    @Nullable
-    public ItemFlag[] getItemFlags(@Nonnull ItemStack itemStack) {
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                ItemFlag[] values = ItemFlag.values();
-                int length = values.length;
-                ArrayList<ItemFlag> flagList = new ArrayList<>(length);
-                for (int i = 0; i < length; i++) {
-                    ItemFlag flag = values[i];
-                    if (container.getOrDefault(
-                            NamespacedKeyUtils
-                                    .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
-                            PersistentDataType.BOOLEAN, false) == true) {
-                        flagList.add(flag);
+    public static void addItemFlags(@Nullable ItemStack itemStack, @Nullable Set<ItemFlag> flags) {
+        if (itemStack != null && flags != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
                     }
+                    renderer.addItemFlags(itemMeta, flags);
+                } else {
+                    itemMeta.addItemFlags(flags.toArray(ItemFlag[]::new));
                 }
-                return flagList.toArray(ItemFlag[]::new);
+                itemStack.setItemMeta(itemMeta);
             }
         }
-        return itemStack.getItemFlags().toArray(ItemFlag[]::new);
     }
 
-    public boolean hasItemFlag(@Nonnull ItemStack itemStack, @Nullable ItemFlag flag) {
-        if (flag == null)
-            return false;
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                return container.getOrDefault(
-                        NamespacedKeyUtils
-                                .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
-                        PersistentDataType.BOOLEAN, false) == true;
+    public static void removeItemFlags(@Nullable ItemStack itemStack, @Nullable ItemFlag... flags) {
+        if (itemStack != null && flags != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    renderer.removeItemFlags(itemMeta, flags);
+                } else {
+                    itemMeta.removeItemFlags(flags);
+                }
+                itemStack.setItemMeta(itemMeta);
             }
         }
-        return itemStack.hasItemFlag(flag);
     }
 
-    public void addItemFlags(@Nonnull ItemStack itemStack, @Nullable ItemFlag... flags) {
-        if (flags == null)
-            return;
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                for (ItemFlag flag : flags) {
-                    container.set(
-                            NamespacedKeyUtils
-                                    .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
-                            PersistentDataType.BOOLEAN, true);
+    public static void removeItemFlags(@Nullable ItemStack itemStack, @Nullable Set<ItemFlag> flags) {
+        if (itemStack != null && flags != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    renderer.removeItemFlags(itemMeta, flags);
+                } else {
+                    itemMeta.removeItemFlags(flags.toArray(ItemFlag[]::new));
                 }
-                itemStack.setItemMeta(meta);
-                return;
+                itemStack.setItemMeta(itemMeta);
             }
         }
-        itemStack.addItemFlags(flags);
     }
 
-    public void removeItemFlags(@Nonnull ItemStack itemStack, @Nullable ItemFlag... flags) {
-        if (flags == null)
-            return;
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            if (container.getOrDefault(lastRenderingKey, PersistentDataType.STRING, null) != null) {
-                for (ItemFlag flag : flags) {
-                    container.remove(
-                            NamespacedKeyUtils
-                                    .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
+    public static boolean hasItemFlag(@Nullable ItemStack itemStack, @Nullable ItemFlag flag) {
+        if (itemStack != null && flag != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    return renderer.hasItemFlag(itemMeta, flag);
+                } else {
+                    return itemMeta.hasItemFlag(flag);
                 }
-                itemStack.setItemMeta(meta);
-                return;
             }
         }
-        itemStack.removeItemFlags(flags);
+        return false;
+    }
+
+    @SuppressWarnings("null")
+    @Nonnull
+    public static Set<ItemFlag> getItemFlags(@Nullable ItemStack itemStack) {
+        if (itemStack != null) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                if (BaseItem.isBarleyTeaItem(itemStack)) {
+                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                    if (renderer == null) {
+                        renderer = getDefault();
+                    }
+                    return ObjectUtil.letNonNull(renderer.getItemFlags(itemMeta), Collections::emptySet);
+                } else {
+                    return ObjectUtil.letNonNull(itemMeta.getItemFlags(), Collections::emptySet);
+                }
+            }
+        }
+        return Collections.emptySet();
     }
 }

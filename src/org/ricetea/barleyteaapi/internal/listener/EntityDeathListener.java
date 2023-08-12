@@ -19,6 +19,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class EntityDeathListener implements Listener {
     private static final Lazy<EntityDeathListener> inst = new Lazy<>(EntityDeathListener::new);
@@ -37,21 +38,12 @@ public final class EntityDeathListener implements Listener {
             return;
         Entity entity = event.getEntity();
         EntityDamageEvent eventLastDamageCaused = entity.getLastDamageCause();
-        EntityDamageByEntityEvent eventLastDamageCausedByEntity;
-        if (eventLastDamageCaused == null) {
-            eventLastDamageCausedByEntity = null;
-        } else {
-            if (eventLastDamageCaused instanceof EntityDamageByEntityEvent) {
-                eventLastDamageCausedByEntity = (EntityDamageByEntityEvent) eventLastDamageCaused;
-            } else {
-                eventLastDamageCausedByEntity = null;
-            }
-        }
+        EntityDamageByEntityEvent eventLastDamageCausedByEntity = ObjectUtil.tryCast(eventLastDamageCaused,
+                EntityDamageByEntityEvent.class);
         NamespacedKey id = BaseEntity.getEntityID(entity);
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureEntityDeath) {
-                FeatureEntityDeath entityDeath = (FeatureEntityDeath) entityType;
+            if (entityType instanceof FeatureEntityDeath entityDeath) {
                 boolean cancelled = !entityDeath
                         .handleEntityDeath(new DataEntityDeath(event, eventLastDamageCausedByEntity));
                 if (cancelled) {
@@ -64,20 +56,15 @@ public final class EntityDeathListener implements Listener {
             id = BaseEntity.getEntityID(eventLastDamageCausedByEntity.getDamager());
             if (id != null) {
                 BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                if (entityType != null) {
+                if (entityType instanceof FeatureKillEntity entityTypeEntityKill) {
                     boolean cancelled;
-                    if (entityType instanceof FeatureKillEntity) {
-                        FeatureKillEntity entityTypeEntityKill = (FeatureKillEntity) entityType;
-                        if (event instanceof PlayerDeathEvent) {
-                            cancelled = !entityTypeEntityKill
-                                    .handleKillPlayer(new DataKillPlayer((PlayerDeathEvent) event,
-                                            eventLastDamageCausedByEntity));
-                        } else {
-                            cancelled = !entityTypeEntityKill
-                                    .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
-                        }
+                    if (event instanceof PlayerDeathEvent playerDeathEvent) {
+                        cancelled = !entityTypeEntityKill
+                                .handleKillPlayer(new DataKillPlayer(playerDeathEvent,
+                                        eventLastDamageCausedByEntity));
                     } else {
-                        cancelled = false;
+                        cancelled = !entityTypeEntityKill
+                                .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
                     }
                     if (cancelled) {
                         event.setCancelled(true);

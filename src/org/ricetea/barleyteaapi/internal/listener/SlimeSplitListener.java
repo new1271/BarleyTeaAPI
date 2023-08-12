@@ -8,7 +8,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDamage;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
@@ -32,8 +31,7 @@ public final class SlimeSplitListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityDamage) {
-                FeatureSlimeSplit slimeSplitEntity = (FeatureSlimeSplit) entity;
+            if (entity instanceof FeatureSlimeSplit slimeSplitEntity) {
                 boolean cancelled = !slimeSplitEntity.handleSlimeSplit(new DataSlimeSplit(event));
                 if (cancelled) {
                     event.setCancelled(true);

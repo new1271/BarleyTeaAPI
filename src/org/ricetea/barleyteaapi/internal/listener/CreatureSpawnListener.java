@@ -38,8 +38,8 @@ public final class CreatureSpawnListener implements Listener {
             return;
         Random rnd = ThreadLocalRandom.current();
         for (BaseEntity entityType : EntityRegister.getInstance()
-                .getEntityTypes(e -> e.getEntityTypeBasedOn().equals(event.getEntityType())
-                        && e instanceof FeatureNaturalSpawn)) {
+                .getEntityTypes(e -> e instanceof FeatureNaturalSpawn
+                        && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
                 if (spawnEntityType.filterSpawnReason(reason) && rnd.nextDouble() < spawnEntityType.getPosibility()) {

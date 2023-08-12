@@ -3,38 +3,51 @@ package org.ricetea.barleyteaapi.internal.bridge;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.TranslationRegistry;
 import su.nightexpress.excellentenchants.enchantment.EnchantRegistry;
 import su.nightexpress.excellentenchants.enchantment.impl.ExcellentEnchant;
 
 public class ExcellentEnchantsBridge {
-    public static String getEnchantmentName(Enchantment enchantment) {
-        if (enchantment instanceof ExcellentEnchant) {
-            return ((ExcellentEnchant) enchantment).getDisplayName();
-        }
-        return null;
+
+    private static TranslationRegistry reg;
+
+    @Nullable
+    public static String getEnchantmentName(@Nullable Enchantment enchantment) {
+        return ObjectUtil.callWhenNonnull(ObjectUtil.tryCast(enchantment, ExcellentEnchant.class),
+                ExcellentEnchant::getDisplayName);
     }
 
-    public static String getEnchantmentNameUnsafe(Enchantment enchantment) {
+    @SuppressWarnings("null")
+    @Nonnull
+    public static String getEnchantmentNameUnsafe(@Nonnull Enchantment enchantment) {
         return ((ExcellentEnchant) enchantment).getDisplayName();
     }
 
-    public static TextColor getEnchantmentTierColorUnsafe(Enchantment enchantment) {
-        return TextColor.color(((ExcellentEnchant) enchantment).getTier().getColor().getColor().getRGB());
+    @Nullable
+    public static TextColor getEnchantmentTierColorUnsafe(@Nonnull Enchantment enchantment) {
+        Function<Style, TextColor> colorFunc = Style::color;
+        return ObjectUtil.callWhenNonnull(
+                (Style) ChatColorHelper.toKyoriStyle(((ExcellentEnchant) enchantment).getTier().getColor()),
+                colorFunc);
     }
 
-    public static boolean isExcellentEnchant(Enchantment enchantment) {
+    public static boolean isExcellentEnchant(@Nullable Enchantment enchantment) {
         return enchantment instanceof ExcellentEnchant;
     }
-
-    private static TranslationRegistry reg;
 
     public static void registerTranslations() {
         reg = TranslationRegistry

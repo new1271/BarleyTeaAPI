@@ -33,10 +33,10 @@ public final class EntityDamageListener implements Listener {
     public void listenEntityDamage(EntityDamageEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (event instanceof EntityDamageByEntityEvent) {
-            onEntityDamageByEntity((EntityDamageByEntityEvent) event);
-        } else if (event instanceof EntityDamageByBlockEvent) {
-            onEntityDamageByBlock((EntityDamageByBlockEvent) event);
+        if (event instanceof EntityDamageByEntityEvent _event) {
+            onEntityDamageByEntity(_event);
+        } else if (event instanceof EntityDamageByBlockEvent _event) {
+            onEntityDamageByBlock(_event);
         } else {
             onEntityDamageByNothing(event);
         }
@@ -46,8 +46,7 @@ public final class EntityDamageListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getDamager());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityDamage) {
-                FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
+            if (entity instanceof FeatureEntityDamage entityDamage) {
                 boolean cancelled = !entityDamage.handleEntityAttack(new DataEntityDamagedByEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -58,8 +57,7 @@ public final class EntityDamageListener implements Listener {
         id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityDamage) {
-                FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
+            if (entity instanceof FeatureEntityDamage entityDamage) {
                 boolean cancelled = !entityDamage.handleEntityDamagedByEntity(new DataEntityDamagedByEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -73,8 +71,7 @@ public final class EntityDamageListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityDamage) {
-                FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
+            if (entity instanceof FeatureEntityDamage entityDamage) {
                 boolean cancelled = !entityDamage.handleEntityDamagedByBlock(new DataEntityDamagedByBlock(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -88,8 +85,7 @@ public final class EntityDamageListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityDamage) {
-                FeatureEntityDamage entityDamage = (FeatureEntityDamage) entity;
+            if (entity instanceof FeatureEntityDamage entityDamage) {
                 boolean cancelled = !entityDamage.handleEntityDamagedByNothing(new DataEntityDamagedByNothing(event));
                 if (cancelled) {
                     event.setCancelled(true);

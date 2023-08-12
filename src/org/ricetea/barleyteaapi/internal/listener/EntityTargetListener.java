@@ -40,8 +40,7 @@ public final class EntityTargetListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityTarget) {
-                FeatureEntityTarget entityTarget = (FeatureEntityTarget) entity;
+            if (entity instanceof FeatureEntityTarget entityTarget) {
                 boolean cancelled = !entityTarget.handleEntityTarget(new DataEntityTarget(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -52,8 +51,7 @@ public final class EntityTargetListener implements Listener {
         id = BaseEntity.getEntityID(event.getTarget());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityTarget) {
-                FeatureEntityTarget entityTarget = (FeatureEntityTarget) entity;
+            if (entity instanceof FeatureEntityTarget entityTarget) {
                 boolean cancelled = !entityTarget.handleEntityBeTargeted(new DataEntityTarget(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -67,8 +65,7 @@ public final class EntityTargetListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity != null && entity instanceof FeatureEntityTarget) {
-                FeatureEntityTarget entityTarget = (FeatureEntityTarget) entity;
+            if (entity instanceof FeatureEntityTarget entityTarget) {
                 boolean cancelled = !entityTarget.handleEntityLostTarget(new DataEntityLostTarget(event));
                 if (cancelled) {
                     event.setCancelled(true);

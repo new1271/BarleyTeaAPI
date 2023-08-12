@@ -11,7 +11,6 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityHit;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitBlock;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitEntity;
@@ -38,8 +37,7 @@ public final class ProjectileListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureProjectile) {
-                FeatureProjectile projectileEntityType = (FeatureProjectile) entityType;
+            if (entityType instanceof FeatureProjectile projectileEntityType) {
                 boolean cancelled = !projectileEntityType.handleProjectileLaunch(new DataProjectileLaunch(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -50,8 +48,7 @@ public final class ProjectileListener implements Listener {
         id = BaseEntity.getEntityID(EntityHelper.getProjectileShooterEntity(event.getEntity()));
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureEntityShoot) {
-                FeatureEntityShoot shootEntityType = (FeatureEntityShoot) entityType;
+            if (entityType instanceof FeatureEntityShoot shootEntityType) {
                 boolean cancelled = !shootEntityType.handleEntityShoot(new DataProjectileLaunch(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -79,8 +76,7 @@ public final class ProjectileListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureProjectile) {
-                FeatureProjectile projectileEntityType = (FeatureProjectile) entityType;
+            if (entityType instanceof FeatureProjectile projectileEntityType) {
                 boolean cancelled = !projectileEntityType.handleProjectileHitEntity(new DataProjectileHitEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -91,9 +87,8 @@ public final class ProjectileListener implements Listener {
         id = BaseEntity.getEntityID(EntityHelper.getProjectileShooterEntity(event.getEntity()));
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureEntityTarget) {
-                FeatureEntityShoot projectileEntityType = (FeatureEntityShoot) entityType;
-                boolean cancelled = !projectileEntityType.handleShotEntity(new DataProjectileHitEntity(event));
+            if (entityType instanceof FeatureEntityShoot shootEntityType) {
+                boolean cancelled = !shootEntityType.handleShotEntity(new DataProjectileHitEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;
@@ -103,8 +98,7 @@ public final class ProjectileListener implements Listener {
         id = BaseEntity.getEntityID(event.getHitEntity());
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureEntityTarget) {
-                FeatureEntityHit hitEntityType = (FeatureEntityHit) entityType;
+            if (entityType instanceof FeatureEntityHit hitEntityType) {
                 boolean cancelled = !hitEntityType.handleEntityHit(new DataProjectileHitEntity(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -118,8 +112,7 @@ public final class ProjectileListener implements Listener {
         NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureProjectile) {
-                FeatureProjectile projectileEntityType = (FeatureProjectile) entityType;
+            if (entityType instanceof FeatureProjectile projectileEntityType) {
                 boolean cancelled = !projectileEntityType.handleProjectileHitBlock(new DataProjectileHitBlock(event));
                 if (cancelled) {
                     event.setCancelled(true);
@@ -130,9 +123,8 @@ public final class ProjectileListener implements Listener {
         id = BaseEntity.getEntityID(EntityHelper.getProjectileShooterEntity(event.getEntity()));
         if (id != null) {
             BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType != null && entityType instanceof FeatureEntityTarget) {
-                FeatureEntityShoot projectileEntityType = (FeatureEntityShoot) entityType;
-                boolean cancelled = !projectileEntityType.handleShotBlock(new DataProjectileHitBlock(event));
+            if (entityType instanceof FeatureEntityShoot shootEntityType) {
+                boolean cancelled = !shootEntityType.handleShotBlock(new DataProjectileHitBlock(event));
                 if (cancelled) {
                     event.setCancelled(true);
                     return;

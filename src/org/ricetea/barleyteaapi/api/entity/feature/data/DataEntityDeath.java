@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
+import java.util.function.Function;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -10,6 +12,7 @@ import org.ricetea.barleyteaapi.api.abstracts.DataEntityBase;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class DataEntityDeath extends DataEntityBase<EntityDeathEvent> {
     @Nullable
@@ -26,13 +29,10 @@ public final class DataEntityDeath extends DataEntityBase<EntityDeathEvent> {
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event);
         decedentType = new Lazy<>(() -> BaseEntity.getEntityType(event.getEntity()));
-        if (lastDamageCauseByEntityEvent == null) {
-            killer = null;
-            killerType = null;
-        } else {
-            killer = lastDamageCauseByEntityEvent.getDamager();
-            killerType = new Lazy<>(() -> BaseEntity.getEntityType(killer));
-        }
+        killer = ObjectUtil.callWhenNonnull(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
+        killerType = ObjectUtil.callWhenNonnull(killer,
+                (Function<Entity, Lazy<DataEntityType>>) killer -> new Lazy<>(
+                        () -> BaseEntity.getEntityType(killer)));
     }
 
     @SuppressWarnings("null")
