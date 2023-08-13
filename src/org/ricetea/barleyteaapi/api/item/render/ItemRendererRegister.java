@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.api.item.render;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,8 +36,14 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     public void register(@Nonnull AbstractItemRenderer renderer) {
-        BarleyTeaAPI.checkPluginUsable();
         lookupTable.put(renderer.getKey(), renderer);
+        if (BarleyTeaAPI.checkPluginUsable()) {
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            if (inst != null) {
+                Logger logger = inst.getLogger();
+                logger.info("registered " + renderer.getKey().toString() + " as item renderer!");
+            }
+        }
     }
 
     @Override

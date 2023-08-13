@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.CommandListenerWrapper;
@@ -32,9 +33,11 @@ import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyGiveCommand {
@@ -92,84 +95,106 @@ public final class BarleyGiveCommand {
 
 	private static int command(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey itemKey,
 			int count, NBTTagCompound nbt) throws CommandSyntaxException {
-		String namespace = itemKey.b();
-		String key = itemKey.a();
-		NamespacedKey alterItemKey = new NamespacedKey(namespace, key);
-		Item nmsItemType;
-		BaseItem barleyTeaItemType;
-		if (namespace == null || namespace.equalsIgnoreCase(MinecraftKey.c)) {
-			try {
-				nmsItemType = (Item) BuiltInRegistries.i.a(itemKey);
-			} catch (Exception e) {
-				nmsItemType = null;
-			}
-			barleyTeaItemType = null;
-		} else {
-			barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
-			nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
-					type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
-		}
-		if (nmsItemType == null)
-			throw giveFailedMessage.create();
-		//int getMaxStackSize() -> l
-		int itemMaxStackSize = nmsItemType.l();
-		int itemLimit = itemMaxStackSize * 100;
-		ItemStack itemstack = new ItemStack(nmsItemType, count);
-		//void setTag(net.minecraft.nbt.CompoundTag) -> c
-		itemstack.c(nbt);
-		if (count > itemLimit) {
-			source.b((IChatBaseComponent) IChatBaseComponent.a("commands.give.failed.toomanyitems",
-					new Object[] { Integer.valueOf(itemLimit), itemstack.J() }));
-			return 0;
-		}
-		if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType
-				&& !commandGiveType.handleCommandGive(ObjectUtil.throwWhenNull(itemstack.asBukkitMirror()),
-						nbt.toString())) {
-			throw giveFailedMessage.create();
-		}
-		//net.minecraft.nbt.CompoundTag getTag() -> v
-		NBTTagCompound nbt1 = itemstack.v();
-		for (Iterator<EntityPlayer> iterator = targets.iterator(); iterator.hasNext();) {
-			EntityPlayer entityplayer = iterator.next();
-			int totalCount = count;
-			while (totalCount > 0) {
-				int stackCount = Math.min(itemMaxStackSize, totalCount);
-				totalCount -= stackCount;
-				ItemStack itemstack1 = new ItemStack(nmsItemType, stackCount);
-				itemstack1.c(nbt1);
-				boolean flag = entityplayer.fN().e(itemstack1);
-				if (flag && itemstack1.b()) {
-					itemstack1.f(1);
-					EntityItem entityItem = entityplayer.drop(itemstack1, false, false, false);
-					if (entityItem != null)
-						entityItem.w();
-					entityplayer.dI().a((EntityHuman) null, entityplayer.dn(), entityplayer.dp(), entityplayer.dt(),
-							SoundEffects.ma, SoundCategory.h, 0.2F,
-							((entityplayer.ec().i() - entityplayer.ec().i()) * 0.7F + 1.0F) * 2.0F);
-					((EntityHuman) entityplayer).bR.d();
-					continue;
+		try {
+			String namespace = itemKey.b();
+			String key = itemKey.a();
+			NamespacedKey alterItemKey = new NamespacedKey(namespace, key);
+			Item nmsItemType;
+			BaseItem barleyTeaItemType;
+			if (namespace == null || namespace.equalsIgnoreCase(MinecraftKey.c)) {
+				try {
+					nmsItemType = (Item) BuiltInRegistries.i.a(itemKey);
+				} catch (Exception e) {
+					nmsItemType = null;
 				}
-				EntityItem entityitem = entityplayer.a(itemstack1, false);
-				if (entityitem != null) {
-					entityitem.p();
-					entityitem.b(entityplayer.ct());
+				barleyTeaItemType = null;
+			} else {
+				barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
+				nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
+						type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
+			}
+			if (nmsItemType == null)
+				throw giveFailedMessage.create();
+			//int getMaxStackSize() -> l
+			int itemMaxStackSize = nmsItemType.l();
+			int itemLimit = itemMaxStackSize * 100;
+			ItemStack itemstack = new ItemStack(nmsItemType, count);
+			//void setTag(net.minecraft.nbt.CompoundTag) -> c
+			itemstack.c(nbt);
+			if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType) {
+				org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
+				if (commandGiveType.handleCommandGive(ObjectUtil.throwWhenNull(bukkitStack), nbt.toString())) {
+					BaseItem.registerItem(bukkitStack, barleyTeaItemType);
+					AbstractItemRenderer.renderItem(bukkitStack);
+					itemstack = CraftItemStack.asNMSCopy(bukkitStack);
+				} else {
+					throw giveFailedMessage.create();
 				}
 			}
+			if (count > itemLimit) {
+				source.b((IChatBaseComponent) IChatBaseComponent.a("commands.give.failed.toomanyitems",
+						new Object[] { Integer.valueOf(itemLimit), itemstack.J() }));
+				return 0;
+			}
+			final ItemStack finalItemStack = itemstack;
+			//net.minecraft.nbt.CompoundTag getTag() -> v
+			NBTTagCompound nbt1 = itemstack.v();
+			for (Iterator<EntityPlayer> iterator = targets.iterator(); iterator.hasNext();) {
+				EntityPlayer entityplayer = iterator.next();
+				int totalCount = count;
+				while (totalCount > 0) {
+					int stackCount = Math.min(itemMaxStackSize, totalCount);
+					totalCount -= stackCount;
+					ItemStack itemstack1 = new ItemStack(nmsItemType, stackCount);
+					itemstack1.c(nbt1);
+					boolean flag = entityplayer.fN().e(itemstack1);
+					if (flag && itemstack1.b()) {
+						itemstack1.f(1);
+						EntityItem entityItem = entityplayer.drop(itemstack1, false, false, false);
+						if (entityItem != null)
+							entityItem.w();
+						entityplayer.dI().a((EntityHuman) null, entityplayer.dn(), entityplayer.dp(), entityplayer.dt(),
+								SoundEffects.ma, SoundCategory.h, 0.2F,
+								((entityplayer.ec().i() - entityplayer.ec().i()) * 0.7F + 1.0F) * 2.0F);
+						((EntityHuman) entityplayer).bR.d();
+						continue;
+					}
+					EntityItem entityitem = entityplayer.a(itemstack1, false);
+					if (entityitem != null) {
+						entityitem.p();
+						entityitem.b(entityplayer.ct());
+					}
+				}
+			}
+			if (targets.size() == 1) {
+				source.a(() -> IChatBaseComponent.a("commands.give.success.single",
+						new Object[] { Integer.valueOf(count),
+								finalItemStack.J(), ((EntityPlayer) targets.iterator().next()).H_() }),
+						true);
+			} else {
+				source.a(
+						() -> IChatBaseComponent.a("commands.give.success.multiple",
+								new Object[] { Integer.valueOf(count), finalItemStack.J(),
+										Integer.valueOf(targets.size()) }),
+						true);
+			}
+			return targets.size();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
-		if (targets.size() == 1) {
-			source.a(() -> IChatBaseComponent.a("commands.give.success.single", new Object[] { Integer.valueOf(count),
-					itemstack.J(), ((EntityPlayer) targets.iterator().next()).H_() }), true);
-		} else {
-			source.a(
-					() -> IChatBaseComponent.a("commands.give.success.multiple",
-							new Object[] { Integer.valueOf(count), itemstack.J(), Integer.valueOf(targets.size()) }),
-					true);
-		}
-		return targets.size();
 	}
 
 	public static void register() {
 		CommandDispatcher dispatcher = ((CraftServer) Bukkit.getServer()).getServer().aC();
 		register(dispatcher.a());
+	}
+
+	public static void unregister() {
+		CommandDispatcher dispatcher = ((CraftServer) Bukkit.getServer()).getServer().aC();
+		var root = dispatcher.a().getRoot();
+		root.removeCommand("givebarley");
+		root.removeCommand("give2");
+		root.removeCommand("giveb");
 	}
 }

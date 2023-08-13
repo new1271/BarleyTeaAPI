@@ -23,7 +23,7 @@ public final class EntityTransformListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEntityTransform(@Nonnull EntityTransformEvent event) {
+    public void listenEntityTransform(EntityTransformEvent event) {
         if (event == null || event.isCancelled())
             return;
         if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTransform.class,

@@ -9,6 +9,14 @@ import org.ricetea.barleyteaapi.util.Either;
 
 public final class DataItemType extends Either<Material, BaseItem> {
 
+    @Nonnull
+    private static final DataItemType EMPTY = create(Material.AIR);
+
+    @Nonnull
+    public static DataItemType empty() {
+        return EMPTY;
+    }
+
     private DataItemType(Material left, BaseItem right) {
         super(left, right);
     }
@@ -29,6 +37,23 @@ public final class DataItemType extends Either<Material, BaseItem> {
 
     public boolean isBarleyTeaCustomItem() {
         return isRight();
+    }
+
+    public boolean isAir() {
+        if (this == EMPTY) {
+            return true;
+        } else {
+            Material left = left();
+            if (left != null) {
+                return left.isAir();
+            }
+            return right() == null;
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return isAir();
     }
 
     @Nullable

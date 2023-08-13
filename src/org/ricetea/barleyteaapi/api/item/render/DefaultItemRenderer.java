@@ -28,6 +28,7 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
+import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -41,9 +42,16 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 public class DefaultItemRenderer extends AbstractItemRenderer {
     private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
     private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
+    private static final @Nonnull Lazy<DefaultItemRenderer> _inst = new Lazy<>(DefaultItemRenderer::new);
 
-    public DefaultItemRenderer() {
+    private DefaultItemRenderer() {
         super(NamespacedKeyUtils.BarleyTeaAPI("default_item_renderer"));
+        ItemRendererRegister.getInstance().register(this);
+    }
+
+    @Nonnull
+    public static DefaultItemRenderer getInstance() {
+        return _inst.get();
     }
 
     @SuppressWarnings({ "unchecked", "null" })

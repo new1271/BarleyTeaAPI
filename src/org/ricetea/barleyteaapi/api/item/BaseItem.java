@@ -15,10 +15,11 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
     @Nonnull
@@ -60,9 +61,14 @@ public abstract class BaseItem implements Keyed {
     }
 
     public final void register(@Nullable ItemStack itemStack) {
-        if (itemStack != null && itemStack.hasItemMeta())
-            itemStack.getItemMeta().getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
-                    key.toString());
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+            }
+        }
     }
 
     public final boolean isCertainItem(@Nullable ItemStack itemStack) {
@@ -72,7 +78,7 @@ public abstract class BaseItem implements Keyed {
                                 ItemTagNamespacedKey, PersistentDataType.STRING, null));
     }
 
-    public int getDurabilityDamage(@Nullable ItemStack itemStack) {
+    public int getDurabilityDamage(@Nonnull ItemStack itemStack) {
         if (itemStack == null || !itemStack.hasItemMeta())
             return 0;
         ItemMeta meta = itemStack.getItemMeta();
@@ -91,15 +97,14 @@ public abstract class BaseItem implements Keyed {
         return 0;
     }
 
-    public void setDurabilityDamage(@Nullable ItemStack itemStack, int damage) {
-        if (itemStack == null || !itemStack.hasItemMeta())
-            return;
+    public void setDurabilityDamage(@Nonnull ItemStack itemStack, int damage) {
         ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null)
+            return;
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        FeatureCustomDurability customDurabilityFeature = ObjectUtil.tryCast(this, FeatureCustomDurability.class);
-        if (customDurabilityFeature != null || container.has(ItemAlternateDamageNamespacedKey)) {
+        if (this instanceof FeatureCustomDurability customDurabilityFeature) {
             container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
-            if (customDurabilityFeature != null && meta instanceof Damageable damageable) {
+            if (meta instanceof Damageable damageable) {
                 if (damage == 0) {
                     damageable.setDamage(0);
                 } else {
@@ -109,7 +114,7 @@ public abstract class BaseItem implements Keyed {
                         damageable.setDamage(maxDuraVisual);
                     } else {
                         int visualDamage = (int) Math
-                                .floor(damage * 1.0 / maxDura * maxDuraVisual);
+                                .round(damage * 1.0 / maxDura * maxDuraVisual);
                         if (visualDamage <= 0 && damage > 0) {
                             visualDamage = 1;
                         } else if (visualDamage >= maxDuraVisual && damage < maxDura) {
@@ -125,12 +130,13 @@ public abstract class BaseItem implements Keyed {
             return;
         }
         itemStack.setItemMeta(meta);
+        AbstractItemRenderer.renderItem(itemStack);
     }
 
     public static int getDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType) {
+        if (itemStack == null)
+            return 0;
         if (itemType == null) {
-            if (itemStack == null || !itemStack.hasItemMeta())
-                return 0;
             ItemMeta meta = itemStack.getItemMeta();
             if (meta instanceof Damageable) {
                 Damageable damageable = (Damageable) meta;
@@ -143,9 +149,9 @@ public abstract class BaseItem implements Keyed {
     }
 
     public static void setDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType, int damage) {
+        if (itemStack == null)
+            return;
         if (itemType == null) {
-            if (itemStack == null || !itemStack.hasItemMeta())
-                return;
             ItemMeta meta = itemStack.getItemMeta();
             if (meta instanceof Damageable) {
                 Damageable damageable = (Damageable) meta;
@@ -195,7 +201,6 @@ public abstract class BaseItem implements Keyed {
     }
 
     @SuppressWarnings("null")
-    @Deprecated
     protected final void setItemName(@Nonnull ItemStack itemStack) {
         setItemName(itemStack, rarity.apply(Component.translatable(getNameInTranslateKey(), getDefaultName())));
     }
@@ -213,10 +218,45 @@ public abstract class BaseItem implements Keyed {
     }
 
     protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull Component component) {
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
             meta.displayName(component);
             itemStack.setItemMeta(meta);
+        }
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof BaseItem baseItem) {
+            return key.equals(baseItem.getKey());
+        }
+        return super.equals(obj);
+    }
+
+    public static void setAsDefaultName(@Nonnull ItemStack itemStack) {
+        getItemType(itemStack).processLeftOrRight(m -> {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.displayName(null);
+                itemStack.setItemMeta(meta);
+            }
+        }, baseItem -> {
+            baseItem.setItemName(itemStack);
+        });
+    }
+
+    public static void setName(@Nonnull ItemStack itemStack, @Nullable String name) {
+        if (name == null || name.isBlank())
+            setAsDefaultName(itemStack);
+        else {
+            getItemType(itemStack).processLeftOrRight(m -> {
+                ItemMeta meta = itemStack.getItemMeta();
+                if (meta != null) {
+                    meta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(name));
+                    itemStack.setItemMeta(meta);
+                }
+            }, baseItem -> {
+                baseItem.setItemName(itemStack, name);
+            });
         }
     }
 }

@@ -9,5 +9,5 @@ public interface FeatureCustomDurability {
 
     int getDurabilityDamage(@Nonnull ItemStack itemStack);
 
-    int setDurabilityDamage(@Nonnull ItemStack itemStack, int damage);
+    void setDurabilityDamage(@Nonnull ItemStack itemStack, int damage);
 }

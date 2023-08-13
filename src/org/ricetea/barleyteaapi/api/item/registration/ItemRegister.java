@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,8 +32,14 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     public void register(@Nonnull BaseItem item) {
-        BarleyTeaAPI.checkPluginUsable();
         lookupTable.put(item.getKey(), item);
+        if (BarleyTeaAPI.checkPluginUsable()) {
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            if (inst != null) {
+                Logger logger = inst.getLogger();
+                logger.info("registered " + item.getKey().toString() + " as item!");
+            }
+        }
     }
 
     public void unregister(@Nonnull BaseItem item) {

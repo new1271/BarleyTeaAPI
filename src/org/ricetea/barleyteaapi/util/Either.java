@@ -46,6 +46,10 @@ public class Either<L, R> {
         return right != null;
     }
 
+    public boolean isEmpty() {
+        return left == null && right == null;
+    }
+
     public void processLeftOrRight(@Nonnull Consumer<L> consumerForLeft, @Nonnull Consumer<R> consumerForRight) {
         L left = this.left;
         R right = this.right;
@@ -65,5 +69,22 @@ public class Either<L, R> {
         if (right != null)
             return mapFunctionForRight.apply(right);
         return null;
+    }
+
+    public boolean equals(Object another) {
+        if (another instanceof Either<?, ?> either) {
+            L left = left();
+            R right = right();
+            Object anotherLeft = either.left();
+            Object anotherRight = either.right();
+            if (left != null && anotherLeft != null) {
+                return left.equals(anotherLeft);
+            } else if (right != null && anotherRight != null) {
+                return right.equals(anotherRight);
+            } else {
+                return isEmpty() && either.isEmpty();
+            }
+        }
+        return super.equals(another);
     }
 }

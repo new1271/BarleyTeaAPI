@@ -48,7 +48,10 @@ public class DataItemRarity {
 
     @SuppressWarnings("null")
     public DataItemRarity(@Nullable Style rarityStyle) {
-        style = rarityStyle == null ? Style.empty() : rarityStyle;
+        Style style = rarityStyle == null ? Style.empty() : rarityStyle;
+        if (!style.hasDecoration(TextDecoration.ITALIC))
+            style = style.decoration(TextDecoration.ITALIC, false);
+        this.style = style;
     }
 
     @Nonnull

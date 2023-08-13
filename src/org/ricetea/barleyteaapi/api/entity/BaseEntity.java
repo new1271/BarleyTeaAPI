@@ -12,6 +12,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
+import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
@@ -157,5 +158,12 @@ public abstract class BaseEntity implements Keyed {
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull Component component) {
         entity.customName(component);
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof BaseEntity baseEntity) {
+            return key.equals(baseEntity.getKey());
+        }
+        return super.equals(obj);
     }
 }

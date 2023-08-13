@@ -44,6 +44,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
             if (inst != null) {
                 Logger logger = inst.getLogger();
+                logger.info("registered " + entity.getKey().toString() + " as entity!");
                 if (entity instanceof FeatureNaturalSpawn
                         && !Creature.class.isAssignableFrom(entity.getEntityTypeBasedOn().getEntityClass())) {
                     logger.warning(entity.getKey().toString()

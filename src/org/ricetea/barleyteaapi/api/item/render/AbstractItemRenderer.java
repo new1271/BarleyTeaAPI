@@ -15,22 +15,23 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
 
 public abstract class AbstractItemRenderer implements Keyed {
 
-    private static @Nullable AbstractItemRenderer _inst;
-    private static final @Nonnull Lazy<AbstractItemRenderer> _defaultInst = new Lazy<>(DefaultItemRenderer::new);
     private static final @Nonnull NamespacedKey lastRenderingKey = NamespacedKeyUtils.BarleyTeaAPI("last_renderer");
+    private static @Nullable AbstractItemRenderer _inst;
     private final NamespacedKey key;
 
     @Nonnull
     public static AbstractItemRenderer getDefault() {
         AbstractItemRenderer inst = _inst;
-        return inst == null ? _defaultInst.get() : inst;
+        if (inst == null) {
+            _inst = inst = DefaultItemRenderer.getInstance();
+        }
+        return inst;
     }
 
     public static void setDefault(@Nullable AbstractItemRenderer renderer) {

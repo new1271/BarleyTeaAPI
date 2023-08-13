@@ -13,7 +13,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class ItemFeatureHelper {
@@ -100,5 +104,45 @@ public final class ItemFeatureHelper {
         @Nonnull
         R apply(@Nonnull T event, @Nullable T2 event2, @Nonnull ItemStack itemStack,
                 @Nonnull EquipmentSlot equipmentSlot);
+    }
+
+    public static ItemStack doItemRepair(@Nullable ItemStack itemStackA, @Nullable ItemStack itemStackB,
+            @Nullable ItemStack itemStackResult) {
+        BaseItem itemType = ObjectUtil
+                .letNonNull(ObjectUtil.mapWhenNonnull(itemStackA, BaseItem::getItemType), DataItemType::empty)
+                .getItemTypeForBarleyTeaCustomItem();
+        if (itemType == null) {
+            if (BaseItem.isBarleyTeaItem(itemStackB)) {
+                return null;
+            } else {
+                return itemStackResult;
+            }
+        } else {
+            if (itemStackA != null && itemStackB != null
+                    && itemType.isCertainItem(itemStackB)) {
+                if (itemStackResult == null && itemType instanceof FeatureCommandGive commandGiveFeature) {
+                    itemStackResult = new ItemStack(itemStackA.getType());
+                    if (commandGiveFeature.handleCommandGive(itemStackResult, null)) {
+                        BaseItem.registerItem(itemStackResult, itemType);
+                        AbstractItemRenderer.renderItem(itemStackResult);
+                    } else {
+                        itemStackResult = null;
+                    }
+                }
+                if (itemStackResult != null) {
+                    if (itemType instanceof FeatureCustomDurability customDurabilityFeature) {
+                        int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
+                        int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);
+                        int lowerItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackB);
+                        int newDamage = Math
+                                .max(Math.min(upperItemDamage + lowerItemDamage - maxDura - maxDura / 20, maxDura), 0);
+                        customDurabilityFeature.setDurabilityDamage(itemStackResult, newDamage);
+                    }
+                }
+                return itemStackResult;
+            } else {
+                return null;
+            }
+        }
     }
 }

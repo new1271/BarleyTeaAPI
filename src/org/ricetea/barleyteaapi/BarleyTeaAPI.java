@@ -18,6 +18,8 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
+import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.internal.listener.*;
@@ -25,6 +27,7 @@ import org.ricetea.barleyteaapi.internal.nms.BarleyGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.test.TestEntity;
+import org.ricetea.barleyteaapi.test.TestItem;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyTeaAPI extends JavaPlugin {
@@ -38,6 +41,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     public static void registerTestEntity() {
         EntityRegister.getInstance().register(TestEntity.getInstance());
+    }
+
+    public static void registerTestItem() {
+        ItemRegister.getInstance().register(TestItem.getInstance());
     }
 
     @Override
@@ -56,20 +63,26 @@ public final class BarleyTeaAPI extends JavaPlugin {
         logger.info("registering '/summonbarley' command...");
         BarleySummonCommand.register();
         logger.info("initializing API...");
+        DefaultItemRenderer.getInstance();
         announceEntitiesAPILoaded();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
+        registerTestEntity();
+        registerTestItem();
     }
 
     private void registerEventListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(ChunkListener.getInstance(), this);
+        pluginManager.registerEvents(CraftListener.getInstance(), this);
         pluginManager.registerEvents(EntitySpawnListener.getInstance(), this);
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);
         pluginManager.registerEvents(EntityDeathListener.getInstance(), this);
         pluginManager.registerEvents(EntityMountListener.getInstance(), this);
         pluginManager.registerEvents(EntityTargetListener.getInstance(), this);
         pluginManager.registerEvents(EntityTransformListener.getInstance(), this);
+        pluginManager.registerEvents(InventoryEventListener.getInstance(), this);
+        pluginManager.registerEvents(PlayerEventListener.getInstance(), this);
         pluginManager.registerEvents(ProjectileListener.getInstance(), this);
         pluginManager.registerEvents(SlimeSplitListener.getInstance(), this);
     }
@@ -140,16 +153,23 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Logger logger = getLogger();
+        logger.info("unregistering '/givebarley' command...");
+        BarleyGiveCommand.unregister();
+        logger.info("unregistering '/summonbarley' command...");
+        BarleySummonCommand.unregister();
+        logger.info("uninitializing API...");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
+        announceEntitiesAPIUnloaded();
         if (hasExcellentEnchants) {
             ExcellentEnchantsBridge.unregisterTranslations();
         }
-        announceEntitiesAPIUnloaded();
         ObjectUtil.callWhenNonnull(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
         TickingService.shutdown();
         TaskService.shutdown();
         Bukkit.getScheduler().cancelTasks(this);
         _inst = null;
+        logger.info("BarleyTeaAPI successfully unloaded!");
     }
 
     public static boolean checkPluginUsable() {

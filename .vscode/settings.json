@@ -8,5 +8,6 @@
         "file:///c%3A/Users/User/.vscode/extensions/atlassian.atlascode-3.0.4/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
         "https://json.schemastore.org/bukkit-plugin.json": "file:///d%3A/Java%20Projects/BarleyTeaAPI/src/plugin.yml"
     },
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -javaagent:\"c:\\Users\\User\\.vscode\\extensions\\gabrielbb.vscode-lombok-1.0.1\\server\\lombok.jar\""
 }
