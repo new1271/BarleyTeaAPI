@@ -2,15 +2,13 @@ package org.ricetea.barleyteaapi.internal.listener;
 
 import javax.annotation.Nonnull;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTransformEvent;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTransform;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTransform;
-import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class EntityTransformListener implements Listener {
@@ -28,16 +26,10 @@ public final class EntityTransformListener implements Listener {
     public void onEntityTransform(@Nonnull EntityTransformEvent event) {
         if (event == null || event.isCancelled())
             return;
-        NamespacedKey id = BaseEntity.getEntityID(event.getEntity());
-        if (id != null) {
-            BaseEntity entity = EntityRegister.getInstance().lookupEntityType(id);
-            if (entity instanceof FeatureEntityTransform entityTransform) {
-                boolean cancelled = !entityTransform.handleEntityTransform(new DataEntityTransform(event));
-                if (cancelled) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
+        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTransform.class,
+                FeatureEntityTransform::handleEntityTransform, DataEntityTransform::new)) {
+            event.setCancelled(true);
+            return;
         }
     }
 }

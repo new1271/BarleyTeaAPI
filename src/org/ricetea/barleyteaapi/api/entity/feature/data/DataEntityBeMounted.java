@@ -9,23 +9,23 @@ import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.spigotmc.event.entity.EntityMountEvent;
 
-public final class DataEntityMount extends BaseEntityFeatureData<EntityMountEvent> {
+public final class DataEntityBeMounted extends BaseEntityFeatureData<EntityMountEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> mountType;
+    private final Lazy<DataEntityType> passengerType;
 
-    public DataEntityMount(@Nonnull EntityMountEvent event) {
-        super(event);
-        mountType = new Lazy<>(() -> BaseEntity.getEntityType(getMount()));
+    public DataEntityBeMounted(@Nonnull EntityMountEvent event) {
+        super(event, event.getMount());
+        passengerType = new Lazy<>(() -> BaseEntity.getEntityType(getPassenger()));
     }
 
     @SuppressWarnings("null")
     @Nonnull
-    public Entity getMount() {
-        return event.getMount();
+    public Entity getPassenger() {
+        return event.getEntity();
     }
 
     @Nonnull
-    public DataEntityType getMountType() {
-        return mountType.get();
+    public DataEntityType getPassengerType() {
+        return passengerType.get();
     }
 }

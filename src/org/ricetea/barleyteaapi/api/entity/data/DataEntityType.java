@@ -31,6 +31,13 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> {
         return isRight();
     }
 
+    public boolean isPlayer() {
+        EntityType type = left();
+        if (type == null)
+            return false;
+        return type.equals(EntityType.PLAYER);
+    }
+
     @Nullable
     public EntityType getEntityTypeForMinecraftBuiltInMob() {
         return left();

@@ -9,23 +9,23 @@ import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
-public final class DataEntityDismount extends BaseEntityFeatureData<EntityDismountEvent> {
+public final class DataEntityBeDismounted extends BaseEntityFeatureData<EntityDismountEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> dismountedType;
+    private final Lazy<DataEntityType> passengerType;
 
-    public DataEntityDismount(@Nonnull EntityDismountEvent event) {
-        super(event);
-        dismountedType = new Lazy<>(() -> BaseEntity.getEntityType(getDismounted()));
+    public DataEntityBeDismounted(@Nonnull EntityDismountEvent event) {
+        super(event, event.getDismounted());
+        passengerType = new Lazy<>(() -> BaseEntity.getEntityType(getPassenger()));
     }
 
     @SuppressWarnings("null")
     @Nonnull
-    public Entity getDismounted() {
+    public Entity getPassenger() {
         return event.getDismounted();
     }
 
     @Nonnull
-    public DataEntityType getDismountedType() {
-        return dismountedType.get();
+    public DataEntityType getPassengerType() {
+        return passengerType.get();
     }
 }

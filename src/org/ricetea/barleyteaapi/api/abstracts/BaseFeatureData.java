@@ -4,11 +4,11 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.event.Event;
 
-public abstract class DataEntityBase<T extends Event> {
+public abstract class BaseFeatureData<T extends Event> {
     @Nonnull
     protected final T event;
 
-    public DataEntityBase(@Nonnull T event) {
+    public BaseFeatureData(@Nonnull T event) {
         this.event = event;
     }
 

@@ -5,10 +5,10 @@ import javax.annotation.Nonnull;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseProjectileFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseEntityShotFeatureData;
 
-public final class DataProjectileHitBlock extends BaseProjectileFeatureData<ProjectileHitEvent> {
-    public DataProjectileHitBlock(@Nonnull ProjectileHitEvent event) {
+public final class DataEntityShotBlock extends BaseEntityShotFeatureData {
+    public DataEntityShotBlock(@Nonnull ProjectileHitEvent event) {
         super(event);
     }
 

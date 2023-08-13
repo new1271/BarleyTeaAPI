@@ -2,6 +2,7 @@ package org.ricetea.barleyteaapi.api.entity.feature;
 
 import javax.annotation.Nonnull;
 
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeTargeted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityLostTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTarget;
 
@@ -10,5 +11,5 @@ public interface FeatureEntityTarget {
 
     boolean handleEntityLostTarget(@Nonnull DataEntityLostTarget data);
 
-    boolean handleEntityBeTargeted(@Nonnull DataEntityTarget data);
+    boolean handleEntityBeTargeted(@Nonnull DataEntityBeTargeted data);
 }

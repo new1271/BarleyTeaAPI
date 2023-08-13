@@ -1,25 +1,28 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
-import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDeath;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityKill;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDeath;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillEntity;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlayer;
+import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -39,44 +42,54 @@ public final class EntityDeathListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         Entity entity = event.getEntity();
-        EntityDamageEvent eventLastDamageCaused = entity.getLastDamageCause();
-        EntityDamageByEntityEvent eventLastDamageCausedByEntity = ObjectUtil.tryCast(eventLastDamageCaused,
-                EntityDamageByEntityEvent.class);
-        NamespacedKey id = BaseEntity.getEntityID(entity);
-        if (id != null) {
-            BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-            if (entityType instanceof FeatureEntityDeath entityDeath) {
-                boolean cancelled = !entityDeath
-                        .handleEntityDeath(new DataEntityDeath(event, eventLastDamageCausedByEntity));
-                if (cancelled) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-            if (entityType instanceof FeatureEntityTick) {
-                EntityTickTask.getInstance().removeEntity(entity);
-            }
+        if (event instanceof PlayerDeathEvent playerDeathEvent) {
+            onPlayerDeath(playerDeathEvent,
+                    ObjectUtil.tryCast(entity.getLastDamageCause(), EntityDamageByEntityEvent.class));
+        } else {
+            onEntityDeath(event,
+                    ObjectUtil.tryCast(entity.getLastDamageCause(), EntityDamageByEntityEvent.class));
         }
-        if (eventLastDamageCausedByEntity != null) {
-            id = BaseEntity.getEntityID(eventLastDamageCausedByEntity.getDamager());
-            if (id != null) {
-                BaseEntity entityType = EntityRegister.getInstance().lookupEntityType(id);
-                if (entityType instanceof FeatureKillEntity entityTypeEntityKill) {
-                    boolean cancelled;
-                    if (event instanceof PlayerDeathEvent playerDeathEvent) {
-                        cancelled = !entityTypeEntityKill
-                                .handleKillPlayer(new DataKillPlayer(playerDeathEvent,
-                                        eventLastDamageCausedByEntity));
-                    } else {
-                        cancelled = !entityTypeEntityKill
-                                .handleKillEntity(new DataKillEntity(event, eventLastDamageCausedByEntity));
-                    }
-                    if (cancelled) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
+    }
+
+    private void onEntityDeath(@Nonnull EntityDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
+        Entity entity = event.getEntity();
+        Entity damager = ObjectUtil.mapWhenNonnull(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
+        if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
+                lastDamageEvent, FeatureItemHoldEntityKill.class,
+                FeatureItemHoldEntityKill::handleItemHoldEntityKillEntity, DataItemHoldEntityKillEntity::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!EntityFeatureHelper.doFeatureCancellable(damager, event, lastDamageEvent, FeatureKillEntity.class,
+                FeatureKillEntity::handleKillEntity, DataKillEntity::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(entity, LivingEntity.class), event,
+                lastDamageEvent, FeatureItemHoldEntityDeath.class,
+                FeatureItemHoldEntityDeath::handleItemHoldEntityDeath, DataItemHoldEntityDeath::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, lastDamageEvent, FeatureEntityDeath.class,
+                FeatureEntityDeath::handleEntityDeath, DataEntityDeath::new)) {
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
+        Entity damager = ObjectUtil.mapWhenNonnull(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
+        if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
+                lastDamageEvent, FeatureItemHoldEntityKill.class,
+                FeatureItemHoldEntityKill::handleItemHoldEntityKillPlayer, DataItemHoldEntityKillPlayer::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!EntityFeatureHelper.doFeatureCancellable(damager, event, lastDamageEvent, FeatureKillEntity.class,
+                FeatureKillEntity::handleKillPlayer, DataKillPlayer::new)) {
+            event.setCancelled(true);
+            return;
         }
     }
 }

@@ -44,12 +44,12 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
         if (data.hasKiller()) {
             Entity killer = data.getKiller();
             if (killer instanceof Player) //if killer is player
-                killer.sendMessage(data.getDecedent().name().append(Component.text(" is dead!"))
+                killer.sendMessage(data.getEntity().name().append(Component.text(" is dead!"))
                         .style(Style.style(NamedTextColor.GOLD)));
             else if (killer instanceof Projectile) { //if killer is arrow, fireball or something that is projectile
                 killer = EntityHelper.getProjectileShooterEntity((Projectile) killer);
                 if (killer != null && killer instanceof Player) //if killer is exist and killer is player
-                    killer.sendMessage(data.getDecedent().name()
+                    killer.sendMessage(data.getEntity().name()
                             .append(Component.text(" is dead!").style(Style.style(NamedTextColor.GOLD))));
             }
         }
@@ -59,7 +59,7 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     @Override
     public boolean handleEntityDamagedByEntity(@Nonnull DataEntityDamagedByEntity data) {
         if (data.getDamager() instanceof Player) {
-            data.getDamager().sendMessage(data.getDamagee().name()
+            data.getDamager().sendMessage(data.getEntity().name()
                     .append(Component.text(" is dealed ").style(Style.style(NamedTextColor.WHITE)))
                     .append(Component.text(data.getDamage()).style(Style.style(NamedTextColor.GOLD)))
                     .append(Component.text(" damage!")).style(Style.style(NamedTextColor.WHITE)));
@@ -78,9 +78,9 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     }
 
     @Override
-    public boolean handleEntityAttack(@Nonnull DataEntityDamagedByEntity data) {
+    public boolean handleEntityAttack(@Nonnull DataEntityAttack data) {
         if (data.getDamagee() instanceof Player) {
-            data.getDamagee().sendMessage(data.getDamager().name()
+            data.getDamagee().sendMessage(data.getEntity().name()
                     .append(Component.text(" damages you ").style(Style.style(NamedTextColor.WHITE)))
                     .append(Component.text(data.getFinalDamage()).style(Style.style(NamedTextColor.GOLD)))
                     .append(Component.text(" !")).style(Style.style(NamedTextColor.WHITE)));
@@ -104,7 +104,7 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
     public boolean handleKillPlayer(@Nonnull DataKillPlayer data) {
         Player decedent = data.getDecedent();
         decedent.sendMessage(Component.text("You're killed by ").style(Style.style(NamedTextColor.WHITE))
-                .append(data.getKiller().name())
+                .append(data.getEntity().name())
                 .append(Component.text(" !").style(Style.style(NamedTextColor.WHITE))));
         return true; //accept the decedent death
     }

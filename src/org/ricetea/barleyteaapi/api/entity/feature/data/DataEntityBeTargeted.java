@@ -9,24 +9,24 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEvent> {
+public final class DataEntityBeTargeted extends BaseEntityFeatureData<EntityTargetEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> targetType;
+    private final Lazy<DataEntityType> entityWhoTargetingType;
 
-    public DataEntityTarget(@Nonnull EntityTargetEvent event) {
-        super(event);
-        targetType = new Lazy<>(() -> BaseEntity.getEntityType(getTarget()));
+    public DataEntityBeTargeted(@Nonnull EntityTargetEvent event) {
+        super(event, event.getTarget());
+        entityWhoTargetingType = new Lazy<>(() -> BaseEntity.getEntityType(getEntityWhoTargeting()));
     }
 
     @SuppressWarnings("null")
     @Nonnull
-    public Entity getTarget() {
-        return event.getTarget();
+    public Entity getEntityWhoTargeting() {
+        return event.getEntity();
     }
 
     @Nonnull
-    public DataEntityType getTargetType() {
-        return targetType.get();
+    public DataEntityType getEntityWhoTargetingType() {
+        return entityWhoTargetingType.get();
     }
 
     @SuppressWarnings("null")

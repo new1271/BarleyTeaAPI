@@ -10,24 +10,24 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<EntityDamageByEntityEvent> {
+public final class DataEntityAttack extends BaseEntityFeatureData<EntityDamageByEntityEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> damagerType;
+    private final Lazy<DataEntityType> damageeType;
 
-    public DataEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event) {
-        super(event);
-        damagerType = new Lazy<>(() -> BaseEntity.getEntityType(getDamager()));
+    public DataEntityAttack(@Nonnull EntityDamageByEntityEvent event) {
+        super(event, event.getDamager());
+        damageeType = new Lazy<>(() -> BaseEntity.getEntityType(getDamagee()));
     }
 
     @SuppressWarnings("null")
     @Nonnull
-    public Entity getDamager() {
-        return event.getDamager();
+    public Entity getDamagee() {
+        return event.getEntity();
     }
 
     @Nonnull
-    public DataEntityType getDamagerType() {
-        return damagerType.get();
+    public DataEntityType getDamageeType() {
+        return damageeType.get();
     }
 
     public double getDamage() {

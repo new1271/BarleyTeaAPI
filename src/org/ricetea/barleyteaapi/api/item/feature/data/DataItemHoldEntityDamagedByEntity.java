@@ -1,21 +1,27 @@
-package org.ricetea.barleyteaapi.api.entity.feature.data;
+package org.ricetea.barleyteaapi.api.item.feature.data;
 
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<EntityDamageByEntityEvent> {
+public final class DataItemHoldEntityDamagedByEntity extends BaseItemFeatureData<EntityDamageByEntityEvent> {
+
     @Nonnull
     private final Lazy<DataEntityType> damagerType;
 
-    public DataEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event) {
-        super(event);
+    @SuppressWarnings("null")
+    public DataItemHoldEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event, @Nonnull ItemStack itemStack,
+            @Nonnull EquipmentSlot equipmentSlot) {
+        super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
         damagerType = new Lazy<>(() -> BaseEntity.getEntityType(getDamager()));
     }
 
@@ -46,9 +52,5 @@ public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<Entit
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();
-    }
-
-    public boolean isCritical() {
-        return event.isCritical();
     }
 }
