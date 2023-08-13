@@ -21,6 +21,7 @@ import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.internal.listener.*;
+import org.ricetea.barleyteaapi.internal.nms.BarleyGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.test.TestEntity;
@@ -50,6 +51,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
         }
         logger.info("registering listeners");
         registerEventListeners();
+        logger.info("registering '/givebarley' command...");
+        BarleyGiveCommand.register();
         logger.info("registering '/summonbarley' command...");
         BarleySummonCommand.register();
         logger.info("initializing API...");
