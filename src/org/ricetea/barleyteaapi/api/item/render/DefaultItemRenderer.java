@@ -192,12 +192,14 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         default:
                                             continue;
                                     }
-                                    if (!isMainHand)
+                                    ArrayList<Component> currentAttributeLore;
+                                    if (!isMainHand) {
                                         AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
                                                 .decoration(TextDecoration.ITALIC, false));
-                                    Object[] entries = entry.getValue().entrySet().toArray();
-                                    for (int i = 0; i < entries.length; i++) {
-                                        Entry<Attribute, AttributeModifier> entry2 = (Entry<Attribute, AttributeModifier>) entries[i];
+                                        currentAttributeLore = AttributeLore;
+                                    } else
+                                        currentAttributeLore = MainHandLore;
+                                    for (Entry<Attribute, AttributeModifier> entry2 : entry.getValue().entrySet()) {
                                         final NamespacedKey key = entry2.getKey().getKey();
                                         final String attributeKey = "attribute.name." + key.getKey();
                                         double value = entry2.getValue().getAmount();
@@ -213,14 +215,17 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         String valueString = Double.toString(value);
                                         if (valueString.endsWith(".0"))
                                             valueString = valueString.substring(0, valueString.length() - 2);
-                                        AttributeLore.add(Component.translatable(format)
+                                        currentAttributeLore.add(Component.translatable(format)
                                                 .args(Component.text(valueString),
                                                         Component.translatable(attributeKey))
                                                 .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
                                                 .decoration(TextDecoration.ITALIC, false));
                                     }
+                                    currentAttributeLore.add(Component.empty());
                                 }
                                 lores.addAll(AttributeLore);
+                                if (!isTool)
+                                    lores.remove(lores.size() - 1);
                             }
                         }
                         if (isTool) {
@@ -232,12 +237,16 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                             String toolSpeedString = Double.toString(toolSpeed);
                             if (toolSpeedString.endsWith(".0"))
                                 toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
-                            MainHandLore.add(0, Component.text(" ").append(
+                            if (MainHandLore.size() > 0) {
+                                MainHandLore.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
+                                        .decoration(TextDecoration.ITALIC, false));
+                            }
+                            MainHandLore.add(Component.text(" ").append(
                                     Component.translatable("attribute.modifier.equals.0").args(
                                             Component.text(toolDamageString),
                                             Component.translatable("attribute.name.generic.attack_damage")))
                                     .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                            MainHandLore.add(1, Component.text(" ").append(
+                            MainHandLore.add(Component.text(" ").append(
                                     Component.translatable("attribute.modifier.equals.0").args(
                                             Component.text(toolSpeedString),
                                             Component.translatable("attribute.name.generic.attack_speed")))
