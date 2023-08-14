@@ -12,7 +12,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
