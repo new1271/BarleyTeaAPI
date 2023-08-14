@@ -45,6 +45,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
     private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
     private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
     private static final @Nonnull Lazy<DefaultItemRenderer> _inst = new Lazy<>(DefaultItemRenderer::new);
+    private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
 
     private DefaultItemRenderer() {
         super(NamespacedKeyUtils.BarleyTeaAPI("default_item_renderer"));
@@ -126,13 +127,13 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                 ArrayList<Component> AttributeLore = new ArrayList<>();
                                 HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>> map = new HashMap<>();
                                 for (Entry<Attribute, AttributeModifier> entry : attrbuteMap.entries()) {
-                                    if (entry.getValue().getAmount() == 0)
+                                    Attribute attribute = entry.getKey();
+                                    AttributeModifier modifier = entry.getValue();
+                                    if (attribute == null || modifier.getAmount() == 0)
                                         continue;
-                                    HashMap<Attribute, AttributeModifier> hmap = map.getOrDefault(
-                                            entry.getValue().getSlot(),
-                                            new HashMap<Attribute, AttributeModifier>());
-                                    if (isTool && entry.getValue().getSlot().equals(EquipmentSlot.HAND)) {
-                                        if (entry.getValue().getOperation()
+                                    EquipmentSlot slot = modifier.getSlot();
+                                    if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
+                                        if (modifier.getOperation()
                                                 .equals(AttributeModifier.Operation.ADD_NUMBER)) {
                                             switch (entry.getKey()) {
                                                 case GENERIC_ATTACK_DAMAGE:
@@ -146,8 +147,23 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                             }
                                         }
                                     }
-                                    hmap.put(entry.getKey(), entry.getValue());
-                                    map.put(entry.getValue().getSlot(), hmap);
+                                    if (slot == null) {
+                                        for (EquipmentSlot slot_ : slots) {
+                                            HashMap<Attribute, AttributeModifier> hmap = map.get(slot_);
+                                            if (hmap == null) {
+                                                hmap = new HashMap<>();
+                                                map.put(slot_, hmap);
+                                            }
+                                            hmap.put(attribute, modifier);
+                                        }
+                                    } else {
+                                        HashMap<Attribute, AttributeModifier> hmap = map.get(slot);
+                                        if (hmap == null) {
+                                            hmap = new HashMap<>();
+                                            map.put(slot, hmap);
+                                        }
+                                        hmap.put(attribute, modifier);
+                                    }
                                 }
                                 for (Entry<EquipmentSlot, HashMap<Attribute, AttributeModifier>> entry : map
                                         .entrySet()) {
