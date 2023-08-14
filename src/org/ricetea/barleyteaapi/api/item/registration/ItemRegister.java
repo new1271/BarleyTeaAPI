@@ -13,6 +13,8 @@ import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.internal.nms.BarleyGiveItemProvider;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class ItemRegister implements IRegister<BaseItem> {
@@ -38,12 +40,21 @@ public final class ItemRegister implements IRegister<BaseItem> {
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + item.getKey().toString() + " as item!");
+                if (item instanceof FeatureCommandGive) {
+                    BarleyGiveItemProvider.updateRegisterList();
+                }
             }
         }
     }
 
     public void unregister(@Nonnull BaseItem item) {
         lookupTable.remove(item.getKey());
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+        if (inst != null) {
+            if (item instanceof FeatureCommandGive) {
+                BarleyGiveItemProvider.updateRegisterList();
+            }
+        }
     }
 
     @Nullable

@@ -16,6 +16,7 @@ import org.bukkit.entity.Slime;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
@@ -60,7 +61,8 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                     logger.warning(entity.getKey().toString()
                             + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
                 }
-                BarleySummonEntityProvider.updateRegisterList();
+                if (entity instanceof FeatureCommandSummon)
+                    BarleySummonEntityProvider.updateRegisterList();
             }
         }
 
@@ -70,7 +72,8 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         lookupTable.remove(entity.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
-            BarleySummonEntityProvider.updateRegisterList();
+            if (entity instanceof FeatureCommandSummon)
+                BarleySummonEntityProvider.updateRegisterList();
         }
     }
 
