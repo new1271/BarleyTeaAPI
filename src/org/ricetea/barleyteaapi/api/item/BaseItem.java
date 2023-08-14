@@ -1,11 +1,17 @@
 package org.ricetea.barleyteaapi.api.item;
 
+import java.util.UUID;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -54,6 +60,70 @@ public abstract class BaseItem implements Keyed {
     @Nonnull
     public final Material getMaterialBasedOn() {
         return materialBasedOn;
+    }
+
+    public final boolean isTool() {
+        Material type = materialBasedOn;
+        switch (type) {
+            case WOODEN_SWORD:
+            case STONE_SWORD:
+            case GOLDEN_SWORD:
+            case IRON_SWORD:
+            case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
+            case TRIDENT:
+            case WOODEN_AXE:
+            case STONE_AXE:
+            case GOLDEN_AXE:
+            case IRON_AXE:
+            case DIAMOND_AXE:
+            case NETHERITE_AXE:
+            case WOODEN_PICKAXE:
+            case STONE_PICKAXE:
+            case GOLDEN_PICKAXE:
+            case IRON_PICKAXE:
+            case DIAMOND_PICKAXE:
+            case NETHERITE_PICKAXE:
+            case WOODEN_SHOVEL:
+            case STONE_SHOVEL:
+            case GOLDEN_SHOVEL:
+            case IRON_SHOVEL:
+            case DIAMOND_SHOVEL:
+            case NETHERITE_SHOVEL:
+            case WOODEN_HOE:
+            case STONE_HOE:
+            case GOLDEN_HOE:
+            case IRON_HOE:
+            case DIAMOND_HOE:
+            case NETHERITE_HOE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public final void setDefaultAttackDamage(@Nullable ItemStack itemStack, double attackDamage) {
+        if (itemStack != null && isBarleyTeaItem(itemStack)) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
+                meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(UUID.randomUUID(),
+                        "default modifier", attackDamage - 1, Operation.ADD_NUMBER, EquipmentSlot.HAND));
+                itemStack.setItemMeta(meta);
+            }
+        }
+    }
+
+    public final void setDefaultAttackSpeed(@Nullable ItemStack itemStack, double attackSpeed) {
+        if (itemStack != null && isBarleyTeaItem(itemStack)) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED);
+                meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID.randomUUID(),
+                        "default modifier", attackSpeed - 4, Operation.ADD_NUMBER, EquipmentSlot.HAND));
+                itemStack.setItemMeta(meta);
+            }
+        }
     }
 
     public final void register(@Nullable ItemStack itemStack) {

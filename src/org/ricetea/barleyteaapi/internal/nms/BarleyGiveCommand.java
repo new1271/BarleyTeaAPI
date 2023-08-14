@@ -15,7 +15,6 @@ import java.util.Iterator;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.CommandListenerWrapper;
@@ -38,6 +37,7 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
+import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyGiveCommand {
@@ -123,10 +123,10 @@ public final class BarleyGiveCommand {
 			itemstack.c(nbt);
 			if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType) {
 				org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
+				BaseItem.registerItem(bukkitStack, barleyTeaItemType);
 				if (commandGiveType.handleCommandGive(ObjectUtil.throwWhenNull(bukkitStack), nbt.toString())) {
-					BaseItem.registerItem(bukkitStack, barleyTeaItemType);
 					AbstractItemRenderer.renderItem(bukkitStack);
-					itemstack = CraftItemStack.asNMSCopy(bukkitStack);
+					itemstack = ObjectUtil.throwWhenNull(NMSItemHelper.getNmsItem(bukkitStack));
 				} else {
 					throw giveFailedMessage.create();
 				}

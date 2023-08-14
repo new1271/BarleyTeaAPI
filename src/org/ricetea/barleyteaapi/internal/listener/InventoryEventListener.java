@@ -95,7 +95,6 @@ public final class InventoryEventListener implements Listener {
                                 resultItem.displayName())) {
                             BaseItem.setName(resultItem, renameText);
                         }
-                        //TODO: 放入自定義鐵砧事件
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
                                 if (itemAnvilFeature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {
@@ -110,7 +109,7 @@ public final class InventoryEventListener implements Listener {
                                     resultItem = null;
                                 }
                             }
-                        } else if (firstItem.getType().equals(secondItem.getType())) {
+                        } else if (secondItem != null && firstItem.getType().equals(secondItem.getType())) {
                             resultItem = null;
                         }
                     }

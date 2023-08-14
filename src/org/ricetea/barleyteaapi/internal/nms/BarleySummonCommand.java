@@ -130,9 +130,8 @@ public final class BarleySummonCommand {
                                 (GroupDataEntity) null, (NBTTagCompound) null);
                     if (!worldserver.tryAddFreshEntityWithPassengers(entity, CreatureSpawnEvent.SpawnReason.COMMAND))
                         throw summonFailedMessage.create();
-                    if (summonEntity.handleCommandSummon(bukkitEntity, nbt.toString())) {
-                        BaseEntity.registerEntity(bukkitEntity, baseEntity);
-                    } else {
+                    BaseEntity.registerEntity(bukkitEntity, baseEntity);
+                    if (!summonEntity.handleCommandSummon(bukkitEntity, nbt.toString())) {
                         bukkitEntity.remove();
                         throw summonFailedMessage.create();
                     }
