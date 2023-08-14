@@ -6,9 +6,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
-public final class DataItemHoldEntityDamagedByNothing extends BaseItemFeatureData<EntityDamageEvent> {
+public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
     @SuppressWarnings("null")
     public DataItemHoldEntityDamagedByNothing(@Nonnull EntityDamageEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {

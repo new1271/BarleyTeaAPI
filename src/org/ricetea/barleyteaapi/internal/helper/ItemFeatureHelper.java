@@ -11,11 +11,11 @@ import org.bukkit.event.Event;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -23,7 +23,7 @@ import org.ricetea.barleyteaapi.util.ObjectUtil;
 public final class ItemFeatureHelper {
     private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemFeatureData<TEvent>> boolean forEachEquipmentCancellable(
+    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
@@ -41,7 +41,7 @@ public final class ItemFeatureHelper {
         return true;
     }
 
-    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemFeatureData<TEvent>> boolean forEachEquipmentCancellable(
+    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nullable TEvent2 event2,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
@@ -60,7 +60,7 @@ public final class ItemFeatureHelper {
         return true;
     }
 
-    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemFeatureData<TEvent>> boolean doFeatureCancellable(
+    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nullable TEvent2 event2, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
@@ -77,7 +77,7 @@ public final class ItemFeatureHelper {
         return true;
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemFeatureData<TEvent>> boolean doFeatureCancellable(
+    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
@@ -94,13 +94,13 @@ public final class ItemFeatureHelper {
     }
 
     @FunctionalInterface
-    public interface ItemDataConstructorForEquipment<T extends Event, R extends BaseItemFeatureData<T>> {
+    public interface ItemDataConstructorForEquipment<T extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
         @Nonnull
         R apply(@Nonnull T event, @Nonnull ItemStack itemStack, @Nonnull EquipmentSlot equipmentSlot);
     }
 
     @FunctionalInterface
-    public interface ItemDataConstructorForEquipment2<T extends Event, T2 extends Event, R extends BaseItemFeatureData<T>> {
+    public interface ItemDataConstructorForEquipment2<T extends Event, T2 extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
         @Nonnull
         R apply(@Nonnull T event, @Nullable T2 event2, @Nonnull ItemStack itemStack,
                 @Nonnull EquipmentSlot equipmentSlot);
@@ -130,7 +130,7 @@ public final class ItemFeatureHelper {
                     }
                 }
                 if (itemStackResult != null) {
-                    if (itemType instanceof FeatureCustomDurability customDurabilityFeature) {
+                    if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
                         int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
                         int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);
                         int lowerItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackB);

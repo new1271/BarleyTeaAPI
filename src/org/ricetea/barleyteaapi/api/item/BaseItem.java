@@ -13,9 +13,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
@@ -24,9 +23,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 public abstract class BaseItem implements Keyed {
     @Nonnull
     private static final NamespacedKey ItemTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("item_id");
-    @Nonnull
-    private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtils
-            .BarleyTeaAPI("item_damage");
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -78,61 +74,6 @@ public abstract class BaseItem implements Keyed {
                                 ItemTagNamespacedKey, PersistentDataType.STRING, null));
     }
 
-    public int getDurabilityDamage(@Nonnull ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta())
-            return 0;
-        ItemMeta meta = itemStack.getItemMeta();
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (container.has(ItemAlternateDamageNamespacedKey)) {
-            Integer damage = container.get(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER);
-            if (damage == null) {
-                container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, 0);
-                damage = 0;
-            }
-            return damage;
-        } else if (meta instanceof Damageable) {
-            Damageable damageable = (Damageable) meta;
-            return damageable.getDamage();
-        }
-        return 0;
-    }
-
-    public void setDurabilityDamage(@Nonnull ItemStack itemStack, int damage) {
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta == null)
-            return;
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (this instanceof FeatureCustomDurability customDurabilityFeature) {
-            container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
-            if (meta instanceof Damageable damageable) {
-                if (damage == 0) {
-                    damageable.setDamage(0);
-                } else {
-                    int maxDura = customDurabilityFeature.getMaxDurability(itemStack);
-                    int maxDuraVisual = itemStack.getType().getMaxDurability();
-                    if (damage == maxDura) {
-                        damageable.setDamage(maxDuraVisual);
-                    } else {
-                        int visualDamage = (int) Math
-                                .round(damage * 1.0 / maxDura * maxDuraVisual);
-                        if (visualDamage <= 0 && damage > 0) {
-                            visualDamage = 1;
-                        } else if (visualDamage >= maxDuraVisual && damage < maxDura) {
-                            visualDamage = maxDuraVisual - 1;
-                        }
-                        damageable.setDamage(visualDamage);
-                    }
-                }
-            }
-        } else if (meta instanceof Damageable damageable) {
-            damageable.setDamage(damage);
-        } else {
-            return;
-        }
-        itemStack.setItemMeta(meta);
-        AbstractItemRenderer.renderItem(itemStack);
-    }
-
     public static int getDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType) {
         if (itemStack == null)
             return 0;
@@ -143,9 +84,10 @@ public abstract class BaseItem implements Keyed {
                 return damageable.getDamage();
             }
             return 0;
-        } else {
-            return itemType.getDurabilityDamage(itemStack);
+        } else if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
+            return customDurabilityFeature.getDurabilityDamage(itemStack);
         }
+        return 0;
     }
 
     public static void setDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType, int damage) {
@@ -158,8 +100,8 @@ public abstract class BaseItem implements Keyed {
                 damageable.setDamage(damage);
                 itemStack.setItemMeta(damageable);
             }
-        } else {
-            itemType.setDurabilityDamage(itemStack, damage);
+        } else if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
+            customDurabilityFeature.setDurabilityDamage(itemStack, damage);
         }
     }
 

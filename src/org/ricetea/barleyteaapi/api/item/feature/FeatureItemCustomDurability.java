@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.inventory.ItemStack;
 
-public interface FeatureCustomDurability {
+public interface FeatureItemCustomDurability {
     int getMaxDurability(@Nonnull ItemStack itemStack);
 
     int getDurabilityDamage(@Nonnull ItemStack itemStack);

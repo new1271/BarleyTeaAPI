@@ -1,15 +1,13 @@
 package org.ricetea.barleyteaapi.test;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.RegularItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDamage;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityKill;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityAttack;
@@ -23,8 +21,8 @@ import org.ricetea.barleyteaapi.util.Lazy;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public final class TestItem extends BaseItem
-        implements FeatureCommandGive, FeatureItemHoldEntityDamage, FeatureItemHoldEntityKill, FeatureCustomDurability {
+public final class TestItem extends RegularItem
+        implements FeatureItemHoldEntityDamage, FeatureItemHoldEntityKill, FeatureItemCustomDurability {
 
     private static final Lazy<TestItem> inst = new Lazy<>(TestItem::new);
 
@@ -42,12 +40,6 @@ public final class TestItem extends BaseItem
     @Nonnull
     public String getDefaultName() { //set default item name
         return "Test Item";
-    }
-
-    @Override
-    public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
-        setItemName(itemStackGived);
-        return true;
     }
 
     @Override
@@ -94,5 +86,4 @@ public final class TestItem extends BaseItem
     public int getMaxDurability(@Nonnull ItemStack itemStack) {
         return 20;
     }
-
 }

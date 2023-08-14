@@ -25,7 +25,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.util.Lazy;
@@ -220,8 +220,8 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                         lores.addAll(MainHandLore);
                     }
                 }
-                if (itemType instanceof FeatureCustomDurability) {
-                    FeatureCustomDurability customDurability = (FeatureCustomDurability) itemType;
+                if (itemType instanceof FeatureItemCustomDurability) {
+                    FeatureItemCustomDurability customDurability = (FeatureItemCustomDurability) itemType;
                     int maxDura = customDurability.getMaxDurability(itemStack);
                     int dura = maxDura - customDurability.getDurabilityDamage(itemStack);
                     if (dura < maxDura) {

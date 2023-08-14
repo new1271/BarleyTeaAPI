@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.Lazy;
 
@@ -37,7 +37,7 @@ public final class PlayerEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
                 BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
-                if (baseItem instanceof FeatureCustomDurability customDurabilityFeature) {
+                if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
                     int newDamage = customDurabilityFeature.getDurabilityDamage(itemStack) + event.getDamage();
                     if (newDamage < customDurabilityFeature.getMaxDurability(itemStack)) {
                         customDurabilityFeature.setDurabilityDamage(itemStack, newDamage);
@@ -60,7 +60,7 @@ public final class PlayerEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
                 BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
-                if (baseItem instanceof FeatureCustomDurability customDurabilityFeature) {
+                if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
                     int damage = customDurabilityFeature.getDurabilityDamage(itemStack);
                     int repairAmount = event.getExperienceOrb().getExperience() * 2;
                     int newDamage = Math.max(damage - repairAmount, 0);

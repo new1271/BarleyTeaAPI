@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
-public final class DataItemHoldEntityDamagedByBlock extends BaseItemFeatureData<EntityDamageByBlockEvent> {
+public final class DataItemHoldEntityDamagedByBlock extends BaseItemHoldEntityFeatureData<EntityDamageByBlockEvent> {
     @SuppressWarnings("null")
     public DataItemHoldEntityDamagedByBlock(@Nonnull EntityDamageByBlockEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {

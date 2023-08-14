@@ -8,13 +8,13 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class DataItemHoldEntityDeath extends BaseItemFeatureData<EntityDeathEvent> {
+public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData<EntityDeathEvent> {
     @Nullable
     private final Entity killer;
 

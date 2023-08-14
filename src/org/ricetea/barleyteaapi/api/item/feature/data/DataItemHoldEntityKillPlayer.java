@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
-public final class DataItemHoldEntityKillPlayer extends BaseItemFeatureData<PlayerDeathEvent> {
+public final class DataItemHoldEntityKillPlayer extends BaseItemHoldEntityFeatureData<PlayerDeathEvent> {
     @SuppressWarnings("null")
     public DataItemHoldEntityKillPlayer(@Nonnull PlayerDeathEvent event,
             @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,

@@ -11,7 +11,7 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.util.Lazy;
 
-public abstract class BaseItemFeatureData<T extends Event> extends BaseFeatureData<T> {
+public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends BaseFeatureData<T> {
 
     @Nonnull
     private final LivingEntity holderEntity;
@@ -25,7 +25,8 @@ public abstract class BaseItemFeatureData<T extends Event> extends BaseFeatureDa
     @Nonnull
     private final EquipmentSlot equipmentSlot;
 
-    public BaseItemFeatureData(@Nonnull T event, @Nonnull LivingEntity holderEntity, @Nonnull ItemStack itemStack,
+    public BaseItemHoldEntityFeatureData(@Nonnull T event, @Nonnull LivingEntity holderEntity,
+            @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event);
         this.holderEntity = holderEntity;
