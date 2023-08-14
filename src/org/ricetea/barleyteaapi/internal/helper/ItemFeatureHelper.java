@@ -14,10 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class ItemFeatureHelper {
@@ -120,14 +119,8 @@ public final class ItemFeatureHelper {
         } else {
             if (itemStackA != null && itemStackB != null
                     && itemType.isCertainItem(itemStackB)) {
-                if (itemStackResult == null && itemType instanceof FeatureCommandGive commandGiveFeature) {
-                    itemStackResult = new ItemStack(itemStackA.getType());
-                    if (commandGiveFeature.handleCommandGive(itemStackResult, null)) {
-                        BaseItem.registerItem(itemStackResult, itemType);
-                        AbstractItemRenderer.renderItem(itemStackResult);
-                    } else {
-                        itemStackResult = null;
-                    }
+                if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
+                    itemStackResult = itemGiveFeature.handleItemGive(1);
                 }
                 if (itemStackResult != null) {
                     if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {

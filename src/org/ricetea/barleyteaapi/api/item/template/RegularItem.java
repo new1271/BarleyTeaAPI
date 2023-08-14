@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.item;
+package org.ricetea.barleyteaapi.api.item.template;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -10,14 +10,16 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public abstract class RegularItem extends BaseItem
-        implements FeatureCommandGive {
+        implements FeatureCommandGive, FeatureItemGive {
     @Nonnull
     private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtils
             .BarleyTeaAPI("item_damage");
@@ -81,10 +83,31 @@ public abstract class RegularItem extends BaseItem
         AbstractItemRenderer.renderItem(itemStack);
     }
 
+    @Nonnull
+    public ItemStack handleItemGive(int count) {
+        if (count > 0) {
+            ItemStack itemStack = new ItemStack(getMaterialBasedOn(), count);
+            BaseItem.registerItem(itemStack, this);
+            if (handleItemGive(itemStack)) {
+                AbstractItemRenderer.renderItem(itemStack);
+                ItemMeta meta = itemStack.getItemMeta();
+                if (meta == null || !meta.hasDisplayName())
+                    setItemName(itemStack);
+                return itemStack;
+            }
+        }
+        return new ItemStack(Material.AIR);
+    }
+
+    protected abstract boolean handleItemGive(ItemStack itemStack);
+
     public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
-        ItemMeta meta = itemStackGived.getItemMeta();
-        if (meta == null || !meta.hasDisplayName())
-            setItemName(itemStackGived);
-        return true;
+        if (handleItemGive(itemStackGived)) {
+            ItemMeta meta = itemStackGived.getItemMeta();
+            if (meta == null || !meta.hasDisplayName())
+                setItemName(itemStackGived);
+            return true;
+        }
+        return false;
     }
 }

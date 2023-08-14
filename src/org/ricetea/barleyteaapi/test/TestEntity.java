@@ -8,10 +8,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.ricetea.barleyteaapi.api.entity.SpawnableEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.*;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
+import org.ricetea.barleyteaapi.api.entity.template.SpawnableEntity;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 import net.kyori.adventure.text.Component;
@@ -90,9 +90,10 @@ public final class TestEntity extends SpawnableEntity // based on BarleyTeaAPI's
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void spawn(@Nonnull Entity entitySummoned) {
+    protected boolean handleEntitySpawn(@Nonnull Entity entitySummoned) {
         //Named entity as "default"(the name that is getDefaultName() set), and set color&style as ChatColor.BLUE + ChatColor.BOLD
         setEntityName(entitySummoned, ChatColor.BLUE, ChatColor.BOLD);
+        return true;
     }
 
     @Override

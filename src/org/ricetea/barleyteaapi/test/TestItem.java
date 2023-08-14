@@ -5,7 +5,6 @@ import javax.annotation.Nonnull;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.item.RegularItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDamage;
@@ -16,6 +15,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedB
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillEntity;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlayer;
+import org.ricetea.barleyteaapi.api.item.template.RegularItem;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 import net.kyori.adventure.text.Component;
@@ -85,5 +85,10 @@ public final class TestItem extends RegularItem
     @Override
     public int getMaxDurability(@Nonnull ItemStack itemStack) {
         return 20;
+    }
+
+    @Override
+    protected boolean handleItemGive(ItemStack itemStack) {
+        return true;
     }
 }

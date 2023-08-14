@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.entity;
+package org.ricetea.barleyteaapi.api.entity.template;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
+import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
