@@ -1,13 +1,13 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public abstract class BaseItemAnvilFeatureData extends BaseFeatureData<PrepareAnvilEvent> {
+public abstract class BaseItemAnvilFeatureData extends BaseItemInventoryResultFeatureData<PrepareAnvilEvent> {
 
     public BaseItemAnvilFeatureData(@Nonnull PrepareAnvilEvent event) {
         super(event);
@@ -23,12 +23,8 @@ public abstract class BaseItemAnvilFeatureData extends BaseFeatureData<PrepareAn
         return ObjectUtil.letNonNull(event.getInventory().getRenameText(), "");
     }
 
-    @Nullable
-    public ItemStack getResult() {
-        return event.getResult();
-    }
-
-    public void setResult(@Nullable ItemStack itemStack) {
-        event.setResult(itemStack);
+    @Nonnull
+    public AnvilInventory getInventory() {
+        return ObjectUtil.throwWhenNull(event.getInventory());
     }
 }

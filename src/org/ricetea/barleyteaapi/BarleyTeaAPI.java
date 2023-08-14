@@ -25,6 +25,7 @@ import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleyGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyTeaAPI extends JavaPlugin {
@@ -152,6 +153,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
             ExcellentEnchantsBridge.unregisterTranslations();
         }
         ObjectUtil.callWhenNonnull(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
+        ObjectUtil.callWhenNonnull(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
         TickingService.shutdown();
         TaskService.shutdown();
         Bukkit.getScheduler().cancelTasks(this);

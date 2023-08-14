@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
@@ -26,7 +27,10 @@ public final class EntityFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event));
+                    return featureFunc.test(feature, dataConstructor.apply(event)) && !ObjectUtil.letNonNull(
+                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
+                                    Cancellable::isCancelled),
+                            false);
                 }
             }
         }
@@ -43,7 +47,10 @@ public final class EntityFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, event2));
+                    return featureFunc.test(feature, dataConstructor.apply(event, event2)) && !ObjectUtil.letNonNull(
+                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
+                                    Cancellable::isCancelled),
+                            false);
                 }
             }
         }

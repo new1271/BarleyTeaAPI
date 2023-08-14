@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.helper;
 
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nonnull;
@@ -7,10 +8,12 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
@@ -69,7 +72,11 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, event2, itemStack, equipmentSlot));
+                    return featureFunc.test(feature, dataConstructor.apply(event, event2, itemStack, equipmentSlot))
+                            && !ObjectUtil.letNonNull(
+                                    ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
+                                            Cancellable::isCancelled),
+                                    false);
                 }
             }
         }
@@ -85,11 +92,55 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
+                    return featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot))
+                            && !ObjectUtil.letNonNull(
+                                    ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
+                                            Cancellable::isCancelled),
+                                    false);
                 }
             }
         }
         return true;
+    }
+
+    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> boolean doFeatureCancellable(
+            @Nullable ItemStack itemStack, @Nullable TEvent event,
+            @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
+            @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
+        if (itemStack != null && event != null) {
+            NamespacedKey id = BaseItem.getItemID(itemStack);
+            if (id != null) {
+                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                if (feature != null) {
+                    return featureFunc.test(feature, dataConstructor.apply(event)) && !ObjectUtil.letNonNull(
+                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
+                                    Cancellable::isCancelled),
+                            false);
+                }
+            }
+        }
+        return true;
+    }
+
+    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> void doFeature(
+            @Nullable ItemStack itemStack, @Nullable TEvent event,
+            @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
+            @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
+        if (itemStack != null && event != null) {
+            NamespacedKey id = BaseItem.getItemID(itemStack);
+            if (id != null) {
+                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                if (feature != null) {
+                    featureFunc.accept(feature, dataConstructor.apply(event));
+                }
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface ItemDataConstructor<T extends Event, R extends BaseFeatureData<T>> {
+        @Nonnull
+        R apply(@Nonnull T event);
     }
 
     @FunctionalInterface

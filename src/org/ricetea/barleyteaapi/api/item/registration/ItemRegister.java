@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.api.item.registration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -14,12 +15,17 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.internal.nms.BarleyGiveItemProvider;
+import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class ItemRegister implements IRegister<BaseItem> {
     @Nonnull
     private static final Lazy<ItemRegister> inst = new Lazy<>(ItemRegister::new);
+
+    @Nonnull
+    private AtomicInteger itemNeedTick = new AtomicInteger(0);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseItem> lookupTable = new Hashtable<>();
@@ -43,6 +49,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
                 if (item instanceof FeatureCommandGive) {
                     BarleyGiveItemProvider.updateRegisterList();
                 }
+                if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
+                    ItemTickTask.getInstance().start();
+                }
             }
         }
     }
@@ -53,6 +62,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
         if (inst != null) {
             if (item instanceof FeatureCommandGive) {
                 BarleyGiveItemProvider.updateRegisterList();
+            }
+            if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
+                ItemTickTask.getInstance().stop();
             }
         }
     }
@@ -68,6 +80,10 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     public boolean hasAnyRegisteredItem() {
         return lookupTable.size() > 0;
+    }
+
+    public boolean hasAnyRegisteredItemNeedTicking() {
+        return itemNeedTick.get() > 0;
     }
 
     @Nonnull
