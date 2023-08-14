@@ -1,5 +1,5 @@
 name: BarleyTeaAPI
-version: "1.0.0"
+version: 1.0.0
 description: a mob/item API for Paper server software
 author: new1271 (RiceTeaInMC)
 main: org.ricetea.barleyteaapi.BarleyTeaAPI

@@ -18,7 +18,6 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
-import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
@@ -26,8 +25,6 @@ import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.BarleyGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
-import org.ricetea.barleyteaapi.test.TestEntity;
-import org.ricetea.barleyteaapi.test.TestItem;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class BarleyTeaAPI extends JavaPlugin {
@@ -37,14 +34,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
     @Nullable
     public static BarleyTeaAPI getInstance() {
         return _inst;
-    }
-
-    public static void registerTestEntity() {
-        EntityRegister.getInstance().register(TestEntity.getInstance());
-    }
-
-    public static void registerTestItem() {
-        ItemRegister.getInstance().register(TestItem.getInstance());
     }
 
     @Override
@@ -67,8 +56,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         announceEntitiesAPILoaded();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
-        registerTestEntity();
-        registerTestItem();
     }
 
     private void registerEventListeners() {
