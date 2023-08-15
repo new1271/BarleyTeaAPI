@@ -32,6 +32,7 @@ import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.kyori.adventure.text.Component;
@@ -125,7 +126,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                     : NMSItemHelper.getDefaultAttributeModifiers(itemStack);
                             if (attrbuteMap != null) {
                                 ArrayList<Component> AttributeLore = new ArrayList<>();
-                                HashMap<EquipmentSlot, HashMap<Attribute, AttributeModifier>> map = new HashMap<>();
+                                HashMap<EquipmentSlot, Multimap<Attribute, AttributeModifier>> map = new HashMap<>();
                                 for (Entry<Attribute, AttributeModifier> entry : attrbuteMap.entries()) {
                                     Attribute attribute = entry.getKey();
                                     AttributeModifier modifier = entry.getValue();
@@ -148,51 +149,55 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         }
                                     }
                                     if (slot == null) {
-                                        for (EquipmentSlot slot_ : slots) {
-                                            HashMap<Attribute, AttributeModifier> hmap = map.get(slot_);
+                                        for (EquipmentSlot iteratedSlot : slots) {
+                                            if (iteratedSlot == null)
+                                                continue;
+                                            Multimap<Attribute, AttributeModifier> hmap = map.get(iteratedSlot);
                                             if (hmap == null) {
-                                                hmap = new HashMap<>();
-                                                map.put(slot_, hmap);
+                                                hmap = LinkedHashMultimap.create();
+                                                map.put(iteratedSlot, hmap);
                                             }
                                             hmap.put(attribute, modifier);
                                         }
                                     } else {
-                                        HashMap<Attribute, AttributeModifier> hmap = map.get(slot);
+                                        Multimap<Attribute, AttributeModifier> hmap = map.get(slot);
                                         if (hmap == null) {
-                                            hmap = new HashMap<>();
+                                            hmap = LinkedHashMultimap.create();
                                             map.put(slot, hmap);
                                         }
                                         hmap.put(attribute, modifier);
                                     }
                                 }
-                                for (Entry<EquipmentSlot, HashMap<Attribute, AttributeModifier>> entry : map
-                                        .entrySet()) {
-                                    String slot;
-                                    switch (entry.getKey()) {
+                                for (EquipmentSlot slot : slots) {
+                                    if (slot == null)
+                                        continue;
+                                    String slotStringKey;
+                                    switch (slot) {
                                         case CHEST:
-                                            slot = "item.modifiers.chest";
+                                            slotStringKey = "item.modifiers.chest";
                                             break;
                                         case FEET:
-                                            slot = "item.modifiers.feet";
+                                            slotStringKey = "item.modifiers.feet";
                                             break;
                                         case HAND:
-                                            slot = "item.modifiers.mainhand";
+                                            slotStringKey = "item.modifiers.mainhand";
                                             break;
                                         case HEAD:
-                                            slot = "item.modifiers.head";
+                                            slotStringKey = "item.modifiers.head";
                                             break;
                                         case LEGS:
-                                            slot = "item.modifiers.legs";
+                                            slotStringKey = "item.modifiers.legs";
                                             break;
                                         case OFF_HAND:
-                                            slot = "item.modifiers.offhand";
+                                            slotStringKey = "item.modifiers.offhand";
                                             break;
                                         default:
                                             continue;
                                     }
-                                    AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
+                                    Multimap<Attribute, AttributeModifier> mapValue = map.get(slot);
+                                    AttributeLore.add(Component.translatable(slotStringKey).color(NamedTextColor.GRAY)
                                             .decoration(TextDecoration.ITALIC, false));
-                                    for (Entry<Attribute, AttributeModifier> entry2 : entry.getValue().entrySet()) {
+                                    for (Entry<Attribute, AttributeModifier> entry2 : mapValue.entries()) {
                                         final NamespacedKey key = entry2.getKey().getKey();
                                         final String attributeKey = "attribute.name." + key.getKey();
                                         double value = entry2.getValue().getAmount();
