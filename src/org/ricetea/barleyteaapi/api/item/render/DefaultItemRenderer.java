@@ -183,6 +183,9 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                 for (EquipmentSlot slot : slots) {
                                     if (slot == null)
                                         continue;
+                                    HashMap<Attribute, double[]> mapValue = map.get(slot);
+                                    if (mapValue == null)
+                                        continue;
                                     String slotStringKey;
                                     switch (slot) {
                                         case CHEST:
@@ -206,7 +209,6 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         default:
                                             continue;
                                     }
-                                    HashMap<Attribute, double[]> mapValue = map.get(slot);
                                     AttributeLore.add(Component.translatable(slotStringKey).color(NamedTextColor.GRAY)
                                             .decoration(TextDecoration.ITALIC, false));
                                     for (Entry<Attribute, double[]> entry2 : mapValue.entrySet()) {
