@@ -7,6 +7,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -17,19 +20,25 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemClick;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemConsume;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemBroken;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickBlock;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickEntity;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickNothing;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemConsume;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGotFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemLostFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemMend;
+import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class PlayerEventListener implements Listener {
     private static final Lazy<PlayerEventListener> inst = new Lazy<>(PlayerEventListener::new);
@@ -151,6 +160,51 @@ public final class PlayerEventListener implements Listener {
             return;
         if (!ItemFeatureHelper.doFeatureCancellable(event.getItem(), event, FeatureItemConsume.class,
                 FeatureItemConsume::handleItemConsume, DataItemConsume::new)) {
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenItemInteractBlock(PlayerInteractEvent event) {
+        if (event == null || event.useInteractedBlock().equals(Result.DENY)
+                || event.useItemInHand().equals(Result.DENY))
+            return;
+        boolean isNothing = event.getClickedBlock() == null || event.getClickedBlock().getType().isAir();
+        if (isNothing) {
+            if (!ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+                    FeatureItemClick::handleItemClickNothing, DataItemClickNothing::new, true)) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.DENY);
+            }
+        } else {
+            switch (ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+                    FeatureItemClick::handleItemClickBlock, DataItemClickBlock::new, StateItemClickBlock.Skipped)) {
+                case Cancelled:
+                    event.setUseInteractedBlock(Result.DENY);
+                    event.setUseItemInHand(Result.DENY);
+                    break;
+                case UseItem:
+                    event.setUseInteractedBlock(Result.DENY);
+                    event.setUseItemInHand(Result.ALLOW);
+                    break;
+                case UseBlock:
+                    event.setUseInteractedBlock(Result.ALLOW);
+                    event.setUseItemInHand(Result.DENY);
+                    break;
+                case Skipped:
+                    break;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenItemInteractEntity(PlayerInteractEntityEvent event) {
+        if (event == null || event.isCancelled())
+            return;
+        ItemStack itemStack = event.getPlayer().getInventory().getItem(ObjectUtil.throwWhenNull(event.getHand()));
+        if (!ItemFeatureHelper.doFeatureCancellable(itemStack, event, FeatureItemClick.class,
+                FeatureItemClick::handleItemClickEntity, DataItemClickEntity::new)) {
             event.setCancelled(true);
             return;
         }

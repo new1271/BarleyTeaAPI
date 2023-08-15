@@ -3,15 +3,14 @@ package org.ricetea.barleyteaapi.api.item.feature.data;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class DataItemLostFocus extends BaseFeatureData<PlayerItemHeldEvent> {
+public final class DataItemLostFocus extends BasePlayerFeatureData<PlayerItemHeldEvent> {
 
     @Nullable
     private DataItemType itemGotFocusType = null;
@@ -29,11 +28,6 @@ public final class DataItemLostFocus extends BaseFeatureData<PlayerItemHeldEvent
 
     public int getNewSlot() {
         return event.getNewSlot();
-    }
-
-    @Nonnull
-    public Player getPlayer() {
-        return ObjectUtil.throwWhenNull(event.getPlayer());
     }
 
     @Nullable

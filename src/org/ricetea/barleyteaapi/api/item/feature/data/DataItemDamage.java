@@ -5,10 +5,10 @@ import javax.annotation.Nonnull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
+import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class DataItemDamage extends BaseFeatureData<PlayerItemDamageEvent> {
+public final class DataItemDamage extends BasePlayerFeatureData<PlayerItemDamageEvent> {
 
     public DataItemDamage(@Nonnull PlayerItemDamageEvent event) {
         super(event);

@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.internal.helper;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nonnull;
@@ -120,6 +121,24 @@ public final class ItemFeatureHelper {
             }
         }
         return true;
+    }
+
+    @Nonnull
+    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>, TReturn> TReturn doFeatureAndReturn(
+            @Nullable ItemStack itemStack, @Nullable TEvent event,
+            @Nonnull Class<TFeature> featureClass, @Nonnull BiFunction<TFeature, TData, TReturn> featureFunc,
+            @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor, @Nonnull TReturn defaultValue) {
+        if (itemStack != null && event != null) {
+            NamespacedKey id = BaseItem.getItemID(itemStack);
+            if (id != null) {
+                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                if (feature != null) {
+                    return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
+                            defaultValue);
+                }
+            }
+        }
+        return defaultValue;
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> void doFeature(
