@@ -120,8 +120,7 @@ public abstract class BaseItem implements Keyed {
 
     protected final void setDefaultAttribute(@Nullable ItemStack itemStack, @Nullable Attribute attribute,
             double amount, @Nullable Operation operation, @Nullable EquipmentSlot equipmentSlot) {
-        if (itemStack != null && attribute != null && operation != null && equipmentSlot != null
-                && isBarleyTeaItem(itemStack)) {
+        if (itemStack != null && attribute != null && operation != null && isBarleyTeaItem(itemStack)) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
                 meta.removeAttributeModifier(attribute);
