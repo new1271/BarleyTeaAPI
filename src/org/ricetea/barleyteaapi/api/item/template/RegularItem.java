@@ -83,26 +83,24 @@ public abstract class RegularItem extends BaseItem
         AbstractItemRenderer.renderItem(itemStack);
     }
 
-    @Nonnull
+    @Nullable
     public ItemStack handleItemGive(int count) {
         if (count > 0) {
             ItemStack itemStack = new ItemStack(getMaterialBasedOn(), count);
-            BaseItem.registerItem(itemStack, this);
-            if (handleItemGive(itemStack)) {
-                AbstractItemRenderer.renderItem(itemStack);
+            if (tryRegister(itemStack, this::handleItemGive)) {
                 ItemMeta meta = itemStack.getItemMeta();
                 if (meta == null || !meta.hasDisplayName())
                     setItemName(itemStack);
                 return itemStack;
             }
         }
-        return new ItemStack(Material.AIR);
+        return null;
     }
 
     protected abstract boolean handleItemGive(ItemStack itemStack);
 
     public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
-        if (handleItemGive(itemStackGived)) {
+        if (tryRegister(itemStackGived, this::handleItemGive)) {
             ItemMeta meta = itemStackGived.getItemMeta();
             if (meta == null || !meta.hasDisplayName())
                 setItemName(itemStackGived);

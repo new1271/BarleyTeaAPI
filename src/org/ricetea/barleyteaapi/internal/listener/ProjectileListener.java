@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.internal.listener;
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,8 +21,12 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitBlock;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class ProjectileListener implements Listener {
     private static final Lazy<ProjectileListener> inst = new Lazy<>(ProjectileListener::new);
@@ -40,6 +45,12 @@ public final class ProjectileListener implements Listener {
             return;
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
+        if (!ItemFeatureHelper.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
+                FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
+                DataItemHoldEntityShoot::new)) {
+            event.setCancelled(true);
+            return;
+        }
         if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
                 FeatureEntityShoot::handleEntityShoot, DataEntityShoot::new)) {
             event.setCancelled(true);

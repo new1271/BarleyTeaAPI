@@ -25,6 +25,8 @@ import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class ItemFeatureHelper {
     private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
+    private static final EquipmentSlot[] SLOTS_JustHands = new EquipmentSlot[] { EquipmentSlot.HAND,
+            EquipmentSlot.OFF_HAND };
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
@@ -33,6 +35,24 @@ public final class ItemFeatureHelper {
         if (entity != null && event != null) {
             EntityEquipment equipment = entity.getEquipment();
             for (EquipmentSlot slot : SLOTS) {
+                if (slot != null) {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    if (!doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc, dataConstructor)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachHandsCancellable(
+            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
+            @Nonnull BiPredicate<TFeature, TData> featureFunc,
+            @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
+        if (entity != null && event != null) {
+            EntityEquipment equipment = entity.getEquipment();
+            for (EquipmentSlot slot : SLOTS_JustHands) {
                 if (slot != null) {
                     ItemStack itemStack = equipment.getItem(slot);
                     if (!doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc, dataConstructor)) {
@@ -192,7 +212,7 @@ public final class ItemFeatureHelper {
                 if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
                     itemStackResult = itemGiveFeature.handleItemGive(1);
                 }
-                if (itemStackResult != null) {
+                if (itemStackResult != null && !itemStackResult.getType().isAir()) {
                     if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
                         int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
                         int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);

@@ -1,6 +1,8 @@
 package org.ricetea.barleyteaapi.api.item;
 
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,6 +23,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 import net.kyori.adventure.text.Component;
@@ -138,8 +141,43 @@ public abstract class BaseItem implements Keyed {
                 meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
                         key.toString());
                 itemStack.setItemMeta(meta);
+                AbstractItemRenderer.renderItem(itemStack);
             }
         }
+    }
+
+    public final void register(@Nullable ItemStack itemStack,
+            @Nullable Consumer<ItemStack> afterItemStackRegistered) {
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+                if (afterItemStackRegistered != null) {
+                    afterItemStackRegistered.accept(itemStack);
+                }
+                AbstractItemRenderer.renderItem(itemStack);
+            }
+        }
+    }
+
+    public final boolean tryRegister(@Nullable ItemStack itemStack,
+            @Nullable Predicate<ItemStack> afterItemStackRegistered) {
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+                if (afterItemStackRegistered != null && !afterItemStackRegistered.test(itemStack)) {
+                    return false;
+                }
+                AbstractItemRenderer.renderItem(itemStack);
+                return true;
+            }
+        }
+        return false;
     }
 
     public final boolean isCertainItem(@Nullable ItemStack itemStack) {

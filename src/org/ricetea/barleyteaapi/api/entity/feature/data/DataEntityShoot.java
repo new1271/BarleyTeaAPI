@@ -16,17 +16,17 @@ public final class DataEntityShoot extends BaseEntityFeatureData<ProjectileLaunc
 
     public DataEntityShoot(@Nonnull ProjectileLaunchEvent event) {
         super(event, (Entity) event.getEntity().getShooter());
-        entityType = new Lazy<>(() -> BaseEntity.getEntityType(getEntity()));
+        entityType = new Lazy<>(() -> BaseEntity.getEntityType(getProjectile()));
     }
 
     @SuppressWarnings("null")
     @Nonnull
-    public Projectile getEntity() {
+    public Projectile getProjectile() {
         return event.getEntity();
     }
 
     @Nonnull
-    public DataEntityType getEntityType() {
+    public DataEntityType getProjectileType() {
         return entityType.get();
     }
 }

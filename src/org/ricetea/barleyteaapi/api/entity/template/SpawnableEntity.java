@@ -28,7 +28,7 @@ public abstract class SpawnableEntity extends BaseEntity
         Entity entity = world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
         if (entity == null)
             return null;
-        if (handleEntitySpawn(entity)) {
+        if (tryRegister(entity, this::handleEntitySpawn)) {
             return entity;
         } else {
             entity.remove();
@@ -40,6 +40,6 @@ public abstract class SpawnableEntity extends BaseEntity
 
     @Override
     public boolean handleCommandSummon(@Nonnull Entity entity, @Nullable String nbt) {
-        return handleEntitySpawn(entity);
+        return tryRegister(entity, this::handleEntitySpawn);
     }
 }

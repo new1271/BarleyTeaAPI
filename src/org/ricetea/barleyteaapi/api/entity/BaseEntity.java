@@ -1,5 +1,8 @@
 package org.ricetea.barleyteaapi.api.entity;
 
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -56,6 +59,38 @@ public abstract class BaseEntity implements Keyed {
         if (entity != null)
             entity.getPersistentDataContainer().set(EntityTagNamespacedKey,
                     PersistentDataType.STRING, key.toString());
+    }
+
+    public final <T extends Entity> void register(@Nullable T entity,
+            @Nullable Consumer<T> afterEntityRegistered) {
+        if (entity != null) {
+            entity.getPersistentDataContainer().set(EntityTagNamespacedKey,
+                    PersistentDataType.STRING, key.toString());
+            if (afterEntityRegistered != null) {
+                afterEntityRegistered.accept(entity);
+            }
+        }
+    }
+
+    public final <T extends Entity> boolean tryRegister(@Nullable T entity,
+            @Nullable Predicate<T> afterEntityRegistered) {
+        if (entity != null) {
+            PersistentDataContainer container = entity.getPersistentDataContainer();
+            String previousID = container.getOrDefault(EntityTagNamespacedKey, PersistentDataType.STRING, null);
+            container.set(EntityTagNamespacedKey, PersistentDataType.STRING, key.toString());
+            if (afterEntityRegistered != null) {
+                if (!afterEntityRegistered.test(entity)) {
+                    if (!entity.isDead())
+                        if (previousID == null)
+                            container.remove(EntityTagNamespacedKey);
+                        else
+                            container.set(EntityTagNamespacedKey, PersistentDataType.STRING, previousID);
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public final boolean isCertainEntity(@Nullable Entity entity) {

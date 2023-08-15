@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Result;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
@@ -169,6 +170,9 @@ public final class PlayerEventListener implements Listener {
     public void listenItemInteractBlock(PlayerInteractEvent event) {
         if (event == null || event.useInteractedBlock().equals(Result.DENY)
                 || event.useItemInHand().equals(Result.DENY))
+            return;
+        Action action = event.getAction();
+        if (action == null || action.equals(Action.PHYSICAL))
             return;
         boolean isNothing = event.getClickedBlock() == null || event.getClickedBlock().getType().isAir();
         if (isNothing) {

@@ -123,7 +123,6 @@ public final class BarleyGiveCommand {
 			itemstack.c(nbt);
 			if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType) {
 				org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
-				BaseItem.registerItem(bukkitStack, barleyTeaItemType);
 				if (commandGiveType.handleCommandGive(ObjectUtil.throwWhenNull(bukkitStack), nbt.toString())) {
 					AbstractItemRenderer.renderItem(bukkitStack);
 					itemstack = ObjectUtil.throwWhenNull(NMSItemHelper.getNmsItem(bukkitStack));

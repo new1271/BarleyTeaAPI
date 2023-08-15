@@ -14,9 +14,11 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectileSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 
-public abstract class BaseProjectile extends BaseEntity implements FeatureCommandSummon, FeatureProjectile {
+public abstract class BaseProjectile extends BaseEntity
+        implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
 
     public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) throws Exception {
         super(key, checkEntityType(entityTypeBasedOn));
@@ -30,12 +32,12 @@ public abstract class BaseProjectile extends BaseEntity implements FeatureComman
     }
 
     @Nullable
-    public Projectile spawn(@Nullable Location location) {
-        return spawn(location, null);
+    public Projectile handleEntitySpawn(@Nullable Location location) {
+        return handleEntitySpawn(location, null);
     }
 
     @Nullable
-    public Projectile spawn(@Nullable Location location, @Nullable ProjectileSource shooter) {
+    public Projectile handleEntitySpawn(@Nullable Location location, @Nullable ProjectileSource shooter) {
         if (location == null)
             return null;
         World world = location.getWorld();
@@ -45,24 +47,26 @@ public abstract class BaseProjectile extends BaseEntity implements FeatureComman
         if (entity == null)
             return null;
         entity.setShooter(shooter);
-        spawn(entity);
-        return entity;
+        if (tryRegister(entity, this::handleEntitySpawn)) {
+            return entity;
+        } else {
+            entity.remove();
+        }
+        return null;
     }
 
-    protected abstract void spawn(@Nonnull Projectile projectile);
+    protected abstract boolean handleEntitySpawn(@Nonnull Projectile projectile);
 
     @Override
     public boolean handleCommandSummon(@Nonnull Entity entity, @Nullable String nbt) {
-        if (entity instanceof Projectile) {
-            spawn((Projectile) entity);
-            return true;
+        if (entity instanceof Projectile projectile) {
+            return tryRegister(projectile, this::handleEntitySpawn);
         }
         return false;
     }
 
     @Override
     public boolean handleProjectileLaunch(@Nonnull DataProjectileLaunch data) {
-        spawn(data.getEntity());
-        return true;
+        return tryRegister(data.getEntity(), this::handleEntitySpawn);
     }
 }

@@ -1,0 +1,38 @@
+package org.ricetea.barleyteaapi.api.item.feature.data;
+
+import javax.annotation.Nonnull;
+
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
+
+public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData<ProjectileLaunchEvent> {
+
+    @Nonnull
+    private final Lazy<DataEntityType> entityType;
+
+    public DataItemHoldEntityShoot(@Nonnull ProjectileLaunchEvent event, @Nonnull ItemStack itemStack,
+            @Nonnull EquipmentSlot equipmentSlot) {
+        super(event, ObjectUtil.throwWhenNull(ObjectUtil.tryCast(event.getEntity().getShooter(), LivingEntity.class)),
+                itemStack, equipmentSlot);
+        entityType = new Lazy<>(() -> BaseEntity.getEntityType(getProjectile()));
+    }
+
+    @SuppressWarnings("null")
+    @Nonnull
+    public Projectile getProjectile() {
+        return event.getEntity();
+    }
+
+    @Nonnull
+    public DataEntityType getProjectileType() {
+        return entityType.get();
+    }
+}

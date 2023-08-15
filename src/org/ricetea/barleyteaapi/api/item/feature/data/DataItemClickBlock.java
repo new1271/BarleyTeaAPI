@@ -18,8 +18,14 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
         super(event);
     }
 
-    public @Nonnull Action getAction() {
-        return ObjectUtil.throwWhenNull(event.getAction());
+    public boolean isLeftClick() {
+        Action action = event.getAction();
+        return action != null && (action.equals(Action.LEFT_CLICK_AIR) || action.equals(Action.LEFT_CLICK_BLOCK));
+    }
+
+    public boolean isRightClick() {
+        Action action = event.getAction();
+        return action != null && (action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK));
     }
 
     public @Nonnull ItemStack getItemStack() {
