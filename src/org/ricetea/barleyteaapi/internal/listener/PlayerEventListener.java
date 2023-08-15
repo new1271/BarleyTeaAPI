@@ -102,6 +102,9 @@ public final class PlayerEventListener implements Listener {
                                 return;
                             }
                             repairAmount = event.getRepairAmount();
+                            newDamage = Math.max(damage - repairAmount, 0);
+                            repairAmount = damage - newDamage;
+                            event.setRepairAmount(damage - newDamage);
                         } else {
                             event.setCancelled(true);
                             return;
