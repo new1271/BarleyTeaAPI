@@ -168,8 +168,7 @@ public final class PlayerEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemInteractBlock(PlayerInteractEvent event) {
-        if (event == null || event.useInteractedBlock().equals(Result.DENY)
-                || event.useItemInHand().equals(Result.DENY))
+        if (event == null)
             return;
         Action action = event.getAction();
         if (action == null || action.equals(Action.PHYSICAL))
