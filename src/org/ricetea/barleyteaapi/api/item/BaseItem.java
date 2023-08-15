@@ -35,11 +35,13 @@ public abstract class BaseItem implements Keyed {
     private final Material materialBasedOn;
     @Nonnull
     private final DataItemRarity rarity;
+    private final boolean isTool;
 
     public BaseItem(@Nonnull NamespacedKey key, @Nonnull Material materialBasedOn, @Nonnull DataItemRarity rarity) {
         this.key = key;
         this.materialBasedOn = materialBasedOn;
         this.rarity = rarity;
+        this.isTool = materialIsTool(materialBasedOn);
     }
 
     @Nonnull
@@ -62,8 +64,12 @@ public abstract class BaseItem implements Keyed {
         return materialBasedOn;
     }
 
-    public final boolean isTool() {
-        Material type = materialBasedOn;
+    public boolean isTool() {
+        return isTool;
+    }
+
+    protected static boolean materialIsTool(Material material) {
+        Material type = material;
         switch (type) {
             case WOODEN_SWORD:
             case STONE_SWORD:
@@ -102,25 +108,25 @@ public abstract class BaseItem implements Keyed {
         }
     }
 
-    public final void setDefaultAttackDamage(@Nullable ItemStack itemStack, double attackDamage) {
-        if (itemStack != null && isBarleyTeaItem(itemStack)) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
-                meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(UUID.randomUUID(),
-                        "default modifier", attackDamage - 1, Operation.ADD_NUMBER, EquipmentSlot.HAND));
-                itemStack.setItemMeta(meta);
-            }
-        }
+    protected final void setToolAttackDamage(@Nullable ItemStack itemStack, double attackDamage) {
+        setDefaultAttribute(itemStack, Attribute.GENERIC_ATTACK_DAMAGE, attackDamage - 1.0, Operation.ADD_NUMBER,
+                EquipmentSlot.HAND);
     }
 
-    public final void setDefaultAttackSpeed(@Nullable ItemStack itemStack, double attackSpeed) {
-        if (itemStack != null && isBarleyTeaItem(itemStack)) {
+    protected final void setToolAttackSpeed(@Nullable ItemStack itemStack, double attackSpeed) {
+        setDefaultAttribute(itemStack, Attribute.GENERIC_ATTACK_SPEED, attackSpeed - 4.0, Operation.ADD_NUMBER,
+                EquipmentSlot.HAND);
+    }
+
+    protected final void setDefaultAttribute(@Nullable ItemStack itemStack, @Nullable Attribute attribute,
+            double amount, @Nullable Operation operation, @Nullable EquipmentSlot equipmentSlot) {
+        if (itemStack != null && attribute != null && operation != null && equipmentSlot != null
+                && isBarleyTeaItem(itemStack)) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED);
-                meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID.randomUUID(),
-                        "default modifier", attackSpeed - 4, Operation.ADD_NUMBER, EquipmentSlot.HAND));
+                meta.removeAttributeModifier(attribute);
+                meta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
+                        "default modifiers", amount, operation, equipmentSlot));
                 itemStack.setItemMeta(meta);
             }
         }

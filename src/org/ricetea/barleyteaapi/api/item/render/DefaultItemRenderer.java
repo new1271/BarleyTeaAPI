@@ -168,7 +168,6 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                 for (Entry<EquipmentSlot, HashMap<Attribute, AttributeModifier>> entry : map
                                         .entrySet()) {
                                     String slot;
-                                    boolean isMainHand = false;
                                     switch (entry.getKey()) {
                                         case CHEST:
                                             slot = "item.modifiers.chest";
@@ -178,7 +177,6 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                             break;
                                         case HAND:
                                             slot = "item.modifiers.mainhand";
-                                            isMainHand = isTool;
                                             break;
                                         case HEAD:
                                             slot = "item.modifiers.head";
@@ -192,13 +190,8 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         default:
                                             continue;
                                     }
-                                    ArrayList<Component> currentAttributeLore;
-                                    if (!isMainHand) {
-                                        AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
-                                                .decoration(TextDecoration.ITALIC, false));
-                                        currentAttributeLore = AttributeLore;
-                                    } else
-                                        currentAttributeLore = MainHandLore;
+                                    AttributeLore.add(Component.translatable(slot).color(NamedTextColor.GRAY)
+                                            .decoration(TextDecoration.ITALIC, false));
                                     for (Entry<Attribute, AttributeModifier> entry2 : entry.getValue().entrySet()) {
                                         final NamespacedKey key = entry2.getKey().getKey();
                                         final String attributeKey = "attribute.name." + key.getKey();
@@ -215,13 +208,13 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         String valueString = Double.toString(value);
                                         if (valueString.endsWith(".0"))
                                             valueString = valueString.substring(0, valueString.length() - 2);
-                                        currentAttributeLore.add(Component.translatable(format)
+                                        AttributeLore.add(Component.translatable(format)
                                                 .args(Component.text(valueString),
                                                         Component.translatable(attributeKey))
                                                 .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
                                                 .decoration(TextDecoration.ITALIC, false));
                                     }
-                                    currentAttributeLore.add(Component.empty());
+                                    AttributeLore.add(Component.empty());
                                 }
                                 lores.addAll(AttributeLore);
                                 if (!isTool)
@@ -237,10 +230,6 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                             String toolSpeedString = Double.toString(toolSpeed);
                             if (toolSpeedString.endsWith(".0"))
                                 toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
-                            if (MainHandLore.size() > 0) {
-                                MainHandLore.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
-                                        .decoration(TextDecoration.ITALIC, false));
-                            }
                             MainHandLore.add(Component.text(" ").append(
                                     Component.translatable("attribute.modifier.equals.0").args(
                                             Component.text(toolDamageString),
