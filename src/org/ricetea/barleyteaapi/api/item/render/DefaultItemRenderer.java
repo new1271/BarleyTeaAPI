@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -32,7 +33,6 @@ import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.kyori.adventure.text.Component;
@@ -47,6 +47,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
     private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
     private static final @Nonnull Lazy<DefaultItemRenderer> _inst = new Lazy<>(DefaultItemRenderer::new);
     private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
+    private static final @Nonnull Operation[] operations = Operation.values();
 
     private DefaultItemRenderer() {
         super(NamespacedKeyUtils.BarleyTeaAPI("default_item_renderer"));
@@ -126,16 +127,17 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                     : NMSItemHelper.getDefaultAttributeModifiers(itemStack);
                             if (attrbuteMap != null) {
                                 ArrayList<Component> AttributeLore = new ArrayList<>();
-                                HashMap<EquipmentSlot, Multimap<Attribute, AttributeModifier>> map = new HashMap<>();
+                                HashMap<EquipmentSlot, HashMap<Attribute, double[]>> map = new HashMap<>();
                                 for (Entry<Attribute, AttributeModifier> entry : attrbuteMap.entries()) {
                                     Attribute attribute = entry.getKey();
                                     AttributeModifier modifier = entry.getValue();
-                                    if (attribute == null || modifier.getAmount() == 0)
+                                    double amount = modifier.getAmount();
+                                    Operation operation = modifier.getOperation();
+                                    if (attribute == null || amount == 0 || operation == null)
                                         continue;
                                     EquipmentSlot slot = modifier.getSlot();
                                     if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
-                                        if (modifier.getOperation()
-                                                .equals(AttributeModifier.Operation.ADD_NUMBER)) {
+                                        if (operation.equals(AttributeModifier.Operation.ADD_NUMBER)) {
                                             switch (entry.getKey()) {
                                                 case GENERIC_ATTACK_DAMAGE:
                                                     toolDamage += entry.getValue().getAmount();
@@ -152,20 +154,30 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         for (EquipmentSlot iteratedSlot : slots) {
                                             if (iteratedSlot == null)
                                                 continue;
-                                            Multimap<Attribute, AttributeModifier> hmap = map.get(iteratedSlot);
+                                            HashMap<Attribute, double[]> hmap = map.get(iteratedSlot);
                                             if (hmap == null) {
-                                                hmap = LinkedHashMultimap.create();
+                                                hmap = new HashMap<>();
                                                 map.put(iteratedSlot, hmap);
                                             }
-                                            hmap.put(attribute, modifier);
+                                            double[] values = hmap.get(attribute);
+                                            if (values == null) {
+                                                values = new double[operations.length];
+                                                hmap.put(attribute, values);
+                                            }
+                                            values[operation.ordinal()] += amount;
                                         }
                                     } else {
-                                        Multimap<Attribute, AttributeModifier> hmap = map.get(slot);
+                                        HashMap<Attribute, double[]> hmap = map.get(slot);
                                         if (hmap == null) {
-                                            hmap = LinkedHashMultimap.create();
+                                            hmap = new HashMap<>();
                                             map.put(slot, hmap);
                                         }
-                                        hmap.put(attribute, modifier);
+                                        double[] values = hmap.get(attribute);
+                                        if (values == null) {
+                                            values = new double[operations.length];
+                                            hmap.put(attribute, values);
+                                        }
+                                        values[operation.ordinal()] += amount;
                                     }
                                 }
                                 for (EquipmentSlot slot : slots) {
@@ -194,30 +206,38 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                         default:
                                             continue;
                                     }
-                                    Multimap<Attribute, AttributeModifier> mapValue = map.get(slot);
+                                    HashMap<Attribute, double[]> mapValue = map.get(slot);
                                     AttributeLore.add(Component.translatable(slotStringKey).color(NamedTextColor.GRAY)
                                             .decoration(TextDecoration.ITALIC, false));
-                                    for (Entry<Attribute, AttributeModifier> entry2 : mapValue.entries()) {
-                                        final NamespacedKey key = entry2.getKey().getKey();
-                                        final String attributeKey = "attribute.name." + key.getKey();
-                                        double value = entry2.getValue().getAmount();
-                                        String format = "attribute.modifier." + (value >= 0 ? "plus." : "take.")
-                                                + entry2.getValue().getOperation().ordinal();
-                                        if (!entry2.getValue().getOperation()
-                                                .equals(AttributeModifier.Operation.ADD_NUMBER))
-                                            value *= 100;
-                                        else if (entry2.getKey().equals(Attribute.GENERIC_KNOCKBACK_RESISTANCE)) {
-                                            value *= 10;
+                                    for (Entry<Attribute, double[]> entry2 : mapValue.entrySet()) {
+                                        final Attribute attribute = entry2.getKey();
+                                        final NamespacedKey attributeKey = attribute.getKey();
+                                        final String attributeTranslateKey = "attribute.name." + attributeKey.getKey();
+                                        final double[] values = entry2.getValue();
+                                        for (Operation operation : operations) {
+                                            if (operation != null) {
+                                                int operationOridinal = operation.ordinal();
+                                                double value = values[operationOridinal];
+                                                if (value == 0)
+                                                    continue;
+                                                String format = "attribute.modifier." + (value >= 0 ? "plus." : "take.")
+                                                        + operationOridinal;
+                                                if (!operation.equals(AttributeModifier.Operation.ADD_NUMBER))
+                                                    value *= 100;
+                                                else if (attribute.equals(Attribute.GENERIC_KNOCKBACK_RESISTANCE)) {
+                                                    value *= 10;
+                                                }
+                                                value = Math.round(value * 100.0) / 100.0;
+                                                String valueString = Double.toString(value);
+                                                if (valueString.endsWith(".0"))
+                                                    valueString = valueString.substring(0, valueString.length() - 2);
+                                                AttributeLore.add(Component.translatable(format)
+                                                        .args(Component.text(valueString),
+                                                                Component.translatable(attributeTranslateKey))
+                                                        .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
+                                                        .decoration(TextDecoration.ITALIC, false));
+                                            }
                                         }
-                                        value = Math.round(value * 100.0) / 100.0;
-                                        String valueString = Double.toString(value);
-                                        if (valueString.endsWith(".0"))
-                                            valueString = valueString.substring(0, valueString.length() - 2);
-                                        AttributeLore.add(Component.translatable(format)
-                                                .args(Component.text(valueString),
-                                                        Component.translatable(attributeKey))
-                                                .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
-                                                .decoration(TextDecoration.ITALIC, false));
                                     }
                                     AttributeLore.add(Component.empty());
                                 }
