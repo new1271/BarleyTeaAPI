@@ -95,21 +95,24 @@ public final class PlayerEventListener implements Listener {
                     int repairAmount = event.getExperienceOrb().getExperience() * 2;
                     int newDamage = Math.max(damage - repairAmount, 0);
                     repairAmount = damage - newDamage;
-                    event.setRepairAmount(damage - newDamage);
                     if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
+                        event.setRepairAmount(repairAmount);
                         if (itemDamageFeature.handleItemMend(new DataItemMend(event))) {
                             if (event.isCancelled()) {
                                 return;
                             }
-                            repairAmount = event.getRepairAmount();
-                            newDamage = Math.max(damage - repairAmount, 0);
-                            repairAmount = damage - newDamage;
-                            event.setRepairAmount(damage - newDamage);
+                            int repairAmountTemp = event.getRepairAmount();
+                            if (repairAmount != repairAmountTemp) {
+                                newDamage = Math.max(damage - repairAmountTemp, 0);
+                                repairAmountTemp = damage - newDamage;
+                                repairAmount = repairAmountTemp;
+                            }
                         } else {
                             event.setCancelled(true);
                             return;
                         }
                     }
+                    event.setRepairAmount(repairAmount);
                     customDurabilityFeature.setDurabilityDamage(itemStack, newDamage);
                     if (itemStack.getItemMeta() instanceof Damageable damageable) {
                         int visualDamage = damageable.getDamage();
