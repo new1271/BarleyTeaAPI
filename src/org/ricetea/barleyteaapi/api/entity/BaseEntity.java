@@ -127,11 +127,16 @@ public abstract class BaseEntity implements Keyed {
         if (entityTypeID == null) {
             return DataEntityType.create(entity.getType());
         } else {
-            BaseEntity baseEntity = EntityRegister.getInstance().lookupEntityType(entityTypeID);
-            if (baseEntity == null)
+            EntityRegister register = EntityRegister.getInstanceUnsafe();
+            if (register == null) {
                 return DataEntityType.create(entity.getType());
-            else
-                return DataEntityType.create(baseEntity);
+            } else {
+                BaseEntity baseEntity = register.lookupEntityType(entityTypeID);
+                if (baseEntity == null)
+                    return DataEntityType.create(entity.getType());
+                else
+                    return DataEntityType.create(baseEntity);
+            }
         }
     }
 

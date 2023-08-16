@@ -59,8 +59,9 @@ public final class PlayerEventListener implements Listener {
         ItemStack itemStack = event.getItem();
         if (itemStack != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseItem baseItem = register.lookupItemType(id);
                 if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
                     if (!itemDamageFeature.handleItemDamage(new DataItemDamage(event))) {
                         event.setCancelled(true);
@@ -88,8 +89,9 @@ public final class PlayerEventListener implements Listener {
         ItemStack itemStack = event.getItem();
         if (itemStack != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseItem baseItem = register.lookupItemType(id);
                 if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
                     int damage = customDurabilityFeature.getDurabilityDamage(itemStack);
                     int repairAmount = event.getExperienceOrb().getExperience() * 2;

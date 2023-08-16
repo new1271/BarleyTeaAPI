@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
+import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -54,6 +56,15 @@ public final class CraftListener implements Listener {
                 availableItemCount++;
             }
             craftingTypeOfMatrix[i] = itemType;
+        }
+        CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
+        if (register != null && register.hasAnyRegisteredCraftingRecipe()) {
+            for (BaseCraftingRecipe recipe : register.getCraftingRecipeTypes(null)) {
+                if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
+                    inventory.setResult(recipe.apply(craftingMatrix));
+                    return;
+                }
+            }
         }
         Recipe craftingRecipe = inventory.getRecipe();
         if (craftingRecipe instanceof Keyed keyedRecipe) {

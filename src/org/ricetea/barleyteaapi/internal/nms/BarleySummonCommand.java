@@ -107,42 +107,47 @@ public final class BarleySummonCommand {
                 if (!worldserver.tryAddFreshEntityWithPassengers(entity, CreatureSpawnEvent.SpawnReason.COMMAND))
                     throw summonFailedWithPositionMessage.create();
                 source.a(() -> IChatBaseComponent.a("commands.summon.success", new Object[] { entity.H_() }), true);
+                return 1;
             } else {
-                EntityRegister register = EntityRegister.getInstance();
-                NamespacedKey key = new NamespacedKey(namespace, entityKey.a());
-                BaseEntity baseEntity = register.lookupEntityType(key);
-                if (baseEntity != null && baseEntity instanceof FeatureCommandSummon) {
-                    FeatureCommandSummon summonEntity = (FeatureCommandSummon) baseEntity;
-                    NBTTagCompound nbttagcompound1 = nbt.h();
-                    nbttagcompound1.a("id", baseEntity.getEntityTypeBasedOn().getKey().toString());
-                    Entity entity = EntityTypes.a(nbttagcompound1, (World) worldserver, loadedEntity -> {
-                        loadedEntity.b(pos.c, pos.d, pos.e, loadedEntity.dy(), loadedEntity.dA());
-                        return loadedEntity;
-                    });
-                    if (entity == null)
-                        throw summonFailedMessage.create();
-                    org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-                    if (bukkitEntity == null)
-                        throw summonFailedMessage.create();
-                    if (initialize && entity instanceof EntityInsentient)
-                        ((EntityInsentient) entity).a((WorldAccess) source.e(), source.e().d_(entity.di()),
-                                EnumMobSpawn.n,
-                                (GroupDataEntity) null, (NBTTagCompound) null);
-                    if (!worldserver.tryAddFreshEntityWithPassengers(entity, CreatureSpawnEvent.SpawnReason.COMMAND))
-                        throw summonFailedMessage.create();
-                    if (!summonEntity.handleCommandSummon(bukkitEntity, nbt.toString())) {
-                        bukkitEntity.remove();
-                        throw summonFailedMessage.create();
+                EntityRegister register = EntityRegister.getInstanceUnsafe();
+                if (register != null) {
+                    NamespacedKey key = new NamespacedKey(namespace, entityKey.a());
+                    BaseEntity baseEntity = register.lookupEntityType(key);
+                    if (baseEntity != null && baseEntity instanceof FeatureCommandSummon) {
+                        FeatureCommandSummon summonEntity = (FeatureCommandSummon) baseEntity;
+                        NBTTagCompound nbttagcompound1 = nbt.h();
+                        nbttagcompound1.a("id", baseEntity.getEntityTypeBasedOn().getKey().toString());
+                        Entity entity = EntityTypes.a(nbttagcompound1, (World) worldserver, loadedEntity -> {
+                            loadedEntity.b(pos.c, pos.d, pos.e, loadedEntity.dy(), loadedEntity.dA());
+                            return loadedEntity;
+                        });
+                        if (entity == null)
+                            throw summonFailedMessage.create();
+                        org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
+                        if (bukkitEntity == null)
+                            throw summonFailedMessage.create();
+                        if (initialize && entity instanceof EntityInsentient)
+                            ((EntityInsentient) entity).a((WorldAccess) source.e(), source.e().d_(entity.di()),
+                                    EnumMobSpawn.n,
+                                    (GroupDataEntity) null, (NBTTagCompound) null);
+                        if (!worldserver.tryAddFreshEntityWithPassengers(entity,
+                                CreatureSpawnEvent.SpawnReason.COMMAND))
+                            throw summonFailedMessage.create();
+                        if (!baseEntity.tryRegister(bukkitEntity,
+                                _entity -> _entity != null
+                                        && summonEntity.handleCommandSummon(_entity, nbt.toString()))) {
+                            bukkitEntity.remove();
+                            throw summonFailedMessage.create();
+                        }
+                        source.a(() -> IChatBaseComponent.a("commands.summon.success",
+                                new Object[] { IChatBaseComponent.a(baseEntity.getNameInTranslateKey(),
+                                        baseEntity.getDefaultName()) }),
+                                true);
+                        return 1;
                     }
-                    source.a(() -> IChatBaseComponent.a("commands.summon.success",
-                            new Object[] { IChatBaseComponent.a(baseEntity.getNameInTranslateKey(),
-                                    baseEntity.getDefaultName()) }),
-                            true);
-                } else {
-                    throw summonFailedMessage.create();
                 }
             }
-            return 1;
+            throw summonFailedMessage.create();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

@@ -44,8 +44,9 @@ public final class EntitySpawnListener implements Listener {
             }
             if (!event.isCancelled()) {
                 NamespacedKey id = BaseEntity.getEntityID(entity);
-                if (id != null) {
-                    BaseEntity baseEntity = EntityRegister.getInstance().lookupEntityType(id);
+                EntityRegister register = EntityRegister.getInstanceUnsafe();
+                if (register != null && id != null) {
+                    BaseEntity baseEntity = register.lookupEntityType(id);
                     if (baseEntity instanceof FeatureEntityTick) {
                         EntityTickTask.getInstance().addEntity(entity);
                     }
@@ -56,13 +57,13 @@ public final class EntitySpawnListener implements Listener {
 
     private void onCreatureSpawn(@Nonnull CreatureSpawnEvent event) {
         SpawnReason reason = event.getSpawnReason();
-        if (reason == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND)
-                || reason.equals(SpawnReason.DEFAULT))
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (reason == null || register == null || reason.equals(SpawnReason.CUSTOM)
+                || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
-        for (BaseEntity entityType : EntityRegister.getInstance()
-                .getEntityTypes(e -> e instanceof FeatureNaturalSpawn
-                        && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
+        for (BaseEntity entityType : register.getEntityTypes(e -> e instanceof FeatureNaturalSpawn
+                && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
                 if (rnd.nextDouble() < spawnEntityType.getSpawnPosibility(reason)) {

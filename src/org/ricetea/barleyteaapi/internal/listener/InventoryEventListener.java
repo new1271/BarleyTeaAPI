@@ -49,8 +49,9 @@ public final class InventoryEventListener implements Listener {
         ItemStack itemStack = event.getItem();
         if (itemStack != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseItem baseItem = register.lookupItemType(id);
                 if (baseItem != null) {
                     Consumer<ItemStack> job = null;
                     if (baseItem instanceof FeatureItemEnchant itemEnchantFeature) {
@@ -83,8 +84,9 @@ public final class InventoryEventListener implements Listener {
         final ItemStack lowerItem = inventory.getLowerItem();
         if (upperItem != null) {
             NamespacedKey id = BaseItem.getItemID(upperItem);
-            if (id != null) {
-                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseItem baseItem = register.lookupItemType(id);
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(lowerItem)) {
@@ -124,8 +126,9 @@ public final class InventoryEventListener implements Listener {
         final ItemStack secondItem = inventory.getSecondItem();
         if (firstItem != null) {
             NamespacedKey id = BaseItem.getItemID(firstItem);
-            if (id != null) {
-                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(id);
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseItem baseItem = register.lookupItemType(id);
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(secondItem)) { //Repair mode

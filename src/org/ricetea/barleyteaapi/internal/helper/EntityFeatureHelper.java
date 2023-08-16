@@ -22,15 +22,17 @@ public final class EntityFeatureHelper {
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
-        if (entity != null && event != null) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupEntityType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event)) && !ObjectUtil.letNonNull(
-                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
-                                    Cancellable::isCancelled),
-                            false);
+                    boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+                    if (event instanceof Cancellable cancellable) {
+                        result &= !cancellable.isCancelled();
+                    }
+                    return result;
                 }
             }
         }
@@ -42,15 +44,17 @@ public final class EntityFeatureHelper {
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
-        if (entity != null && event != null) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupEntityType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, event2)) && !ObjectUtil.letNonNull(
-                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
-                                    Cancellable::isCancelled),
-                            false);
+                    boolean result = featureFunc.test(feature, dataConstructor.apply(event, event2));
+                    if (event instanceof Cancellable cancellable) {
+                        result &= !cancellable.isCancelled();
+                    }
+                    return result;
                 }
             }
         }
@@ -62,10 +66,11 @@ public final class EntityFeatureHelper {
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
-        if (entity != null && event != null) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupEntityType(id), featureClass);
                 if (feature != null) {
                     featureFunc.accept(feature, dataConstructor.apply(event, event2));
                 }
@@ -77,10 +82,11 @@ public final class EntityFeatureHelper {
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
-        if (entity != null && event != null) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupEntityType(id), featureClass);
                 if (feature != null) {
                     featureFunc.accept(feature, dataConstructor.apply(event));
                 }
@@ -91,10 +97,11 @@ public final class EntityFeatureHelper {
     public static <TFeature> void doFeature(
             @Nullable Entity entity, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, Entity> featureFunc) {
-        if (entity != null) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (entity != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(EntityRegister.getInstance().lookupEntityType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupEntityType(id), featureClass);
                 if (feature != null) {
                     featureFunc.accept(feature, entity);
                 }

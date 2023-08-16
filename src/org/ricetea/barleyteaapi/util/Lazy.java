@@ -5,17 +5,14 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class Lazy<T> {
-    boolean isInited;
+public final class Lazy<T> implements Supplier<T> {
+    @Nonnull
+    protected final Supplier<T> supplier;
 
     @Nullable
-    T realObj;
-
-    @Nonnull
-    Supplier<T> supplier;
+    protected T realObj;
 
     public Lazy(@Nonnull Supplier<T> supplier) {
-        isInited = false;
         this.supplier = supplier;
     }
 

@@ -77,19 +77,23 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
                 } else {
                     List<MinecraftKey> customKeys = this.customKeys;
                     if (customKeys == null) {
-                        this.customKeys = customKeys = Arrays
-                                .stream(EntityRegister.getInstance()
-                                        .getEntityIDs(type -> type instanceof FeatureCommandSummon))
-                                .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                        EntityRegister register = EntityRegister.getInstanceUnsafe();
+                        if (register != null) {
+                            this.customKeys = customKeys = Arrays
+                                    .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                                    .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                        }
                     }
                     builtinKeys.stream()
                             .filter(key -> key.a().startsWith(lowerCasedRemaining)
                                     || key.b().startsWith(lowerCasedRemaining))
                             .forEach(key -> suggestionsBuilder.suggest(key.toString()));
-                    customKeys.stream()
-                            .filter(key -> key.a().startsWith(lowerCasedRemaining)
-                                    || key.b().startsWith(lowerCasedRemaining))
-                            .forEach(key -> suggestionsBuilder.suggest(key.toString()));
+                    if (customKeys != null) {
+                        customKeys.stream()
+                                .filter(key -> key.a().startsWith(lowerCasedRemaining)
+                                        || key.b().startsWith(lowerCasedRemaining))
+                                .forEach(key -> suggestionsBuilder.suggest(key.toString()));
+                    }
                 }
             }
             return suggestionsBuilder.buildFuture();
@@ -102,9 +106,12 @@ public final class BarleySummonEntityProvider extends CompletionProviders {
         public Iterator<MinecraftKey> iterator() {
             List<MinecraftKey> customKeys = this.customKeys;
             if (customKeys == null) {
-                this.customKeys = customKeys = Arrays
-                        .stream(EntityRegister.getInstance().getEntityIDs(type -> type instanceof FeatureCommandSummon))
-                        .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                EntityRegister register = EntityRegister.getInstanceUnsafe();
+                if (register != null) {
+                    this.customKeys = customKeys = Arrays
+                            .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                            .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                }
             }
             return new IteratorForEntityKey(builtinKeys, ObjectUtil.letNonNull(customKeys, Collections::emptyList));
         }

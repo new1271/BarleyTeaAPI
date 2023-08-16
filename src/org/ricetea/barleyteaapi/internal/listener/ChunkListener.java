@@ -33,8 +33,8 @@ public final class ChunkListener implements Listener {
     public void listenEntitiesLoad(EntitiesLoadEvent event) {
         if (event == null)
             return;
-        EntityRegister register = EntityRegister.getInstance();
-        if (register.hasAnyRegisteredMob()) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (register != null && register.hasAnyRegisteredMob()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
                 if (entity != null) {
@@ -57,8 +57,8 @@ public final class ChunkListener implements Listener {
     public void listenEntitiesUnload(EntitiesUnloadEvent event) {
         if (event == null)
             return;
-        EntityRegister register = EntityRegister.getInstance();
-        if (register.hasAnyRegisteredMob()) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (register != null && register.hasAnyRegisteredMob()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
                 if (entity != null) {

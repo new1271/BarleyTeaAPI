@@ -76,19 +76,23 @@ public final class BarleyGiveItemProvider extends CompletionProviders {
                 } else {
                     List<MinecraftKey> customKeys = this.customKeys;
                     if (customKeys == null) {
-                        this.customKeys = customKeys = Arrays
-                                .stream(ItemRegister.getInstance()
-                                        .getItemIDs(type -> type instanceof FeatureCommandGive))
-                                .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                        ItemRegister register = ItemRegister.getInstanceUnsafe();
+                        if (register != null) {
+                            this.customKeys = customKeys = Arrays
+                                    .stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+                                    .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                        }
                     }
                     builtinKeys.stream()
                             .filter(key -> key.a().startsWith(lowerCasedRemaining)
                                     || key.b().startsWith(lowerCasedRemaining))
                             .forEach(key -> suggestionsBuilder.suggest(key.toString()));
-                    customKeys.stream()
-                            .filter(key -> key.a().startsWith(lowerCasedRemaining)
-                                    || key.b().startsWith(lowerCasedRemaining))
-                            .forEach(key -> suggestionsBuilder.suggest(key.toString()));
+                    if (customKeys != null) {
+                        customKeys.stream()
+                                .filter(key -> key.a().startsWith(lowerCasedRemaining)
+                                        || key.b().startsWith(lowerCasedRemaining))
+                                .forEach(key -> suggestionsBuilder.suggest(key.toString()));
+                    }
                 }
             }
             return suggestionsBuilder.buildFuture();
@@ -101,9 +105,12 @@ public final class BarleyGiveItemProvider extends CompletionProviders {
         public Iterator<MinecraftKey> iterator() {
             List<MinecraftKey> customKeys = this.customKeys;
             if (customKeys == null) {
-                this.customKeys = customKeys = Arrays
-                        .stream(ItemRegister.getInstance().getItemIDs(type -> type instanceof FeatureCommandGive))
-                        .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                ItemRegister register = ItemRegister.getInstanceUnsafe();
+                if (register != null) {
+                    this.customKeys = customKeys = Arrays
+                            .stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+                            .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+                }
             }
             return new IteratorForItemKey(builtinKeys, ObjectUtil.letNonNull(customKeys, Collections::emptyList));
         }

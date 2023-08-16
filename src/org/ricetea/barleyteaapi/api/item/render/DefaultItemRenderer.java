@@ -63,10 +63,11 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
     @Override
     public void render(@Nonnull ItemStack itemStack) {
         BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstance();
-        if (apiInstance != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (apiInstance != null && register != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                BaseItem itemType = ItemRegister.getInstance().lookupItemType(id);
+                BaseItem itemType = register.lookupItemType(id);
                 if (itemType != null) {
                     ItemMeta meta = itemStack.getItemMeta();
                     List<Component> customLores = getItemLore(itemStack);

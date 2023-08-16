@@ -43,8 +43,8 @@ public final class ItemTickTask extends AbstractTask {
     protected void runInternal() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstance();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        ItemRegister register = ItemRegister.getInstance();
-        if (api == null || scheduler == null || !register.hasAnyRegisteredItemNeedTicking()) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredItemNeedTicking()) {
             stop();
         } else {
             Player[] players = Bukkit.getOnlinePlayers().toArray(Player[]::new);

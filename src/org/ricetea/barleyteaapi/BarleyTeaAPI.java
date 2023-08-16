@@ -92,8 +92,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     private void announceEntitiesAPILoaded() {
-        EntityRegister register = EntityRegister.getInstance();
-        if (register.hasAnyRegisteredMob()) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (register != null && register.hasAnyRegisteredMob()) {
             for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
                 World world = worldIterator.next();
                 if (world != null) {
@@ -116,8 +116,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     private void announceEntitiesAPIUnloaded() {
-        EntityRegister register = EntityRegister.getInstance();
-        if (register.hasAnyRegisteredMob()) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (register != null && register.hasAnyRegisteredMob()) {
             for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
                 World world = worldIterator.next();
                 if (world != null) {

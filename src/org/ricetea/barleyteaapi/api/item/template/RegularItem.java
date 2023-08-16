@@ -100,7 +100,7 @@ public abstract class RegularItem extends BaseItem
     protected abstract boolean handleItemGive(ItemStack itemStack);
 
     public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
-        if (tryRegister(itemStackGived, this::handleItemGive)) {
+        if (handleItemGive(itemStackGived)) {
             ItemMeta meta = itemStackGived.getItemMeta();
             if (meta == null || !meta.hasDisplayName())
                 setItemName(itemStackGived);

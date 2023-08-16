@@ -39,6 +39,11 @@ public final class ItemRegister implements IRegister<BaseItem> {
         return inst.get();
     }
 
+    @Nullable
+    public static ItemRegister getInstanceUnsafe() {
+        return inst.getUnsafe();
+    }
+
     public void register(@Nonnull BaseItem item) {
         lookupTable.put(item.getKey(), item);
         if (BarleyTeaAPI.checkPluginUsable()) {

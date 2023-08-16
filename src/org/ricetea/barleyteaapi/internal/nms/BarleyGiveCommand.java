@@ -109,9 +109,15 @@ public final class BarleyGiveCommand {
 				}
 				barleyTeaItemType = null;
 			} else {
-				barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
-				nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
-						type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
+				ItemRegister register = ItemRegister.getInstanceUnsafe();
+				if (register == null) {
+					barleyTeaItemType = null;
+					nmsItemType = null;
+				} else {
+					barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
+					nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
+							type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
+				}
 			}
 			if (nmsItemType == null)
 				throw giveFailedMessage.create();
@@ -123,7 +129,9 @@ public final class BarleyGiveCommand {
 			itemstack.c(nbt);
 			if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType) {
 				org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
-				if (commandGiveType.handleCommandGive(ObjectUtil.throwWhenNull(bukkitStack), nbt.toString())) {
+				if (barleyTeaItemType.tryRegister(bukkitStack,
+						_itemStack -> _itemStack != null && commandGiveType
+								.handleCommandGive(_itemStack, nbt.toString()))) {
 					AbstractItemRenderer.renderItem(bukkitStack);
 					itemstack = ObjectUtil.throwWhenNull(NMSItemHelper.getNmsItem(bukkitStack));
 				} else {

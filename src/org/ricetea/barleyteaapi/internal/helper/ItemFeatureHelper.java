@@ -88,16 +88,18 @@ public final class ItemFeatureHelper {
             @Nullable TEvent2 event2, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
-        if (itemStack != null && event != null && equipmentSlot != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, event2, itemStack, equipmentSlot))
-                            && !ObjectUtil.letNonNull(
-                                    ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
-                                            Cancellable::isCancelled),
-                                    false);
+                    boolean result = featureFunc.test(feature,
+                            dataConstructor.apply(event, event2, itemStack, equipmentSlot));
+                    if (event instanceof Cancellable cancellable) {
+                        result &= !cancellable.isCancelled();
+                    }
+                    return result;
                 }
             }
         }
@@ -108,16 +110,17 @@ public final class ItemFeatureHelper {
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (itemStack != null && event != null && equipmentSlot != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot))
-                            && !ObjectUtil.letNonNull(
-                                    ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
-                                            Cancellable::isCancelled),
-                                    false);
+                    boolean result = featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
+                    if (event instanceof Cancellable cancellable) {
+                        result &= !cancellable.isCancelled();
+                    }
+                    return result;
                 }
             }
         }
@@ -128,15 +131,17 @@ public final class ItemFeatureHelper {
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
-        if (itemStack != null && event != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
                 if (feature != null) {
-                    return featureFunc.test(feature, dataConstructor.apply(event)) && !ObjectUtil.letNonNull(
-                            ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(event, Cancellable.class),
-                                    Cancellable::isCancelled),
-                            false);
+                    boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+                    if (event instanceof Cancellable cancellable) {
+                        result &= !cancellable.isCancelled();
+                    }
+                    return result;
                 }
             }
         }
@@ -148,10 +153,11 @@ public final class ItemFeatureHelper {
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiFunction<TFeature, TData, TReturn> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor, @Nonnull TReturn defaultValue) {
-        if (itemStack != null && event != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
                 if (feature != null) {
                     return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
                             defaultValue);
@@ -165,10 +171,11 @@ public final class ItemFeatureHelper {
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
-        if (itemStack != null && event != null) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(ItemRegister.getInstance().lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
                 if (feature != null) {
                     featureFunc.accept(feature, dataConstructor.apply(event));
                 }

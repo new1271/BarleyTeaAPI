@@ -39,6 +39,11 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         return inst.get();
     }
 
+    @Nullable
+    public static EntityRegister getInstanceUnsafe() {
+        return inst.getUnsafe();
+    }
+
     public void register(@Nonnull BaseEntity entity) {
         lookupTable.put(entity.getKey(), entity);
         if (BarleyTeaAPI.checkPluginUsable()) {

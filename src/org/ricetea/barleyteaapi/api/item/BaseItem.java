@@ -247,11 +247,16 @@ public abstract class BaseItem implements Keyed {
         if (itemTypeID == null) {
             return DataItemType.create(itemStack.getType());
         } else {
-            BaseItem baseItem = ItemRegister.getInstance().lookupItemType(itemTypeID);
-            if (baseItem == null)
+            ItemRegister register = ItemRegister.getInstanceUnsafe();
+            if (register == null) {
                 return DataItemType.create(itemStack.getType());
-            else
-                return DataItemType.create(baseItem);
+            } else {
+                BaseItem baseItem = ItemRegister.getInstance().lookupItemType(itemTypeID);
+                if (baseItem == null)
+                    return DataItemType.create(itemStack.getType());
+                else
+                    return DataItemType.create(baseItem);
+            }
         }
     }
 

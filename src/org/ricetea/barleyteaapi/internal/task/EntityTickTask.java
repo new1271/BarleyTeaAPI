@@ -41,8 +41,8 @@ public final class EntityTickTask extends AbstractTask {
     protected void runInternal() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstance();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        EntityRegister register = EntityRegister.getInstance();
-        if (api == null || scheduler == null || !register.hasAnyRegisteredMob()) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredMob()) {
             stop();
         } else {
             Entity[] entities;
