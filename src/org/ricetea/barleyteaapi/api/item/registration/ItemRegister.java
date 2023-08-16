@@ -16,9 +16,10 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
-import org.ricetea.barleyteaapi.internal.nms.BarleyGiveItemProvider;
+import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class ItemRegister implements IRegister<BaseItem> {
     @Nonnull
@@ -52,7 +53,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + item.getKey().toString() + " as item!");
                 if (item instanceof FeatureCommandGive) {
-                    BarleyGiveItemProvider.updateRegisterList();
+                    ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
                 }
                 if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
                     ItemTickTask.getInstance().start();
@@ -66,7 +67,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
             if (item instanceof FeatureCommandGive) {
-                BarleyGiveItemProvider.updateRegisterList();
+                ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
             }
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();

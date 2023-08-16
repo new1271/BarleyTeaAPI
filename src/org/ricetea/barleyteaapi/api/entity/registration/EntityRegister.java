@@ -20,8 +20,9 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
-import org.ricetea.barleyteaapi.internal.nms.BarleySummonEntityProvider;
+import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
     @Nonnull
@@ -67,7 +68,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                             + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
                 }
                 if (entity instanceof FeatureCommandSummon)
-                    BarleySummonEntityProvider.updateRegisterList();
+                    ObjectUtil.callWhenNonnull(inst.summonCommand, NMSBaseCommand::update);
             }
         }
 
@@ -78,7 +79,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
             if (entity instanceof FeatureCommandSummon)
-                BarleySummonEntityProvider.updateRegisterList();
+                ObjectUtil.callWhenNonnull(inst.summonCommand, NMSBaseCommand::update);
         }
     }
 

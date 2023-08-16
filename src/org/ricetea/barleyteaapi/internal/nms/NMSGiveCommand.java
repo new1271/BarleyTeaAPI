@@ -5,22 +5,32 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import org.bukkit.Bukkit;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.CommandListenerWrapper;
+import net.minecraft.commands.ICompletionProvider;
 import net.minecraft.commands.arguments.ArgumentEntity;
 import net.minecraft.commands.arguments.ArgumentMinecraftKeyRegistered;
 import net.minecraft.commands.arguments.ArgumentNBTTag;
+import net.minecraft.core.RegistryBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
@@ -40,12 +50,14 @@ import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class BarleyGiveCommand {
+public final class NMSGiveCommand implements NMSBaseCommand {
 	private static final SimpleCommandExceptionType giveFailedMessage = new SimpleCommandExceptionType(
 			(Message) IChatBaseComponent.c("command.failed"));
 
+	private SuggestionProvider suggestionProvider;
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void register(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
+	public void register(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
 		LiteralCommandNode<CommandListenerWrapper> mainNode = dispatcher
 				.register((LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("givebarley")
 						.requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)))
@@ -53,7 +65,7 @@ public final class BarleyGiveCommand {
 								CommandDispatcher.a("targets", (ArgumentType) ArgumentEntity.d()).then(
 										((RequiredArgumentBuilder) CommandDispatcher
 												.a("item", (ArgumentType) ArgumentMinecraftKeyRegistered.a())
-												.suggests(BarleyGiveItemProvider.getProvider())
+												.suggests(suggestionProvider = new SuggestionProvider())
 												// /givebarley <targets> <item>
 												.executes(
 														commandcontext -> command(
@@ -93,7 +105,7 @@ public final class BarleyGiveCommand {
 						.requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
 	}
 
-	private static int command(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey itemKey,
+	private int command(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey itemKey,
 			int count, NBTTagCompound nbt) throws CommandSyntaxException {
 		try {
 			String namespace = itemKey.b();
@@ -192,16 +204,80 @@ public final class BarleyGiveCommand {
 		}
 	}
 
-	public static void register() {
-		CommandDispatcher dispatcher = ((CraftServer) Bukkit.getServer()).getServer().aC();
-		register(dispatcher.a());
-	}
-
-	public static void unregister() {
-		CommandDispatcher dispatcher = ((CraftServer) Bukkit.getServer()).getServer().aC();
-		var root = dispatcher.a().getRoot();
+	public void unregister(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
+		var root = dispatcher.getRoot();
 		root.removeCommand("givebarley");
 		root.removeCommand("give2");
 		root.removeCommand("giveb");
+	}
+
+	public void update() {
+		ObjectUtil.callWhenNonnull(suggestionProvider, SuggestionProvider::updateRegisterList);
+	}
+
+	public static class SuggestionProvider
+			implements com.mojang.brigadier.suggestion.SuggestionProvider<ICompletionProvider>, Iterable<MinecraftKey> {
+
+		@Nonnull
+		private final List<MinecraftKey> builtinKeys;
+		@Nullable
+		private List<MinecraftKey> customKeys;
+
+		public SuggestionProvider() {
+			RegistryBlocks<Item> itemRegistries = BuiltInRegistries.i;
+			builtinKeys = ObjectUtil.letNonNull(
+					itemRegistries.s().map(itemType -> itemRegistries.b(itemType)).toList(),
+					Collections::emptyList);
+		}
+
+		@Override
+		public CompletableFuture<Suggestions> getSuggestions(CommandContext<ICompletionProvider> provider,
+				SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
+			String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
+			if (!lowerCasedRemaining.contains("/")) {
+				if (lowerCasedRemaining.isBlank() || lowerCasedRemaining.contains(":")) {
+					return ICompletionProvider.a(this, suggestionsBuilder);
+				} else {
+					List<MinecraftKey> customKeys = this.customKeys;
+					if (customKeys == null) {
+						ItemRegister register = ItemRegister.getInstanceUnsafe();
+						if (register != null) {
+							this.customKeys = customKeys = Arrays
+									.stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+									.map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+						}
+					}
+					builtinKeys.stream()
+							.filter(key -> key.a().startsWith(lowerCasedRemaining)
+									|| key.b().startsWith(lowerCasedRemaining))
+							.forEach(key -> suggestionsBuilder.suggest(key.toString()));
+					if (customKeys != null) {
+						customKeys.stream()
+								.filter(key -> key.a().startsWith(lowerCasedRemaining)
+										|| key.b().startsWith(lowerCasedRemaining))
+								.forEach(key -> suggestionsBuilder.suggest(key.toString()));
+					}
+				}
+			}
+			return suggestionsBuilder.buildFuture();
+		}
+
+		@Override
+		public Iterator<MinecraftKey> iterator() {
+			List<MinecraftKey> customKeys = this.customKeys;
+			if (customKeys == null) {
+				ItemRegister register = ItemRegister.getInstanceUnsafe();
+				if (register != null) {
+					this.customKeys = customKeys = Arrays
+							.stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+							.map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
+				}
+			}
+			return new MinecraftKeyCombinedIterator(builtinKeys, customKeys);
+		}
+
+		public void updateRegisterList() {
+			customKeys = null;
+		}
 	}
 }

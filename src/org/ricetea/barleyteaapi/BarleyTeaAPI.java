@@ -22,8 +22,10 @@ import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
 import org.ricetea.barleyteaapi.internal.listener.*;
-import org.ricetea.barleyteaapi.internal.nms.BarleyGiveCommand;
-import org.ricetea.barleyteaapi.internal.nms.BarleySummonCommand;
+import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
+import org.ricetea.barleyteaapi.internal.nms.NMSCommandRegister;
+import org.ricetea.barleyteaapi.internal.nms.NMSGiveCommand;
+import org.ricetea.barleyteaapi.internal.nms.NMSSummonCommand;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -31,6 +33,7 @@ import org.ricetea.barleyteaapi.util.ObjectUtil;
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
     public boolean hasExcellentEnchants;
+    public NMSBaseCommand summonCommand, giveCommand;
 
     @Nullable
     public static BarleyTeaAPI getInstance() {
@@ -49,9 +52,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         logger.info("registering listeners");
         registerEventListeners();
         logger.info("registering '/givebarley' command...");
-        BarleyGiveCommand.register();
+        NMSCommandRegister commandRegister = NMSCommandRegister.getInstance();
+        commandRegister.register(giveCommand = new NMSGiveCommand());
         logger.info("registering '/summonbarley' command...");
-        BarleySummonCommand.register();
+        commandRegister.register(summonCommand = new NMSSummonCommand());
         logger.info("initializing API...");
         DefaultItemRenderer.getInstance();
         announceEntitiesAPILoaded();
@@ -143,9 +147,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
     public void onDisable() {
         Logger logger = getLogger();
         logger.info("unregistering '/givebarley' command...");
-        BarleyGiveCommand.unregister();
+        NMSCommandRegister commandRegister = NMSCommandRegister.getInstance();
+        commandRegister.unregister(giveCommand);
         logger.info("unregistering '/summonbarley' command...");
-        BarleySummonCommand.unregister();
+        commandRegister.unregister(summonCommand);
         logger.info("uninitializing API...");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
         announceEntitiesAPIUnloaded();
