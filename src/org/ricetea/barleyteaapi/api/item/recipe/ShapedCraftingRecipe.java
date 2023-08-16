@@ -128,8 +128,4 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
         return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(result, FeatureItemGive.class),
                 itemGiveFeature -> itemGiveFeature.handleItemGive(1));
     }
-
-    public static class Builder {
-
-    }
 }
