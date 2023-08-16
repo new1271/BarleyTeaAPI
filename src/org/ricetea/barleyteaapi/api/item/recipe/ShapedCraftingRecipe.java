@@ -2,12 +2,16 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -125,7 +129,42 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
     @Override
     public ItemStack apply(ItemStack[] matrix) {
-        return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(result, FeatureItemGive.class),
-                itemGiveFeature -> itemGiveFeature.handleItemGive(1));
+        return result.mapLeftOrRight(ItemStack::new, right -> {
+            return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                    itemGiveFeature -> itemGiveFeature.handleItemGive(1));
+        });
     }
+
+    @Nonnull
+    public static ShapedRecipe toBukkitRecipe(ShapedCraftingRecipe recipe, NamespacedKey key) {
+        ShapedRecipe result = new ShapedRecipe(key,
+                new ItemStack(recipe.result.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
+        HashMap<Material, Character> collectMap = new HashMap<>();
+        char c = 'a';
+        int colCount = recipe.getColumnCount();
+        String[] shape = new String[recipe.getRowCount()];
+        int currentIndex = 0;
+        for (DataItemType type : recipe.getIngredientMatrix()) {
+            Material material = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
+            Character ct = collectMap.get(material);
+            if (ct == null) {
+                collectMap.put(material, ct = c++);
+            }
+            int currentRowIndex = currentIndex / colCount;
+            String shapeLet = shape[currentRowIndex];
+            if (shapeLet == null) {
+                shape[currentRowIndex] = Character.toString(ct);
+            } else {
+                shape[currentRowIndex] = shapeLet + Character.toString(ct);
+            }
+            currentIndex++;
+        }
+
+        result = result.shape(shape);
+        for (Map.Entry<Material, Character> entry : collectMap.entrySet()) {
+            result = result.setIngredient(entry.getValue(), entry.getKey());
+        }
+        return ObjectUtil.throwWhenNull(result);
+    }
+
 }

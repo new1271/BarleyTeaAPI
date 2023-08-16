@@ -7,8 +7,10 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -70,13 +72,25 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
                 }
             }
         }
-        return selectedCount >= ingredients.length && matrixClone.size() <= 0;
+        return selectedCount >= ingredients.length && matrixClone.stream().filter(type -> !type.isEmpty()).count() <= 0;
     }
 
     @Override
     public ItemStack apply(ItemStack[] matrix) {
-        return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(result, FeatureItemGive.class),
-                itemGiveFeature -> itemGiveFeature.handleItemGive(1));
+        return result.mapLeftOrRight(ItemStack::new, right -> {
+            return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                    itemGiveFeature -> itemGiveFeature.handleItemGive(1));
+        });
     }
 
+    @Nonnull
+    public static ShapelessRecipe toBukkitRecipe(ShapelessCraftingRecipe recipe, NamespacedKey key) {
+        ShapelessRecipe result = new ShapelessRecipe(key,
+                new ItemStack(recipe.result.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
+        for (DataItemType type : recipe.getIngredients()) {
+            Material material = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
+            result.addIngredient(material);
+        }
+        return ObjectUtil.throwWhenNull(result);
+    }
 }

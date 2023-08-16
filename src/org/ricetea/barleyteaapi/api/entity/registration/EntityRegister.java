@@ -78,6 +78,8 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         lookupTable.remove(entity.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
+            Logger logger = inst.getLogger();
+            logger.info("unregistered " + entity.getKey().toString());
             if (entity instanceof FeatureCommandSummon)
                 ObjectUtil.callWhenNonnull(inst.summonCommand, NMSBaseCommand::update);
         }

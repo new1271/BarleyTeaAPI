@@ -211,7 +211,7 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                         EntityRegister register = EntityRegister.getInstanceUnsafe();
                         if (register != null) {
                             this.customKeys = customKeys = Arrays
-                                    .stream(register.getEntityIDs(type -> type instanceof FeatureCommandGive))
+                                    .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
                                     .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
                         }
                     }
@@ -237,7 +237,7 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
                     this.customKeys = customKeys = Arrays
-                            .stream(register.getEntityIDs(type -> type instanceof FeatureCommandGive))
+                            .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
                             .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
                 }
             }

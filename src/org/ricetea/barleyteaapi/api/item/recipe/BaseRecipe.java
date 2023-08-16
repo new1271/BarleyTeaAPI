@@ -17,5 +17,4 @@ public abstract class BaseRecipe implements Keyed {
     public NamespacedKey getKey() {
         return key;
     }
-
 }

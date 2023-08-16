@@ -66,6 +66,8 @@ public final class ItemRegister implements IRegister<BaseItem> {
         lookupTable.remove(item.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
+            Logger logger = inst.getLogger();
+            logger.info("unregistered " + item.getKey().toString());
             if (item instanceof FeatureCommandGive) {
                 ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
             }

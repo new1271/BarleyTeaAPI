@@ -1,18 +1,33 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
+import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
+import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
 import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
+
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecipe> {
 
@@ -21,6 +36,17 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseCraftingRecipe> lookupTable = new Hashtable<>();
+
+    @Nonnull
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = ObjectUtil
+            .throwWhenNull(LinkedHashMultimap.create());
+
+    @Nonnull
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert = ObjectUtil
+            .throwWhenNull(LinkedHashMultimap.create());
+
+    @Nonnull
+    private final AtomicInteger flowNumber = new AtomicInteger(0);
 
     private CraftingRecipeRegister() {
     }
@@ -39,16 +65,105 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     @Override
     public void register(@Nonnull BaseCraftingRecipe recipe) {
         lookupTable.put(recipe.getKey(), recipe);
+        Recipe bukkitRecipe;
+        if (recipe instanceof ShapedCraftingRecipe shapedRecipe) {
+            bukkitRecipe = ShapedCraftingRecipe.toBukkitRecipe(shapedRecipe,
+                    NamespacedKeyUtils.BarleyTeaAPI("dummy_recipe_" + flowNumber.getAndIncrement()));
+            if (!Bukkit.addRecipe(bukkitRecipe)) {
+                bukkitRecipe = Bukkit.getCraftingRecipe(shapedRecipe.getIngredientMatrix().stream()
+                        .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
+                        .toArray(ItemStack[]::new), Bukkit.getWorlds().get(0));
+            }
+        } else if (recipe instanceof ShapelessCraftingRecipe shapelessCraftingRecipe) {
+            bukkitRecipe = ShapelessCraftingRecipe.toBukkitRecipe(shapelessCraftingRecipe,
+                    NamespacedKeyUtils.BarleyTeaAPI("dummy_recipe_" + flowNumber.getAndIncrement()));
+            if (!Bukkit.addRecipe(bukkitRecipe)) {
+                bukkitRecipe = Bukkit.getCraftingRecipe(shapelessCraftingRecipe.getIngredients().stream()
+                        .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
+                        .toArray(ItemStack[]::new), Bukkit.getWorlds().get(0));
+            }
+        } else {
+            bukkitRecipe = null;
+        }
+        if (bukkitRecipe instanceof Keyed keyed) {
+            collidingTable.put(keyed.getKey(), recipe.getKey());
+            collidingTable_revert.put(recipe.getKey(), keyed.getKey());
+        }
+        if (BarleyTeaAPI.checkPluginUsable()) {
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            if (inst != null) {
+                Logger logger = inst.getLogger();
+                logger.info("registered " + recipe.getKey().toString() + " as crafting recipe!");
+            }
+        }
     }
+    /*
+    private ShapedRecipe createBukkitSharedRecipe(ShapedCraftingRecipe shapedRecipe) {
+        ShapedRecipe bukkitShapedRecipe = new ShapedRecipe(
+                NamespacedKeyUtils
+                        .BarleyTeaAPI("dummy_crafting_recipe_" + Integer.toString(flowNumber.getAndIncrement())),
+                new ItemStack(Material.DIRT));
+        HashMap<Material, Character> collectMap = new HashMap<>();
+        char c = 'a';
+        int colCount = shapedRecipe.getColumnCount();
+        String[] shape = new String[shapedRecipe.getRowCount()];
+        int currentIndex = 0;
+        for (DataItemType type : shapedRecipe.getIngredientMatrix()) {
+            Material baseMaterial = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
+            Character ct = collectMap.get(baseMaterial);
+            if (ct == null) {
+                collectMap.put(baseMaterial, ct = c++);
+            }
+            shape[currentIndex / colCount] += Character.toString(ct);
+            currentIndex++;
+        }
+        bukkitShapedRecipe = bukkitShapedRecipe.shape(shape);
+        for (Map.Entry<Material, Character> entry : collectMap.entrySet()) {
+            bukkitShapedRecipe = bukkitShapedRecipe.setIngredient(entry.getValue(), entry.getKey());
+        }
+        return bukkitShapedRecipe;
+    } */
 
     @Override
     public void unregister(@Nonnull BaseCraftingRecipe recipe) {
         lookupTable.remove(recipe.getKey());
+        Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipe.getKey());
+        if (headers != null) {
+            for (NamespacedKey header : headers) {
+                collidingTable.remove(header, recipe);
+                if (!collidingTable.containsKey(headers)) {
+                    Bukkit.removeRecipe(header);
+                }
+            }
+        }
+        if (BarleyTeaAPI.checkPluginUsable()) {
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            if (inst != null) {
+                Logger logger = inst.getLogger();
+                logger.info("unregistered " + recipe.getKey().toString());
+            }
+        }
+    }
+
+    public void unregisterAll() {
+        lookupTable.clear();
+        collidingTable_revert.clear();
+        collidingTable.keySet().forEach(key -> {
+            if (key.getNamespace().equals(NamespacedKeyUtils.Namespace)) {
+                Bukkit.removeRecipe(key);
+            }
+        });
+        collidingTable.clear();
     }
 
     @Nullable
     public BaseCraftingRecipe lookupCraftingRecipe(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
+    }
+
+    @Nullable
+    public List<BaseCraftingRecipe> lookupCraftingRecipeFromDummies(@Nonnull NamespacedKey key) {
+        return collidingTable.get(key).stream().map(this::lookupCraftingRecipe).toList();
     }
 
     public boolean hasCraftingRecipe(@Nonnull NamespacedKey key) {

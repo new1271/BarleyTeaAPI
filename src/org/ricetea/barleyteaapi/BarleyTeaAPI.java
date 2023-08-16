@@ -18,6 +18,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
+import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
@@ -157,6 +158,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         if (hasExcellentEnchants) {
             ExcellentEnchantsBridge.unregisterTranslations();
         }
+        ObjectUtil.callWhenNonnull(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
         ObjectUtil.callWhenNonnull(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
         ObjectUtil.callWhenNonnull(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
         TickingService.shutdown();

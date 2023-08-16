@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
@@ -7,6 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ComplexRecipe;
 import org.bukkit.inventory.CraftingInventory;
@@ -33,13 +36,21 @@ public final class CraftListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenItemCrafted(CraftItemEvent event) {
+        if (event == null || event.isCancelled())
+            return;
+        if (event.getRecipe() == null) {
+            ItemStack stack = event.getCurrentItem();
+            event.getInventory().clear();
+            event.setCurrentItem(stack);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemCrafting(PrepareItemCraftEvent event) {
-        if (event == null)
+        if (event == null || event.getRecipe() == null)
             return;
         CraftingInventory inventory = event.getInventory();
-        ItemStack resultItem = inventory.getResult();
-        if (resultItem == null || resultItem.getType().isAir())
-            return;
         ItemStack[] craftingMatrix = inventory.getMatrix();
         int craftingMatrixLength = craftingMatrix.length;
         DataItemType[] craftingTypeOfMatrix = new DataItemType[craftingMatrixLength];
@@ -57,6 +68,7 @@ public final class CraftListener implements Listener {
             }
             craftingTypeOfMatrix[i] = itemType;
         }
+        /*
         CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
         if (register != null && register.hasAnyRegisteredCraftingRecipe()) {
             for (BaseCraftingRecipe recipe : register.getCraftingRecipeTypes(null)) {
@@ -65,14 +77,28 @@ public final class CraftListener implements Listener {
                     return;
                 }
             }
-        }
+        }*/
         Recipe craftingRecipe = inventory.getRecipe();
         if (craftingRecipe instanceof Keyed keyedRecipe) {
             NamespacedKey recipeKey = keyedRecipe.getKey();
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || hasCustomItem) {
                 final ItemStack oldResult = inventory.getResult();
                 ItemStack result = oldResult;
-                if (craftingRecipe instanceof ComplexRecipe complexRecipe) {
+                boolean allPassed = true;
+                CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
+                if (register != null && register.hasAnyRegisteredCraftingRecipe()) {
+                    List<BaseCraftingRecipe> recipes = register.lookupCraftingRecipeFromDummies(recipeKey);
+                    if (recipes != null) {
+                        for (BaseCraftingRecipe recipe : recipes) {
+                            if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
+                                result = recipe.apply(craftingMatrix);
+                                allPassed = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (allPassed && craftingRecipe instanceof ComplexRecipe complexRecipe) {
                     switch (recipeKey.getNamespace()) {
                         case NamespacedKey.MINECRAFT:
                             switch (recipeKey.getKey()) {
@@ -103,6 +129,7 @@ public final class CraftListener implements Listener {
                                             result = null;
                                         } else {
                                             result = ItemFeatureHelper.doItemRepair(stacks[0], stacks[1], null);
+                                            allPassed = false;
                                         }
                                     }
                                 }
@@ -110,6 +137,9 @@ public final class CraftListener implements Listener {
                             }
                             break;
                     }
+                }
+                if (allPassed && hasCustomItem) {
+                    result = null;
                 }
                 if (oldResult != result) {
                     inventory.setResult(result);
