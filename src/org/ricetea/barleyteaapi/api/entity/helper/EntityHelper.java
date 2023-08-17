@@ -5,7 +5,9 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.internal.nms.helper.NMSEntityHelper;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class EntityHelper {
@@ -22,5 +24,16 @@ public final class EntityHelper {
             EntityType type = entityType.getEntityTypeForMinecraftBuiltInMob();
             return type != null && type.equals(EntityType.PLAYER);
         }
+    }
+
+    public static boolean damage(@Nullable Entity damagee, @Nullable DamageCause damageCause, float damage) {
+        return damage(damagee, null, damageCause, damage);
+    }
+
+    public static boolean damage(@Nullable Entity damagee, @Nullable Entity damager, @Nullable DamageCause damageCause,
+            float damage) {
+        if (damagee == null)
+            return false;
+        return NMSEntityHelper.damage(damagee, damager, damageCause, damage);
     }
 }

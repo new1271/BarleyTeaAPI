@@ -26,6 +26,7 @@ import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -196,6 +197,10 @@ public abstract class BaseItem implements Keyed {
                                 ItemTagNamespacedKey, PersistentDataType.STRING, null));
     }
 
+    public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
+        return ObjectUtil.letNonNull(ObjectUtil.mapWhenNonnull(itemStack.getItemMeta(), ItemMeta::hasEnchants), false);
+    }
+
     public static int getDurabilityDamage(@Nullable ItemStack itemStack, @Nullable BaseItem itemType) {
         if (itemStack == null)
             return 0;
@@ -276,20 +281,30 @@ public abstract class BaseItem implements Keyed {
         }
     }
 
-    @SuppressWarnings("null")
     protected final void setItemName(@Nonnull ItemStack itemStack) {
+        setItemName(itemStack, isRarityUpgraded(itemStack));
+    }
+
+    @SuppressWarnings("null")
+    protected final void setItemName(@Nonnull ItemStack itemStack, boolean isUpgraded) {
+        DataItemRarity rarity = this.rarity;
+        if (isUpgraded)
+            rarity = rarity.upgrade();
         setItemName(itemStack, rarity.apply(Component.translatable(getNameInTranslateKey(), getDefaultName())));
     }
 
     @Deprecated
     protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String name) {
-        setItemName(itemStack, name, true);
+        setItemName(itemStack, name, true, isRarityUpgraded(itemStack));
     }
 
     @SuppressWarnings("null")
     @Deprecated
     protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String name,
-            boolean isApplyRenamingItalic) {
+            boolean isApplyRenamingItalic, boolean isUpgraded) {
+        DataItemRarity rarity = this.rarity;
+        if (isUpgraded)
+            rarity = rarity.upgrade();
         setItemName(itemStack, rarity.apply(Component.text(name), isApplyRenamingItalic));
     }
 

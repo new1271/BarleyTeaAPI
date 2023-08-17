@@ -48,7 +48,6 @@ import net.minecraft.world.phys.Vec3D;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class NMSSummonCommand implements NMSBaseCommand {
