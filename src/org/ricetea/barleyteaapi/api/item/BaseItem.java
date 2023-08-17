@@ -238,9 +238,16 @@ public abstract class BaseItem implements Keyed {
 
     @Nullable
     public static NamespacedKey getItemID(@Nullable ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta())
+        if (itemStack == null)
             return null;
-        PersistentDataContainer container = itemStack.getItemMeta().getPersistentDataContainer();
+        return getItemID(itemStack.getItemMeta());
+    }
+
+    @Nullable
+    public static NamespacedKey getItemID(@Nullable ItemMeta itemMeta) {
+        if (itemMeta == null)
+            return null;
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         String namespacedKeyString = container.getOrDefault(ItemTagNamespacedKey, PersistentDataType.STRING, null);
         return namespacedKeyString == null ? null
                 : namespacedKeyString.contains(":") ? NamespacedKey.fromString(namespacedKeyString) : null;

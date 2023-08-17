@@ -134,10 +134,12 @@ public abstract class AbstractItemRenderer implements Keyed {
                         renderer = getDefault();
                     }
                     renderer.setItemLore(itemMeta, lore);
+                    itemStack.setItemMeta(itemMeta);
+                    renderer.render(itemStack);
                 } else {
                     itemMeta.lore(lore);
+                    itemStack.setItemMeta(itemMeta);
                 }
-                itemStack.setItemMeta(itemMeta);
             }
         }
     }
@@ -152,10 +154,12 @@ public abstract class AbstractItemRenderer implements Keyed {
                         renderer = getDefault();
                     }
                     renderer.addItemFlags(itemMeta, flags);
+                    itemStack.setItemMeta(itemMeta);
+                    renderer.render(itemStack);
                 } else {
                     itemMeta.addItemFlags(flags);
+                    itemStack.setItemMeta(itemMeta);
                 }
-                itemStack.setItemMeta(itemMeta);
             }
         }
     }
@@ -170,10 +174,12 @@ public abstract class AbstractItemRenderer implements Keyed {
                         renderer = getDefault();
                     }
                     renderer.addItemFlags(itemMeta, flags);
+                    itemStack.setItemMeta(itemMeta);
+                    renderer.render(itemStack);
                 } else {
                     itemMeta.addItemFlags(flags.toArray(ItemFlag[]::new));
+                    itemStack.setItemMeta(itemMeta);
                 }
-                itemStack.setItemMeta(itemMeta);
             }
         }
     }
@@ -188,10 +194,12 @@ public abstract class AbstractItemRenderer implements Keyed {
                         renderer = getDefault();
                     }
                     renderer.removeItemFlags(itemMeta, flags);
+                    itemStack.setItemMeta(itemMeta);
+                    renderer.render(itemStack);
                 } else {
                     itemMeta.removeItemFlags(flags);
+                    itemStack.setItemMeta(itemMeta);
                 }
-                itemStack.setItemMeta(itemMeta);
             }
         }
     }
@@ -206,10 +214,12 @@ public abstract class AbstractItemRenderer implements Keyed {
                         renderer = getDefault();
                     }
                     renderer.removeItemFlags(itemMeta, flags);
+                    itemStack.setItemMeta(itemMeta);
+                    renderer.render(itemStack);
                 } else {
                     itemMeta.removeItemFlags(flags.toArray(ItemFlag[]::new));
+                    itemStack.setItemMeta(itemMeta);
                 }
-                itemStack.setItemMeta(itemMeta);
             }
         }
     }

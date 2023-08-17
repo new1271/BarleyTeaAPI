@@ -387,6 +387,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                     PersistentDataType.BOOLEAN, true);
         }
+        itemMeta.addItemFlags(flags.toArray(ItemFlag[]::new));
     }
 
     public void addItemFlags(@Nonnull ItemMeta itemMeta, @Nullable ItemFlag... flags) {
@@ -399,6 +400,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                     PersistentDataType.BOOLEAN, true);
         }
+        itemMeta.addItemFlags(flags);
     }
 
     public void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nullable Set<ItemFlag> flags) {
@@ -410,6 +412,8 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                     NamespacedKeyUtils
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
         }
+        itemMeta.removeItemFlags(flags.toArray(ItemFlag[]::new));
+        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
     }
 
     public void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nullable ItemFlag... flags) {
@@ -421,5 +425,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                     NamespacedKeyUtils
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
         }
+        itemMeta.removeItemFlags(flags);
+        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
     }
 }
