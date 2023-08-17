@@ -34,6 +34,18 @@ public final class EntityHelper {
             float damage) {
         if (damagee == null)
             return false;
-        return NMSEntityHelper.damage(damagee, damager, damageCause, damage);
+        return NMSEntityHelper.damage(damagee, damager, damageCause, damage, true);
+    }
+
+    public static boolean damageWithDifficultyScaling(@Nullable Entity damagee, @Nullable DamageCause damageCause,
+            float damage) {
+        return damageWithDifficultyScaling(damagee, null, damageCause, damage);
+    }
+
+    public static boolean damageWithDifficultyScaling(@Nullable Entity damagee, @Nullable Entity damager,
+            @Nullable DamageCause damageCause, float damage) {
+        if (damagee == null)
+            return false;
+        return NMSEntityHelper.damage(damagee, damager, damageCause, damage, false);
     }
 }

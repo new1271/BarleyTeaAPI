@@ -8,9 +8,11 @@ import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -29,18 +31,25 @@ public final class NMSEntityHelper {
     }
 
     public static boolean damage(@Nonnull org.bukkit.entity.Entity damagee, @Nullable org.bukkit.entity.Entity damager,
-            @Nullable DamageCause cause, float damage) {
+            @Nullable DamageCause cause, float damage, boolean withoutScaling) {
         net.minecraft.world.entity.Entity nmsDamagee = getNmsEntity(damagee);
         net.minecraft.world.entity.Entity nmsDamager = getNmsEntity(damager);
-        var world = nmsDamagee.portalWorld;
+        var world = nmsDamagee.dI();
         DamageSource damageSource = buildDamageSource(world.B_().d(Registries.p), toDamageTypeResourceKey(cause),
-                nmsDamager);
+                nmsDamager, withoutScaling);
         return nmsDamagee.a(damageSource, damage);
     }
 
     private static DamageSource buildDamageSource(IRegistry<DamageType> registry, ResourceKey<DamageType> key,
-            @Nullable net.minecraft.world.entity.Entity attacker) {
-        return new DamageSource(registry.f(key), attacker);
+            @Nullable net.minecraft.world.entity.Entity attacker, boolean withoutScaling) {
+        Holder<DamageType> holder = registry.f(key);
+        if (withoutScaling) {
+            DamageType oldDamageType = holder.a();
+            if (!oldDamageType.b().equals(DamageScaling.a))
+                holder = Holder.a(new DamageType(oldDamageType.a(), DamageScaling.a, oldDamageType.c(),
+                        oldDamageType.d(), oldDamageType.e()));
+        }
+        return new DamageSource(holder, attacker);
     }
 
     private static ResourceKey<DamageType> toDamageTypeResourceKey(@Nullable DamageCause cause) {
