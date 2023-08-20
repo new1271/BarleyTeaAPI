@@ -65,4 +65,15 @@ public final class DataItemType extends Either<Material, BaseItem> {
     public BaseItem getItemTypeForBarleyTeaCustomItem() {
         return right();
     }
+
+    @Nonnull
+    public Material toMaterial() {
+        Material left = left();
+        if (left != null)
+            return left;
+        BaseItem right = right();
+        if (right != null)
+            return right.getMaterialBasedOn();
+        return Material.AIR;
+    }
 }

@@ -67,6 +67,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
     private void registerEventListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(ChunkListener.getInstance(), this);
+        pluginManager.registerEvents(CookListener.getInstance(), this);
         pluginManager.registerEvents(CraftListener.getInstance(), this);
         pluginManager.registerEvents(EntitySpawnListener.getInstance(), this);
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);

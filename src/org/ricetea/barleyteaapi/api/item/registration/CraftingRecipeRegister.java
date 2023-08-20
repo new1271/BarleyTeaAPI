@@ -65,18 +65,23 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     @Override
     public void register(@Nonnull BaseCraftingRecipe recipe) {
         lookupTable.put(recipe.getKey(), recipe);
+        int recipeTypeIndex = 0;
         Recipe bukkitRecipe;
         if (recipe instanceof ShapedCraftingRecipe shapedRecipe) {
-            bukkitRecipe = ShapedCraftingRecipe.toBukkitRecipe(shapedRecipe,
-                    NamespacedKeyUtils.BarleyTeaAPI("dummy_recipe_" + flowNumber.getAndIncrement()));
+            recipeTypeIndex = 1;
+            bukkitRecipe = shapedRecipe
+                    .toBukkitRecipe(
+                            NamespacedKeyUtils.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 bukkitRecipe = Bukkit.getCraftingRecipe(shapedRecipe.getIngredientMatrix().stream()
                         .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
                         .toArray(ItemStack[]::new), Bukkit.getWorlds().get(0));
             }
         } else if (recipe instanceof ShapelessCraftingRecipe shapelessCraftingRecipe) {
-            bukkitRecipe = ShapelessCraftingRecipe.toBukkitRecipe(shapelessCraftingRecipe,
-                    NamespacedKeyUtils.BarleyTeaAPI("dummy_recipe_" + flowNumber.getAndIncrement()));
+            recipeTypeIndex = 2;
+            bukkitRecipe = shapelessCraftingRecipe
+                    .toBukkitRecipe(
+                            NamespacedKeyUtils.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 bukkitRecipe = Bukkit.getCraftingRecipe(shapelessCraftingRecipe.getIngredients().stream()
                         .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
@@ -93,36 +98,21 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + recipe.getKey().toString() + " as crafting recipe!");
+                switch (recipeTypeIndex) {
+                    case 1:
+                        logger.info("registered " + recipe.getKey().toString() + " as shaped crafting recipe!");
+                        break;
+                    case 2:
+                        logger.info("registered " + recipe.getKey().toString() + " as shapeless crafting recipe!");
+                        break;
+                    default:
+                        logger.warning(
+                                "registered " + recipe.getKey().toString() + " as unknown-type crafting recipe!");
+                        break;
+                }
             }
         }
     }
-    /*
-    private ShapedRecipe createBukkitSharedRecipe(ShapedCraftingRecipe shapedRecipe) {
-        ShapedRecipe bukkitShapedRecipe = new ShapedRecipe(
-                NamespacedKeyUtils
-                        .BarleyTeaAPI("dummy_crafting_recipe_" + Integer.toString(flowNumber.getAndIncrement())),
-                new ItemStack(Material.DIRT));
-        HashMap<Material, Character> collectMap = new HashMap<>();
-        char c = 'a';
-        int colCount = shapedRecipe.getColumnCount();
-        String[] shape = new String[shapedRecipe.getRowCount()];
-        int currentIndex = 0;
-        for (DataItemType type : shapedRecipe.getIngredientMatrix()) {
-            Material baseMaterial = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
-            Character ct = collectMap.get(baseMaterial);
-            if (ct == null) {
-                collectMap.put(baseMaterial, ct = c++);
-            }
-            shape[currentIndex / colCount] += Character.toString(ct);
-            currentIndex++;
-        }
-        bukkitShapedRecipe = bukkitShapedRecipe.shape(shape);
-        for (Map.Entry<Material, Character> entry : collectMap.entrySet()) {
-            bukkitShapedRecipe = bukkitShapedRecipe.setIngredient(entry.getValue(), entry.getKey());
-        }
-        return bukkitShapedRecipe;
-    } */
 
     @Override
     public void unregister(@Nonnull BaseCraftingRecipe recipe) {

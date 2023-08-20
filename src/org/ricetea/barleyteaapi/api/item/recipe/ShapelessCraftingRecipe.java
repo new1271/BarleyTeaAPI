@@ -19,12 +19,10 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
 
     @Nonnull
     private final DataItemType[] ingredients;
-    @Nonnull
-    private final DataItemType result;
 
     public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredients,
             @Nonnull DataItemType result) throws Exception {
-        super(key);
+        super(key, result);
         int length = ingredients.length;
         if (length <= 0) {
             throw new Exception("'ingredientMatrix' can't be empty!");
@@ -35,7 +33,6 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
         if (result.isRight() && !(result.right() instanceof FeatureItemGive)) {
             throw new Exception("'result' isn't implement FeatureItemGive, recipe can't constructed!");
         }
-        this.result = result;
     }
 
     @Nonnull
@@ -47,11 +44,6 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     protected DataItemType[] getIngredients0() {
         return ingredients;
-    }
-
-    @Nonnull
-    public DataItemType getResult() {
-        return result;
     }
 
     @Override
@@ -77,17 +69,17 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
 
     @Override
     public ItemStack apply(ItemStack[] matrix) {
-        return result.mapLeftOrRight(ItemStack::new, right -> {
+        return getResult().mapLeftOrRight(ItemStack::new, right -> {
             return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
                     itemGiveFeature -> itemGiveFeature.handleItemGive(1));
         });
     }
 
     @Nonnull
-    public static ShapelessRecipe toBukkitRecipe(ShapelessCraftingRecipe recipe, NamespacedKey key) {
+    public ShapelessRecipe toBukkitRecipe(NamespacedKey key) {
         ShapelessRecipe result = new ShapelessRecipe(key,
-                new ItemStack(recipe.result.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
-        for (DataItemType type : recipe.getIngredients()) {
+                new ItemStack(getResult().mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
+        for (DataItemType type : getIngredients()) {
             Material material = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
             result.addIngredient(material);
         }

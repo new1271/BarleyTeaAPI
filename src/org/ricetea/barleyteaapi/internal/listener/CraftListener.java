@@ -9,7 +9,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ComplexRecipe;
 import org.bukkit.inventory.CraftingInventory;
@@ -36,17 +35,6 @@ public final class CraftListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void listenItemCrafted(CraftItemEvent event) {
-        if (event == null || event.isCancelled())
-            return;
-        if (event.getRecipe() == null) {
-            ItemStack stack = event.getCurrentItem();
-            event.getInventory().clear();
-            event.setCurrentItem(stack);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemCrafting(PrepareItemCraftEvent event) {
         if (event == null || event.getRecipe() == null)
             return;
@@ -68,17 +56,7 @@ public final class CraftListener implements Listener {
             }
             craftingTypeOfMatrix[i] = itemType;
         }
-        /*
-        CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegisteredCraftingRecipe()) {
-            for (BaseCraftingRecipe recipe : register.getCraftingRecipeTypes(null)) {
-                if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
-                    inventory.setResult(recipe.apply(craftingMatrix));
-                    return;
-                }
-            }
-        }*/
-        Recipe craftingRecipe = inventory.getRecipe();
+        Recipe craftingRecipe = event.getRecipe();
         if (craftingRecipe instanceof Keyed keyedRecipe) {
             NamespacedKey recipeKey = keyedRecipe.getKey();
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || hasCustomItem) {
