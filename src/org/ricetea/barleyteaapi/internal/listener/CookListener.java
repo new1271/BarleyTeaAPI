@@ -20,6 +20,7 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -50,8 +51,8 @@ public final class CookListener implements Listener {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredCookingRecipe()) {
-                    List<BaseCookingRecipe> recipes = register.lookupCookingRecipeFromDummies(recipeKey);
+                if (register != null && register.hasAnyRegisteredRecipe()) {
+                    List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
                     if (recipes != null) {
                         for (BaseCookingRecipe recipe : recipes) {
                             if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
@@ -66,6 +67,9 @@ public final class CookListener implements Listener {
                     result = null;
                 }
                 if (oldResult != result) {
+                    if (BaseItem.isBarleyTeaItem(result)) {
+                        AbstractItemRenderer.renderItem(result);
+                    }
                     event.setResult(result != null ? result : event.getSource());
                 }
             }
@@ -87,8 +91,8 @@ public final class CookListener implements Listener {
             NamespacedKey recipeKey = keyedRecipe.getKey();
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
                 CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredCookingRecipe()) {
-                    List<BaseCookingRecipe> recipes = register.lookupCookingRecipeFromDummies(recipeKey);
+                if (register != null && register.hasAnyRegisteredRecipe()) {
+                    List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
                     if (recipes != null) {
                         for (BaseCookingRecipe recipe : recipes) {
                             if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
@@ -116,8 +120,8 @@ public final class CookListener implements Listener {
         NamespacedKey recipeKey = campfireRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
             CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-            if (register != null && register.hasAnyRegisteredCookingRecipe()) {
-                List<BaseCookingRecipe> recipes = register.lookupCookingRecipeFromDummies(recipeKey);
+            if (register != null && register.hasAnyRegisteredRecipe()) {
+                List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
                 if (recipes != null) {
                     for (BaseCookingRecipe recipe : recipes) {
                         if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {

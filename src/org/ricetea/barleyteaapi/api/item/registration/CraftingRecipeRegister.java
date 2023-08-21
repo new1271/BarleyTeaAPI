@@ -147,36 +147,36 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     }
 
     @Nullable
-    public BaseCraftingRecipe lookupCraftingRecipe(@Nonnull NamespacedKey key) {
+    public BaseCraftingRecipe lookupRecipe(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
     }
 
     @Nullable
-    public List<BaseCraftingRecipe> lookupCraftingRecipeFromDummies(@Nonnull NamespacedKey key) {
-        return collidingTable.get(key).stream().map(this::lookupCraftingRecipe).toList();
+    public List<BaseCraftingRecipe> lookupRecipeFromDummies(@Nonnull NamespacedKey key) {
+        return collidingTable.get(key).stream().map(this::lookupRecipe).toList();
     }
 
-    public boolean hasCraftingRecipe(@Nonnull NamespacedKey key) {
+    public boolean hasRecipe(@Nonnull NamespacedKey key) {
         return lookupTable.containsKey(key);
     }
 
-    public boolean hasAnyRegisteredCraftingRecipe() {
+    public boolean hasAnyRegisteredRecipe() {
         return lookupTable.size() > 0;
     }
 
     @Nonnull
-    public NamespacedKey[] getCraftingRecipeIDs(@Nullable Predicate<BaseCraftingRecipe> filter) {
+    public NamespacedKey[] getRecipeIDs(@Nullable Predicate<BaseCraftingRecipe> filter) {
         NamespacedKey[] result;
         if (filter == null)
             result = lookupTable.keySet().toArray(NamespacedKey[]::new);
         else
-            result = lookupTable.entrySet().stream().filter(new CraftingRecipeFilter(filter)).map(e -> e.getKey())
+            result = lookupTable.entrySet().stream().filter(new RecipeFilter(filter)).map(e -> e.getKey())
                     .toArray(NamespacedKey[]::new);
         return result != null ? result : new NamespacedKey[0];
     }
 
     @Nonnull
-    public BaseCraftingRecipe[] getCraftingRecipeTypes(@Nullable Predicate<BaseCraftingRecipe> filter) {
+    public BaseCraftingRecipe[] getRecipeTypes(@Nullable Predicate<BaseCraftingRecipe> filter) {
         BaseCraftingRecipe[] result;
         if (filter == null)
             result = lookupTable.values().toArray(BaseCraftingRecipe[]::new);
@@ -185,12 +185,12 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
         return result != null ? result : new BaseCraftingRecipe[0];
     }
 
-    private static class CraftingRecipeFilter implements Predicate<Map.Entry<NamespacedKey, BaseCraftingRecipe>> {
+    private static class RecipeFilter implements Predicate<Map.Entry<NamespacedKey, BaseCraftingRecipe>> {
 
         @Nonnull
         Predicate<BaseCraftingRecipe> filter;
 
-        public CraftingRecipeFilter(@Nonnull Predicate<BaseCraftingRecipe> filter) {
+        public RecipeFilter(@Nonnull Predicate<BaseCraftingRecipe> filter) {
             this.filter = filter;
         }
 

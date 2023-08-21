@@ -9,12 +9,13 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 
 public class BlastingRecipe extends BaseCookingRecipe {
-    public BlastingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result) {
+    public BlastingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result)
+            throws UnsupportedOperationException {
         super(key, original, result);
     }
 
     public BlastingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+            float experience, int cookingTime) throws UnsupportedOperationException {
         super(key, original, result, experience, cookingTime);
     }
 

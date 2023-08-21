@@ -21,18 +21,15 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     private final DataItemType[] ingredients;
 
     public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredients,
-            @Nonnull DataItemType result) throws Exception {
+            @Nonnull DataItemType result) throws UnsupportedOperationException {
         super(key, result);
         int length = ingredients.length;
         if (length <= 0) {
-            throw new Exception("'ingredientMatrix' can't be empty!");
+            throw new UnsupportedOperationException("'ingredientMatrix' can't be empty!");
         } else if (length > 9) {
-            throw new Exception("'ingredientMatrix' too large!");
+            throw new UnsupportedOperationException("'ingredientMatrix' too large!");
         }
         this.ingredients = ingredients;
-        if (result.isRight() && !(result.right() instanceof FeatureItemGive)) {
-            throw new Exception("'result' isn't implement FeatureItemGive, recipe can't constructed!");
-        }
     }
 
     @Nonnull
@@ -78,9 +75,9 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapelessRecipe toBukkitRecipe(NamespacedKey key) {
         ShapelessRecipe result = new ShapelessRecipe(key,
-                new ItemStack(getResult().mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
+                new ItemStack(getResult().toMaterial()));
         for (DataItemType type : getIngredients()) {
-            Material material = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
+            Material material = type.toMaterial();
             result.addIngredient(material);
         }
         return ObjectUtil.throwWhenNull(result);

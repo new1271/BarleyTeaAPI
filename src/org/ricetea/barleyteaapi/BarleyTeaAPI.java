@@ -79,6 +79,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(PlayerEventListener.getInstance(), this);
         pluginManager.registerEvents(ProjectileListener.getInstance(), this);
         pluginManager.registerEvents(SlimeSplitListener.getInstance(), this);
+        pluginManager.registerEvents(SmithingListener.getInstance(), this);
     }
 
     private boolean checkSoftDepend(String pluginName) {

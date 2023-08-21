@@ -18,6 +18,7 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -64,8 +65,8 @@ public final class CraftListener implements Listener {
                 ItemStack result = oldResult;
                 boolean allPassed = true;
                 CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredCraftingRecipe()) {
-                    List<BaseCraftingRecipe> recipes = register.lookupCraftingRecipeFromDummies(recipeKey);
+                if (register != null && register.hasAnyRegisteredRecipe()) {
+                    List<BaseCraftingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
                     if (recipes != null) {
                         for (BaseCraftingRecipe recipe : recipes) {
                             if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
@@ -116,10 +117,13 @@ public final class CraftListener implements Listener {
                             break;
                     }
                 }
-                if (allPassed && hasCustomItem) {
+                if (allPassed) {
                     result = null;
                 }
                 if (oldResult != result) {
+                    if (BaseItem.isBarleyTeaItem(result)) {
+                        AbstractItemRenderer.renderItem(result);
+                    }
                     inventory.setResult(result);
                 }
             }

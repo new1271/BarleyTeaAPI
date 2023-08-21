@@ -75,8 +75,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(
-                        furnaceRecipe.getOriginal().mapLeftOrRight(m -> m, dt -> dt.getMaterialBasedOn()));
+                ItemStack originalItem = new ItemStack(furnaceRecipe.getOriginal().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingFurnaceRecipe) {
@@ -93,8 +92,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(
-                        smokingRecipe.getOriginal().mapLeftOrRight(m -> m, dt -> dt.getMaterialBasedOn()));
+                ItemStack originalItem = new ItemStack(smokingRecipe.getOriginal().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.SmokingRecipe iteratingFurnaceRecipe) {
@@ -116,8 +114,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(
-                        blastingRecipe.getOriginal().mapLeftOrRight(m -> m, dt -> dt.getMaterialBasedOn()));
+                ItemStack originalItem = new ItemStack(blastingRecipe.getOriginal().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.BlastingRecipe iteratingFurnaceRecipe) {
@@ -139,8 +136,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(
-                        campfireRecipe.getOriginal().mapLeftOrRight(m -> m, dt -> dt.getMaterialBasedOn()));
+                ItemStack originalItem = new ItemStack(campfireRecipe.getOriginal().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingCampfireRecipe) {
@@ -217,36 +213,36 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Nullable
-    public BaseCookingRecipe lookupCookingRecipe(@Nonnull NamespacedKey key) {
+    public BaseCookingRecipe lookupRecipe(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
     }
 
     @Nullable
-    public List<BaseCookingRecipe> lookupCookingRecipeFromDummies(@Nonnull NamespacedKey key) {
-        return collidingTable.get(key).stream().map(this::lookupCookingRecipe).toList();
+    public List<BaseCookingRecipe> lookupRecipeFromDummies(@Nonnull NamespacedKey key) {
+        return collidingTable.get(key).stream().map(this::lookupRecipe).toList();
     }
 
-    public boolean hasCookingRecipe(@Nonnull NamespacedKey key) {
+    public boolean hasRecipe(@Nonnull NamespacedKey key) {
         return lookupTable.containsKey(key);
     }
 
-    public boolean hasAnyRegisteredCookingRecipe() {
+    public boolean hasAnyRegisteredRecipe() {
         return lookupTable.size() > 0;
     }
 
     @Nonnull
-    public NamespacedKey[] getCookingRecipeIDs(@Nullable Predicate<BaseCookingRecipe> filter) {
+    public NamespacedKey[] getRecipeIDs(@Nullable Predicate<BaseCookingRecipe> filter) {
         NamespacedKey[] result;
         if (filter == null)
             result = lookupTable.keySet().toArray(NamespacedKey[]::new);
         else
-            result = lookupTable.entrySet().stream().filter(new CookingRecipeFilter(filter)).map(e -> e.getKey())
+            result = lookupTable.entrySet().stream().filter(new RecipeFilter(filter)).map(e -> e.getKey())
                     .toArray(NamespacedKey[]::new);
         return result != null ? result : new NamespacedKey[0];
     }
 
     @Nonnull
-    public BaseCookingRecipe[] getCookingRecipeTypes(@Nullable Predicate<BaseCookingRecipe> filter) {
+    public BaseCookingRecipe[] getRecipeTypes(@Nullable Predicate<BaseCookingRecipe> filter) {
         BaseCookingRecipe[] result;
         if (filter == null)
             result = lookupTable.values().toArray(BaseCookingRecipe[]::new);
@@ -255,12 +251,12 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
         return result != null ? result : new BaseCookingRecipe[0];
     }
 
-    private static class CookingRecipeFilter implements Predicate<Map.Entry<NamespacedKey, BaseCookingRecipe>> {
+    private static class RecipeFilter implements Predicate<Map.Entry<NamespacedKey, BaseCookingRecipe>> {
 
         @Nonnull
         Predicate<BaseCookingRecipe> filter;
 
-        public CookingRecipeFilter(@Nonnull Predicate<BaseCookingRecipe> filter) {
+        public RecipeFilter(@Nonnull Predicate<BaseCookingRecipe> filter) {
             this.filter = filter;
         }
 

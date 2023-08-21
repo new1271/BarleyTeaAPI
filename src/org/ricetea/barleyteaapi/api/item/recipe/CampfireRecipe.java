@@ -9,12 +9,13 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 
 public class CampfireRecipe extends BaseCookingRecipe {
-    public CampfireRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result) {
+    public CampfireRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result)
+            throws UnsupportedOperationException {
         super(key, original, result);
     }
 
     public CampfireRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+            float experience, int cookingTime) throws UnsupportedOperationException {
         super(key, original, result, experience, cookingTime);
     }
 

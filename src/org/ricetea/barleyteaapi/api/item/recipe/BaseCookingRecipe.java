@@ -23,12 +23,13 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements Function<I
     private final float experience;
     private final int cookingTime;
 
-    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result) {
+    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result)
+            throws UnsupportedOperationException {
         this(key, original, result, 0.0f, DefaultCookingTime);
     }
 
     public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+            float experience, int cookingTime) throws UnsupportedOperationException {
         super(key, result);
         this.original = original;
         this.experience = experience;

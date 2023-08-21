@@ -23,31 +23,28 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     private final int colCount, rowCount;
 
     public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredientMatrix,
-            int colCount, @Nonnull DataItemType result) throws Exception {
+            int colCount, @Nonnull DataItemType result) throws UnsupportedOperationException {
         super(key, result);
         if (colCount < 1 || colCount > 3) {
-            throw new Exception("'colCount' can't lower than 1 or greater then 3!");
+            throw new UnsupportedOperationException("'colCount' can't lower than 1 or greater then 3!");
         }
         int length = ingredientMatrix.length;
         if (length <= 0) {
-            throw new Exception("'ingredientMatrix' can't be empty!");
+            throw new UnsupportedOperationException("'ingredientMatrix' can't be empty!");
         } else {
             int remain = length % colCount;
             if (remain > 0) {
-                throw new Exception("'ingredientMatrix' must be a matrix!");
+                throw new UnsupportedOperationException("'ingredientMatrix' must be a matrix!");
             } else {
                 int rowCount = length / colCount;
                 if (rowCount > 3) {
-                    throw new Exception("'ingredientMatrix' is an invalid matrix!");
+                    throw new UnsupportedOperationException("'ingredientMatrix' is an invalid matrix!");
                 }
                 this.colCount = colCount;
                 this.rowCount = rowCount;
             }
         }
         this.ingredientMatrix = ingredientMatrix;
-        if (result.isRight() && !(result.right() instanceof FeatureItemGive)) {
-            throw new Exception("'result' isn't implement FeatureItemGive, recipe can't constructed!");
-        }
     }
 
     @Nonnull
@@ -130,14 +127,14 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapedRecipe toBukkitRecipe(NamespacedKey key) {
         ShapedRecipe result = new ShapedRecipe(key,
-                new ItemStack(getResult().mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())));
+                new ItemStack(getResult().toMaterial()));
         HashMap<Material, Character> collectMap = new HashMap<>();
         char c = 'a';
         int colCount = getColumnCount();
         String[] shape = new String[getRowCount()];
         int currentIndex = 0;
         for (DataItemType type : getIngredientMatrix()) {
-            Material material = type.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn());
+            Material material = type.toMaterial();
             Character ct = collectMap.get(material);
             if (ct == null) {
                 collectMap.put(material, ct = c++);
