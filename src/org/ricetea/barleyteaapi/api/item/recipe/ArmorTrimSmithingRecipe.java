@@ -29,12 +29,12 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
-    public DataItemType getTemplate() {
+    public DataItemType getTemplateAsExample() {
         return DataItemType.create(Tag.ITEMS_TRIM_TEMPLATES.getValues().iterator().next());
     }
 
     @Nonnull
-    public DataItemType getAddition() {
+    public DataItemType getAdditionAsExample() {
         return DataItemType.create(Tag.ITEMS_TRIM_MATERIALS.getValues().iterator().next());
     }
 

@@ -75,8 +75,8 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
                     NamespacedKeyUtils.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().toMaterial());
-                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplate().toMaterial());
-                ItemStack additionItem = new ItemStack(smithingRecipe.getAddition().toMaterial());
+                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().toMaterial());
+                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
@@ -102,8 +102,8 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
                     NamespacedKeyUtils.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().toMaterial());
-                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplate().toMaterial());
-                ItemStack additionItem = new ItemStack(smithingRecipe.getAddition().toMaterial());
+                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().toMaterial());
+                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().toMaterial());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {

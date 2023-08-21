@@ -21,12 +21,12 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
-    public DataItemType getTemplate() {
+    public DataItemType getTemplateAsExample() {
         return template;
     }
 
     @Nonnull
-    public DataItemType getAddition() {
+    public DataItemType getAdditionAsExample() {
         return addition;
     }
 
@@ -43,7 +43,7 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     @Nonnull
     public SmithingTransformRecipe toBukkitRecipe(NamespacedKey key) {
         return new SmithingTransformRecipe(key, new ItemStack(getResult().toMaterial()),
-                new MaterialChoice(getTemplate().toMaterial()), new MaterialChoice(getOriginal().toMaterial()),
-                new MaterialChoice(getAddition().toMaterial()), true);
+                new MaterialChoice(getTemplateAsExample().toMaterial()), new MaterialChoice(getOriginal().toMaterial()),
+                new MaterialChoice(getAdditionAsExample().toMaterial()), true);
     }
 }
