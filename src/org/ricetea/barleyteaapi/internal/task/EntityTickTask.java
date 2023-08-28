@@ -42,7 +42,7 @@ public final class EntityTickTask extends AbstractTask {
         BarleyTeaAPI api = BarleyTeaAPI.getInstance();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredMob()) {
+        if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {
             stop();
         } else {
             Entity[] entities;
@@ -58,7 +58,7 @@ public final class EntityTickTask extends AbstractTask {
                         if (id == null) {
                             removeEntity(entity);
                         } else {
-                            BaseEntity baseEntity = register.lookupEntityType(id);
+                            BaseEntity baseEntity = register.lookup(id);
                             if (baseEntity instanceof FeatureEntityTick tickingEntity)
                                 try {
                                     scheduler.runTask(api, () -> tickingEntity.handleTick(entity));

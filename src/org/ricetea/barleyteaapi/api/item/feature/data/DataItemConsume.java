@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -20,7 +22,7 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
     }
 
     public @Nonnull ItemStack getItem() {
-        return ObjectUtil.throwWhenNull(event.getItem());
+        return Objects.requireNonNull(event.getItem());
     }
 
     public void setItem(@Nullable ItemStack item) {
@@ -28,7 +30,7 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
     }
 
     public @Nonnull EquipmentSlot getHand() {
-        return ObjectUtil.throwWhenNull(event.getHand());
+        return Objects.requireNonNull(event.getHand());
     }
 
     public boolean isOffHand() {

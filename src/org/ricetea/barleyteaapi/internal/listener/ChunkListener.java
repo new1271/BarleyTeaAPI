@@ -34,13 +34,13 @@ public final class ChunkListener implements Listener {
         if (event == null)
             return;
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegisteredMob()) {
+        if (register != null && register.hasAnyRegistered()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
                 if (entity != null) {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {
-                        BaseEntity entityType = register.lookupEntityType(id);
+                        BaseEntity entityType = register.lookup(id);
                         if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                             entityChunkLoad.handleChunkLoaded(entity);
                         }
@@ -58,13 +58,13 @@ public final class ChunkListener implements Listener {
         if (event == null)
             return;
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegisteredMob()) {
+        if (register != null && register.hasAnyRegistered()) {
             for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
                 Entity entity = iterator.next();
                 if (entity != null) {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {
-                        BaseEntity entityType = register.lookupEntityType(id);
+                        BaseEntity entityType = register.lookup(id);
                         if (entityType instanceof FeatureChunkLoad entityChunkLoad) {
                             entityChunkLoad.handleChunkUnloaded(entity);
                         }

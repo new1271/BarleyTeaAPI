@@ -44,7 +44,7 @@ public final class ItemTickTask extends AbstractTask {
         BarleyTeaAPI api = BarleyTeaAPI.getInstance();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredItemNeedTicking()) {
+        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
             stop();
         } else {
             Player[] players = Bukkit.getOnlinePlayers().toArray(Player[]::new);
@@ -60,7 +60,7 @@ public final class ItemTickTask extends AbstractTask {
                                 if (itemStack != null) {
                                     NamespacedKey id = BaseItem.getItemID(itemStack);
                                     if (id != null
-                                            && register.lookupItemType(id) instanceof FeatureItemTick itemTickFeature) {
+                                            && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
                                         scheduler.runTask(api, () -> itemTickFeature.handleTickOnEquipment(player, inv,
                                                 itemStack, slot));
                                     }
@@ -74,7 +74,7 @@ public final class ItemTickTask extends AbstractTask {
                             if (itemStack != null) {
                                 NamespacedKey id = BaseItem.getItemID(itemStack);
                                 if (id != null
-                                        && register.lookupItemType(id) instanceof FeatureItemTick itemTickFeature) {
+                                        && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
                                     scheduler.runTask(api, () -> itemTickFeature.handleTickOnInventory(player, inv,
                                             itemStack, slot));
                                 }

@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.Material;
@@ -29,11 +31,11 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
     }
 
     public @Nonnull ItemStack getItemStack() {
-        return ObjectUtil.throwWhenNull(event.getItem());
+        return Objects.requireNonNull(event.getItem());
     }
 
     public @Nonnull Block getClickedBlock() {
-        return ObjectUtil.throwWhenNull(event.getClickedBlock());
+        return Objects.requireNonNull(event.getClickedBlock());
     }
 
     public @Nonnull Material getClickedBlockType() {
@@ -41,10 +43,10 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
     }
 
     public @Nonnull EquipmentSlot getHand() {
-        return ObjectUtil.throwWhenNull(event.getHand());
+        return Objects.requireNonNull(event.getHand());
     }
 
     public @Nonnull BlockFace getBlockFace() {
-        return ObjectUtil.throwWhenNull(event.getBlockFace());
+        return Objects.requireNonNull(event.getBlockFace());
     }
 }

@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.event.inventory.PrepareAnvilEvent;
@@ -8,7 +10,6 @@ import org.ricetea.barleyteaapi.api.abstracts.BaseItemAnvilFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
 
@@ -22,7 +23,7 @@ public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
 
     @Nonnull
     public ItemStack getItemStackCombined() {
-        return ObjectUtil.throwWhenNull(event.getInventory().getSecondItem());
+        return Objects.requireNonNull(event.getInventory().getSecondItem());
     }
 
     @Nonnull

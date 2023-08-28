@@ -1,11 +1,12 @@
 package org.ricetea.barleyteaapi.internal.nms;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -18,7 +19,7 @@ public final class NMSCommandRegister {
     private final CommandDispatcher<CommandListenerWrapper> dispatcher;
 
     private NMSCommandRegister() {
-        dispatcher = ObjectUtil.throwWhenNull(((CraftServer) Bukkit.getServer()).getServer().aC().a());
+        dispatcher = Objects.requireNonNull(((CraftServer) Bukkit.getServer()).getServer().aC().a());
     }
 
     @Nonnull

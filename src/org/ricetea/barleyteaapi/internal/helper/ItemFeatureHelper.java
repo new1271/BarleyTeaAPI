@@ -92,7 +92,7 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null && equipmentSlot != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
                     boolean result = featureFunc.test(feature,
                             dataConstructor.apply(event, event2, itemStack, equipmentSlot));
@@ -114,7 +114,7 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null && equipmentSlot != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
                     boolean result = featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
                     if (event instanceof Cancellable cancellable) {
@@ -135,7 +135,7 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
                     boolean result = featureFunc.test(feature, dataConstructor.apply(event));
                     if (event instanceof Cancellable cancellable) {
@@ -157,7 +157,7 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
                     return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
                             defaultValue);
@@ -175,7 +175,7 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookupItemType(id), featureClass);
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
                     featureFunc.accept(feature, dataConstructor.apply(event));
                 }

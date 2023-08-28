@@ -2,6 +2,7 @@ package org.ricetea.barleyteaapi.api.item.render;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -46,7 +47,8 @@ public abstract class AbstractItemRenderer implements Keyed {
                     PersistentDataType.STRING,
                     null);
             if (resultString != null && resultString.contains(":")) {
-                return ItemRendererRegister.getInstance().getRendererOrDefault(NamespacedKey.fromString(resultString));
+                return ItemRendererRegister.getInstance()
+                        .lookup(Objects.requireNonNull(NamespacedKey.fromString(resultString)));
             }
         }
         return null;

@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
@@ -65,15 +63,12 @@ public final class CraftListener implements Listener {
                 ItemStack result = oldResult;
                 boolean allPassed = true;
                 CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredRecipe()) {
-                    List<BaseCraftingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
-                    if (recipes != null) {
-                        for (BaseCraftingRecipe recipe : recipes) {
-                            if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
-                                result = recipe.apply(craftingMatrix);
-                                allPassed = false;
-                                break;
-                            }
+                if (register != null && register.hasAnyRegistered()) {
+                    for (BaseCraftingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                        if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
+                            result = recipe.apply(craftingMatrix);
+                            allPassed = false;
+                            break;
                         }
                     }
                 }

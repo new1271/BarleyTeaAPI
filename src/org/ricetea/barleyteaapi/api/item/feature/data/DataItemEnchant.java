@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -12,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemInventoryFeatureData;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class DataItemEnchant extends BaseItemInventoryFeatureData<EnchantItemEvent> {
 
@@ -24,15 +24,15 @@ public final class DataItemEnchant extends BaseItemInventoryFeatureData<EnchantI
     }
 
     public @Nonnull Player getPlayer() {
-        return ObjectUtil.throwWhenNull(event.getEnchanter());
+        return Objects.requireNonNull(event.getEnchanter());
     }
 
     public @Nonnull Block getBlock() {
-        return ObjectUtil.throwWhenNull(event.getEnchantBlock());
+        return Objects.requireNonNull(event.getEnchantBlock());
     }
 
     public @Nonnull ItemStack getItemStack() {
-        return ObjectUtil.throwWhenNull(event.getItem());
+        return Objects.requireNonNull(event.getItem());
     }
 
     public int getExpLevelCost() {
@@ -44,11 +44,11 @@ public final class DataItemEnchant extends BaseItemInventoryFeatureData<EnchantI
     }
 
     public @Nonnull Map<Enchantment, Integer> getEnchantsToAdd() {
-        return ObjectUtil.throwWhenNull(event.getEnchantsToAdd());
+        return Objects.requireNonNull(event.getEnchantsToAdd());
     }
 
     public @Nonnull Enchantment getEnchantmentHint() {
-        return ObjectUtil.throwWhenNull(event.getEnchantmentHint());
+        return Objects.requireNonNull(event.getEnchantmentHint());
     }
 
     public int getLevelHint() {

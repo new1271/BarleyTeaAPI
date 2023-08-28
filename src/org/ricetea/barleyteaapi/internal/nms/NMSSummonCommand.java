@@ -11,7 +11,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -128,7 +127,7 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
                     NamespacedKey key = new NamespacedKey(namespace, entityKey.a());
-                    BaseEntity baseEntity = register.lookupEntityType(key);
+                    BaseEntity baseEntity = register.lookup(key);
                     if (baseEntity != null && baseEntity instanceof FeatureCommandSummon) {
                         FeatureCommandSummon summonEntity = (FeatureCommandSummon) baseEntity;
                         NBTTagCompound nbttagcompound1 = nbt.h();
@@ -209,8 +208,8 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                     if (customKeys == null) {
                         EntityRegister register = EntityRegister.getInstanceUnsafe();
                         if (register != null) {
-                            this.customKeys = customKeys = Arrays
-                                    .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                            this.customKeys = customKeys = register
+                                    .listAllKeys(type -> type instanceof FeatureCommandSummon).stream()
                                     .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
                         }
                     }
@@ -235,8 +234,8 @@ public final class NMSSummonCommand implements NMSBaseCommand {
             if (customKeys == null) {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
-                    this.customKeys = customKeys = Arrays
-                            .stream(register.getEntityIDs(type -> type instanceof FeatureCommandSummon))
+                    this.customKeys = customKeys = register
+                            .listAllKeys(type -> type instanceof FeatureCommandSummon).stream()
                             .map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
                 }
             }

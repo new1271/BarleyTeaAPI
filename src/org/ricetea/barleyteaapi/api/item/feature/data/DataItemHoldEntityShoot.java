@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.LivingEntity;
@@ -20,7 +22,7 @@ public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData
 
     public DataItemHoldEntityShoot(@Nonnull ProjectileLaunchEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
-        super(event, ObjectUtil.throwWhenNull(ObjectUtil.tryCast(event.getEntity().getShooter(), LivingEntity.class)),
+        super(event, Objects.requireNonNull(ObjectUtil.tryCast(event.getEntity().getShooter(), LivingEntity.class)),
                 itemStack, equipmentSlot);
         entityType = new Lazy<>(() -> BaseEntity.getEntityType(getProjectile()));
     }

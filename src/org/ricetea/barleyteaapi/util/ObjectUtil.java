@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.util;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -11,18 +12,12 @@ public final class ObjectUtil {
 
     @Nonnull
     public static <T> T letNonNull(@Nullable T obj, @Nonnull Supplier<T> supplierWhenNull) {
-        if (obj == null) {
-            T result = supplierWhenNull.get();
-            if (result == null)
-                throw new NullPointerException();
-            return result;
-        }
-        return obj;
+        return obj == null ? Objects.requireNonNull(Objects.requireNonNull(supplierWhenNull).get()) : obj;
     }
 
     @Nonnull
     public static <T> T letNonNull(@Nullable T obj, @Nonnull T objWhenNull) {
-        return obj == null ? objWhenNull : obj;
+        return obj == null ? Objects.requireNonNull(objWhenNull) : obj;
     }
 
     @Nullable
@@ -34,12 +29,13 @@ public final class ObjectUtil {
         }
     }
 
-    @Nonnull
-    public static <T> T throwWhenNull(@Nullable T obj) throws NullPointerException {
+    @Nullable
+    public static <T> T cast(@Nullable Object obj, @Nonnull Class<T> castClass) {
         if (obj == null)
-            throw new NullPointerException();
-        else
-            return obj;
+            return null;
+        else {
+            return castClass.cast(obj);
+        }
     }
 
     @Nullable

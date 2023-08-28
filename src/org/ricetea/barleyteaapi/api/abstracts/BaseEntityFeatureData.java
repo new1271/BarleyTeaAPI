@@ -1,11 +1,12 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
+import java.util.Objects;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityEvent;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public abstract class BaseEntityFeatureData<T extends EntityEvent> extends BaseFeatureData<T> {
 
@@ -18,7 +19,7 @@ public abstract class BaseEntityFeatureData<T extends EntityEvent> extends BaseF
 
     public BaseEntityFeatureData(@Nonnull T event, @CheckForNull Entity entity) {
         super(event);
-        this.entity = ObjectUtil.throwWhenNull(entity);
+        this.entity = Objects.requireNonNull(entity);
     }
 
     @Nonnull

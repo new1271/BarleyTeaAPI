@@ -67,7 +67,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         if (apiInstance != null && register != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                BaseItem itemType = register.lookupItemType(id);
+                BaseItem itemType = register.lookup(id);
                 if (itemType != null) {
                     ItemMeta meta = itemStack.getItemMeta();
                     List<Component> customLores = getItemLore(itemStack);

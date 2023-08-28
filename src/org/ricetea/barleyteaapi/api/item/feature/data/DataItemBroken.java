@@ -1,12 +1,13 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class DataItemBroken extends BaseFeatureData<PlayerItemBreakEvent> {
 
@@ -15,10 +16,10 @@ public final class DataItemBroken extends BaseFeatureData<PlayerItemBreakEvent> 
     }
 
     public @Nonnull Player getPlayer() {
-        return ObjectUtil.throwWhenNull(event.getPlayer());
+        return Objects.requireNonNull(event.getPlayer());
     }
 
     public @Nonnull ItemStack getItemStack() {
-        return ObjectUtil.throwWhenNull(event.getBrokenItem());
+        return Objects.requireNonNull(event.getBrokenItem());
     }
 }

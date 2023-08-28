@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
+import java.util.Objects;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +31,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
     @SuppressWarnings("null")
     public BaseProjectileFeatureData(@Nonnull T event, @CheckForNull Projectile entity) {
         super(event);
-        this.entity = ObjectUtil.throwWhenNull(entity);
+        this.entity = Objects.requireNonNull(entity);
         shooter = ObjectUtil.tryCast(entity.getShooter(), Entity.class);
         shooterType = ObjectUtil.mapWhenNonnull(shooter,
                 shooter -> new Lazy<>(() -> BaseEntity.getEntityType(shooter)));

@@ -51,7 +51,7 @@ public final class InventoryEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register != null && id != null) {
-                BaseItem baseItem = register.lookupItemType(id);
+                BaseItem baseItem = register.lookup(id);
                 if (baseItem != null) {
                     Consumer<ItemStack> job = null;
                     if (baseItem instanceof FeatureItemEnchant itemEnchantFeature) {
@@ -86,7 +86,7 @@ public final class InventoryEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(upperItem);
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register != null && id != null) {
-                BaseItem baseItem = register.lookupItemType(id);
+                BaseItem baseItem = register.lookup(id);
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(lowerItem)) {
@@ -128,7 +128,7 @@ public final class InventoryEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(firstItem);
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register != null && id != null) {
-                BaseItem baseItem = register.lookupItemType(id);
+                BaseItem baseItem = register.lookup(id);
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(secondItem)) { //Repair mode

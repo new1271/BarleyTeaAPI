@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
@@ -51,15 +49,12 @@ public final class CookListener implements Listener {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredRecipe()) {
-                    List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
-                    if (recipes != null) {
-                        for (BaseCookingRecipe recipe : recipes) {
-                            if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
-                                result = recipe.apply(event.getSource());
-                                allPassed = false;
-                                break;
-                            }
+                if (register != null && register.hasAnyRegistered()) {
+                    for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                        if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
+                            result = recipe.apply(event.getSource());
+                            allPassed = false;
+                            break;
                         }
                     }
                 }
@@ -91,14 +86,11 @@ public final class CookListener implements Listener {
             NamespacedKey recipeKey = keyedRecipe.getKey();
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
                 CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredRecipe()) {
-                    List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
-                    if (recipes != null) {
-                        for (BaseCookingRecipe recipe : recipes) {
-                            if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
-                                event.setTotalCookTime(event.getSource().getAmount() * recipe.getCookingTime());
-                                break;
-                            }
+                if (register != null && register.hasAnyRegistered()) {
+                    for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                        if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
+                            event.setTotalCookTime(event.getSource().getAmount() * recipe.getCookingTime());
+                            break;
                         }
                     }
                 }
@@ -120,14 +112,11 @@ public final class CookListener implements Listener {
         NamespacedKey recipeKey = campfireRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
             CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-            if (register != null && register.hasAnyRegisteredRecipe()) {
-                List<BaseCookingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
-                if (recipes != null) {
-                    for (BaseCookingRecipe recipe : recipes) {
-                        if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
-                            event.setTotalCookTime(recipe.getCookingTime());
-                            break;
-                        }
+            if (register != null && register.hasAnyRegistered()) {
+                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                    if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
+                        event.setTotalCookTime(recipe.getCookingTime());
+                        break;
                     }
                 }
             }

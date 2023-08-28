@@ -12,11 +12,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
@@ -126,7 +126,7 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 					barleyTeaItemType = null;
 					nmsItemType = null;
 				} else {
-					barleyTeaItemType = ItemRegister.getInstance().lookupItemType(alterItemKey);
+					barleyTeaItemType = ItemRegister.getInstance().lookup(alterItemKey);
 					nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
 							type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
 				}
@@ -145,7 +145,7 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 						_itemStack -> _itemStack != null && commandGiveType
 								.handleCommandGive(_itemStack, nbt.toString()))) {
 					AbstractItemRenderer.renderItem(bukkitStack);
-					itemstack = ObjectUtil.throwWhenNull(NMSItemHelper.getNmsItem(bukkitStack));
+					itemstack = Objects.requireNonNull(NMSItemHelper.getNmsItem(bukkitStack));
 				} else {
 					throw giveFailedMessage.create();
 				}
@@ -242,8 +242,8 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 					if (customKeys == null) {
 						ItemRegister register = ItemRegister.getInstanceUnsafe();
 						if (register != null) {
-							this.customKeys = customKeys = Arrays
-									.stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+							this.customKeys = customKeys = register
+									.listAllKeys(type -> type instanceof FeatureCommandGive).stream()
 									.map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
 						}
 					}
@@ -268,8 +268,8 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 			if (customKeys == null) {
 				ItemRegister register = ItemRegister.getInstanceUnsafe();
 				if (register != null) {
-					this.customKeys = customKeys = Arrays
-							.stream(register.getItemIDs(type -> type instanceof FeatureCommandGive))
+					this.customKeys = customKeys = register
+							.listAllKeys(type -> type instanceof FeatureCommandGive).stream()
 							.map(key -> MinecraftKey.a(key.getNamespace(), key.getKey())).toList();
 				}
 			}

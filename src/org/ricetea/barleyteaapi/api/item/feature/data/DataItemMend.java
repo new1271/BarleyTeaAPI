@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.ExperienceOrb;
@@ -8,7 +10,6 @@ import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class DataItemMend extends BaseFeatureData<PlayerItemMendEvent> {
 
@@ -17,19 +18,19 @@ public final class DataItemMend extends BaseFeatureData<PlayerItemMendEvent> {
     }
 
     public @Nonnull Player getPlayer() {
-        return ObjectUtil.throwWhenNull(event.getPlayer());
+        return Objects.requireNonNull(event.getPlayer());
     }
 
     public @Nonnull ItemStack getItemStack() {
-        return ObjectUtil.throwWhenNull(event.getItem());
+        return Objects.requireNonNull(event.getItem());
     }
 
     public @Nonnull EquipmentSlot getSlot() {
-        return ObjectUtil.throwWhenNull(event.getSlot());
+        return Objects.requireNonNull(event.getSlot());
     }
 
     public @Nonnull ExperienceOrb getExperienceOrb() {
-        return ObjectUtil.throwWhenNull(event.getExperienceOrb());
+        return Objects.requireNonNull(event.getExperienceOrb());
     }
 
     public int getRepairAmount() {

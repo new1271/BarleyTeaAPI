@@ -1,10 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.registration;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,52 +87,66 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     }
 
     @Nullable
-    public BaseEntity lookupEntityType(@Nonnull NamespacedKey key) {
+    public BaseEntity lookup(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
     }
 
-    public boolean hasEntityType(@Nonnull NamespacedKey key) {
+    public boolean has(@Nonnull NamespacedKey key) {
         return lookupTable.containsKey(key);
     }
 
-    public boolean hasAnyRegisteredMob() {
+    public boolean hasAnyRegistered() {
         return lookupTable.size() > 0;
     }
 
+    @Override
     @Nonnull
-    public NamespacedKey[] getEntityIDs(@Nullable Predicate<BaseEntity> filter) {
-        NamespacedKey[] result;
-        if (filter == null)
-            result = lookupTable.keySet().toArray(NamespacedKey[]::new);
-        else
-            result = lookupTable.entrySet().stream().filter(new EntityFilter(filter)).map(e -> e.getKey())
-                    .toArray(NamespacedKey[]::new);
-        return result != null ? result : new NamespacedKey[0];
+    public Collection<BaseEntity> listAll() {
+        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
+                Collections::emptySet);
     }
 
+    @Override
     @Nonnull
-    public BaseEntity[] getEntityTypes(@Nullable Predicate<BaseEntity> filter) {
-        BaseEntity[] result;
-        if (filter == null)
-            result = lookupTable.values().toArray(BaseEntity[]::new);
-        else
-            result = lookupTable.values().stream().filter(filter).toArray(BaseEntity[]::new);
-        return result != null ? result : new BaseEntity[0];
+    public Collection<BaseEntity> listAll(@Nullable Predicate<BaseEntity> predicate) {
+        return predicate == null ? listAll()
+                : ObjectUtil.letNonNull(
+                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
+                        Collections::emptySet);
     }
 
-    private static class EntityFilter implements Predicate<Map.Entry<NamespacedKey, BaseEntity>> {
+    @Override
+    @Nonnull
+    public Collection<NamespacedKey> listAllKeys() {
+        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
+                Collections::emptySet);
+    }
 
-        @Nonnull
-        Predicate<BaseEntity> filter;
+    @Override
+    @Nonnull
+    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseEntity> predicate) {
+        return predicate == null ? listAllKeys()
+                : ObjectUtil.letNonNull(
+                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
+                                .collect(Collectors.toUnmodifiableList()),
+                        Collections::emptySet);
+    }
 
-        public EntityFilter(@Nonnull Predicate<BaseEntity> filter) {
-            this.filter = filter;
-        }
+    @Override
+    @Nullable
+    public BaseEntity findFirst(@Nullable Predicate<BaseEntity> predicate) {
+        var stream = lookupTable.values().stream();
+        if (predicate != null)
+            stream = stream.filter(predicate);
+        return stream.findFirst().orElse(null);
+    }
 
-        @Override
-        public boolean test(Entry<NamespacedKey, BaseEntity> t) {
-            return filter.test(t.getValue());
-        }
-
+    @Override
+    @Nullable
+    public NamespacedKey findFirstKey(@Nullable Predicate<BaseEntity> predicate) {
+        var stream = lookupTable.entrySet().stream();
+        if (predicate != null)
+            stream = stream.filter(new Filter<>(predicate));
+        return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 }

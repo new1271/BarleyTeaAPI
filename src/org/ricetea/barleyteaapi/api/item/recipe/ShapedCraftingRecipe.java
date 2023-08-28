@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -153,7 +154,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
         for (Map.Entry<Material, Character> entry : collectMap.entrySet()) {
             result = result.setIngredient(entry.getValue(), entry.getKey());
         }
-        return ObjectUtil.throwWhenNull(result);
+        return Objects.requireNonNull(result);
     }
 
 }

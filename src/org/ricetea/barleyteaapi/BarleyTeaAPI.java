@@ -100,7 +100,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     private void announceEntitiesAPILoaded() {
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegisteredMob()) {
+        if (register != null && register.hasAnyRegistered()) {
             for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
                 World world = worldIterator.next();
                 if (world != null) {
@@ -109,7 +109,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
                         if (entity != null) {
                             NamespacedKey id = BaseEntity.getEntityID(entity);
                             if (id != null) {
-                                BaseEntity entityType = register.lookupEntityType(id);
+                                BaseEntity entityType = register.lookup(id);
                                 if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
                                     FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
                                     apiLoadEntity.handleAPILoaded(entity);
@@ -124,7 +124,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     private void announceEntitiesAPIUnloaded() {
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegisteredMob()) {
+        if (register != null && register.hasAnyRegistered()) {
             for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
                 World world = worldIterator.next();
                 if (world != null) {
@@ -133,7 +133,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
                         if (entity != null) {
                             NamespacedKey id = BaseEntity.getEntityID(entity);
                             if (id != null) {
-                                BaseEntity entityType = register.lookupEntityType(id);
+                                BaseEntity entityType = register.lookup(id);
                                 if (entityType != null && entityType instanceof FeatureBarleyTeaAPILoad) {
                                     FeatureBarleyTeaAPILoad apiLoadEntity = (FeatureBarleyTeaAPILoad) entityType;
                                     apiLoadEntity.handleAPIUnloaded(entity);

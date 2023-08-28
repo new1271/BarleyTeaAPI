@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.event.inventory.PrepareAnvilEvent;
@@ -15,7 +17,7 @@ public abstract class BaseItemAnvilFeatureData extends BaseItemInventoryResultFe
 
     @Nonnull
     public ItemStack getItemStack() {
-        return ObjectUtil.throwWhenNull(event.getInventory().getFirstItem());
+        return Objects.requireNonNull(event.getInventory().getFirstItem());
     }
 
     @Nonnull
@@ -25,6 +27,6 @@ public abstract class BaseItemAnvilFeatureData extends BaseItemInventoryResultFe
 
     @Nonnull
     public AnvilInventory getInventory() {
-        return ObjectUtil.throwWhenNull(event.getInventory());
+        return Objects.requireNonNull(event.getInventory());
     }
 }

@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.Bukkit;
@@ -39,7 +41,6 @@ import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public final class PlayerEventListener implements Listener {
     private static final Lazy<PlayerEventListener> inst = new Lazy<>(PlayerEventListener::new);
@@ -61,7 +62,7 @@ public final class PlayerEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register != null && id != null) {
-                BaseItem baseItem = register.lookupItemType(id);
+                BaseItem baseItem = register.lookup(id);
                 if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
                     if (!itemDamageFeature.handleItemDamage(new DataItemDamage(event))) {
                         event.setCancelled(true);
@@ -91,7 +92,7 @@ public final class PlayerEventListener implements Listener {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register != null && id != null) {
-                BaseItem baseItem = register.lookupItemType(id);
+                BaseItem baseItem = register.lookup(id);
                 if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
                     int damage = customDurabilityFeature.getDurabilityDamage(itemStack);
                     int repairAmount = event.getExperienceOrb().getExperience() * 2;
@@ -213,7 +214,7 @@ public final class PlayerEventListener implements Listener {
     public void listenItemInteractEntity(PlayerInteractEntityEvent event) {
         if (event == null || event.isCancelled())
             return;
-        ItemStack itemStack = event.getPlayer().getInventory().getItem(ObjectUtil.throwWhenNull(event.getHand()));
+        ItemStack itemStack = event.getPlayer().getInventory().getItem(Objects.requireNonNull(event.getHand()));
         if (!ItemFeatureHelper.doFeatureCancellable(itemStack, event, FeatureItemClick.class,
                 FeatureItemClick::handleItemClickEntity, DataItemClickEntity::new)) {
             event.setCancelled(true);

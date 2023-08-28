@@ -1,13 +1,13 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,12 +40,12 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     private final Hashtable<NamespacedKey, BaseCookingRecipe> lookupTable = new Hashtable<>();
 
     @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = ObjectUtil
-            .throwWhenNull(LinkedHashMultimap.create());
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Objects
+            .requireNonNull(LinkedHashMultimap.create());
 
     @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert = ObjectUtil
-            .throwWhenNull(LinkedHashMultimap.create());
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert = Objects
+            .requireNonNull(LinkedHashMultimap.create());
 
     @Nonnull
     private final AtomicInteger flowNumber = new AtomicInteger(0);
@@ -213,57 +213,73 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Nullable
-    public BaseCookingRecipe lookupRecipe(@Nonnull NamespacedKey key) {
+    public BaseCookingRecipe lookup(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
     }
 
-    @Nullable
-    public List<BaseCookingRecipe> lookupRecipeFromDummies(@Nonnull NamespacedKey key) {
-        return collidingTable.get(key).stream().map(this::lookupRecipe).toList();
-    }
-
-    public boolean hasRecipe(@Nonnull NamespacedKey key) {
+    public boolean has(@Nonnull NamespacedKey key) {
         return lookupTable.containsKey(key);
     }
 
-    public boolean hasAnyRegisteredRecipe() {
+    public boolean hasAnyRegistered() {
         return lookupTable.size() > 0;
     }
 
+    @Override
     @Nonnull
-    public NamespacedKey[] getRecipeIDs(@Nullable Predicate<BaseCookingRecipe> filter) {
-        NamespacedKey[] result;
-        if (filter == null)
-            result = lookupTable.keySet().toArray(NamespacedKey[]::new);
-        else
-            result = lookupTable.entrySet().stream().filter(new RecipeFilter(filter)).map(e -> e.getKey())
-                    .toArray(NamespacedKey[]::new);
-        return result != null ? result : new NamespacedKey[0];
+    public Collection<BaseCookingRecipe> listAll() {
+        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
+                Collections::emptySet);
+    }
+
+    @Override
+    @Nonnull
+    public Collection<BaseCookingRecipe> listAll(@Nullable Predicate<BaseCookingRecipe> predicate) {
+        return predicate == null ? listAll()
+                : ObjectUtil.letNonNull(
+                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
+                        Collections::emptySet);
+    }
+
+    @Override
+    @Nonnull
+    public Collection<NamespacedKey> listAllKeys() {
+        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
+                Collections::emptySet);
+    }
+
+    @Override
+    @Nonnull
+    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseCookingRecipe> predicate) {
+        return predicate == null ? listAllKeys()
+                : ObjectUtil.letNonNull(
+                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
+                                .collect(Collectors.toUnmodifiableList()),
+                        Collections::emptySet);
     }
 
     @Nonnull
-    public BaseCookingRecipe[] getRecipeTypes(@Nullable Predicate<BaseCookingRecipe> filter) {
-        BaseCookingRecipe[] result;
-        if (filter == null)
-            result = lookupTable.values().toArray(BaseCookingRecipe[]::new);
-        else
-            result = lookupTable.values().stream().filter(filter).toArray(BaseCookingRecipe[]::new);
-        return result != null ? result : new BaseCookingRecipe[0];
+    public Collection<BaseCookingRecipe> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
+        return ObjectUtil.letNonNull(
+                collidingTable.get(key).stream().map(this::lookup).collect(Collectors.toUnmodifiableSet()),
+                Collections::emptySet);
     }
 
-    private static class RecipeFilter implements Predicate<Map.Entry<NamespacedKey, BaseCookingRecipe>> {
+    @Override
+    @Nullable
+    public BaseCookingRecipe findFirst(@Nullable Predicate<BaseCookingRecipe> predicate) {
+        var stream = lookupTable.values().stream();
+        if (predicate != null)
+            stream = stream.filter(predicate);
+        return stream.findFirst().orElse(null);
+    }
 
-        @Nonnull
-        Predicate<BaseCookingRecipe> filter;
-
-        public RecipeFilter(@Nonnull Predicate<BaseCookingRecipe> filter) {
-            this.filter = filter;
-        }
-
-        @Override
-        public boolean test(Entry<NamespacedKey, BaseCookingRecipe> t) {
-            return filter.test(t.getValue());
-        }
-
+    @Override
+    @Nullable
+    public NamespacedKey findFirstKey(@Nullable Predicate<BaseCookingRecipe> predicate) {
+        var stream = lookupTable.entrySet().stream();
+        if (predicate != null)
+            stream = stream.filter(new Filter<>(predicate));
+        return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 }

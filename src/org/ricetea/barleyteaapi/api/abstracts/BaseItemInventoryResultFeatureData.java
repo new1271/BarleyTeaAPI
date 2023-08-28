@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -22,7 +24,7 @@ public abstract class BaseItemInventoryResultFeatureData<T extends org.bukkit.ev
 
     @Nonnull
     public Inventory getInventory() {
-        return ObjectUtil.throwWhenNull(event.getInventory());
+        return Objects.requireNonNull(event.getInventory());
     }
 
     @Nullable

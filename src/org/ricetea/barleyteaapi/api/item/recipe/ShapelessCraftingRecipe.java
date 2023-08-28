@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -80,6 +81,6 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
             Material material = type.toMaterial();
             result.addIngredient(material);
         }
-        return ObjectUtil.throwWhenNull(result);
+        return Objects.requireNonNull(result);
     }
 }

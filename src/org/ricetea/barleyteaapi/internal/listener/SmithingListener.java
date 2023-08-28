@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
@@ -58,16 +56,13 @@ public final class SmithingListener implements Listener {
                 ItemStack result = oldResult;
                 boolean allPassed = true;
                 SmithingRecipeRegister register = SmithingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegisteredRecipe()) {
-                    List<BaseSmithingRecipe> recipes = register.lookupRecipeFromDummies(recipeKey);
-                    if (recipes != null) {
-                        for (BaseSmithingRecipe recipe : recipes) {
-                            if (recipe.getOriginal().equals(originalType) && recipe.filterAdditionType(additionType)
-                                    && recipe.filterTemplateType(templateType)) {
-                                result = recipe.apply(original, template, addition);
-                                allPassed = false;
-                                break;
-                            }
+                if (register != null && register.hasAnyRegistered()) {
+                    for (BaseSmithingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                        if (recipe.getOriginal().equals(originalType) && recipe.filterAdditionType(additionType)
+                                && recipe.filterTemplateType(templateType)) {
+                            result = recipe.apply(original, template, addition);
+                            allPassed = false;
+                            break;
                         }
                     }
                 }

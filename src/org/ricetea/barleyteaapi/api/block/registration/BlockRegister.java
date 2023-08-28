@@ -1,9 +1,8 @@
-package org.ricetea.barleyteaapi.api.item.registration;
+package org.ricetea.barleyteaapi.api.block.registration;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -14,72 +13,53 @@ import javax.annotation.Nullable;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
-import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
-import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
+import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
-public final class ItemRegister implements IRegister<BaseItem> {
+public final class BlockRegister implements IRegister<BaseBlock> {
     @Nonnull
-    private static final Lazy<ItemRegister> inst = new Lazy<>(ItemRegister::new);
+    private static final Lazy<BlockRegister> inst = new Lazy<>(BlockRegister::new);
 
     @Nonnull
-    private AtomicInteger itemNeedTick = new AtomicInteger(0);
+    private final Hashtable<NamespacedKey, BaseBlock> lookupTable = new Hashtable<>();
 
-    @Nonnull
-    private final Hashtable<NamespacedKey, BaseItem> lookupTable = new Hashtable<>();
-
-    private ItemRegister() {
+    private BlockRegister() {
     }
 
     @Nonnull
-    public static ItemRegister getInstance() {
+    public static BlockRegister getInstance() {
         BarleyTeaAPI.checkPluginUsable();
         return inst.get();
     }
 
     @Nullable
-    public static ItemRegister getInstanceUnsafe() {
+    public static BlockRegister getInstanceUnsafe() {
         return inst.getUnsafe();
     }
 
-    public void register(@Nonnull BaseItem item) {
-        lookupTable.put(item.getKey(), item);
+    public void register(@Nonnull BaseBlock block) {
+        lookupTable.put(block.getKey(), block);
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + item.getKey().toString() + " as item!");
-                if (item instanceof FeatureCommandGive) {
-                    ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
-                }
-                if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
-                    ItemTickTask.getInstance().start();
-                }
+                logger.info("registered " + block.getKey().toString() + " as block!");
             }
         }
     }
 
-    public void unregister(@Nonnull BaseItem item) {
-        lookupTable.remove(item.getKey());
+    public void unregister(@Nonnull BaseBlock block) {
+        lookupTable.remove(block.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
             Logger logger = inst.getLogger();
-            logger.info("unregistered " + item.getKey().toString());
-            if (item instanceof FeatureCommandGive) {
-                ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
-            }
-            if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
-                ItemTickTask.getInstance().stop();
-            }
+            logger.info("unregistered " + block.getKey().toString());
         }
     }
 
     @Nullable
-    public BaseItem lookup(@Nonnull NamespacedKey key) {
+    public BaseBlock lookup(@Nonnull NamespacedKey key) {
         return lookupTable.get(key);
     }
 
@@ -87,24 +67,21 @@ public final class ItemRegister implements IRegister<BaseItem> {
         return lookupTable.containsKey(key);
     }
 
+    @Override
     public boolean hasAnyRegistered() {
         return lookupTable.size() > 0;
     }
 
-    public boolean hasAnyRegisteredNeedTicking() {
-        return itemNeedTick.get() > 0;
-    }
-
     @Override
     @Nonnull
-    public Collection<BaseItem> listAll() {
+    public Collection<BaseBlock> listAll() {
         return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
                 Collections::emptySet);
     }
 
     @Override
     @Nonnull
-    public Collection<BaseItem> listAll(@Nullable Predicate<BaseItem> predicate) {
+    public Collection<BaseBlock> listAll(@Nullable Predicate<BaseBlock> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
                         lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
@@ -120,7 +97,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     @Override
     @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseItem> predicate) {
+    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseBlock> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
                         lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
@@ -130,7 +107,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     @Override
     @Nullable
-    public BaseItem findFirst(@Nullable Predicate<BaseItem> predicate) {
+    public BaseBlock findFirst(@Nullable Predicate<BaseBlock> predicate) {
         var stream = lookupTable.values().stream();
         if (predicate != null)
             stream = stream.filter(predicate);
@@ -139,7 +116,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     @Override
     @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<BaseItem> predicate) {
+    public NamespacedKey findFirstKey(@Nullable Predicate<BaseBlock> predicate) {
         var stream = lookupTable.entrySet().stream();
         if (predicate != null)
             stream = stream.filter(new Filter<>(predicate));
