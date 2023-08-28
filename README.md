@@ -1,3 +1,3 @@
-## BarleyTeaAPI - a mob/item API for Paper server software
+## BarleyTeaAPI - a custom mob/item/block API for Paper-based server software
 
 working in progress...
