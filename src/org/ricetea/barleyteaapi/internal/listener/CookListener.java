@@ -5,11 +5,13 @@ import javax.annotation.Nonnull;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockCookEvent;
 import org.bukkit.event.block.CampfireStartEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceStartSmeltEvent;
 import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -66,6 +68,25 @@ public final class CookListener implements Listener {
                         AbstractItemRenderer.renderItem(result);
                     }
                     event.setResult(result != null ? result : event.getSource());
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenFurnaceBurn(FurnaceBurnEvent event) {
+        if (event == null)
+            return;
+        CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
+        if (event.getBlock().getState() instanceof Furnace furnace && register != null) {
+            ItemStack item = furnace.getInventory().getSmelting();
+            if (item != null) {
+                BaseItem baseItem = BaseItem.getItemType(item).getItemTypeForBarleyTeaCustomItem();
+                if (baseItem != null) {
+                    if (register.findFirst(recipe -> baseItem
+                            .equals(recipe.getOriginal().getItemTypeForBarleyTeaCustomItem())) == null) {
+                        event.setCancelled(true);
+                    }
                 }
             }
         }

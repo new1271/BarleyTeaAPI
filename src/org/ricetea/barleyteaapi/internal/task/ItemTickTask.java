@@ -23,7 +23,7 @@ public final class ItemTickTask extends AbstractTask {
     private static final Lazy<ItemTickTask> _inst = new Lazy<>(ItemTickTask::new);
 
     @Nonnull
-    private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
+    public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
 
     private ItemTickTask() {
         super(50, 0);

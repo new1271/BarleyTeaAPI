@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,6 +23,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockClick;
+import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockClicked;
+import org.ricetea.barleyteaapi.api.block.feature.state.StateBlockClicked;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemClick;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemConsume;
@@ -39,6 +43,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemLostFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemMend;
 import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 
@@ -182,7 +187,8 @@ public final class PlayerEventListener implements Listener {
         Action action = event.getAction();
         if (action == null || action.equals(Action.PHYSICAL))
             return;
-        boolean isNothing = event.getClickedBlock() == null || event.getClickedBlock().getType().isAir();
+        Block clickedBlock = event.getClickedBlock();
+        boolean isNothing = clickedBlock == null || clickedBlock.isEmpty();
         if (isNothing) {
             if (!ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickNothing, DataItemClickNothing::new, true)) {
@@ -190,19 +196,26 @@ public final class PlayerEventListener implements Listener {
                 event.setUseItemInHand(Result.DENY);
             }
         } else {
+            switch (BlockFeatureHelper.doFeatureAndReturn(event.getClickedBlock(), event, FeatureBlockClick.class,
+                    FeatureBlockClick::handleBlockClicked, DataBlockClicked::new, StateBlockClicked.Skipped)) {
+                case Cancelled:
+                    event.setUseInteractedBlock(Result.DENY);
+                    event.setUseItemInHand(Result.DENY);
+                    return;
+                case Use:
+                    event.setUseInteractedBlock(Result.ALLOW);
+                    break;
+                case Skipped:
+                    break;
+            }
             switch (ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickBlock, DataItemClickBlock::new, StateItemClickBlock.Skipped)) {
                 case Cancelled:
                     event.setUseInteractedBlock(Result.DENY);
                     event.setUseItemInHand(Result.DENY);
-                    break;
-                case UseItem:
-                    event.setUseInteractedBlock(Result.DENY);
+                    return;
+                case Use:
                     event.setUseItemInHand(Result.ALLOW);
-                    break;
-                case UseBlock:
-                    event.setUseInteractedBlock(Result.ALLOW);
-                    event.setUseItemInHand(Result.DENY);
                     break;
                 case Skipped:
                     break;

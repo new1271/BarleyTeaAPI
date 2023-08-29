@@ -20,7 +20,7 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public abstract class BaseBlock implements Keyed {
     @Nonnull
-    private static final NamespacedKey BlockTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("block_id");
+    public static final NamespacedKey BlockTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("block_id");
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
