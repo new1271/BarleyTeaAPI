@@ -1,6 +1,8 @@
 package org.ricetea.barleyteaapi.api.block;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -20,7 +22,9 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
 public abstract class BaseBlock implements Keyed {
     @Nonnull
-    public static final NamespacedKey BlockTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("block_id");
+    public static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("block_id");
+    @Nonnull
+    private static final Set<NamespacedKey> FallbackNamespacedKeys = new HashSet<>();
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -58,14 +62,14 @@ public abstract class BaseBlock implements Keyed {
 
     public final void register(@Nullable Block block) {
         if (block != null)
-            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(BlockTagNamespacedKey,
+            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(DefaultNamespacedKey,
                     PersistentDataType.STRING, key.toString());
     }
 
     public final void register(@Nullable Block block,
             @Nullable Consumer<Block> afterBlockRegistered) {
         if (block != null) {
-            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(BlockTagNamespacedKey,
+            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(DefaultNamespacedKey,
                     PersistentDataType.STRING, key.toString());
             if (afterBlockRegistered != null) {
                 afterBlockRegistered.accept(block);
@@ -77,18 +81,18 @@ public abstract class BaseBlock implements Keyed {
             @Nullable Predicate<Block> afterBlockRegistered) {
         if (block != null) {
             PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
-            String previousID = container.getOrDefault(BlockTagNamespacedKey, PersistentDataType.STRING, null);
-            container.set(BlockTagNamespacedKey, PersistentDataType.STRING, key.toString());
+            String previousID = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
             if (afterBlockRegistered != null) {
                 if (!afterBlockRegistered.test(block)) {
                     if (!block.isEmpty())
                         if (previousID == null) {
-                            container.remove(BlockTagNamespacedKey);
+                            container.remove(DefaultNamespacedKey);
                             if (container.isEmpty()) {
                                 ChunkStorage.removeBlockDataContainer(block);
                             }
                         } else
-                            container.set(BlockTagNamespacedKey, PersistentDataType.STRING, previousID);
+                            container.set(DefaultNamespacedKey, PersistentDataType.STRING, previousID);
                     return false;
                 }
             }
@@ -102,7 +106,7 @@ public abstract class BaseBlock implements Keyed {
             PersistentDataContainer container = getPersistentDataContainer(block, false);
             if (container != null) {
                 return key.toString()
-                        .equals(container.getOrDefault(BlockTagNamespacedKey, PersistentDataType.STRING, null));
+                        .equals(container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null));
             }
         }
         return false;
@@ -114,22 +118,40 @@ public abstract class BaseBlock implements Keyed {
 
     public static boolean isBarleyTeaBlock(@Nullable Block block) {
         if (block != null) {
-            PersistentDataContainer container = getPersistentDataContainer(block, false);
-            if (container != null) {
-                return container.has(BlockTagNamespacedKey, PersistentDataType.STRING);
-            }
+            return getBlockID(block) != null;
         }
         return false;
+    }
+
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        if (key != null && !FallbackNamespacedKeys.contains(key)) {
+            FallbackNamespacedKeys.add(key);
+        }
+    }
+
+    public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        FallbackNamespacedKeys.remove(key);
     }
 
     @Nullable
     public static NamespacedKey getBlockID(@Nullable Block block) {
         if (block == null)
             return null;
-        PersistentDataContainer container = getPersistentDataContainer(block, false);
+        return getBlockID(getPersistentDataContainer(block, false));
+    }
+
+    @Nullable
+    public static NamespacedKey getBlockID(@Nullable PersistentDataContainer container) {
         if (container == null)
             return null;
-        String namespacedKeyString = container.getOrDefault(BlockTagNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
+            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
+                NamespacedKey key = iterator.next();
+                if (key != null)
+                    namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+            }
+        }
         return namespacedKeyString == null ? null
                 : namespacedKeyString.contains(":") ? NamespacedKey.fromString(namespacedKeyString) : null;
     }

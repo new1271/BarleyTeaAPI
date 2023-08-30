@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -24,7 +26,9 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public abstract class BaseEntity implements Keyed {
     @Nonnull
-    private static final NamespacedKey EntityTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("entity_id");
+    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("entity_id");
+    @Nonnull
+    private static final Set<NamespacedKey> FallbackNamespacedKeys = new HashSet<>();
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -57,14 +61,14 @@ public abstract class BaseEntity implements Keyed {
 
     public final void register(@Nullable Entity entity) {
         if (entity != null)
-            entity.getPersistentDataContainer().set(EntityTagNamespacedKey,
+            entity.getPersistentDataContainer().set(DefaultNamespacedKey,
                     PersistentDataType.STRING, key.toString());
     }
 
     public final <T extends Entity> void register(@Nullable T entity,
             @Nullable Consumer<T> afterEntityRegistered) {
         if (entity != null) {
-            entity.getPersistentDataContainer().set(EntityTagNamespacedKey,
+            entity.getPersistentDataContainer().set(DefaultNamespacedKey,
                     PersistentDataType.STRING, key.toString());
             if (afterEntityRegistered != null) {
                 afterEntityRegistered.accept(entity);
@@ -76,15 +80,15 @@ public abstract class BaseEntity implements Keyed {
             @Nullable Predicate<T> afterEntityRegistered) {
         if (entity != null) {
             PersistentDataContainer container = entity.getPersistentDataContainer();
-            String previousID = container.getOrDefault(EntityTagNamespacedKey, PersistentDataType.STRING, null);
-            container.set(EntityTagNamespacedKey, PersistentDataType.STRING, key.toString());
+            String previousID = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
             if (afterEntityRegistered != null) {
                 if (!afterEntityRegistered.test(entity)) {
                     if (!entity.isDead())
                         if (previousID == null)
-                            container.remove(EntityTagNamespacedKey);
+                            container.remove(DefaultNamespacedKey);
                         else
-                            container.set(EntityTagNamespacedKey, PersistentDataType.STRING, previousID);
+                            container.set(DefaultNamespacedKey, PersistentDataType.STRING, previousID);
                     return false;
                 }
             }
@@ -95,7 +99,7 @@ public abstract class BaseEntity implements Keyed {
 
     public final boolean isCertainEntity(@Nullable Entity entity) {
         return entity != null
-                && key.toString().equals(entity.getPersistentDataContainer().getOrDefault(EntityTagNamespacedKey,
+                && key.toString().equals(entity.getPersistentDataContainer().getOrDefault(DefaultNamespacedKey,
                         PersistentDataType.STRING, null));
     }
 
@@ -104,7 +108,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     public static boolean isBarleyTeaEntity(@Nullable Entity entity) {
-        return entity != null && entity.getPersistentDataContainer().has(EntityTagNamespacedKey);
+        return entity != null && getEntityID(entity) != null;
     }
 
     @Nullable
@@ -112,9 +116,26 @@ public abstract class BaseEntity implements Keyed {
         if (entity == null)
             return null;
         PersistentDataContainer container = entity.getPersistentDataContainer();
-        String namespacedKeyString = container.getOrDefault(EntityTagNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
+            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
+                NamespacedKey key = iterator.next();
+                if (key != null)
+                    namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+            }
+        }
         return namespacedKeyString == null ? null
                 : namespacedKeyString.contains(":") ? NamespacedKey.fromString(namespacedKeyString) : null;
+    }
+
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        if (key != null && !FallbackNamespacedKeys.contains(key)) {
+            FallbackNamespacedKeys.add(key);
+        }
+    }
+
+    public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        FallbackNamespacedKeys.remove(key);
     }
 
     public static boolean isCertainEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {

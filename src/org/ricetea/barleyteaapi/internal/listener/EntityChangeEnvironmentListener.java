@@ -140,7 +140,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 && BarleyFallingBlock.getInstance().equals(entityRegister.lookup(key))) {
                             PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
                             if (container != null) {
-                                String rawId = container.get(BaseBlock.BlockTagNamespacedKey,
+                                String rawId = container.get(BaseBlock.DefaultNamespacedKey,
                                         PersistentDataType.STRING);
                                 if (rawId != null) {
                                     NamespacedKey id = NamespacedKey.fromString(rawId);
@@ -216,7 +216,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 && BarleyFallingBlock.getInstance().equals(entityRegister.lookup(key))) {
                             PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
                             if (container != null) {
-                                String rawId = container.get(BaseBlock.BlockTagNamespacedKey,
+                                String rawId = container.get(BaseBlock.DefaultNamespacedKey,
                                         PersistentDataType.STRING);
                                 if (rawId != null) {
                                     NamespacedKey id = NamespacedKey.fromString(rawId);

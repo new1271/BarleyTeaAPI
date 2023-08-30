@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -33,7 +35,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
     @Nonnull
-    private static final NamespacedKey ItemTagNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("item_id");
+    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("item_id");
+    @Nonnull
+    private static final Set<NamespacedKey> FallbackNamespacedKeys = new HashSet<>();
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -144,11 +148,21 @@ public abstract class BaseItem implements Keyed {
         }
     }
 
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        if (key != null && !FallbackNamespacedKeys.contains(key)) {
+            FallbackNamespacedKeys.add(key);
+        }
+    }
+
+    public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        FallbackNamespacedKeys.remove(key);
+    }
+
     public final void register(@Nullable ItemStack itemStack) {
         if (itemStack != null) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
                         key.toString());
                 itemStack.setItemMeta(meta);
                 AbstractItemRenderer.renderItem(itemStack);
@@ -161,7 +175,7 @@ public abstract class BaseItem implements Keyed {
         if (itemStack != null) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
                         key.toString());
                 itemStack.setItemMeta(meta);
                 if (afterItemStackRegistered != null) {
@@ -177,7 +191,7 @@ public abstract class BaseItem implements Keyed {
         if (itemStack != null) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.getPersistentDataContainer().set(ItemTagNamespacedKey, PersistentDataType.STRING,
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
                         key.toString());
                 itemStack.setItemMeta(meta);
                 if (afterItemStackRegistered != null && !afterItemStackRegistered.test(itemStack)) {
@@ -194,7 +208,7 @@ public abstract class BaseItem implements Keyed {
         return itemStack != null && itemStack.hasItemMeta()
                 && key.toString()
                         .equals(itemStack.getItemMeta().getPersistentDataContainer().getOrDefault(
-                                ItemTagNamespacedKey, PersistentDataType.STRING, null));
+                                DefaultNamespacedKey, PersistentDataType.STRING, null));
     }
 
     public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
@@ -238,7 +252,7 @@ public abstract class BaseItem implements Keyed {
 
     public static boolean isBarleyTeaItem(@Nullable ItemStack itemStack) {
         return itemStack != null && itemStack.hasItemMeta()
-                && itemStack.getItemMeta().getPersistentDataContainer().has(ItemTagNamespacedKey);
+                && getItemID(itemStack.getItemMeta()) != null;
     }
 
     @Nullable
@@ -253,7 +267,14 @@ public abstract class BaseItem implements Keyed {
         if (itemMeta == null)
             return null;
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-        String namespacedKeyString = container.getOrDefault(ItemTagNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
+            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
+                NamespacedKey key = iterator.next();
+                if (key != null)
+                    namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+            }
+        }
         return namespacedKeyString == null ? null
                 : namespacedKeyString.contains(":") ? NamespacedKey.fromString(namespacedKeyString) : null;
     }

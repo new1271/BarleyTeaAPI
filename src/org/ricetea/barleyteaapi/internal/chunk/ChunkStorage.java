@@ -19,7 +19,6 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 public class ChunkStorage {
-
     @Nullable
     public static PersistentDataContainer getBlockDataContainer(@Nonnull Block block, boolean create) {
         Chunk chunk = block.getChunk();
