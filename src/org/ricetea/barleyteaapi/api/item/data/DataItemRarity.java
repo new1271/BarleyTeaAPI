@@ -27,10 +27,10 @@ public class DataItemRarity {
     public static final DataItemRarity COMMON = new DataItemRarity(UNCOMMON, NamedTextColor.WHITE);
 
     @Nonnull
-    final Style style;
+    private final Style style;
 
     @Nullable
-    final DataItemRarity nextLevelRarity;
+    private final DataItemRarity nextLevelRarity;
 
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity, @Nullable TextColor rarityColor) {
         this(nextLevelRarity, Style.style(rarityColor));
@@ -105,6 +105,11 @@ public class DataItemRarity {
     @Nonnull
     public DataItemRarity upgrade() {
         return ObjectUtil.letNonNull(nextLevelRarity, this);
+    }
+
+    @Nonnull
+    public final Style getStyle() {
+        return style;
     }
 
     @Nullable
