@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.api.item;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -31,6 +32,7 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
@@ -156,6 +158,11 @@ public abstract class BaseItem implements Keyed {
 
     public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
         FallbackNamespacedKeys.remove(key);
+    }
+
+    @Nonnull
+    public final TranslatableComponent getDefaultNameComponent(){
+        return Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
     }
 
     public final void register(@Nullable ItemStack itemStack) {
@@ -306,12 +313,11 @@ public abstract class BaseItem implements Keyed {
         setItemName(itemStack, isRarityUpgraded(itemStack));
     }
 
-    @SuppressWarnings("null")
     protected final void setItemName(@Nonnull ItemStack itemStack, boolean isUpgraded) {
         DataItemRarity rarity = this.rarity;
         if (isUpgraded)
             rarity = rarity.upgrade();
-        setItemName(itemStack, rarity.apply(Component.translatable(getNameInTranslateKey(), getDefaultName())));
+        setItemName(itemStack, rarity.apply(getDefaultNameComponent()));
     }
 
     @Deprecated
