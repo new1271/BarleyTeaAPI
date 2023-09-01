@@ -24,7 +24,7 @@ public class DataItemRarity {
     public static final DataItemRarity UNCOMMON = new DataItemRarity(RARE, NamedTextColor.YELLOW);
 
     @Nonnull
-    public static final DataItemRarity COMMON = new DataItemRarity(UNCOMMON, NamedTextColor.WHITE);
+    public static final DataItemRarity COMMON = new DataItemRarity(RARE, NamedTextColor.WHITE);
 
     @Nonnull
     private final Style style;

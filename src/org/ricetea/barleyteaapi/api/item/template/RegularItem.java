@@ -97,7 +97,7 @@ public abstract class RegularItem extends BaseItem
         return null;
     }
 
-    protected abstract boolean handleItemGive(ItemStack itemStack);
+    protected abstract boolean handleItemGive(@Nonnull ItemStack itemStack);
 
     public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
         if (handleItemGive(itemStackGived)) {
