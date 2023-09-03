@@ -83,6 +83,22 @@ public final class ItemFeatureHelper {
         return true;
     }
 
+       
+    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void forEachEquipment(
+            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
+            @Nonnull BiConsumer<TFeature, TData> featureFunc,
+            @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
+        if (entity != null && event != null) {
+            EntityEquipment equipment = entity.getEquipment();
+            for (EquipmentSlot slot : SLOTS) {
+                if (slot != null) {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
+                }
+            }
+        }
+    }
+
     public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nullable TEvent2 event2, @Nonnull Class<TFeature> featureClass,
@@ -183,6 +199,22 @@ public final class ItemFeatureHelper {
         }
     }
 
+    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void doFeature(
+            @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
+            @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
+            @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
+            NamespacedKey id = BaseItem.getItemID(itemStack);
+            if (id != null) {
+                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                if (feature != null) {
+                    featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
+                }
+            }
+        }
+    }
+    
     @FunctionalInterface
     public interface ItemDataConstructor<T extends Event, R extends BaseFeatureData<T>> {
         @Nonnull

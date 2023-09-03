@@ -19,6 +19,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
@@ -32,6 +34,7 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemConsume;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemFocus;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerJoinOrQuit;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemWear;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemBroken;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickBlock;
@@ -40,6 +43,8 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickNothing;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemConsume;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGotFocus;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerJoin;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerQuit;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemLostFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemMend;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemWear;
@@ -244,7 +249,25 @@ public final class PlayerEventListener implements Listener {
     public void listenItemWear(PlayerArmorChangeEvent event) {
         if (event == null)
             return;
-        ItemFeatureHelper.doFeature(event.getOldItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWearOff, DataItemWearOff::new);
-        ItemFeatureHelper.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear, DataItemWear::new);
+        ItemFeatureHelper.doFeature(event.getOldItem(), event, FeatureItemWear.class,
+                FeatureItemWear::handleItemWearOff, DataItemWearOff::new);
+        ItemFeatureHelper.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear,
+                DataItemWear::new);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenPlayerJoin(PlayerJoinEvent event) {
+        if (event == null)
+            return;
+        ItemFeatureHelper.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
+                FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenPlayerQuit(PlayerQuitEvent event) {
+        if (event == null)
+            return;
+        ItemFeatureHelper.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
+                FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
     }
 }
