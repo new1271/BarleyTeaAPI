@@ -32,6 +32,7 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemConsume;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemFocus;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemWear;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemBroken;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemClickEntity;
@@ -41,11 +42,15 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDamage;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGotFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemLostFocus;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemMend;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemWear;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemWearOff;
 import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
+
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 
 public final class PlayerEventListener implements Listener {
     private static final Lazy<PlayerEventListener> inst = new Lazy<>(PlayerEventListener::new);
@@ -233,5 +238,13 @@ public final class PlayerEventListener implements Listener {
             event.setCancelled(true);
             return;
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenItemWear(PlayerArmorChangeEvent event) {
+        if (event == null)
+            return;
+        ItemFeatureHelper.doFeature(event.getOldItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWearOff, DataItemWearOff::new);
+        ItemFeatureHelper.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear, DataItemWear::new);
     }
 }

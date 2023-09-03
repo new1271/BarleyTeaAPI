@@ -83,6 +83,11 @@ public abstract class BaseItem implements Keyed {
         return lazyType.get();
     }
 
+    @Nonnull
+    public final DataItemRarity getRarity() {
+        return rarity;
+    }
+
     public boolean isTool() {
         return isTool;
     }

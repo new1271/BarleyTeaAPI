@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
@@ -20,14 +21,16 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 public abstract class BaseProjectile extends BaseEntity
         implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
 
-    public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) throws Exception {
-        super(key, checkEntityType(entityTypeBasedOn));
+    public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
+        super(key, checkEntityType(key, entityTypeBasedOn));
     }
 
     @Nonnull
-    private static EntityType checkEntityType(@Nonnull EntityType entityTypeBasedOn) throws Exception {
-        if (!Projectile.class.isAssignableFrom(entityTypeBasedOn.getEntityClass()))
-            throw new Exception("BaseProjectile cannot be used on non-projectile entity type!");
+    private static EntityType checkEntityType(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
+        if (!Projectile.class.isAssignableFrom(entityTypeBasedOn.getEntityClass())) {
+            BarleyTeaAPI.warnWhenPluginUsable(
+                    "BaseProjectile cannot be used on non-projectile entity type! (trigger at " + key.toString() + ")");
+        }
         return entityTypeBasedOn;
     }
 
