@@ -59,7 +59,7 @@ public final class BlockListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (BlockFeatureHelper.doFeatureCancellable(event.getBlock(), event, FeatureBlockPlace.class,
+        if (!BlockFeatureHelper.doFeatureCancellable(event.getBlock(), event, FeatureBlockPlace.class,
                 FeatureBlockPlace::handleBlockPlaceByPlayer, DataBlockPlaceByPlayer::new)) {
             event.setCancelled(true);
             return;
