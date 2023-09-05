@@ -1,10 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import org.bukkit.entity.Entity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 
 public interface FeatureCommandSummon {
-    boolean handleCommandSummon(@Nonnull Entity entitySummoned, @Nullable String nbt);
+    boolean handleCommandSummon(@Nonnull DataCommandSummon data);
 }

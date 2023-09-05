@@ -32,7 +32,6 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
@@ -137,21 +136,38 @@ public abstract class BaseItem implements Keyed {
                 EquipmentSlot.HAND);
     }
 
+    protected final void setToolAttackDamage(@Nullable ItemMeta itemMeta, double attackDamage) {
+        setDefaultAttribute(itemMeta, Attribute.GENERIC_ATTACK_DAMAGE, attackDamage - 1.0, Operation.ADD_NUMBER,
+                EquipmentSlot.HAND);
+    }
+
     protected final void setToolAttackSpeed(@Nullable ItemStack itemStack, double attackSpeed) {
         setDefaultAttribute(itemStack, Attribute.GENERIC_ATTACK_SPEED, attackSpeed - 4.0, Operation.ADD_NUMBER,
                 EquipmentSlot.HAND);
     }
 
+    protected final void setToolAttackSpeed(@Nullable ItemMeta itemMeta, double attackSpeed) {
+        setDefaultAttribute(itemMeta, Attribute.GENERIC_ATTACK_SPEED, attackSpeed - 4.0, Operation.ADD_NUMBER,
+                EquipmentSlot.HAND);
+    }
+
     protected final void setDefaultAttribute(@Nullable ItemStack itemStack, @Nullable Attribute attribute,
             double amount, @Nullable Operation operation, @Nullable EquipmentSlot equipmentSlot) {
-        if (itemStack != null && attribute != null && operation != null && isBarleyTeaItem(itemStack)) {
+        if (itemStack != null && attribute != null && operation != null) {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.removeAttributeModifier(attribute);
-                meta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
-                        "default modifiers", amount, operation, equipmentSlot));
+                setDefaultAttribute(meta, attribute, amount, operation, equipmentSlot);
                 itemStack.setItemMeta(meta);
             }
+        }
+    }
+
+    protected final void setDefaultAttribute(@Nullable ItemMeta itemMeta, @Nullable Attribute attribute,
+            double amount, @Nullable Operation operation, @Nullable EquipmentSlot equipmentSlot) {
+        if (itemMeta != null && getItemID(itemMeta) != null) {
+            itemMeta.removeAttributeModifier(attribute);
+            itemMeta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
+                    "default modifiers", amount, operation, equipmentSlot));
         }
     }
 
@@ -166,8 +182,16 @@ public abstract class BaseItem implements Keyed {
     }
 
     @Nonnull
-    public final TranslatableComponent getDefaultNameComponent(){
-        return Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
+    public final Component getDefaultNameComponent() {
+        return getDefaultNameComponent(true);
+    }
+
+    @Nonnull
+    public final Component getDefaultNameComponent(boolean isRarityStyled) {
+        Component component = Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
+        if (isRarityStyled)
+            component = rarity.apply(component);
+        return component;
     }
 
     public final void register(@Nullable ItemStack itemStack) {
@@ -322,7 +346,7 @@ public abstract class BaseItem implements Keyed {
         DataItemRarity rarity = this.rarity;
         if (isUpgraded)
             rarity = rarity.upgrade();
-        setItemName(itemStack, rarity.apply(getDefaultNameComponent()));
+        setItemName(itemStack, getDefaultNameComponent());
     }
 
     @Deprecated
@@ -330,14 +354,13 @@ public abstract class BaseItem implements Keyed {
         setItemName(itemStack, name, true, isRarityUpgraded(itemStack));
     }
 
-    @SuppressWarnings("null")
     @Deprecated
     protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String name,
             boolean isApplyRenamingItalic, boolean isUpgraded) {
         DataItemRarity rarity = this.rarity;
         if (isUpgraded)
             rarity = rarity.upgrade();
-        setItemName(itemStack, rarity.apply(Component.text(name), isApplyRenamingItalic));
+        setItemName(itemStack, rarity.apply(Objects.requireNonNull(Component.text(name)), isApplyRenamingItalic));
     }
 
     protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull Component component) {

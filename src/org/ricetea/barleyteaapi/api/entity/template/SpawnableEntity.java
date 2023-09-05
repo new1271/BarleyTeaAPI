@@ -12,6 +12,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 
 public abstract class SpawnableEntity extends BaseEntity
         implements FeatureCommandSummon, FeatureEntitySpawn {
@@ -39,7 +40,7 @@ public abstract class SpawnableEntity extends BaseEntity
     protected abstract boolean handleEntitySpawn(@Nonnull Entity entity);
 
     @Override
-    public boolean handleCommandSummon(@Nonnull Entity entity, @Nullable String nbt) {
-        return tryRegister(entity, this::handleEntitySpawn);
+    public boolean handleCommandSummon(@Nonnull DataCommandSummon data) {
+        return tryRegister(data.getEntity(), this::handleEntitySpawn);
     }
 }

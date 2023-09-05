@@ -15,6 +15,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 
@@ -99,11 +100,12 @@ public abstract class RegularItem extends BaseItem
 
     protected abstract boolean handleItemGive(@Nonnull ItemStack itemStack);
 
-    public boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt) {
-        if (handleItemGive(itemStackGived)) {
-            ItemMeta meta = itemStackGived.getItemMeta();
+    public boolean handleCommandGive(@Nonnull DataCommandGive data) {
+        ItemStack itemStack = data.getItemStack();
+        if (handleItemGive(itemStack)) {
+            ItemMeta meta = itemStack.getItemMeta();
             if (meta == null || !meta.hasDisplayName())
-                setItemName(itemStackGived);
+                setItemName(itemStack);
             return true;
         }
         return false;

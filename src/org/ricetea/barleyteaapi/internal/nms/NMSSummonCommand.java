@@ -46,6 +46,7 @@ import net.minecraft.world.phys.Vec3D;
 
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -150,7 +151,8 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                             throw summonFailedMessage.create();
                         if (!baseEntity.tryRegister(bukkitEntity,
                                 _entity -> _entity != null
-                                        && summonEntity.handleCommandSummon(_entity, nbt.toString()))) {
+                                        && summonEntity.handleCommandSummon(
+                                                new DataCommandSummon(_entity, nbt.toString())))) {
                             bukkitEntity.remove();
                             throw summonFailedMessage.create();
                         }

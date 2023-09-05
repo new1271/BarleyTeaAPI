@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -16,6 +15,7 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectileSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 
 public abstract class BaseProjectile extends BaseEntity
@@ -61,8 +61,8 @@ public abstract class BaseProjectile extends BaseEntity
     protected abstract boolean handleEntitySpawn(@Nonnull Projectile projectile);
 
     @Override
-    public boolean handleCommandSummon(@Nonnull Entity entity, @Nullable String nbt) {
-        if (entity instanceof Projectile projectile) {
+    public boolean handleCommandSummon(@Nonnull DataCommandSummon data) {
+        if (data.getEntity() instanceof Projectile projectile) {
             return tryRegister(projectile, this::handleEntitySpawn);
         }
         return false;

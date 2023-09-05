@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -161,6 +162,11 @@ public abstract class BaseEntity implements Keyed {
         }
     }
 
+    @Nonnull
+    public final Component getDefaultNameComponent() {
+        return Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
+    }
+
     @Deprecated
     protected final void setEntityName(@Nonnull Entity entity, @Nullable org.bukkit.ChatColor... colorAndStyles) {
         setEntityName(entity, ChatColorHelper.toKyoriStyle(colorAndStyles));
@@ -182,38 +188,32 @@ public abstract class BaseEntity implements Keyed {
         setEntityName(entity, name, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
-    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity) {
-        setEntityName(entity, Component.translatable(getNameInTranslateKey(), getDefaultName()));
+        setEntityName(entity, getDefaultNameComponent());
     }
 
-    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity, @Nullable TextColor color,
             @Nullable TextDecoration... decoration) {
-        setEntityName(entity,
-                Component.translatable(getNameInTranslateKey(), getDefaultName(), Style.style(color, decoration)));
+        setEntityName(entity, Style.style(color, decoration));
     }
 
-    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity, @Nullable Style style) {
-        setEntityName(entity, style == null ? Component.translatable(getNameInTranslateKey(), getDefaultName())
-                : Component.translatable(getNameInTranslateKey(), getDefaultName(), style));
+        setEntityName(entity, style == null ? getDefaultNameComponent()
+                : Objects.requireNonNull(getDefaultNameComponent().style(style)));
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name) {
         setEntityName(entity, name, null, (TextDecoration[]) null);
     }
 
-    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name, @Nullable TextColor color,
             @Nullable TextDecoration... decorations) {
-        setEntityName(entity,
-                decorations == null ? Component.text(name, color) : Component.text(name, color, decorations));
+        setEntityName(entity, name, decorations == null ? Style.style(color) : Style.style(color, decorations));
     }
 
-    @SuppressWarnings("null")
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name, @Nullable Style style) {
-        setEntityName(entity, style == null ? Component.text(name) : Component.text(name, style));
+        setEntityName(entity,
+                Objects.requireNonNull(style == null ? Component.text(name) : Component.text(name, style)));
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull Component component) {

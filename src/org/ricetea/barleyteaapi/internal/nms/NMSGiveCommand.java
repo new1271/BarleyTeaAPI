@@ -45,6 +45,7 @@ import net.minecraft.world.item.ItemStack;
 
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
@@ -143,7 +144,8 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 				org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
 				if (barleyTeaItemType.tryRegister(bukkitStack,
 						_itemStack -> _itemStack != null && commandGiveType
-								.handleCommandGive(_itemStack, nbt.toString()))) {
+								.handleCommandGive(
+										new DataCommandGive(_itemStack, nbt.toString())))) {
 					AbstractItemRenderer.renderItem(bukkitStack);
 					itemstack = Objects.requireNonNull(NMSItemHelper.getNmsItem(bukkitStack));
 				} else {

@@ -1,10 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.feature;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 
 public interface FeatureCommandGive {
-    boolean handleCommandGive(@Nonnull ItemStack itemStackGived, @Nullable String nbt);
+    boolean handleCommandGive(@Nonnull DataCommandGive data);
 }
