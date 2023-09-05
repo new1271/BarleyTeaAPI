@@ -16,7 +16,7 @@ public abstract class BaseRecipe implements Keyed {
 
     public BaseRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result) throws UnsupportedOperationException {
         this.key = key;
-        if (result.mapLeftOrRight(Material::isAir, dt -> (Boolean) (dt instanceof FeatureItemGive)) != true) {
+        if (result.mapLeftOrRight(Material::isAir, dt -> (Boolean) !(dt instanceof FeatureItemGive)) != true) {
             throw new UnsupportedOperationException(
                     "if 'result' is custom item, it must implement FeatureItemGive interface!");
         }
