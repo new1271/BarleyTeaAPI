@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,7 @@ public abstract class BaseEntity implements Keyed {
     @Nonnull
     private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("entity_id");
     @Nonnull
-    private static final Set<NamespacedKey> FallbackNamespacedKeys = new HashSet<>();
+    private static final HashMap<NamespacedKey, Function<String, NamespacedKey>> FallbackNamespacedKeys = new HashMap<>();
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
@@ -116,22 +116,40 @@ public abstract class BaseEntity implements Keyed {
     public static NamespacedKey getEntityID(@Nullable Entity entity) {
         if (entity == null)
             return null;
+        NamespacedKey result;
         PersistentDataContainer container = entity.getPersistentDataContainer();
         String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
-        if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
-            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
-                NamespacedKey key = iterator.next();
-                if (key != null)
-                    namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+        if (namespacedKeyString == null) {
+            result = null;
+            if (!FallbackNamespacedKeys.isEmpty()) {
+                for (var iterator = FallbackNamespacedKeys.entrySet().iterator(); iterator.hasNext();) {
+                    var entry = iterator.next();
+                    NamespacedKey key = entry.getKey();
+                    if (key != null) {
+                        namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+                        if (namespacedKeyString != null) {
+                            Function<String, NamespacedKey> function = entry.getValue();
+                            result = function == null ? NamespacedKey.fromString(namespacedKeyString)
+                                    : function.apply(namespacedKeyString);
+                            break;
+                        }
+                    }
+                }
             }
+        } else {
+            result = NamespacedKey.fromString(namespacedKeyString);
         }
-        return namespacedKeyString == null ? null
-                : namespacedKeyString.contains(":") ? NamespacedKey.fromString(namespacedKeyString) : null;
+        return result;
     }
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
-        if (key != null && !FallbackNamespacedKeys.contains(key)) {
-            FallbackNamespacedKeys.add(key);
+        addFallbackNamespacedKey(key, null);
+    }
+
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key,
+            @Nullable Function<String, NamespacedKey> converter) {
+        if (key != null && !FallbackNamespacedKeys.containsKey(key)) {
+            FallbackNamespacedKeys.put(key, converter == null ? NamespacedKey::fromString : converter);
         }
     }
 
