@@ -26,9 +26,9 @@ import org.json.simple.JSONValue;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
-import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
@@ -123,10 +123,9 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                     if (!hasItemFlag(meta, ItemFlag.HIDE_ATTRIBUTES)) {
                         ArrayList<Component> MainHandLore = (isTool ? new ArrayList<>() : null);
                         {
-                            Multimap<Attribute, AttributeModifier> attrbuteMap = meta.hasAttributeModifiers()
-                                    ? meta.getAttributeModifiers()
-                                    : NMSItemHelper.getDefaultAttributeModifiers(itemStack);
-                            if (attrbuteMap != null) {
+                            Multimap<Attribute, AttributeModifier> attrbuteMap = meta.getAttributeModifiers();
+                            if (attrbuteMap == null) attrbuteMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
+                            if (attrbuteMap != null && !attrbuteMap.isEmpty()) {
                                 ArrayList<Component> AttributeLore = new ArrayList<>();
                                 HashMap<EquipmentSlot, HashMap<Attribute, double[]>> map = new HashMap<>();
                                 for (Entry<Attribute, AttributeModifier> entry : attrbuteMap.entries()) {
@@ -300,6 +299,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         if (meta != null) {
             setItemLore(meta, meta.lore());
             addItemFlags(meta, meta.getItemFlags());
+            itemStack.setItemMeta(meta);
         }
         setLastRenderer(itemStack, this);
     }

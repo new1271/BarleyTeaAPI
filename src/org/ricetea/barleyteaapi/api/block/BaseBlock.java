@@ -42,7 +42,7 @@ public abstract class BaseBlock implements Keyed {
 
     @Nonnull
     public final String getNameInTranslateKey() {
-        return "block." + key.getNamespace() + "." + key.getKey() + ".name";
+        return "block." + key.getNamespace() + "." + key.getKey();
     }
 
     @Nonnull

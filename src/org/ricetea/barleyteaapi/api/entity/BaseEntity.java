@@ -11,8 +11,11 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
@@ -47,7 +50,7 @@ public abstract class BaseEntity implements Keyed {
 
     @Nonnull
     public final String getNameInTranslateKey() {
-        return "entity." + key.getNamespace() + "." + key.getKey() + ".name";
+        return "entity." + key.getNamespace() + "." + key.getKey();
     }
 
     @Nonnull
@@ -236,6 +239,19 @@ public abstract class BaseEntity implements Keyed {
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull Component component) {
         entity.customName(component);
+    }
+
+    @Nullable
+    protected AttributeInstance getAttribute(@Nullable Entity entity, @Nullable Attribute attribute) {
+        if (entity instanceof LivingEntity livingEntity && attribute != null)
+            return livingEntity.getAttribute(attribute);
+        return null;
+    }
+
+    protected void setAttribute(@Nullable Entity entity, @Nullable Attribute attribute, double baseValue) {
+        AttributeInstance attributeInstance = getAttribute(entity, attribute);
+        if (attributeInstance != null)
+            attributeInstance.setBaseValue(baseValue);
     }
 
     public boolean equals(Object obj) {

@@ -64,7 +64,7 @@ public abstract class BaseItem implements Keyed {
 
     @Nonnull
     public final String getNameInTranslateKey() {
-        return "item." + key.getNamespace() + "." + key.getKey() + ".name";
+        return "item." + key.getNamespace() + "." + key.getKey();
     }
 
     @Nonnull
