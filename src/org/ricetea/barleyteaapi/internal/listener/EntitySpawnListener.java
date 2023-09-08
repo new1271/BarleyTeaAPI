@@ -70,7 +70,6 @@ public final class EntitySpawnListener implements Listener {
                     StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
                     switch (result) {
                         case Handled:
-                            BaseEntity.registerEntity(event.getEntity(), entityType);
                             return;
                         case Cancelled:
                             event.setCancelled(true);

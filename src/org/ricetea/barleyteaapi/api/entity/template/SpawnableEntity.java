@@ -13,6 +13,8 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 
 public abstract class SpawnableEntity extends BaseEntity
         implements FeatureCommandSummon, FeatureEntitySpawn {
@@ -42,5 +44,11 @@ public abstract class SpawnableEntity extends BaseEntity
     @Override
     public boolean handleCommandSummon(@Nonnull DataCommandSummon data) {
         return tryRegister(data.getEntity(), this::handleEntitySpawn);
+    }
+
+    @Nonnull
+    public StateNaturalSpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data) {
+        return tryRegister(data.getEntity(), this::handleEntitySpawn) ? StateNaturalSpawn.Handled
+                : StateNaturalSpawn.Skipped;
     }
 }
