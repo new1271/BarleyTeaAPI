@@ -66,7 +66,8 @@ public final class EntitySpawnListener implements Listener {
                 && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
-                if (rnd.nextDouble() < spawnEntityType.getSpawnPosibility(reason)) {
+                double posibility = spawnEntityType.getSpawnPosibility(reason);
+                if (posibility > 0 && (posibility >  1 || rnd.nextDouble() < posibility)) {
                     StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
                     switch (result) {
                         case Handled:
