@@ -39,14 +39,19 @@ public final class ItemFeatureHelper {
             boolean isCopy = !(equipment instanceof PlayerInventory);
             for (EquipmentSlot slot : SLOTS) {
                 if (slot != null) {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot, itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
+                    try {
+                        ItemStack itemStack = equipment.getItem(slot);
+                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                                dataConstructor);
+                        if (isCopy)
+                            equipment.setItem(slot,
+                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                    true);
+                        if (isCancelled)
+                            return false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -62,14 +67,19 @@ public final class ItemFeatureHelper {
             boolean isCopy = !(equipment instanceof PlayerInventory);
             for (EquipmentSlot slot : SLOTS_JustHands) {
                 if (slot != null) {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot, itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
+                    try {
+                        ItemStack itemStack = equipment.getItem(slot);
+                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                                dataConstructor);
+                        if (isCopy)
+                            equipment.setItem(slot,
+                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                    true);
+                        if (isCancelled)
+                            return false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -85,15 +95,20 @@ public final class ItemFeatureHelper {
             boolean isCopy = !(equipment instanceof PlayerInventory);
             for (EquipmentSlot slot : SLOTS_JustHands) {
                 if (slot != null) {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
-                            featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot, itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
+                    try {
+                        ItemStack itemStack = equipment.getItem(slot);
+                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
+                                featureFunc,
+                                dataConstructor);
+                        if (isCopy)
+                            equipment.setItem(slot,
+                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                    true);
+                        if (isCancelled)
+                            return false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -109,11 +124,16 @@ public final class ItemFeatureHelper {
             boolean isCopy = !(equipment instanceof PlayerInventory);
             for (EquipmentSlot slot : SLOTS) {
                 if (slot != null) {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot, itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
+                    try {
+                        ItemStack itemStack = equipment.getItem(slot);
+                        doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
+                        if (isCopy)
+                            equipment.setItem(slot,
+                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                    true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -130,12 +150,16 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature,
-                            dataConstructor.apply(event, event2, itemStack, equipmentSlot));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature,
+                                dataConstructor.apply(event, event2, itemStack, equipmentSlot));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -152,11 +176,16 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature,
+                                dataConstructor.apply(event, itemStack, equipmentSlot));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -173,11 +202,15 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -195,8 +228,12 @@ public final class ItemFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
-                            defaultValue);
+                    try {
+                        return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
+                                defaultValue);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -211,9 +248,13 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, dataConstructor.apply(event));
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, dataConstructor.apply(event));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -227,9 +268,13 @@ public final class ItemFeatureHelper {
         if (register != null && itemStack != null && event != null && equipmentSlot != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -269,16 +314,25 @@ public final class ItemFeatureHelper {
             if (itemStackA != null && itemStackB != null
                     && itemType.isCertainItem(itemStackB)) {
                 if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
-                    itemStackResult = itemGiveFeature.handleItemGive(1);
+                    try {
+                        itemStackResult = itemGiveFeature.handleItemGive(1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 if (itemStackResult != null && !itemStackResult.getType().isAir()) {
                     if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
-                        int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
-                        int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);
-                        int lowerItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackB);
-                        int newDamage = Math
-                                .max(Math.min(upperItemDamage + lowerItemDamage - maxDura - maxDura / 20, maxDura), 0);
-                        customDurabilityFeature.setDurabilityDamage(itemStackResult, newDamage);
+                        try {
+                            int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
+                            int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);
+                            int lowerItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackB);
+                            int newDamage = Math
+                                    .max(Math.min(upperItemDamage + lowerItemDamage - maxDura - maxDura / 20, maxDura),
+                                            0);
+                            customDurabilityFeature.setDurabilityDamage(itemStackResult, newDamage);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 return itemStackResult;

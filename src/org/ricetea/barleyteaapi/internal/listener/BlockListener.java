@@ -53,16 +53,24 @@ public final class BlockListener implements Listener {
     public void listenBlockPlace(BlockPlaceEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!ItemFeatureHelper.doFeatureCancellable(event.getItemInHand(), event,
-                FeatureItemHoldPlayerPlace.class, FeatureItemHoldPlayerPlace::handleItemHoldPlayerPlaceBlock,
-                DataItemHoldPlayerPlaceBlock::new)) {
-            event.setCancelled(true);
-            return;
+        try {
+            if (!ItemFeatureHelper.doFeatureCancellable(event.getItemInHand(), event,
+                    FeatureItemHoldPlayerPlace.class, FeatureItemHoldPlayerPlace::handleItemHoldPlayerPlaceBlock,
+                    DataItemHoldPlayerPlaceBlock::new)) {
+                event.setCancelled(true);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (!BlockFeatureHelper.doFeatureCancellable(event.getBlock(), event, FeatureBlockPlace.class,
-                FeatureBlockPlace::handleBlockPlaceByPlayer, DataBlockPlaceByPlayer::new)) {
-            event.setCancelled(true);
-            return;
+        try {
+            if (!BlockFeatureHelper.doFeatureCancellable(event.getBlock(), event, FeatureBlockPlace.class,
+                    FeatureBlockPlace::handleBlockPlaceByPlayer, DataBlockPlaceByPlayer::new)) {
+                event.setCancelled(true);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -78,10 +86,14 @@ public final class BlockListener implements Listener {
                 BaseBlock baseBlock = register.lookup(id);
                 if (baseBlock != null) {
                     if (baseBlock instanceof FeatureBlockBreak blockBreakFeature) {
-                        if (!blockBreakFeature.handleBlockBreakByPlayer(new DataBlockBreakByPlayer(event))
-                                || event.isCancelled()) {
-                            event.setCancelled(true);
-                            return;
+                        try {
+                            if (!blockBreakFeature.handleBlockBreakByPlayer(new DataBlockBreakByPlayer(event))
+                                    || event.isCancelled()) {
+                                event.setCancelled(true);
+                                return;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                     if (baseBlock instanceof FeatureBlockTick) {
@@ -132,12 +144,17 @@ public final class BlockListener implements Listener {
                         BaseBlock baseBlock = register.lookup(id);
                         if (baseBlock != null) {
                             if (baseBlock instanceof FeatureBlockBreak blockBreakFeature) {
-                                if (!blockBreakFeature
-                                        .handleBlockBreakByBlockExplode(
-                                                new DataBlockBreakByBlockExplode(event, block))) {
-                                    iterator.remove();
-                                    continue;
-                                } else if (event.isCancelled()) {
+                                try {
+                                    if (!blockBreakFeature
+                                            .handleBlockBreakByBlockExplode(
+                                                    new DataBlockBreakByBlockExplode(event, block))) {
+                                        iterator.remove();
+                                        continue;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                if (event.isCancelled()) {
                                     return;
                                 }
                             }

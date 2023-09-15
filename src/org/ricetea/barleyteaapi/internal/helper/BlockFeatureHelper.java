@@ -28,11 +28,15 @@ public final class BlockFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -50,11 +54,15 @@ public final class BlockFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event, data));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature, dataConstructor.apply(event, data));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -71,11 +79,15 @@ public final class BlockFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    TReturn result = featureFunc.apply(feature, dataConstructor.apply(event));
-                    if (feature instanceof Cancellable cancellable && cancellable.isCancelled()) {
-                        return defaultValue;
+                    try {
+                        TReturn result = featureFunc.apply(feature, dataConstructor.apply(event));
+                        if (feature instanceof Cancellable cancellable && cancellable.isCancelled()) {
+                            return defaultValue;
+                        }
+                        return ObjectUtil.letNonNull(result, defaultValue);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return ObjectUtil.letNonNull(result, defaultValue);
                 }
             }
         }
@@ -90,9 +102,13 @@ public final class BlockFeatureHelper {
         if (block != null && event != null && register != null) {
             NamespacedKey id = BaseBlock.getBlockID(block);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, dataConstructor.apply(event));
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, dataConstructor.apply(event));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

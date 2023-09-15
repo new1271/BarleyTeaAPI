@@ -28,11 +28,15 @@ public final class EntityFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -50,11 +54,15 @@ public final class EntityFeatureHelper {
             if (id != null) {
                 TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
                 if (feature != null) {
-                    boolean result = featureFunc.test(feature, dataConstructor.apply(event, event2));
-                    if (event instanceof Cancellable cancellable) {
-                        result &= !cancellable.isCancelled();
+                    try {
+                        boolean result = featureFunc.test(feature, dataConstructor.apply(event, event2));
+                        if (event instanceof Cancellable cancellable) {
+                            result &= !cancellable.isCancelled();
+                        }
+                        return result;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    return result;
                 }
             }
         }
@@ -70,9 +78,13 @@ public final class EntityFeatureHelper {
         if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, dataConstructor.apply(event, event2));
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, dataConstructor.apply(event, event2));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -86,9 +98,13 @@ public final class EntityFeatureHelper {
         if (entity != null && event != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, dataConstructor.apply(event));
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, dataConstructor.apply(event));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -101,9 +117,13 @@ public final class EntityFeatureHelper {
         if (entity != null && register != null) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
             if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    featureFunc.accept(feature, entity);
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, entity);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
