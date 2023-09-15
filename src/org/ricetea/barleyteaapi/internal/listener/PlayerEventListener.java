@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -259,8 +260,13 @@ public final class PlayerEventListener implements Listener {
     public void listenPlayerJoin(PlayerJoinEvent event) {
         if (event == null)
             return;
-        ItemFeatureHelper.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
-                FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(), () -> {
+            if (player.isOnline()) {
+                ItemFeatureHelper.forEachEquipment(player, event, FeatureItemHoldPlayerJoinOrQuit.class,
+                        FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

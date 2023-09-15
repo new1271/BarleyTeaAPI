@@ -3,7 +3,6 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
@@ -16,10 +15,17 @@ public abstract class BaseRecipe implements Keyed {
 
     public BaseRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result) throws UnsupportedOperationException {
         this.key = key;
-        if (result.mapLeftOrRight(Material::isAir, dt -> (Boolean) !(dt instanceof FeatureItemGive)) != true) {
-            throw new UnsupportedOperationException(
-                    "if 'result' is custom item, it must implement FeatureItemGive interface!");
-        }
+        result.processLeftOrRight(left -> {
+            if (left.isAir()) {
+                throw new UnsupportedOperationException(
+                        "'result' cannot be an air!");
+            }
+        }, right -> {
+            if (!(right instanceof FeatureItemGive)) {
+                throw new UnsupportedOperationException(
+                        "'result' must implement FeatureItemGive interface!");
+            }
+        });
         this.result = result;
     }
 
