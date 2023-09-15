@@ -157,8 +157,11 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                             throw summonFailedMessage.create();
                         }
                         source.a(() -> IChatBaseComponent.a("commands.summon.success",
-                                new Object[] { IChatBaseComponent.a(baseEntity.getNameInTranslateKey(),
-                                        baseEntity.getDefaultName()) }),
+                                new Object[] {
+                                        bukkitEntity.customName() == null
+                                                ? IChatBaseComponent.a(baseEntity.getNameInTranslateKey(),
+                                                        baseEntity.getDefaultName())
+                                                : entity.H_() }),
                                 true);
                         return 1;
                     }
