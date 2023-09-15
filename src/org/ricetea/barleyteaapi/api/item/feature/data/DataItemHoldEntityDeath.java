@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -39,10 +40,9 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
         killerType = ObjectUtil.mapWhenNonnull(killer, killer -> new Lazy<>(() -> BaseEntity.getEntityType(killer)));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
-    public Entity getDecedent() {
-        return event.getEntity();
+    public LivingEntity getDecedent() {
+        return Objects.requireNonNull(event.getEntity());
     }
 
     @Nonnull

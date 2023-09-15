@@ -26,6 +26,7 @@ import org.json.simple.JSONValue;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtra;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
@@ -124,7 +125,8 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                         ArrayList<Component> MainHandLore = (isTool ? new ArrayList<>() : null);
                         {
                             Multimap<Attribute, AttributeModifier> attrbuteMap = meta.getAttributeModifiers();
-                            if (attrbuteMap == null) attrbuteMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
+                            if (attrbuteMap == null)
+                                attrbuteMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
                             if (attrbuteMap != null && !attrbuteMap.isEmpty()) {
                                 ArrayList<Component> AttributeLore = new ArrayList<>();
                                 HashMap<EquipmentSlot, HashMap<Attribute, double[]>> map = new HashMap<>();
@@ -274,11 +276,12 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                             lores.addAll(MainHandLore);
                         }
                     }
-                    if (itemType instanceof FeatureItemCustomDurability) {
-                        FeatureItemCustomDurability customDurability = (FeatureItemCustomDurability) itemType;
+                    if (itemType instanceof FeatureItemCustomDurability customDurability) {
                         int maxDura = customDurability.getMaxDurability(itemStack);
                         int dura = maxDura - customDurability.getDurabilityDamage(itemStack);
-                        if (dura < maxDura) {
+                        if (dura < maxDura ||
+                                customDurability instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
+                                        customDurabilityExtra.isAlwaysShowDurabilityHint(itemStack)) {
                             lores.add(Component.translatable("item.durability", NamedTextColor.WHITE)
                                     .args(Component.text(dura), Component.text(maxDura))
                                     .decoration(TextDecoration.ITALIC, false));

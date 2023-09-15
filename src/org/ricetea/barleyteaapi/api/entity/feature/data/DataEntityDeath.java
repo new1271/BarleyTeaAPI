@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +32,11 @@ public final class DataEntityDeath extends BaseEntityFeatureData<EntityDeathEven
         super(event);
         killer = ObjectUtil.mapWhenNonnull(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
         killerType = ObjectUtil.mapWhenNonnull(killer, killer -> new Lazy<>(() -> BaseEntity.getEntityType(killer)));
+    }
+
+    @Nonnull
+    public LivingEntity getEntity() {
+        return Objects.requireNonNull(event.getEntity());
     }
 
     @Nullable

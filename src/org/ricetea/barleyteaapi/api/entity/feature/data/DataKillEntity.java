@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -27,10 +27,9 @@ public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent
         decedentType = new Lazy<>(() -> BaseEntity.getEntityType(getDecedent()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
-    public Entity getDecedent() {
-        return event.getEntity();
+    public LivingEntity getDecedent() {
+        return Objects.requireNonNull(event.getEntity());
     }
 
     @Nonnull
