@@ -16,6 +16,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
+import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 
 public final class SmithingListener implements Listener {
@@ -50,6 +51,9 @@ public final class SmithingListener implements Listener {
             DataItemType originalType = BaseItem.getItemType(original);
             DataItemType templateType = BaseItem.getItemType(template);
             DataItemType additionType = BaseItem.getItemType(addition);
+            original = ItemHelper.getSingletonClone(original);
+            template = ItemHelper.getSingletonClone(template);
+            addition = ItemHelper.getSingletonClone(addition);
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || originalType.isBarleyTeaCustomItem()
                     || templateType.isBarleyTeaCustomItem() || additionType.isBarleyTeaCustomItem()) {
                 final ItemStack oldResult = event.getResult();

@@ -21,6 +21,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
+import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
 import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.ObjectUtil;
 
@@ -39,10 +40,11 @@ public final class CookListener implements Listener {
     public void listenBlockCook(BlockCookEvent event) {
         if (event == null)
             return;
+        ItemStack source = ItemHelper.getSingletonClone(event.getSource());
         Recipe cookRecipe = event.getRecipe();
         if (cookRecipe instanceof Keyed keyedRecipe) {
             DataItemType itemType = ObjectUtil.letNonNull(
-                    ObjectUtil.mapWhenNonnull(event.getSource(), BaseItem::getItemType),
+                    ObjectUtil.mapWhenNonnull(source, BaseItem::getItemType),
                     DataItemType::empty);
             NamespacedKey recipeKey = keyedRecipe.getKey();
             Block block = event.getBlock();
@@ -54,7 +56,7 @@ public final class CookListener implements Listener {
                 if (register != null && register.hasAnyRegistered()) {
                     for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                         if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
-                            result = recipe.apply(event.getSource());
+                            result = recipe.apply(source);
                             allPassed = false;
                             break;
                         }
