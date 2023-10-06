@@ -100,7 +100,11 @@ public final class TickingService {
                         }
                         if (array != null) {
                             for (AbstractTickCounter counter : array) {
-                                counter.doTick(entity);
+                                try {
+                                    counter.doTick(entity);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }

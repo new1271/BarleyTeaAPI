@@ -56,18 +56,26 @@ public abstract class AbstractTickCounter implements Keyed {
 
     private final boolean doTriggers(@Nonnull Entity affectedEntity, int count) {
         for (TickCounterTrigger trigger : triggerList) {
-            if (!trigger.triggerAndReturnNeedClean(affectedEntity, count)) {
-                return false;
+            try {
+                if (!trigger.triggerAndReturnNeedClean(affectedEntity, count)) {
+                    return false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return true;
     }
 
     public void addTrigger(TickCounterTrigger trigger) {
-        triggerList.add(trigger);
+        synchronized (this) {
+            triggerList.add(trigger);
+        }
     }
 
     public void removeTrigger(TickCounterTrigger trigger) {
-        triggerList.remove(trigger);
+        synchronized (this) {
+            triggerList.remove(trigger);
+        }
     }
 }
