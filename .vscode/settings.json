@@ -11,5 +11,17 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "java.format.settings.url": ".vscode/compile.settings",
     "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -javaagent:\"c:\\Users\\User\\.vscode\\extensions\\gabrielbb.vscode-lombok-1.0.1\\server\\lombok.jar\"",
-    "java.codeGeneration.generateComments": true
+    "java.codeGeneration.generateComments": true,
+    "java.compile.nullAnalysis.nullable": [
+        "javax.annotation.Nullable",
+        "org.jetbrains.annotations.Nullable",
+        "org.eclipse.jdt.annotation.Nullable",
+        "org.springframework.lang.Nullable"
+    ],
+    "java.compile.nullAnalysis.nonnull": [
+        "javax.annotation.Nonnull",
+        "org.jetbrains.annotations.NotNull",
+        "org.eclipse.jdt.annotation.NonNull",
+        "org.springframework.lang.NonNull"
+      ]
 }
