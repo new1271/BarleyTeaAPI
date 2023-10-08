@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -16,6 +17,8 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
@@ -252,6 +255,66 @@ public abstract class BaseEntity implements Keyed {
         AttributeInstance attributeInstance = getAttribute(entity, attribute);
         if (attributeInstance != null)
             attributeInstance.setBaseValue(baseValue);
+    }
+
+    protected double getBaseMaxHealth(@Nullable Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) {
+            AttributeInstance attributeInstance = getAttribute(entity, Attribute.GENERIC_MAX_HEALTH);
+            if (attributeInstance != null)
+                return attributeInstance.getBaseValue();
+        }
+        return 0.0;
+    }
+
+    protected double getMaxHealth(@Nullable Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) {
+            AttributeInstance attributeInstance = getAttribute(entity, Attribute.GENERIC_MAX_HEALTH);
+            if (attributeInstance != null)
+                return attributeInstance.getValue();
+        }
+        return 0.0;
+    }
+
+    protected double getHealth(@Nullable Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) {
+            return livingEntity.getHealth();
+        }
+        return 0.0;
+    }
+
+    protected void setHealth(@Nullable Entity entity, double health) {
+        if (entity instanceof LivingEntity livingEntity) {
+            livingEntity.setHealth(Math.max(Math.min(livingEntity.getHealth(), getMaxHealth(livingEntity)), 0));
+        }
+    }
+
+    protected void setAsMaxHealth(@Nullable Entity entity, double health) {
+        if (entity instanceof LivingEntity livingEntity) {
+            livingEntity.setHealth(getMaxHealth(livingEntity));
+        }
+    }
+
+    protected boolean regenHealth(@Nullable Entity entity, double value) {
+        return regenHealth(entity, value, RegainReason.REGEN);
+    }
+
+    protected boolean regenHealth(@Nullable Entity entity, double value, boolean shouldPassEvent) {
+        return regenHealth(entity, value, shouldPassEvent ? RegainReason.REGEN : null);
+    }
+
+    protected boolean regenHealth(@Nullable Entity entity, double value, @Nullable RegainReason reason) {
+        if (entity instanceof LivingEntity livingEntity) {
+            if (reason != null) {
+                EntityRegainHealthEvent event = new EntityRegainHealthEvent(entity, value, reason);
+                event.setCancelled(false);
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled())
+                    return false;
+            }
+            livingEntity.setHealth(Math.max(Math.min(livingEntity.getHealth(), getMaxHealth(livingEntity)), 0));
+            return true;
+        }
+        return false;
     }
 
     public boolean equals(Object obj) {
