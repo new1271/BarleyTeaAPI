@@ -288,7 +288,7 @@ public abstract class BaseEntity implements Keyed {
         }
     }
 
-    protected void setAsMaxHealth(@Nullable Entity entity, double health) {
+    protected void setAsMaxHealth(@Nullable Entity entity) {
         if (entity instanceof LivingEntity livingEntity) {
             livingEntity.setHealth(getMaxHealth(livingEntity));
         }
