@@ -23,6 +23,7 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockExplode;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockMove;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockPlace;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByBlockExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByPlayer;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByPlayer;
@@ -72,6 +73,12 @@ public final class BlockListener implements Listener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            BlockFeatureHelper.doFeature(event.getBlock(), FeatureChunkLoad.class,
+                    FeatureChunkLoad::handleChunkLoaded);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -98,6 +105,13 @@ public final class BlockListener implements Listener {
                     }
                     if (baseBlock instanceof FeatureBlockTick) {
                         BlockTickTask.getInstance().removeBlock(block);
+                    }
+                    if (baseBlock instanceof FeatureChunkLoad feature) {
+                        try {
+                            feature.handleChunkUnloaded(block);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                     ChunkStorage.removeBlockDataContainer(block);
                     if (event.isDropItems()) {
@@ -161,6 +175,13 @@ public final class BlockListener implements Listener {
                             if (baseBlock instanceof FeatureBlockTick) {
                                 BlockTickTask.getInstance().removeBlock(block);
                             }
+                            if (baseBlock instanceof FeatureChunkLoad feature) {
+                                try {
+                                    feature.handleChunkUnloaded(block);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
                             ChunkStorage.removeBlockDataContainer(block);
                             PrepareToDrops.put(block.getLocation(), id);
                         }
@@ -180,7 +201,8 @@ public final class BlockListener implements Listener {
         if (id != null && from != null && to != null) {
             BlockRegister register = BlockRegister.getInstanceUnsafe();
             if (register != null) {
-                if (register.lookup(id) instanceof FeatureBlockMove blockMoveFeature
+                BaseBlock baseBlock = register.lookup(id);
+                if (baseBlock instanceof FeatureBlockMove blockMoveFeature
                         && !blockMoveFeature.handleBlockMove(new DataBlockMove(event)) || event.isCancelled()) {
                     event.setCancelled(true);
                     return;
@@ -190,6 +212,10 @@ public final class BlockListener implements Listener {
                     ChunkStorage.removeBlockDataContainer(from);
                 }
                 ChunkStorage.setBlockDataContainer(to, container);
+                if (baseBlock instanceof FeatureChunkLoad feature) {
+                    feature.handleChunkUnloaded(from);
+                    feature.handleChunkLoaded(to);
+                }
             }
         }
     }

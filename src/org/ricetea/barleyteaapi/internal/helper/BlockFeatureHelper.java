@@ -113,4 +113,23 @@ public final class BlockFeatureHelper {
             }
         }
     }
+
+    public static <TFeature> void doFeature(
+            @Nullable Block block, @Nonnull Class<TFeature> featureClass,
+            @Nonnull BiConsumer<TFeature, Block> featureFunc) {
+        BlockRegister register = BlockRegister.getInstanceUnsafe();
+        if (block != null && register != null) {
+            NamespacedKey id = BaseBlock.getBlockID(block);
+            if (id != null) {
+                try {
+                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
+                    if (feature != null) {
+                        featureFunc.accept(feature, block);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

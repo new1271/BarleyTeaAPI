@@ -25,6 +25,7 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockEntityChange;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockFalling;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByEntityExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByEntity;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockEntityChange;
@@ -139,6 +140,13 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                     if (baseBlock instanceof FeatureBlockTick) {
                                         BlockTickTask.getInstance().removeBlock(block);
                                     }
+                                    if (baseBlock instanceof FeatureChunkLoad feature) {
+                                        try {
+                                            feature.handleChunkUnloaded(block);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
                                     ChunkStorage.removeBlockDataContainer(block);
                                 }
                             }
@@ -172,6 +180,13 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                         if (baseBlock instanceof FeatureBlockTick) {
                                             BlockTickTask.getInstance().addBlock(block);
                                         }
+                                        if (baseBlock instanceof FeatureChunkLoad feature) {
+                                            try {
+                                                feature.handleChunkLoaded(block);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -198,6 +213,13 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 }
                                 if (baseBlock instanceof FeatureBlockTick) {
                                     BlockTickTask.getInstance().removeBlock(block);
+                                }
+                                if (baseBlock instanceof FeatureChunkLoad feature) {
+                                    try {
+                                        feature.handleChunkUnloaded(block);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                                 ChunkStorage.removeBlockDataContainer(block);
                                 if (baseBlock instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
@@ -237,8 +259,9 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 if (rawId != null) {
                                     NamespacedKey id = NamespacedKey.fromString(rawId);
                                     if (register != null && id != null) {
+                                        BaseBlock baseBlock = register.lookup(key);
                                         try {
-                                            if (register.lookup(key) instanceof FeatureBlockFalling blockFallingFeature
+                                            if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
                                                     &&
                                                     !blockFallingFeature.handleBlockFallDropItem(container,
                                                             Objects.requireNonNull(event.getItemDrop()))
