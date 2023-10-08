@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
@@ -76,6 +77,7 @@ public final class EntityDeathListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        EntityFeatureHelper.doFeature(entity, FeatureChunkLoad.class, FeatureChunkLoad::handleChunkUnloaded);
     }
 
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {

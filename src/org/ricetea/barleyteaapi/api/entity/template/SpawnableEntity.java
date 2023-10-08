@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
@@ -32,6 +33,9 @@ public abstract class SpawnableEntity extends BaseEntity
         if (entity == null)
             return null;
         if (tryRegister(entity, this::handleEntitySpawn)) {
+            if (this instanceof FeatureChunkLoad feature) {
+                feature.handleChunkLoaded(entity);
+            }
             return entity;
         } else {
             entity.remove();
