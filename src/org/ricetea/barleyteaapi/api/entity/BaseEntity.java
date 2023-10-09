@@ -310,8 +310,10 @@ public abstract class BaseEntity implements Keyed {
                 Bukkit.getPluginManager().callEvent(event);
                 if (event.isCancelled())
                     return false;
+                else
+                    value = event.getAmount();
             }
-            livingEntity.setHealth(Math.max(Math.min(livingEntity.getHealth(), getMaxHealth(livingEntity)), 0));
+            livingEntity.setHealth(Math.max(Math.min(livingEntity.getHealth() + value, getMaxHealth(livingEntity)), 0));
             return true;
         }
         return false;
