@@ -7,7 +7,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEvent> {
     @Nonnull
@@ -15,7 +15,7 @@ public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEv
 
     public DataEntityTarget(@Nonnull EntityTargetEvent event) {
         super(event);
-        targetType = new Lazy<>(() -> BaseEntity.getEntityType(getTarget()));
+        targetType = Lazy.create(() -> BaseEntity.getEntityType(getTarget()));
     }
 
     @SuppressWarnings("null")

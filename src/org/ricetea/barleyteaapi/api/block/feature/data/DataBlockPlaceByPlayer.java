@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataBlockPlaceByPlayer extends BaseBlockFeatureData<BlockPlaceEvent> {
 
@@ -21,7 +21,7 @@ public final class DataBlockPlaceByPlayer extends BaseBlockFeatureData<BlockPlac
 
     public DataBlockPlaceByPlayer(@Nonnull BlockPlaceEvent event) {
         super(event);
-        itemType = new Lazy<>(() -> BaseItem.getItemType(getItemInHand()));
+        itemType = Lazy.create(() -> BaseItem.getItemType(getItemInHand()));
     }
 
     public @Nonnull Player getPlayer() {

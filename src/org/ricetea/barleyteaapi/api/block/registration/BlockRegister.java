@@ -14,12 +14,12 @@ import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class BlockRegister implements IRegister<BaseBlock> {
     @Nonnull
-    private static final Lazy<BlockRegister> inst = new Lazy<>(BlockRegister::new);
+    private static final Lazy<BlockRegister> inst = Lazy.create(BlockRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseBlock> lookupTable = new Hashtable<>();

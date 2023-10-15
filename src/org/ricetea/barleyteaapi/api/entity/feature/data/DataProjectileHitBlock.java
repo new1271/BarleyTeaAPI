@@ -8,7 +8,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseProjectileFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataProjectileHitBlock extends BaseProjectileFeatureData<ProjectileHitEvent> {
     @Nonnull
@@ -16,7 +16,7 @@ public final class DataProjectileHitBlock extends BaseProjectileFeatureData<Proj
 
     public DataProjectileHitBlock(@Nonnull ProjectileHitEvent event) {
         super(event);
-        blockType = new Lazy<DataBlockType>(() -> BaseBlock.getBlockType(getHitBlock()));
+        blockType = Lazy.create(() -> BaseBlock.getBlockType(getHitBlock()));
     }
 
     @SuppressWarnings("null")

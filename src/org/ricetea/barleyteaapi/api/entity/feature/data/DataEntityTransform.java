@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityTransformEvent.TransformReason;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataEntityTransform extends BaseEntityFeatureData<EntityTransformEvent> {
 
@@ -19,7 +19,7 @@ public final class DataEntityTransform extends BaseEntityFeatureData<EntityTrans
 
     public DataEntityTransform(@Nonnull EntityTransformEvent event) {
         super(event);
-        transformedEntityType = new Lazy<>(() -> BaseEntity.getEntityType(getTransformedEntity()));
+        transformedEntityType = Lazy.create(() -> BaseEntity.getEntityType(getTransformedEntity()));
     }
 
     @SuppressWarnings("null")

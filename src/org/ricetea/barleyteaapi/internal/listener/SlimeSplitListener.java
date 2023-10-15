@@ -9,10 +9,10 @@ import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class SlimeSplitListener implements Listener {
-    private static final Lazy<SlimeSplitListener> inst = new Lazy<>(SlimeSplitListener::new);
+    private static final Lazy<SlimeSplitListener> inst = Lazy.create(SlimeSplitListener::new);
 
     private SlimeSplitListener() {
     }

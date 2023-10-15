@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent> {
     @Nonnull
@@ -24,7 +24,7 @@ public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent
     public DataKillEntity(@Nonnull EntityDeathEvent event,
             @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event, lastDamageCauseByEntityEvent.getDamager());
-        decedentType = new Lazy<>(() -> BaseEntity.getEntityType(getDecedent()));
+        decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
     }
 
     @Nonnull

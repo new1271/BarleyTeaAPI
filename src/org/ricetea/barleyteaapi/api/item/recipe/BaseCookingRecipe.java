@@ -10,7 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public abstract class BaseCookingRecipe extends BaseRecipe implements Function<ItemStack, ItemStack> {
 

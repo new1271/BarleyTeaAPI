@@ -30,9 +30,9 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtr
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import com.google.common.collect.Multimap;
 
@@ -46,7 +46,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 public class DefaultItemRenderer extends AbstractItemRenderer {
     private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
     private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
-    private static final @Nonnull Lazy<DefaultItemRenderer> _inst = new Lazy<>(DefaultItemRenderer::new);
+    private static final @Nonnull Lazy<DefaultItemRenderer> _inst = Lazy.create(DefaultItemRenderer::new);
     private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
     private static final @Nonnull Operation[] operations = Operation.values();
 

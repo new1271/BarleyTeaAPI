@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemAnvilFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
 
@@ -18,7 +18,7 @@ public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
 
     public DataItemAnvilCombine(@Nonnull PrepareAnvilEvent event) {
         super(event);
-        combinedType = new Lazy<>(() -> BaseItem.getItemType(getItemStackCombined()));
+        combinedType = Lazy.create(() -> BaseItem.getItemType(getItemStackCombined()));
     }
 
     @Nonnull

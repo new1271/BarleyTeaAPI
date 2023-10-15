@@ -12,13 +12,13 @@ import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
-import org.ricetea.barleyteaapi.util.CachedList;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.CachedList;
+import org.ricetea.utils.Lazy;
 
 public final class BlockTickTask extends AbstractTask {
 
     @Nonnull
-    private static final Lazy<BlockTickTask> _inst = new Lazy<>(BlockTickTask::new);
+    private static final Lazy<BlockTickTask> _inst = Lazy.create(BlockTickTask::new);
 
     @Nonnull
     private final CachedList<Block> blocks = new CachedList<>(Block.class);

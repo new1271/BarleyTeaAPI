@@ -9,10 +9,10 @@ import org.bukkit.event.entity.EntityTameEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTame;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTame;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class EntityTameListener implements Listener {
-    private static final Lazy<EntityTameListener> inst = new Lazy<>(EntityTameListener::new);
+    private static final Lazy<EntityTameListener> inst = Lazy.create(EntityTameListener::new);
 
     private EntityTameListener() {
     }

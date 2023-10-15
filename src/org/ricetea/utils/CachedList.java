@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.util;
+package org.ricetea.utils;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

@@ -4,11 +4,11 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class BarleyTeaAPILoadEvent extends Event {
 
-    static final Lazy<HandlerList> lazyHandlerList = new Lazy<>(HandlerList::new);
+    static final Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
     public BarleyTeaAPILoadEvent() {
     }

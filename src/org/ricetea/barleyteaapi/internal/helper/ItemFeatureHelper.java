@@ -23,7 +23,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class ItemFeatureHelper {
     private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();

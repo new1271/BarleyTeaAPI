@@ -9,7 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 @SuppressWarnings("deprecation")
 public abstract class BaseItemInventoryResultFeatureData<T extends org.bukkit.event.inventory.PrepareInventoryResultEvent>

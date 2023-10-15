@@ -19,12 +19,12 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class ItemRegister implements IRegister<BaseItem> {
     @Nonnull
-    private static final Lazy<ItemRegister> inst = new Lazy<>(ItemRegister::new);
+    private static final Lazy<ItemRegister> inst = Lazy.create(ItemRegister::new);
 
     @Nonnull
     private AtomicInteger itemNeedTick = new AtomicInteger(0);

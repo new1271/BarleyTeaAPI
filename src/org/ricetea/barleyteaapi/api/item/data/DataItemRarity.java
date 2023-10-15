@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 import io.papermc.paper.inventory.ItemRarity;
 import net.kyori.adventure.text.Component;

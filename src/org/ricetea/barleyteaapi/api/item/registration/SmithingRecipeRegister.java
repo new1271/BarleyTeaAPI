@@ -24,9 +24,9 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.ArmorTrimSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmithingRecipe;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -34,7 +34,7 @@ import com.google.common.collect.Multimap;
 public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecipe> {
 
     @Nonnull
-    private static final Lazy<SmithingRecipeRegister> inst = new Lazy<>(SmithingRecipeRegister::new);
+    private static final Lazy<SmithingRecipeRegister> inst = Lazy.create(SmithingRecipeRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseSmithingRecipe> lookupTable = new Hashtable<>();

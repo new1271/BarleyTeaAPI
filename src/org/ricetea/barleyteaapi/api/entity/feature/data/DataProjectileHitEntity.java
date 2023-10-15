@@ -7,7 +7,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseProjectileFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataProjectileHitEntity extends BaseProjectileFeatureData<ProjectileHitEvent> {
     @Nonnull
@@ -15,7 +15,7 @@ public final class DataProjectileHitEntity extends BaseProjectileFeatureData<Pro
 
     public DataProjectileHitEntity(@Nonnull ProjectileHitEvent event) {
         super(event);
-        hitEntityType = new Lazy<>(() -> BaseEntity.getEntityType(getHitEntity()));
+        hitEntityType = Lazy.create(() -> BaseEntity.getEntityType(getHitEntity()));
     }
 
     @SuppressWarnings("null")

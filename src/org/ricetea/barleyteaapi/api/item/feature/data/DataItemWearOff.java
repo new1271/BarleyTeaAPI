@@ -10,8 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.SlotType;
@@ -23,7 +23,7 @@ public final class DataItemWearOff extends BasePlayerFeatureData<PlayerArmorChan
 
     public DataItemWearOff(@Nonnull PlayerArmorChangeEvent event) {
         super(event);
-        newItemType = new Lazy<DataItemType>(() -> ObjectUtil
+        newItemType = Lazy.create(() -> ObjectUtil
                 .letNonNull(ObjectUtil.mapWhenNonnull(getNewItem(), BaseItem::getItemType), DataItemType::empty));
     }
 

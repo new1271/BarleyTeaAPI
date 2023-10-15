@@ -22,11 +22,11 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class CookListener implements Listener {
-    private static final Lazy<CookListener> inst = new Lazy<>(CookListener::new);
+    private static final Lazy<CookListener> inst = Lazy.create(CookListener::new);
 
     private CookListener() {
     }

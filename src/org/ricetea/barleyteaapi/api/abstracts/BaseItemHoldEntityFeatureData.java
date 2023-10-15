@@ -9,7 +9,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends BaseFeatureData<T> {
 
@@ -30,7 +30,7 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event);
         this.holderEntity = holderEntity;
-        this.holderEntityType = new Lazy<>(() -> BaseEntity.getEntityType(this.holderEntity));
+        this.holderEntityType = Lazy.create(() -> BaseEntity.getEntityType(this.holderEntity));
         this.itemStack = itemStack;
         this.equipmentSlot = equipmentSlot;
     }

@@ -6,7 +6,7 @@ import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 public final class DataEntityBeMounted extends BaseEntityFeatureData<EntityMountEvent> {
@@ -15,7 +15,7 @@ public final class DataEntityBeMounted extends BaseEntityFeatureData<EntityMount
 
     public DataEntityBeMounted(@Nonnull EntityMountEvent event) {
         super(event, event.getMount());
-        passengerType = new Lazy<>(() -> BaseEntity.getEntityType(getPassenger()));
+        passengerType = Lazy.create(() -> BaseEntity.getEntityType(getPassenger()));
     }
 
     @SuppressWarnings("null")

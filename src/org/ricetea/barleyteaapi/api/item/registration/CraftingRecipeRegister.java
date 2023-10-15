@@ -22,9 +22,9 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -32,7 +32,7 @@ import com.google.common.collect.Multimap;
 public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecipe> {
 
     @Nonnull
-    private static final Lazy<CraftingRecipeRegister> inst = new Lazy<>(CraftingRecipeRegister::new);
+    private static final Lazy<CraftingRecipeRegister> inst = Lazy.create(CraftingRecipeRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseCraftingRecipe> lookupTable = new Hashtable<>();

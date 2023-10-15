@@ -37,10 +37,10 @@ import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class BlockListener implements Listener {
-    private static final Lazy<BlockListener> inst = new Lazy<>(BlockListener::new);
+    private static final Lazy<BlockListener> inst = Lazy.create(BlockListener::new);
 
     private BlockListener() {
     }

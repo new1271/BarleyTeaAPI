@@ -18,14 +18,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 
 public final class ItemRendererRegister implements IRegister<AbstractItemRenderer> {
     @Nonnull
-    private static final Lazy<ItemRendererRegister> inst = new Lazy<>(ItemRendererRegister::new);
+    private static final Lazy<ItemRendererRegister> inst = Lazy.create(ItemRendererRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, AbstractItemRenderer> lookupTable = new Hashtable<>();

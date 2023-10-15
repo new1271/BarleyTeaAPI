@@ -54,12 +54,12 @@ import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 
 public final class PlayerEventListener implements Listener {
-    private static final Lazy<PlayerEventListener> inst = new Lazy<>(PlayerEventListener::new);
+    private static final Lazy<PlayerEventListener> inst = Lazy.create(PlayerEventListener::new);
 
     private PlayerEventListener() {
     }

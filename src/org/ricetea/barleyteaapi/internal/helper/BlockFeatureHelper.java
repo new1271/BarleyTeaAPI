@@ -15,7 +15,7 @@ import org.bukkit.event.Event;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class BlockFeatureHelper {
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(

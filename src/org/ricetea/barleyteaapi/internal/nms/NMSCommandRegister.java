@@ -6,14 +6,14 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandListenerWrapper;
 
 public final class NMSCommandRegister {
-    private final static Lazy<NMSCommandRegister> _inst = new Lazy<>(NMSCommandRegister::new);
+    private final static Lazy<NMSCommandRegister> _inst = Lazy.create(NMSCommandRegister::new);
 
     @Nonnull
     private final CommandDispatcher<CommandListenerWrapper> dispatcher;

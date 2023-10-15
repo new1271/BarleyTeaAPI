@@ -48,7 +48,7 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class NMSSummonCommand implements NMSBaseCommand {
     private static final SimpleCommandExceptionType summonFailedMessage = new SimpleCommandExceptionType(

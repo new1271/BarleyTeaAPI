@@ -17,11 +17,11 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class SmithingListener implements Listener {
 
-    private static final Lazy<SmithingListener> inst = new Lazy<>(SmithingListener::new);
+    private static final Lazy<SmithingListener> inst = Lazy.create(SmithingListener::new);
 
     private SmithingListener() {
     }

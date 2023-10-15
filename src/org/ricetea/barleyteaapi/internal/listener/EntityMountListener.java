@@ -11,12 +11,12 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeMounted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDismount;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMount;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 public final class EntityMountListener implements Listener {
-    private static final Lazy<EntityMountListener> inst = new Lazy<>(EntityMountListener::new);
+    private static final Lazy<EntityMountListener> inst = Lazy.create(EntityMountListener::new);
 
     private EntityMountListener() {
     }

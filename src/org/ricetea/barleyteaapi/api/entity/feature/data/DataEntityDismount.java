@@ -6,7 +6,7 @@ import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
 public final class DataEntityDismount extends BaseEntityFeatureData<EntityDismountEvent> {
@@ -15,7 +15,7 @@ public final class DataEntityDismount extends BaseEntityFeatureData<EntityDismou
 
     public DataEntityDismount(@Nonnull EntityDismountEvent event) {
         super(event);
-        dismountedType = new Lazy<>(() -> BaseEntity.getEntityType(getDismounted()));
+        dismountedType = Lazy.create(() -> BaseEntity.getEntityType(getDismounted()));
     }
 
     @SuppressWarnings("null")

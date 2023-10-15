@@ -24,10 +24,10 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class ChunkListener implements Listener {
-    private static final Lazy<ChunkListener> inst = new Lazy<>(ChunkListener::new);
+    private static final Lazy<ChunkListener> inst = Lazy.create(ChunkListener::new);
 
     private ChunkListener() {
     }

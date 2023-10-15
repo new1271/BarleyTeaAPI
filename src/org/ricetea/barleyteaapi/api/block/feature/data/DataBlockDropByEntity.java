@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityDropItemEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataBlockDropByEntity extends BaseFeatureData<EntityDropItemEvent> {
 
@@ -19,7 +19,7 @@ public final class DataBlockDropByEntity extends BaseFeatureData<EntityDropItemE
 
     public DataBlockDropByEntity(@Nonnull EntityDropItemEvent event) {
         super(event);
-        entityType = new Lazy<>(() -> BaseEntity.getEntityType(getEntity()));
+        entityType = Lazy.create(() -> BaseEntity.getEntityType(getEntity()));
     }
 
     public @Nonnull Entity getEntity() {

@@ -12,7 +12,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;

@@ -11,7 +11,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;

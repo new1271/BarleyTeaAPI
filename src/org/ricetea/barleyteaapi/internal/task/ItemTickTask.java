@@ -15,12 +15,12 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class ItemTickTask extends AbstractTask {
 
     @Nonnull
-    private static final Lazy<ItemTickTask> _inst = new Lazy<>(ItemTickTask::new);
+    private static final Lazy<ItemTickTask> _inst = Lazy.create(ItemTickTask::new);
 
     @Nonnull
     public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();

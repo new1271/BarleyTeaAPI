@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.util;
+package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

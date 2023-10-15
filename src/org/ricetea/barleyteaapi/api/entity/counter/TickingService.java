@@ -11,8 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
-import org.ricetea.barleyteaapi.util.CachedList;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.CachedList;
+import org.ricetea.utils.Lazy;
 
 public final class TickingService {
 
@@ -69,7 +69,7 @@ public final class TickingService {
         int taskID;
 
         @Nonnull
-        private static final Lazy<SyncGlobalTickingTask> _inst = new Lazy<>(SyncGlobalTickingTask::new);
+        private static final Lazy<SyncGlobalTickingTask> _inst = Lazy.create(SyncGlobalTickingTask::new);
 
         @Nonnull
         private final ConcurrentHashMap<Entity, CachedList<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
@@ -156,7 +156,7 @@ public final class TickingService {
 
     private static final class AsyncGlobalTickingTask extends AbstractTask {
         @Nonnull
-        private static final Lazy<AsyncGlobalTickingTask> _inst = new Lazy<>(AsyncGlobalTickingTask::new);
+        private static final Lazy<AsyncGlobalTickingTask> _inst = Lazy.create(AsyncGlobalTickingTask::new);
 
         @Nonnull
         private final ConcurrentHashMap<Entity, CachedList<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();

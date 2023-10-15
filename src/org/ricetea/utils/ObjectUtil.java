@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.util;
+package org.ricetea.utils;
 
 import java.util.Objects;
 import java.util.function.Consumer;

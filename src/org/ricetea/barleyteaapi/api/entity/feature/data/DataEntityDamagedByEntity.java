@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<EntityDamageByEntityEvent> {
     @Nonnull
@@ -16,7 +16,7 @@ public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<Entit
 
     public DataEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event) {
         super(event);
-        damagerType = new Lazy<>(() -> BaseEntity.getEntityType(getDamager()));
+        damagerType = Lazy.create(() -> BaseEntity.getEntityType(getDamager()));
     }
 
     @SuppressWarnings("null")

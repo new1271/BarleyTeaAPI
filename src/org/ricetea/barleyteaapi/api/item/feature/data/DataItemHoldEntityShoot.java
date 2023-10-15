@@ -12,8 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData<ProjectileLaunchEvent> {
 
@@ -24,7 +24,7 @@ public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, Objects.requireNonNull(ObjectUtil.tryCast(event.getEntity().getShooter(), LivingEntity.class)),
                 itemStack, equipmentSlot);
-        entityType = new Lazy<>(() -> BaseEntity.getEntityType(getProjectile()));
+        entityType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
     }
 
     @SuppressWarnings("null")

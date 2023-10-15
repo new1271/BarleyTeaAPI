@@ -5,11 +5,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public class TaskService {
 
-    private static Lazy<TaskService> lazyInst = new Lazy<>(TaskService::new);
+    private static Lazy<TaskService> lazyInst = Lazy.create(TaskService::new);
 
     ScheduledExecutorService executorService;
 

@@ -15,7 +15,7 @@ import org.bukkit.event.Event;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class EntityFeatureHelper {
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(

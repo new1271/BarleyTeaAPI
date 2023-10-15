@@ -3,15 +3,15 @@ package org.ricetea.barleyteaapi.api.i18n;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 
 public final class GlobalTranslators {
     @Nonnull
-    private static final Lazy<GlobalTranslators> inst = new Lazy<>(GlobalTranslators::new);
-    private static final @Nonnull Lazy<MultisourceTranslatableComponentRenderer> lazyRenderer = new Lazy<>(
+    private static final Lazy<GlobalTranslators> inst = Lazy.create(GlobalTranslators::new);
+    private static final @Nonnull Lazy<MultisourceTranslatableComponentRenderer> lazyRenderer = Lazy.create(
             MultisourceTranslatableComponentRenderer::new);
 
     private GlobalTranslators() {

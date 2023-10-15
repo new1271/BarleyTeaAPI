@@ -24,11 +24,11 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillEnti
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlayer;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class EntityDeathListener implements Listener {
-    private static final Lazy<EntityDeathListener> inst = new Lazy<>(EntityDeathListener::new);
+    private static final Lazy<EntityDeathListener> inst = Lazy.create(EntityDeathListener::new);
 
     private EntityDeathListener() {
     }

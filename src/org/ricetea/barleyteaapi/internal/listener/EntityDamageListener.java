@@ -22,12 +22,12 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedB
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class EntityDamageListener implements Listener {
 
-    private static final Lazy<EntityDamageListener> inst = new Lazy<>(EntityDamageListener::new);
+    private static final Lazy<EntityDamageListener> inst = Lazy.create(EntityDamageListener::new);
 
     private EntityDamageListener() {
     }

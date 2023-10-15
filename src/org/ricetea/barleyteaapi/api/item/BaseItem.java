@@ -27,9 +27,9 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -54,7 +54,7 @@ public abstract class BaseItem implements Keyed {
         this.materialBasedOn = materialBasedOn;
         this.rarity = rarity;
         this.isTool = materialIsTool(materialBasedOn);
-        this.lazyType = new Lazy<>(() -> DataItemType.create(this));
+        this.lazyType = Lazy.create(() -> DataItemType.create(this));
     }
 
     @Nonnull

@@ -49,7 +49,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class NMSGiveCommand implements NMSBaseCommand {
 	private static final SimpleCommandExceptionType giveFailedMessage = new SimpleCommandExceptionType(

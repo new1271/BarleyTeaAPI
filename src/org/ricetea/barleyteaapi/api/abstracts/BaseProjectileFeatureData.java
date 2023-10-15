@@ -11,8 +11,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends BaseFeatureData<T> {
     @Nullable
@@ -34,7 +34,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
         this.entity = Objects.requireNonNull(entity);
         shooter = ObjectUtil.tryCast(entity.getShooter(), Entity.class);
         shooterType = ObjectUtil.mapWhenNonnull(shooter,
-                shooter -> new Lazy<>(() -> BaseEntity.getEntityType(shooter)));
+                shooter -> Lazy.create(() -> BaseEntity.getEntityType(shooter)));
     }
 
     @Nonnull

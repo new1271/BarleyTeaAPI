@@ -11,10 +11,10 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeTargeted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityLostTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTarget;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class EntityTargetListener implements Listener {
-    private static final Lazy<EntityTargetListener> inst = new Lazy<>(EntityTargetListener::new);
+    private static final Lazy<EntityTargetListener> inst = Lazy.create(EntityTargetListener::new);
 
     private EntityTargetListener() {
     }

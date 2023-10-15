@@ -12,13 +12,13 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
-import org.ricetea.barleyteaapi.util.CachedList;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.CachedList;
+import org.ricetea.utils.Lazy;
 
 public final class EntityTickTask extends AbstractTask {
 
     @Nonnull
-    private static final Lazy<EntityTickTask> _inst = new Lazy<>(EntityTickTask::new);
+    private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
 
     @Nonnull
     private final CachedList<Entity> entities = new CachedList<>(Entity.class);

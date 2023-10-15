@@ -40,7 +40,7 @@ import org.ricetea.barleyteaapi.internal.nms.NMSSummonCommand;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;

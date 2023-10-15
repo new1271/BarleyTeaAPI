@@ -22,12 +22,12 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
     @Nonnull
-    private static final Lazy<EntityRegister> inst = new Lazy<>(EntityRegister::new);
+    private static final Lazy<EntityRegister> inst = Lazy.create(EntityRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseEntity> lookupTable = new Hashtable<>();

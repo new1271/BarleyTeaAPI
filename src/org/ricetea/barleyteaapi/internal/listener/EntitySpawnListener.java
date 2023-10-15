@@ -20,10 +20,10 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class EntitySpawnListener implements Listener {
-    private static final Lazy<EntitySpawnListener> inst = new Lazy<>(EntitySpawnListener::new);
+    private static final Lazy<EntitySpawnListener> inst = Lazy.create(EntitySpawnListener::new);
 
     private EntitySpawnListener() {
     }

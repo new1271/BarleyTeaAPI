@@ -18,12 +18,12 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class CraftListener implements Listener {
 
-    private static final Lazy<CraftListener> inst = new Lazy<>(CraftListener::new);
+    private static final Lazy<CraftListener> inst = Lazy.create(CraftListener::new);
 
     private CraftListener() {
     }

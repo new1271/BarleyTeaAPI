@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataBlockBreakByEntityExplode extends BaseFeatureData<EntityExplodeEvent> {
     @Nonnull
@@ -21,7 +21,7 @@ public final class DataBlockBreakByEntityExplode extends BaseFeatureData<EntityE
 
     public DataBlockBreakByEntityExplode(@Nonnull EntityExplodeEvent event, @Nonnull Block block) {
         super(event);
-        entityType = new Lazy<DataEntityType>(() -> BaseEntity.getEntityType(getEntityExploded()));
+        entityType = Lazy.create(() -> BaseEntity.getEntityType(getEntityExploded()));
         this.block = block;
     }
 

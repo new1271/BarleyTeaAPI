@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.entity.EntityType;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.util.Either;
+import org.ricetea.utils.Either;
 
 public final class DataEntityType extends Either<EntityType, BaseEntity> {
 

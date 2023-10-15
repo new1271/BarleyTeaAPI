@@ -11,7 +11,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataItemHoldPlayerPlaceBlock extends BaseItemHoldEntityFeatureData<BlockPlaceEvent> {
     @Nonnull
@@ -20,7 +20,7 @@ public final class DataItemHoldPlayerPlaceBlock extends BaseItemHoldEntityFeatur
     public DataItemHoldPlayerPlaceBlock(@Nonnull BlockPlaceEvent event) {
         super(event, Objects.requireNonNull(event.getPlayer()), Objects.requireNonNull(event.getItemInHand()),
                 Objects.requireNonNull(event.getHand()));
-        blockType = new Lazy<>(() -> BaseBlock.getBlockType(getBlock()));
+        blockType = Lazy.create(() -> BaseBlock.getBlockType(getBlock()));
     }
 
     public @Nonnull Block getBlock() {

@@ -29,10 +29,10 @@ import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.util.ComponentUtil;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class InventoryEventListener implements Listener {
-    private static final Lazy<InventoryEventListener> inst = new Lazy<>(InventoryEventListener::new);
+    private static final Lazy<InventoryEventListener> inst = Lazy.create(InventoryEventListener::new);
 
     private InventoryEventListener() {
     }

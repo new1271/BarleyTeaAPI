@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public abstract class BaseItemAnvilFeatureData extends BaseItemInventoryResultFeatureData<PrepareAnvilEvent> {
 

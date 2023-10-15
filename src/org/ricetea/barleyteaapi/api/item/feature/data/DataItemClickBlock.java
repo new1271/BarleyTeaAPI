@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerInteractEvent> {
 
@@ -22,7 +22,7 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
 
     public DataItemClickBlock(@Nonnull PlayerInteractEvent event) {
         super(event);
-        blockType = new Lazy<DataBlockType>(() -> BaseBlock.getBlockType(getClickedBlock()));
+        blockType = Lazy.create(() -> BaseBlock.getBlockType(getClickedBlock()));
     }
 
     public boolean isLeftClick() {

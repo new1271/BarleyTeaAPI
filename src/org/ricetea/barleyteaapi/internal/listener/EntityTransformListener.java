@@ -9,10 +9,10 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTransform;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTransform;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class EntityTransformListener implements Listener {
-    private static final Lazy<EntityTransformListener> inst = new Lazy<>(EntityTransformListener::new);
+    private static final Lazy<EntityTransformListener> inst = Lazy.create(EntityTransformListener::new);
 
     private EntityTransformListener() {
     }

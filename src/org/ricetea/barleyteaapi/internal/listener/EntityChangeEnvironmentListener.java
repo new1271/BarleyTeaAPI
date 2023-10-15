@@ -38,10 +38,10 @@ import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.entity.BarleyFallingBlock;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
-import org.ricetea.barleyteaapi.util.Lazy;
+import org.ricetea.utils.Lazy;
 
 public final class EntityChangeEnvironmentListener implements Listener {
-    private static final Lazy<EntityChangeEnvironmentListener> inst = new Lazy<>(
+    private static final Lazy<EntityChangeEnvironmentListener> inst = Lazy.create(
             EntityChangeEnvironmentListener::new);
 
     private EntityChangeEnvironmentListener() {

@@ -24,9 +24,9 @@ import org.ricetea.barleyteaapi.api.item.recipe.BlastingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.CampfireRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.FurnaceRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmokingRecipe;
-import org.ricetea.barleyteaapi.util.Lazy;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -34,7 +34,7 @@ import com.google.common.collect.Multimap;
 public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe> {
 
     @Nonnull
-    private static final Lazy<CookingRecipeRegister> inst = new Lazy<>(CookingRecipeRegister::new);
+    private static final Lazy<CookingRecipeRegister> inst = Lazy.create(CookingRecipeRegister::new);
 
     @Nonnull
     private final Hashtable<NamespacedKey, BaseCookingRecipe> lookupTable = new Hashtable<>();

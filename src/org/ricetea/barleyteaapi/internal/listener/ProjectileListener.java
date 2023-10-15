@@ -25,11 +25,11 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.Lazy;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 public final class ProjectileListener implements Listener {
-    private static final Lazy<ProjectileListener> inst = new Lazy<>(ProjectileListener::new);
+    private static final Lazy<ProjectileListener> inst = Lazy.create(ProjectileListener::new);
 
     private ProjectileListener() {
     }

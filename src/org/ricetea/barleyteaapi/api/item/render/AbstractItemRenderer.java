@@ -15,8 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 

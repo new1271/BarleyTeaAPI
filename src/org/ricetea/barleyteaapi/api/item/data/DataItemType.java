@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Material;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.util.Either;
+import org.ricetea.utils.Either;
 
 public final class DataItemType extends Either<Material, BaseItem> {
 

@@ -8,7 +8,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSEntityHelper;
-import org.ricetea.barleyteaapi.util.ObjectUtil;
+import org.ricetea.utils.ObjectUtil;
 
 public final class EntityHelper {
 
