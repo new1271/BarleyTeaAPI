@@ -3,10 +3,10 @@ package org.ricetea.utils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class Box<T> implements Property<T> {
-    public T obj;
+public class Box<T> implements Property<T> {
+    protected T obj;
 
-    public Box(@Nullable T obj) {
+    protected Box(@Nullable T obj) {
         this.obj = obj;
     }
 
@@ -15,10 +15,15 @@ public final class Box<T> implements Property<T> {
         return new Box<T>(obj);
     }
 
+    @Nonnull
+    public static <T> Box<T> boxInThreadSafe(@Nullable T obj) {
+        return new ThreadSafeImpl<T>(obj);
+    }
+
     @Nullable
     public static <T> T unbox(@Nullable Box<T> box) {
         return box == null ? null : box.unbox();
-    }    
+    }
 
     @Nullable
     public T unbox() {
@@ -33,13 +38,13 @@ public final class Box<T> implements Property<T> {
     }
 
     @Nullable
-    public T get(){
+    public T get() {
         return obj;
     }
 
     @Override
     public T set(T obj) {
-        return exchange(obj);
+        return this.obj = obj;
     }
 
     public boolean contains(@Nullable T obj) {
@@ -71,5 +76,41 @@ public final class Box<T> implements Property<T> {
     @Nonnull
     public PropertyType getPropertyType() {
         return PropertyType.ReadWrite;
+    }
+
+    private static final class ThreadSafeImpl<T> extends Box<T> {
+
+        @Nonnull
+        private final Object syncRoot = new Object();
+
+        protected ThreadSafeImpl(@Nullable T obj) {
+            super(obj);
+        }
+
+        @Override
+        @Nullable
+        public T get() {
+            synchronized (syncRoot) {
+                return obj;
+            }
+        }
+
+        @Override
+        @Nullable
+        public T set(@Nullable T value) {
+            synchronized (syncRoot) {
+                return obj = value;
+            }
+        }
+
+        @Override
+        @Nullable
+        public T exchange(@Nullable T obj) {
+            synchronized (syncRoot) {
+                T oldObj = this.obj;
+                this.obj = obj;
+                return oldObj;
+            }
+        }
     }
 }
