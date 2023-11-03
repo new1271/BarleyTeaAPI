@@ -83,10 +83,10 @@ public final class CookListener implements Listener {
         if (event.getBlock().getState() instanceof Furnace furnace && register != null) {
             ItemStack item = furnace.getInventory().getSmelting();
             if (item != null) {
-                BaseItem baseItem = BaseItem.getItemType(item).getItemTypeForBarleyTeaCustomItem();
+                BaseItem baseItem = BaseItem.getItemType(item).asCustomItem();
                 if (baseItem != null) {
                     if (register.findFirst(recipe -> baseItem
-                            .equals(recipe.getOriginal().getItemTypeForBarleyTeaCustomItem())) == null) {
+                            .equals(recipe.getOriginal().asCustomItem())) == null) {
                         event.setCancelled(true);
                     }
                 }

@@ -74,9 +74,9 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
             bukkitRecipe = smithingRecipe.toBukkitRecipe(
                     NamespacedKeyUtils.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().toMaterial());
-                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().toMaterial());
-                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().toMaterial());
+                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().getMaterialBasedOn());
+                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().getMaterialBasedOn());
+                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
@@ -101,9 +101,9 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
             bukkitRecipe = smithingRecipe.toBukkitRecipe(
                     NamespacedKeyUtils.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().toMaterial());
-                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().toMaterial());
-                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().toMaterial());
+                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().getMaterialBasedOn());
+                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().getMaterialBasedOn());
+                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {

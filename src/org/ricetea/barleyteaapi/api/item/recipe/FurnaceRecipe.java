@@ -19,8 +19,8 @@ public class FurnaceRecipe extends BaseCookingRecipe {
     }
 
     public org.bukkit.inventory.FurnaceRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
-        return new org.bukkit.inventory.FurnaceRecipe(key, new ItemStack(getResult().toMaterial()),
-                getOriginal().toMaterial(), getExperience(), getCookingTime());
+        return new org.bukkit.inventory.FurnaceRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
+                getOriginal().getMaterialBasedOn(), getExperience(), getCookingTime());
     }
 
     @Override

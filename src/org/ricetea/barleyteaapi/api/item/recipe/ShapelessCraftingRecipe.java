@@ -76,9 +76,9 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapelessRecipe toBukkitRecipe(NamespacedKey key) {
         ShapelessRecipe result = new ShapelessRecipe(key,
-                new ItemStack(getResult().toMaterial()));
+                new ItemStack(getResult().getMaterialBasedOn()));
         for (DataItemType type : getIngredients()) {
-            Material material = type.toMaterial();
+            Material material = type.getMaterialBasedOn();
             result.addIngredient(material);
         }
         return Objects.requireNonNull(result);

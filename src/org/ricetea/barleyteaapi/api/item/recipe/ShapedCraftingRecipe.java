@@ -128,14 +128,14 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapedRecipe toBukkitRecipe(NamespacedKey key) {
         ShapedRecipe result = new ShapedRecipe(key,
-                new ItemStack(getResult().toMaterial()));
+                new ItemStack(getResult().getMaterialBasedOn()));
         HashMap<Material, Character> collectMap = new HashMap<>();
         char c = 'a';
         int colCount = getColumnCount();
         String[] shape = new String[getRowCount()];
         int currentIndex = 0;
         for (DataItemType type : getIngredientMatrix()) {
-            Material material = type.toMaterial();
+            Material material = type.getMaterialBasedOn();
             Character ct = collectMap.get(material);
             if (ct == null) {
                 collectMap.put(material, ct = c++);

@@ -303,7 +303,7 @@ public final class ItemFeatureHelper {
             @Nullable ItemStack itemStackResult) {
         BaseItem itemType = ObjectUtil
                 .letNonNull(ObjectUtil.mapWhenNonnull(itemStackA, BaseItem::getItemType), DataItemType::empty)
-                .getItemTypeForBarleyTeaCustomItem();
+                .asCustomItem();
         if (itemType == null) {
             if (BaseItem.isBarleyTeaItem(itemStackB)) {
                 return null;

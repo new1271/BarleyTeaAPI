@@ -75,7 +75,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(furnaceRecipe.getOriginal().toMaterial());
+                ItemStack originalItem = new ItemStack(furnaceRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingFurnaceRecipe) {
@@ -92,7 +92,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smokingRecipe.getOriginal().toMaterial());
+                ItemStack originalItem = new ItemStack(smokingRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.SmokingRecipe iteratingFurnaceRecipe) {
@@ -114,7 +114,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(blastingRecipe.getOriginal().toMaterial());
+                ItemStack originalItem = new ItemStack(blastingRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.BlastingRecipe iteratingFurnaceRecipe) {
@@ -136,7 +136,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
                     .toBukkitRecipe(
                             NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(campfireRecipe.getOriginal().toMaterial());
+                ItemStack originalItem = new ItemStack(campfireRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingCampfireRecipe) {

@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -110,6 +112,38 @@ public class DataItemRarity {
     @Nonnull
     public final Style getStyle() {
         return style;
+    }
+
+    public final boolean isSimilar(@Nullable DataItemRarity rarity) {
+        if (rarity == null)
+            return false;
+        return isSimilar(rarity.style);
+    }
+
+    public final boolean isSimilar(@Nullable Style style) {
+        if (style == null)
+            return false;
+        Style thisStyle = this.style;
+        if (thisStyle.isEmpty() && style.isEmpty())
+            return true;
+        TextColor color = style.color();
+        if (Objects.equals(thisStyle.color(), color)) {
+            var thisDecorMap = thisStyle.decorations();
+            var decorMap = style.decorations();
+            for (TextDecoration decoration : TextDecoration.values()) {
+                if (decoration.equals(TextDecoration.ITALIC))
+                    continue;
+                else {
+                    if (!Objects.equals(
+                            decorMap.getOrDefault(decoration, TextDecoration.State.NOT_SET),
+                            thisDecorMap.getOrDefault(decoration, TextDecoration.State.NOT_SET))) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     @Nullable

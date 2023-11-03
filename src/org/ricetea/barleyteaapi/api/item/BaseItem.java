@@ -34,8 +34,6 @@ import org.ricetea.utils.ObjectUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.format.TextDecorationAndState;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
@@ -230,43 +228,12 @@ public abstract class BaseItem implements Keyed {
                         if (right.isDefaultNameComponent(itemStack)) {
                             return null;
                         } else {
-                            Style style = displayName.style();
-                            if (style != null && !style.isEmpty()) {
-                                DataItemRarity rarity = right.getRarity();
-                                boolean flag = false;
-                                {
-                                    Style rarityStyle = rarity.getStyle();
-                                    if (Objects.equals(style.color(), rarityStyle.color())) {
-                                        var styleDecorationMap = rarityStyle.decorations();
-                                        for (var entry : style.decorations().entrySet()) {
-                                            TextDecoration key = entry.getKey();
-                                            if (key.equals(TextDecoration.ITALIC)) {
-                                                continue;
-                                            } else if (!Objects.equals(styleDecorationMap.get(key), entry.getValue())) {
-                                                flag = true;
-                                                displayName = displayName.style(Style.empty());
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                if (!flag && right.isRarityUpgraded(itemStack)) {
-                                    rarity = rarity.upgrade();
-                                    Style rarityStyle = rarity.getStyle();
-                                    if (Objects.equals(style.color(), rarityStyle.color())) {
-                                        var styleDecorationMap = rarityStyle.decorations();
-                                        for (var entry : style.decorations().entrySet()) {
-                                            TextDecoration key = entry.getKey();
-                                            if (key.equals(TextDecoration.ITALIC)) {
-                                                continue;
-                                            } else if (!Objects.equals(styleDecorationMap.get(key), entry.getValue())) {
-                                                flag = true;
-                                                displayName = displayName.style(Style.empty());
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
+                            DataItemRarity originalRarity = right.getRarity();
+                            DataItemRarity rarity = right.isRarityUpgraded(itemStack) ? originalRarity.upgrade()
+                                    : originalRarity;
+                            if (!rarity.isSimilar(displayName.style()) &&
+                                    (originalRarity == rarity || !originalRarity.isSimilar(displayName.style()))) {
+                                        displayName = displayName.style(Style.empty());
                             }
                         }
                     }

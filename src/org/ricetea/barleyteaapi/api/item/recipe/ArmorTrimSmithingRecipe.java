@@ -144,8 +144,8 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
     @Nonnull
     public SmithingTransformRecipe toBukkitRecipe(NamespacedKey key) {
-        return new SmithingTransformRecipe(key, new ItemStack(getResult().toMaterial()),
-                new MaterialChoice(Tag.ITEMS_TRIM_TEMPLATES), new MaterialChoice(getOriginal().toMaterial()),
+        return new SmithingTransformRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
+                new MaterialChoice(Tag.ITEMS_TRIM_TEMPLATES), new MaterialChoice(getOriginal().getMaterialBasedOn()),
                 new MaterialChoice(Tag.ITEMS_TRIM_MATERIALS), true);
     }
 }

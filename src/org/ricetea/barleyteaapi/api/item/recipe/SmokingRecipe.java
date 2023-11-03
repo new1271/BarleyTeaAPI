@@ -19,8 +19,8 @@ public class SmokingRecipe extends BaseCookingRecipe {
     }
 
     public org.bukkit.inventory.SmokingRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
-        return new org.bukkit.inventory.SmokingRecipe(key, new ItemStack(getResult().toMaterial()),
-                getOriginal().toMaterial(), getExperience(), getCookingTime());
+        return new org.bukkit.inventory.SmokingRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
+                getOriginal().getMaterialBasedOn(), getExperience(), getCookingTime());
     }
 
     @Override

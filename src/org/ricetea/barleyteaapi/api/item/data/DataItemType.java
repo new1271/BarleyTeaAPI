@@ -81,17 +81,17 @@ public final class DataItemType extends Either<Material, BaseItem> {
     }
 
     @Nullable
-    public Material getItemTypeForMinecraftBuiltInItem() {
+    public Material asMaterial() {
         return left();
     }
 
     @Nullable
-    public BaseItem getItemTypeForBarleyTeaCustomItem() {
+    public BaseItem asCustomItem() {
         return right();
     }
 
     @Nonnull
-    public Material toMaterial() {
+    public Material getMaterialBasedOn() {
         Material left = left();
         if (left != null)
             return left;
