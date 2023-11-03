@@ -22,7 +22,7 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -63,7 +63,9 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     }
 
     @Override
-    public void register(@Nonnull BaseCraftingRecipe recipe) {
+    public void register(@Nullable BaseCraftingRecipe recipe) {
+        if (recipe == null)
+            return;
         lookupTable.put(recipe.getKey(), recipe);
         int recipeTypeIndex = 0;
         Recipe bukkitRecipe;
@@ -71,7 +73,7 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             recipeTypeIndex = 1;
             bukkitRecipe = shapedRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 bukkitRecipe = Bukkit.getCraftingRecipe(shapedRecipe.getIngredientMatrix().stream()
                         .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
@@ -81,7 +83,7 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             recipeTypeIndex = 2;
             bukkitRecipe = shapelessCraftingRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_crafting_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 bukkitRecipe = Bukkit.getCraftingRecipe(shapelessCraftingRecipe.getIngredients().stream()
                         .map(dt -> dt.mapLeftOrRight(m -> m, d -> d.getMaterialBasedOn())).map(ItemStack::new)
@@ -115,7 +117,9 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     }
 
     @Override
-    public void unregister(@Nonnull BaseCraftingRecipe recipe) {
+    public void unregister(@Nullable BaseCraftingRecipe recipe) {
+        if (recipe == null)
+            return;
         lookupTable.remove(recipe.getKey());
         Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipe.getKey());
         if (headers != null) {
@@ -139,7 +143,7 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
         lookupTable.clear();
         collidingTable_revert.clear();
         collidingTable.keySet().forEach(key -> {
-            if (key.getNamespace().equals(NamespacedKeyUtils.Namespace)) {
+            if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI)) {
                 Bukkit.removeRecipe(key);
             }
         });
@@ -147,11 +151,15 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
     }
 
     @Nullable
-    public BaseCraftingRecipe lookup(@Nonnull NamespacedKey key) {
+    public BaseCraftingRecipe lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
         return lookupTable.get(key);
     }
 
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

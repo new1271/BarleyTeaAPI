@@ -24,7 +24,7 @@ import org.ricetea.barleyteaapi.api.item.recipe.BlastingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.CampfireRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.FurnaceRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmokingRecipe;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -65,7 +65,9 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Override
-    public void register(@Nonnull BaseCookingRecipe recipe) {
+    public void register(@Nullable BaseCookingRecipe recipe) {
+        if (recipe == null)
+            return;
         lookupTable.put(recipe.getKey(), recipe);
         int recipeTypeIndex = 0;
         Recipe bukkitRecipe;
@@ -73,7 +75,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
             recipeTypeIndex = 1;
             bukkitRecipe = furnaceRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(furnaceRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
@@ -90,7 +92,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
             recipeTypeIndex = 2;
             bukkitRecipe = smokingRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(smokingRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
@@ -112,7 +114,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
             recipeTypeIndex = 3;
             bukkitRecipe = blastingRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(blastingRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
@@ -134,7 +136,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
             recipeTypeIndex = 4;
             bukkitRecipe = campfireRecipe
                     .toBukkitRecipe(
-                            NamespacedKeyUtils.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
+                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(campfireRecipe.getOriginal().getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
@@ -181,7 +183,9 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Override
-    public void unregister(@Nonnull BaseCookingRecipe recipe) {
+    public void unregister(@Nullable BaseCookingRecipe recipe) {
+        if (recipe == null)
+            return;
         lookupTable.remove(recipe.getKey());
         Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipe.getKey());
         if (headers != null) {
@@ -205,7 +209,7 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
         lookupTable.clear();
         collidingTable_revert.clear();
         collidingTable.keySet().forEach(key -> {
-            if (key.getNamespace().equals(NamespacedKeyUtils.Namespace)) {
+            if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI)) {
                 Bukkit.removeRecipe(key);
             }
         });
@@ -213,11 +217,15 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Nullable
-    public BaseCookingRecipe lookup(@Nonnull NamespacedKey key) {
+    public BaseCookingRecipe lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
         return lookupTable.get(key);
     }
 
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

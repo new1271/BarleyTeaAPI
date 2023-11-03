@@ -10,23 +10,22 @@ import org.ricetea.utils.ObjectUtil;
 
 import io.papermc.paper.inventory.ItemRarity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 public class DataItemRarity {
     @Nonnull
-    public static final DataItemRarity EPIC = new DataItemRarity(NamedTextColor.LIGHT_PURPLE);
+    public static final DataItemRarity EPIC = fromVanillaItemRarity(null, ItemRarity.EPIC);
 
     @Nonnull
-    public static final DataItemRarity RARE = new DataItemRarity(EPIC, NamedTextColor.AQUA);
+    public static final DataItemRarity RARE = fromVanillaItemRarity(EPIC, ItemRarity.RARE);
 
     @Nonnull
-    public static final DataItemRarity UNCOMMON = new DataItemRarity(RARE, NamedTextColor.YELLOW);
+    public static final DataItemRarity UNCOMMON = fromVanillaItemRarity(RARE, ItemRarity.UNCOMMON);
 
     @Nonnull
-    public static final DataItemRarity COMMON = new DataItemRarity(RARE, NamedTextColor.WHITE);
+    public static final DataItemRarity COMMON = fromVanillaItemRarity(RARE, ItemRarity.COMMON);
 
     @Nonnull
     private final Style style;
@@ -146,8 +145,13 @@ public class DataItemRarity {
         return false;
     }
 
+    @Nonnull
+    private static DataItemRarity fromVanillaItemRarity(@Nullable DataItemRarity nextLevelRarity, @Nonnull ItemRarity rarity) {
+        return new DataItemRarity(nextLevelRarity, Style.style(rarity.getColor()));
+    }
+
     @Nullable
-    public static final DataItemRarity fromPaperItemRarity(@Nullable ItemRarity rarity) {
+    public static final DataItemRarity fromItemRarity(@Nullable ItemRarity rarity) {
         if (rarity == null)
             return null;
         switch (rarity) {

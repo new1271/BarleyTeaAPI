@@ -15,14 +15,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
 
 public abstract class AbstractItemRenderer implements Keyed {
 
-    private static final @Nonnull NamespacedKey lastRenderingKey = NamespacedKeyUtils.BarleyTeaAPI("last_renderer");
+    private static final @Nonnull NamespacedKey lastRenderingKey = NamespacedKeyUtil.BarleyTeaAPI("last_renderer");
     private static @Nullable AbstractItemRenderer _inst;
     private final NamespacedKey key;
 

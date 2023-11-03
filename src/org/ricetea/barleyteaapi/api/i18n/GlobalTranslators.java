@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.i18n;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -25,7 +27,7 @@ public final class GlobalTranslators {
     public void addServerTranslationSource(@Nullable Translator source) {
         if (source == null)
             return;
-        GlobalTranslator.translator().addSource(source);
+        getServerTranslator().addSource(source);
     }
 
     public void addRenderTranslationSource(@Nullable Translator source) {
@@ -37,7 +39,7 @@ public final class GlobalTranslators {
     public void removeServerTranslationSource(@Nullable Translator source) {
         if (source == null)
             return;
-        GlobalTranslator.translator().removeSource(source);
+        getServerTranslator().removeSource(source);
     }
 
     public void removeRenderTranslationSource(@Nullable Translator source) {
@@ -48,6 +50,12 @@ public final class GlobalTranslators {
             renderer.removeSource(source);
     }
 
+    @Nonnull
+    public GlobalTranslator getServerTranslator() {
+        return Objects.requireNonNull(GlobalTranslator.translator());
+    }
+
+    @Nonnull
     public MultisourceTranslatableComponentRenderer getRenderer() {
         return lazyRenderer.get();
     }

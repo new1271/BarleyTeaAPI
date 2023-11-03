@@ -21,7 +21,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 

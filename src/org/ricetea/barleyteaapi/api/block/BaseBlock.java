@@ -18,11 +18,11 @@ import org.bukkit.util.Consumer;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 
 public abstract class BaseBlock implements Keyed {
     @Nonnull
-    public static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("block_id");
+    public static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtil.BarleyTeaAPI("block_id");
     @Nonnull
     private static final Set<NamespacedKey> FallbackNamespacedKeys = new HashSet<>();
     @Nonnull

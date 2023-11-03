@@ -46,7 +46,9 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         return inst.getUnsafe();
     }
 
-    public void register(@Nonnull BaseEntity entity) {
+    public void register(@Nullable BaseEntity entity) {
+        if (entity == null)
+            return;
         lookupTable.put(entity.getKey(), entity);
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
@@ -75,7 +77,9 @@ public final class EntityRegister implements IRegister<BaseEntity> {
 
     }
 
-    public void unregister(@Nonnull BaseEntity entity) {
+    public void unregister(@Nullable BaseEntity entity) {
+        if (entity == null)
+            return;
         lookupTable.remove(entity.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
@@ -87,11 +91,15 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     }
 
     @Nullable
-    public BaseEntity lookup(@Nonnull NamespacedKey key) {
+    public BaseEntity lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
         return lookupTable.get(key);
     }
 
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

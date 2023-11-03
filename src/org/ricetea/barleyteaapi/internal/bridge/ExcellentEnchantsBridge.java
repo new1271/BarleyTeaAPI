@@ -11,7 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.format.Style;
@@ -49,7 +49,7 @@ public class ExcellentEnchantsBridge {
 
     public static void registerTranslations() {
         reg = TranslationRegistry
-                .create(NamespacedKeyUtils.BarleyTeaAPI("excellent_enchant_translation"));
+                .create(NamespacedKeyUtil.BarleyTeaAPI("excellent_enchant_translation"));
         for (Entry<NamespacedKey, ExcellentEnchant> enchKVPair : EnchantRegistry.REGISTRY_MAP.entrySet()) {
             NamespacedKey key = enchKVPair.getKey();
             reg.register("enchantment." + key.getNamespace() + "." + key.getKey(), Locale.getDefault(),

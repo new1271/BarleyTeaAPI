@@ -30,7 +30,7 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtr
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -44,14 +44,14 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 
 public class DefaultItemRenderer extends AbstractItemRenderer {
-    private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtils.BarleyTeaAPI("item_lore");
+    private static final @Nonnull NamespacedKey ItemLoreKey = NamespacedKeyUtil.BarleyTeaAPI("item_lore");
     private static final @Nonnull String AlternateItemFlagStoreKeyHeader = "item_flag_";
     private static final @Nonnull Lazy<DefaultItemRenderer> _inst = Lazy.create(DefaultItemRenderer::new);
     private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
     private static final @Nonnull Operation[] operations = Operation.values();
 
     private DefaultItemRenderer() {
-        super(NamespacedKeyUtils.BarleyTeaAPI("default_item_renderer"));
+        super(NamespacedKeyUtil.BarleyTeaAPI("default_item_renderer"));
         ItemRendererRegister.getInstance().register(this);
     }
 
@@ -361,7 +361,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         for (int i = 0; i < length; i++) {
             ItemFlag flag = values[i];
             if (container.getOrDefault(
-                    NamespacedKeyUtils
+                    NamespacedKeyUtil
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                     PersistentDataType.BOOLEAN, false) == true) {
                 flagList.add(flag);
@@ -375,7 +375,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
             return false;
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         return container.getOrDefault(
-                NamespacedKeyUtils
+                NamespacedKeyUtil
                         .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                 PersistentDataType.BOOLEAN, false) == true;
     }
@@ -386,7 +386,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         for (ItemFlag flag : flags) {
             container.set(
-                    NamespacedKeyUtils
+                    NamespacedKeyUtil
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                     PersistentDataType.BOOLEAN, true);
         }
@@ -399,7 +399,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         for (ItemFlag flag : flags) {
             container.set(
-                    NamespacedKeyUtils
+                    NamespacedKeyUtil
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()),
                     PersistentDataType.BOOLEAN, true);
         }
@@ -412,7 +412,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         for (ItemFlag flag : flags) {
             container.remove(
-                    NamespacedKeyUtils
+                    NamespacedKeyUtil
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
         }
         itemMeta.removeItemFlags(flags.toArray(ItemFlag[]::new));
@@ -425,7 +425,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         for (ItemFlag flag : flags) {
             container.remove(
-                    NamespacedKeyUtils
+                    NamespacedKeyUtil
                             .BarleyTeaAPI(AlternateItemFlagStoreKeyHeader + flag.toString().toLowerCase()));
         }
         itemMeta.removeItemFlags(flags);

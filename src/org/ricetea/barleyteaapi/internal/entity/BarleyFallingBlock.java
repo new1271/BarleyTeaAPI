@@ -15,18 +15,18 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 
 public final class BarleyFallingBlock extends BaseEntity implements FeatureEntitySpawn {
     @Nonnull
-    private static final NamespacedKey blockDataKey = NamespacedKeyUtils.BarleyTeaAPI("block_data");
+    private static final NamespacedKey blockDataKey = NamespacedKeyUtil.BarleyTeaAPI("block_data");
 
     @Nonnull
     private static final Lazy<BarleyFallingBlock> _inst = Lazy.create(BarleyFallingBlock::new);
 
     private BarleyFallingBlock() {
-        super(NamespacedKeyUtils.BarleyTeaAPI("falling_block"), EntityType.FALLING_BLOCK);
+        super(NamespacedKeyUtil.BarleyTeaAPI("falling_block"), EntityType.FALLING_BLOCK);
         EntityRegister.getInstance().register(this);
     }
 

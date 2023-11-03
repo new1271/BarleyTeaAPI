@@ -12,14 +12,14 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 
 public interface IRegister<T extends Keyed> {
-    void register(@Nonnull T key);
+    void register(@Nullable T key);
 
-    void unregister(@Nonnull T key);
+    void unregister(@Nullable T key);
 
     @Nullable
-    T lookup(@Nonnull NamespacedKey key);
+    T lookup(@Nullable NamespacedKey key);
 
-    boolean has(@Nonnull NamespacedKey key);
+    boolean has(@Nullable NamespacedKey key);
 
     boolean hasAnyRegistered();
 

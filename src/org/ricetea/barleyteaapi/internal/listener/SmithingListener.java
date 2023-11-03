@@ -16,7 +16,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.internal.helper.ItemHelper;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.utils.Lazy;
 
 public final class SmithingListener implements Listener {
@@ -48,9 +48,9 @@ public final class SmithingListener implements Listener {
             ItemStack addition = inventory.getInputMineral();
             if (original == null || template == null || addition == null)
                 return;
-            DataItemType originalType = BaseItem.getItemType(original);
-            DataItemType templateType = BaseItem.getItemType(template);
-            DataItemType additionType = BaseItem.getItemType(addition);
+            DataItemType originalType = DataItemType.get(original);
+            DataItemType templateType = DataItemType.get(template);
+            DataItemType additionType = DataItemType.get(addition);
             original = ItemHelper.getSingletonClone(original);
             template = ItemHelper.getSingletonClone(template);
             addition = ItemHelper.getSingletonClone(addition);

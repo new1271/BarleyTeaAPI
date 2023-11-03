@@ -46,7 +46,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
         return inst.getUnsafe();
     }
 
-    public void register(@Nonnull BaseItem item) {
+    public void register(@Nullable BaseItem item) {
+        if (item == null)
+            return;
         lookupTable.put(item.getKey(), item);
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
@@ -63,7 +65,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
         }
     }
 
-    public void unregister(@Nonnull BaseItem item) {
+    public void unregister(@Nullable BaseItem item) {
+        if (item == null)
+            return;
         lookupTable.remove(item.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
@@ -79,11 +83,15 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     @Nullable
-    public BaseItem lookup(@Nonnull NamespacedKey key) {
+    public BaseItem lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
         return lookupTable.get(key);
     }
 
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

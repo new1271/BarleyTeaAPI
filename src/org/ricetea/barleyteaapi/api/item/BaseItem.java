@@ -25,9 +25,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
-import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -38,7 +37,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
     @Nonnull
-    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("item_id");
+    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtil.BarleyTeaAPI("item_id");
     @Nonnull
     private static final HashMap<NamespacedKey, Function<String, NamespacedKey>> FallbackNamespacedKeys = new HashMap<>();
     @Nonnull
@@ -381,21 +380,7 @@ public abstract class BaseItem implements Keyed {
 
     @Nonnull
     public static DataItemType getItemType(@Nonnull ItemStack itemStack) {
-        NamespacedKey itemTypeID = BaseItem.getItemID(itemStack);
-        if (itemTypeID == null) {
-            return DataItemType.get(itemStack.getType());
-        } else {
-            ItemRegister register = ItemRegister.getInstanceUnsafe();
-            if (register == null) {
-                return DataItemType.get(itemStack.getType());
-            } else {
-                BaseItem baseItem = ItemRegister.getInstance().lookup(itemTypeID);
-                if (baseItem == null)
-                    return DataItemType.get(itemStack.getType());
-                else
-                    return DataItemType.get(baseItem);
-            }
-        }
+        return DataItemType.get(itemStack);
     }
 
     protected final void setItemName(@Nonnull ItemStack itemStack) {

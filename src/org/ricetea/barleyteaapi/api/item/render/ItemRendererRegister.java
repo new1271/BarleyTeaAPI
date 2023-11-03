@@ -40,7 +40,9 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
     }
 
     @Override
-    public void register(@Nonnull AbstractItemRenderer renderer) {
+    public void register(@Nullable AbstractItemRenderer renderer) {
+        if (renderer == null)
+            return;
         lookupTable.put(renderer.getKey(), renderer);
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
@@ -52,30 +54,32 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
     }
 
     @Override
-    public void unregister(@Nonnull AbstractItemRenderer renderer) {
+    public void unregister(@Nullable AbstractItemRenderer renderer) {
+        if (renderer == null)
+            return;
         lookupTable.remove(renderer.getKey());
     }
 
     @Override
     @Nullable
-    public AbstractItemRenderer lookup(@Nonnull NamespacedKey key) {
-        return lookupOrDefault(key, null);
+    public AbstractItemRenderer lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
+        return lookupTable.get(key);
     }
 
-    @Nullable
-    public AbstractItemRenderer lookupOrDefault(@Nullable NamespacedKey rendererKey,
-            @Nullable AbstractItemRenderer defaultRenderer) {
-        if (rendererKey == null)
+    @Nonnull
+    public AbstractItemRenderer lookupOrDefault(@Nullable NamespacedKey key,
+            @Nonnull AbstractItemRenderer defaultRenderer) {
+        if (key == null)
             return defaultRenderer;
-        AbstractItemRenderer renderer = lookupTable.get(rendererKey);
-        if (renderer == null)
-            return new InvalidItemRenderer(rendererKey);
-        else
-            return renderer;
+        return ObjectUtil.letNonNull(lookup(key), () -> new InvalidItemRenderer(key));
     }
 
     @Override
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

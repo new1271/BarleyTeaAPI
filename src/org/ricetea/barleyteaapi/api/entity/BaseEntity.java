@@ -24,7 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -33,7 +33,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public abstract class BaseEntity implements Keyed {
     @Nonnull
-    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtils.BarleyTeaAPI("entity_id");
+    private static final NamespacedKey DefaultNamespacedKey = NamespacedKeyUtil.BarleyTeaAPI("entity_id");
     @Nonnull
     private static final HashMap<NamespacedKey, Function<String, NamespacedKey>> FallbackNamespacedKeys = new HashMap<>();
     @Nonnull

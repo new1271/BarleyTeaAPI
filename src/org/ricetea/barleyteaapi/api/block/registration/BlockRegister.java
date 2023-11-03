@@ -38,7 +38,9 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         return inst.getUnsafe();
     }
 
-    public void register(@Nonnull BaseBlock block) {
+    public void register(@Nullable BaseBlock block) {
+        if (block == null)
+            return;
         lookupTable.put(block.getKey(), block);
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
@@ -49,7 +51,9 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         }
     }
 
-    public void unregister(@Nonnull BaseBlock block) {
+    public void unregister(@Nullable BaseBlock block) {
+        if (block == null)
+            return;
         lookupTable.remove(block.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
         if (inst != null) {
@@ -59,11 +63,15 @@ public final class BlockRegister implements IRegister<BaseBlock> {
     }
 
     @Nullable
-    public BaseBlock lookup(@Nonnull NamespacedKey key) {
+    public BaseBlock lookup(@Nullable NamespacedKey key) {
+        if (key == null)
+            return null;
         return lookupTable.get(key);
     }
 
-    public boolean has(@Nonnull NamespacedKey key) {
+    public boolean has(@Nullable NamespacedKey key) {
+        if (key == null)
+            return false;
         return lookupTable.containsKey(key);
     }
 

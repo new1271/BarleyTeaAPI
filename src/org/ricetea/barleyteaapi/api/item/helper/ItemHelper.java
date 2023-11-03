@@ -47,4 +47,18 @@ public final class ItemHelper {
     public static Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable ItemStack itemStack) {
         return itemStack == null ? EMPTY_MAP : getDefaultAttributeModifiers(itemStack.getType());
     }
+
+    @Nonnull
+    public static ItemStack getSingletonClone(@Nullable ItemStack itemStack) {
+        if (itemStack == null) {
+            return new ItemStack(Material.AIR);
+        } else if (itemStack.getType().isAir()) {
+            return itemStack;
+        } else {
+            ItemStack result = itemStack.clone();
+            if (result.getAmount() > 1)
+                result.setAmount(1);
+            return result;
+        }
+    }
 }

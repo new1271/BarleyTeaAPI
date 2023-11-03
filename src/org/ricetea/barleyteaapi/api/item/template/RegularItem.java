@@ -17,12 +17,12 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtils;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 
 public abstract class RegularItem extends BaseItem
         implements FeatureCommandGive, FeatureItemGive {
     @Nonnull
-    private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtils
+    private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtil
             .BarleyTeaAPI("item_damage");
 
     public RegularItem(@Nonnull NamespacedKey key, @Nonnull Material materialBasedOn, @Nonnull DataItemRarity rarity) {
