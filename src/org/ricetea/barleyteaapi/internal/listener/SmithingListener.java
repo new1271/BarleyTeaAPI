@@ -54,8 +54,8 @@ public final class SmithingListener implements Listener {
             original = ItemHelper.getSingletonClone(original);
             template = ItemHelper.getSingletonClone(template);
             addition = ItemHelper.getSingletonClone(addition);
-            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || originalType.isBarleyTeaCustomItem()
-                    || templateType.isBarleyTeaCustomItem() || additionType.isBarleyTeaCustomItem()) {
+            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || originalType.isCustom()
+                    || templateType.isCustom() || additionType.isCustom()) {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 boolean allPassed = true;

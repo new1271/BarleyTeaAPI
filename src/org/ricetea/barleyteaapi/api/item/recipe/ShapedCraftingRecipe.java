@@ -24,7 +24,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     private final int colCount, rowCount;
 
     public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredientMatrix,
-            int colCount, @Nonnull DataItemType result) throws UnsupportedOperationException {
+            int colCount, @Nonnull DataItemType result) {
         super(key, result);
         if (colCount < 1 || colCount > 3) {
             throw new UnsupportedOperationException("'colCount' can't lower than 1 or greater then 3!");

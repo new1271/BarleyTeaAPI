@@ -13,18 +13,18 @@ public class Either<L, R> {
     @Nullable
     final R right;
 
-    protected Either(L left, R right) {
+    protected Either(@Nullable L left,@Nullable  R right) {
         this.left = left;
         this.right = right;
     }
 
     @Nonnull
-    public static <L, R> Either<L, R> left(L left) {
+    public static <L, R> Either<L, R> left(@Nonnull L left) {
         return new Either<L, R>(left, null);
     }
 
     @Nonnull
-    public static <L, R> Either<L, R> right(R right) {
+    public static <L, R> Either<L, R> right(@Nonnull R right) {
         return new Either<L, R>(null, right);
     }
 

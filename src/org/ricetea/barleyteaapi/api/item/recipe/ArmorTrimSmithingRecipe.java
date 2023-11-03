@@ -18,24 +18,23 @@ import org.ricetea.barleyteaapi.internal.helper.MaterialHelper;
 
 public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
-    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original)
-            throws UnsupportedOperationException {
+    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original) {
         this(key, original, original);
     }
 
     public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-            @Nonnull DataItemType result) throws UnsupportedOperationException {
+            @Nonnull DataItemType result) {
         super(key, original, result);
     }
 
     @Nonnull
     public DataItemType getTemplateAsExample() {
-        return DataItemType.create(Tag.ITEMS_TRIM_TEMPLATES.getValues().iterator().next());
+        return DataItemType.get(Tag.ITEMS_TRIM_TEMPLATES.getValues().iterator().next());
     }
 
     @Nonnull
     public DataItemType getAdditionAsExample() {
-        return DataItemType.create(Tag.ITEMS_TRIM_MATERIALS.getValues().iterator().next());
+        return DataItemType.get(Tag.ITEMS_TRIM_MATERIALS.getValues().iterator().next());
     }
 
     @Override

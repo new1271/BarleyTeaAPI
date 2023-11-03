@@ -29,7 +29,7 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements Function<I
     }
 
     public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) throws UnsupportedOperationException {
+            float experience, int cookingTime) {
         super(key, result);
         this.original = original;
         this.experience = experience;

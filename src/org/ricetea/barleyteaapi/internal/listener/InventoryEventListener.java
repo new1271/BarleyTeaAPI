@@ -143,7 +143,7 @@ public final class InventoryEventListener implements Listener {
                     } else if (resultItem != null && BaseItem.isBarleyTeaItem(resultItem)) {
                         if (!ComponentUtil.translatableComponentEquals(firstItem.displayName(),
                                 resultItem.displayName())) {
-                            BaseItem.setName(resultItem, renameText);
+                            BaseItem.setDisplayName(resultItem, renameText);
                         }
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode

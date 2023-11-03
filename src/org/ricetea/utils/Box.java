@@ -43,7 +43,7 @@ public class Box<T> implements Property<T> {
     }
 
     @Override
-    public T set(T obj) {
+    public T set(@Nullable T obj) {
         return this.obj = obj;
     }
 

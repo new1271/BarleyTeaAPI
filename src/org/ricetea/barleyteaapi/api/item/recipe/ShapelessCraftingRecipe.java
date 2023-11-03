@@ -22,7 +22,7 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     private final DataItemType[] ingredients;
 
     public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredients,
-            @Nonnull DataItemType result) throws UnsupportedOperationException {
+            @Nonnull DataItemType result) {
         super(key, result);
         int length = ingredients.length;
         if (length <= 0) {

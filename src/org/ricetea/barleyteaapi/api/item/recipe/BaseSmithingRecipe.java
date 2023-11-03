@@ -15,7 +15,7 @@ public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingF
     private final DataItemType original;
 
     public BaseSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-            @Nonnull DataItemType result) throws UnsupportedOperationException {
+            @Nonnull DataItemType result) {
         super(key, result);
         this.original = original;
     }

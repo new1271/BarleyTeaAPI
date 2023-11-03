@@ -20,12 +20,18 @@ public final class ObjectUtil {
         return obj == null ? Objects.requireNonNull(objWhenNull) : obj;
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     public static <T> T tryCast(@Nullable Object obj, @Nonnull Class<T> castClass) {
         if (obj == null)
             return null;
         else {
-            return castClass.isInstance(obj) ? castClass.cast(obj) : null;
+            if (castClass.isInstance(obj))
+                return castClass.cast(obj);
+            else if (castClass.equals(String.class))
+                return (T) obj.toString();
+            else
+                return null;
         }
     }
 

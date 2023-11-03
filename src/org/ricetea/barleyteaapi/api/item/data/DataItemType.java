@@ -1,5 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.data;
 
+import java.util.HashMap;
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -10,32 +13,53 @@ import org.ricetea.utils.Either;
 public final class DataItemType extends Either<Material, BaseItem> {
 
     @Nonnull
-    private static final DataItemType EMPTY = create(Material.AIR);
+    private static final DataItemType EMPTY = get0(Material.AIR);
+
+    @Nonnull
+    private static final HashMap<Material, DataItemType> vanillaMaterialMap = new HashMap<>();
 
     @Nonnull
     public static DataItemType empty() {
         return EMPTY;
     }
 
-    private DataItemType(Material left, BaseItem right) {
+    private DataItemType(@Nullable Material left, @Nullable BaseItem right) {
         super(left, right);
     }
 
     @Nonnull
-    public static DataItemType create(Material type) {
-        return new DataItemType(type, null);
+    public static DataItemType get(@Nullable Material itemType) {
+        if (itemType == null)
+            return empty();
+        else
+            return Objects.requireNonNull(vanillaMaterialMap.computeIfAbsent(itemType, DataItemType::get0));
     }
 
     @Nonnull
-    public static DataItemType create(BaseItem type) {
-        return new DataItemType(null, type);
+    public static DataItemType get(@Nullable BaseItem itemType) {
+        if (itemType == null)
+            return empty();
+        else
+            return itemType.getType();
     }
 
-    public boolean isMinecraftBuiltInItem() {
+    //This method should be internally
+    @Deprecated
+    @Nonnull
+    public static DataItemType create(@Nonnull BaseItem itemType) {
+        return new DataItemType(null, itemType);
+    }
+
+    @Nonnull
+    private static DataItemType get0(Material type) {
+        return new DataItemType(type, null);
+    }
+
+    public boolean isVanilla() {
         return isLeft();
     }
 
-    public boolean isBarleyTeaCustomItem() {
+    public boolean isCustom() {
         return isRight();
     }
 

@@ -10,8 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 
 public abstract class BaseCraftingRecipe extends BaseRecipe implements Function<ItemStack[], ItemStack> {
-    public BaseCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result)
-            throws UnsupportedOperationException {
+    public BaseCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result) {
         super(key, result);
     }
 

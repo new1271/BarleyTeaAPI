@@ -32,6 +32,10 @@ import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.TextDecorationAndState;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class BaseItem implements Keyed {
@@ -49,6 +53,7 @@ public abstract class BaseItem implements Keyed {
     private final Lazy<DataItemType> lazyType;
     private final boolean isTool;
 
+    @SuppressWarnings("deprecation")
     public BaseItem(@Nonnull NamespacedKey key, @Nonnull Material materialBasedOn, @Nonnull DataItemRarity rarity) {
         this.key = key;
         this.materialBasedOn = materialBasedOn;
@@ -170,7 +175,7 @@ public abstract class BaseItem implements Keyed {
                     "default modifiers", amount, operation, equipmentSlot));
         }
     }
-    
+
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
         addFallbackNamespacedKey(key, null);
     }
@@ -197,6 +202,76 @@ public abstract class BaseItem implements Keyed {
         if (isRarityStyled)
             component = rarity.apply(component);
         return component;
+    }
+
+    public final boolean isDefaultNameComponent(@Nullable ItemStack itemStack) {
+        if (itemStack == null)
+            return false;
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            return isDefaultNameComponent(meta.displayName());
+        }
+        return false;
+    }
+
+    public final boolean isDefaultNameComponent(@Nullable Component component) {
+        if (component instanceof TranslatableComponent translatableComponent)
+            return translatableComponent.key().equals(getNameInTranslateKey());
+        return false;
+    }
+
+    @Nullable
+    public static Component getDisplayName(@Nonnull ItemStack itemStack) {
+        return getItemType(itemStack).mapLeftOrRight(
+                left -> ObjectUtil.mapWhenNonnull(itemStack.getItemMeta(), ItemMeta::displayName),
+                right -> {
+                    Component displayName = ObjectUtil.mapWhenNonnull(itemStack.getItemMeta(), ItemMeta::displayName);
+                    if (displayName != null) {
+                        if (right.isDefaultNameComponent(itemStack)) {
+                            return null;
+                        } else {
+                            Style style = displayName.style();
+                            if (style != null && !style.isEmpty()) {
+                                DataItemRarity rarity = right.getRarity();
+                                boolean flag = false;
+                                {
+                                    Style rarityStyle = rarity.getStyle();
+                                    if (Objects.equals(style.color(), rarityStyle.color())) {
+                                        var styleDecorationMap = rarityStyle.decorations();
+                                        for (var entry : style.decorations().entrySet()) {
+                                            TextDecoration key = entry.getKey();
+                                            if (key.equals(TextDecoration.ITALIC)) {
+                                                continue;
+                                            } else if (!Objects.equals(styleDecorationMap.get(key), entry.getValue())) {
+                                                flag = true;
+                                                displayName = displayName.style(Style.empty());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!flag && right.isRarityUpgraded(itemStack)) {
+                                    rarity = rarity.upgrade();
+                                    Style rarityStyle = rarity.getStyle();
+                                    if (Objects.equals(style.color(), rarityStyle.color())) {
+                                        var styleDecorationMap = rarityStyle.decorations();
+                                        for (var entry : style.decorations().entrySet()) {
+                                            TextDecoration key = entry.getKey();
+                                            if (key.equals(TextDecoration.ITALIC)) {
+                                                continue;
+                                            } else if (!Objects.equals(styleDecorationMap.get(key), entry.getValue())) {
+                                                flag = true;
+                                                displayName = displayName.style(Style.empty());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return displayName;
+                });
     }
 
     public final void register(@Nullable ItemStack itemStack) {
@@ -341,17 +416,17 @@ public abstract class BaseItem implements Keyed {
     public static DataItemType getItemType(@Nonnull ItemStack itemStack) {
         NamespacedKey itemTypeID = BaseItem.getItemID(itemStack);
         if (itemTypeID == null) {
-            return DataItemType.create(itemStack.getType());
+            return DataItemType.get(itemStack.getType());
         } else {
             ItemRegister register = ItemRegister.getInstanceUnsafe();
             if (register == null) {
-                return DataItemType.create(itemStack.getType());
+                return DataItemType.get(itemStack.getType());
             } else {
                 BaseItem baseItem = ItemRegister.getInstance().lookup(itemTypeID);
                 if (baseItem == null)
-                    return DataItemType.create(itemStack.getType());
+                    return DataItemType.get(itemStack.getType());
                 else
-                    return DataItemType.create(baseItem);
+                    return DataItemType.get(baseItem);
             }
         }
     }
@@ -361,30 +436,36 @@ public abstract class BaseItem implements Keyed {
     }
 
     protected final void setItemName(@Nonnull ItemStack itemStack, boolean isUpgraded) {
-        DataItemRarity rarity = this.rarity;
-        if (isUpgraded)
-            rarity = rarity.upgrade();
-        setItemName(itemStack, getDefaultNameComponent());
+        setItemName(itemStack, getDefaultNameComponent(), isUpgraded, false);
     }
 
     @Deprecated
-    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String name) {
-        setItemName(itemStack, name, true, isRarityUpgraded(itemStack));
+    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String displayName) {
+        setItemName(itemStack, displayName, isRarityUpgraded(itemStack), true);
     }
 
     @Deprecated
-    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String name,
-            boolean isApplyRenamingItalic, boolean isUpgraded) {
-        DataItemRarity rarity = this.rarity;
-        if (isUpgraded)
-            rarity = rarity.upgrade();
-        setItemName(itemStack, rarity.apply(Objects.requireNonNull(Component.text(name)), isApplyRenamingItalic));
+    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull String displayName,
+            boolean isUpgraded, boolean needApplyRenamingItalic) {
+        setItemName(itemStack, Objects.requireNonNull(Component.text(displayName)), isUpgraded,
+                needApplyRenamingItalic);
     }
 
-    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull Component component) {
+    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull Component displayName) {
+        setItemName(itemStack, displayName, isRarityUpgraded(itemStack), true);
+    }
+
+    protected final void setItemName(@Nonnull ItemStack itemStack, @Nonnull Component displayName,
+            boolean isUpgraded, boolean needApplyRenamingItalic) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta.displayName(component);
+            if (displayName.color() == null) {
+                DataItemRarity rarity = this.rarity;
+                if (isUpgraded)
+                    rarity = rarity.upgrade();
+                displayName = rarity.apply(displayName, needApplyRenamingItalic);
+            }
+            meta.displayName(displayName);
             itemStack.setItemMeta(meta);
         }
     }
@@ -408,18 +489,34 @@ public abstract class BaseItem implements Keyed {
         });
     }
 
-    public static void setName(@Nonnull ItemStack itemStack, @Nullable String name) {
-        if (name == null || name.isBlank())
+    public static void setDisplayName(@Nonnull ItemStack itemStack, @Nullable String displayName) {
+        if (displayName == null || displayName.isBlank())
             setAsDefaultName(itemStack);
         else {
             getItemType(itemStack).processLeftOrRight(m -> {
                 ItemMeta meta = itemStack.getItemMeta();
                 if (meta != null) {
-                    meta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(name));
+                    meta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(displayName));
                     itemStack.setItemMeta(meta);
                 }
             }, baseItem -> {
-                baseItem.setItemName(itemStack, name);
+                baseItem.setItemName(itemStack, displayName);
+            });
+        }
+    }
+
+    public static void setDisplayName(@Nonnull ItemStack itemStack, @Nullable Component displayName) {
+        if (displayName == null)
+            setAsDefaultName(itemStack);
+        else {
+            getItemType(itemStack).processLeftOrRight(m -> {
+                ItemMeta meta = itemStack.getItemMeta();
+                if (meta != null) {
+                    meta.displayName(displayName);
+                    itemStack.setItemMeta(meta);
+                }
+            }, baseItem -> {
+                baseItem.setItemName(itemStack, displayName);
             });
         }
     }
