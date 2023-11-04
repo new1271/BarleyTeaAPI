@@ -39,7 +39,7 @@ public final class BlockTickTask extends AbstractTask {
 
     @Override
     protected void runInternal() {
-        BarleyTeaAPI api = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         BlockRegister register = BlockRegister.getInstanceUnsafe();
         if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {

@@ -14,7 +14,17 @@ import org.bukkit.NamespacedKey;
 public interface IRegister<T extends Keyed> {
     void register(@Nullable T key);
 
+    default void registerAll(@Nullable Collection<T> keys) {
+        if (keys != null) {
+            keys.forEach(this::register);
+        }
+    }
+
     void unregister(@Nullable T key);
+
+    void unregisterAll();
+
+    void unregisterAll(@Nullable Predicate<T> predicate);
 
     @Nullable
     T lookup(@Nullable NamespacedKey key);

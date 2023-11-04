@@ -97,7 +97,7 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             collidingTable_revert.put(recipe.getKey(), keyed.getKey());
         }
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 switch (recipeTypeIndex) {
@@ -131,7 +131,7 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             }
         }
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("unregistered " + recipe.getKey().toString());
@@ -139,7 +139,9 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
         }
     }
 
+    @Override
     public void unregisterAll() {
+        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
         lookupTable.clear();
         collidingTable_revert.clear();
         collidingTable.keySet().forEach(key -> {
@@ -148,6 +150,23 @@ public final class CraftingRecipeRegister implements IRegister<BaseCraftingRecip
             }
         });
         collidingTable.clear();
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            for (NamespacedKey key : keySet) {
+                logger.info("unregistered " + key.getKey().toString());
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(@Nullable Predicate<BaseCraftingRecipe> predicate) {
+        if (predicate == null)
+            unregisterAll();
+        else {
+            for (BaseCraftingRecipe item : listAll(predicate)) {
+                unregister(item);
+            }
+        }
     }
 
     @Nullable

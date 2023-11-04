@@ -45,7 +45,7 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
             return;
         lookupTable.put(renderer.getKey(), renderer);
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + renderer.getKey().toString() + " as item renderer!");
@@ -58,6 +58,33 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
         if (renderer == null)
             return;
         lookupTable.remove(renderer.getKey());
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            logger.info("unregistered " + renderer.getKey().toString());
+        }
+    }
+
+    @Override
+    public void unregisterAll() {
+        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
+        lookupTable.clear();
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            for (NamespacedKey key : keySet) {
+                logger.info("unregistered " + key.getKey().toString());
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(@Nullable Predicate<AbstractItemRenderer> predicate) {
+        if (predicate == null)
+            unregisterAll();
+        else {
+            for (AbstractItemRenderer item : listAll(predicate)) {
+                unregister(item);
+            }
+        }
     }
 
     @Override

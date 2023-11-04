@@ -1,8 +1,10 @@
 package org.ricetea.barleyteaapi;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
@@ -47,8 +49,13 @@ public final class BarleyTeaAPI extends JavaPlugin {
     public boolean hasExcellentEnchants;
     public NMSBaseCommand summonCommand, giveCommand;
 
-    @Nullable
+    @Nonnull
     public static BarleyTeaAPI getInstance() {
+        return Objects.requireNonNull(_inst);
+    }
+
+    @Nullable
+    public static BarleyTeaAPI getInstanceUnsafe() {
         return _inst;
     }
 

@@ -60,7 +60,7 @@ public final class InventoryEventListener implements Listener {
                         job = data.getJobAfterItemEnchant();
                     }
                     final Consumer<ItemStack> finalJob = job;
-                    Bukkit.getScheduler().runTaskLater(BarleyTeaAPI.getInstance(), () -> {
+                    Bukkit.getScheduler().runTaskLater(BarleyTeaAPI.getInstanceUnsafe(), () -> {
                         ItemStack _itemStack = event.getItem();
                         if (finalJob != null) {
                             finalJob.accept(_itemStack);

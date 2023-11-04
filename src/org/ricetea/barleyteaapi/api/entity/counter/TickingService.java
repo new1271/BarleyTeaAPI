@@ -122,7 +122,7 @@ public final class TickingService {
                 list.add(counter);
             }
             if (taskID == 0)
-                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(BarleyTeaAPI.getInstance(), this, 0, 1);
+                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(BarleyTeaAPI.getInstanceUnsafe(), this, 0, 1);
         }
 
         public void removeEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {

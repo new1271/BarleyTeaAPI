@@ -63,7 +63,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
     @SuppressWarnings({ "unchecked", "null" })
     @Override
     public void render(@Nonnull ItemStack itemStack) {
-        BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstanceUnsafe();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
         if (apiInstance != null && register != null) {
             NamespacedKey id = BaseItem.getItemID(itemStack);

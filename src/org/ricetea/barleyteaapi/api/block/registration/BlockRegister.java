@@ -43,7 +43,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
             return;
         lookupTable.put(block.getKey(), block);
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + block.getKey().toString() + " as block!");
@@ -55,10 +55,33 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         if (block == null)
             return;
         lookupTable.remove(block.getKey());
-        BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + block.getKey().toString());
+        }
+    }
+
+    @Override
+    public void unregisterAll() {
+        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
+        lookupTable.clear();
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            for (NamespacedKey key : keySet) {
+                logger.info("unregistered " + key.getKey().toString());
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(@Nullable Predicate<BaseBlock> predicate) {
+        if (predicate == null)
+            unregisterAll();
+        else {
+            for (BaseBlock item : listAll(predicate)) {
+                unregister(item);
+            }
         }
     }
 

@@ -41,7 +41,7 @@ public final class ItemTickTask extends AbstractTask {
 
     @Override
     protected void runInternal() {
-        BarleyTeaAPI api = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
         if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredNeedTicking()) {

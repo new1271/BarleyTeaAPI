@@ -51,7 +51,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
             return;
         lookupTable.put(item.getKey(), item);
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + item.getKey().toString() + " as item!");
@@ -69,7 +69,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
         if (item == null)
             return;
         lookupTable.remove(item.getKey());
-        BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + item.getKey().toString());
@@ -78,6 +78,29 @@ public final class ItemRegister implements IRegister<BaseItem> {
             }
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll() {
+        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
+        lookupTable.clear();
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            for (NamespacedKey key : keySet) {
+                logger.info("unregistered " + key.getKey().toString());
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(@Nullable Predicate<BaseItem> predicate) {
+        if (predicate == null)
+            unregisterAll();
+        else {
+            for (BaseItem item : listAll(predicate)) {
+                unregister(item);
             }
         }
     }

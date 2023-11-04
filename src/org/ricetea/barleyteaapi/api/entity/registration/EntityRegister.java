@@ -51,7 +51,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             return;
         lookupTable.put(entity.getKey(), entity);
         if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + entity.getKey().toString() + " as entity!");
@@ -81,12 +81,35 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         if (entity == null)
             return;
         lookupTable.remove(entity.getKey());
-        BarleyTeaAPI inst = BarleyTeaAPI.getInstance();
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + entity.getKey().toString());
             if (entity instanceof FeatureCommandSummon)
                 ObjectUtil.callWhenNonnull(inst.summonCommand, NMSBaseCommand::update);
+        }
+    }
+
+    @Override
+    public void unregisterAll() {
+        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
+        lookupTable.clear();
+        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        if (logger != null) {
+            for (NamespacedKey key : keySet) {
+                logger.info("unregistered " + key.getKey().toString());
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(@Nullable Predicate<BaseEntity> predicate) {
+        if (predicate == null)
+            unregisterAll();
+        else {
+            for (BaseEntity item : listAll(predicate)) {
+                unregister(item);
+            }
         }
     }
 
