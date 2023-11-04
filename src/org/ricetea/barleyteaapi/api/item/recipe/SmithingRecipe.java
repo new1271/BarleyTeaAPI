@@ -1,5 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -9,6 +12,7 @@ import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.inventory.RecipeChoice.MaterialChoice;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.internal.helper.SmithingHelper;
+import org.ricetea.utils.CollectionUtil;
 
 public class SmithingRecipe extends BaseSmithingRecipe {
 
@@ -31,39 +35,38 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
-    public DataItemType getTemplateAsExample() {
-        return template;
+    public Set<DataItemType> getTemplates() {
+        return Objects.requireNonNull(Collections.singleton(template));
     }
 
     @Nonnull
-    public DataItemType getAdditionAsExample() {
-        return addition;
-    }
-
-    @Override
-    public boolean filterAdditionType(@Nonnull DataItemType additionType) {
-        return addition.equals(additionType);
-    }
-
-    @Override
-    public boolean filterTemplateType(@Nonnull DataItemType templateType) {
-        return template.equals(templateType);
+    public Set<DataItemType> getAdditions() {
+        return Objects.requireNonNull(Collections.singleton(addition));
     }
 
     @Nonnull
     public SmithingTransformRecipe toBukkitRecipe(NamespacedKey key) {
         return new SmithingTransformRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
-                new MaterialChoice(getTemplateAsExample().getMaterialBasedOn()), 
+                new MaterialChoice(CollectionUtil.firstOrDefault(getTemplates(), DataItemType::empty)
+                        .getMaterialBasedOn()),
                 new MaterialChoice(getOriginal().getMaterialBasedOn()),
-                new MaterialChoice(getAdditionAsExample().getMaterialBasedOn()), copyNbt);
+                new MaterialChoice(CollectionUtil.firstOrDefault(getAdditions(), DataItemType::empty)
+                        .getMaterialBasedOn()),
+                copyNbt);
     }
 
     @Nullable
     @Override
-    public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {
-        ItemStack result = super.apply(original, template, addition);
-        if (result != null && copyNbt) {
-            result = SmithingHelper.copyNbt(this, original, result);
+    public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {    
+        ItemStack result;
+        if (copyNbt) {
+            if (getOriginal() == getResult()) {
+                result = original.clone();
+            } else {
+                result = SmithingHelper.copyNbt(this, original, super.apply(original, template, addition));
+            }
+        } else {
+            result = super.apply(original, template, addition);
         }
         return result;
     }

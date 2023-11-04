@@ -56,23 +56,15 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
+    @Override
     public Set<DataItemType> getTemplates() {
         return templateSetLazy.get();
     }
 
     @Nonnull
+    @Override
     public Set<DataItemType> getAdditions() {
         return additionSetLazy.get();
-    }
-
-    @Override
-    public boolean filterAdditionType(@Nonnull DataItemType additionType) {
-        return getAdditions().contains(additionType);
-    }
-
-    @Override
-    public boolean filterTemplateType(@Nonnull DataItemType templateType) {
-        return getAdditions().contains(templateType);
     }
 
     @Override

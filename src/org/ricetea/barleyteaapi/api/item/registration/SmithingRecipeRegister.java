@@ -79,8 +79,12 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
                     NamespacedKeyUtil.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
             if (!Bukkit.addRecipe(bukkitRecipe)) {
                 ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().getMaterialBasedOn());
-                ItemStack templateItem = new ItemStack(smithingRecipe.getTemplateAsExample().getMaterialBasedOn());
-                ItemStack additionItem = new ItemStack(smithingRecipe.getAdditionAsExample().getMaterialBasedOn());
+                ItemStack templateItem = new ItemStack(
+                        CollectionUtil.firstOrDefault(smithingRecipe.getTemplates(), DataItemType::empty)
+                                .getMaterialBasedOn());
+                ItemStack additionItem = new ItemStack(
+                        CollectionUtil.firstOrDefault(smithingRecipe.getAdditions(), DataItemType::empty)
+                                .getMaterialBasedOn());
                 for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
                     Recipe iteratingRecipe = iterator.next();
                     if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {

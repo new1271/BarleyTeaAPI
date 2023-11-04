@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -25,9 +26,19 @@ public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingF
         return original;
     }
 
-    public abstract boolean filterAdditionType(@Nonnull DataItemType additionType);
+    @Nonnull
+    public abstract Set<DataItemType> getTemplates();
 
-    public abstract boolean filterTemplateType(@Nonnull DataItemType templateType);
+    @Nonnull
+    public abstract Set<DataItemType> getAdditions();
+
+    public boolean filterTemplateType(@Nonnull DataItemType templateType) {
+        return getTemplates().contains(templateType);
+    }
+
+    public boolean filterAdditionType(@Nonnull DataItemType additionType) {
+        return getAdditions().contains(additionType);
+    }
 
     @Nullable
     public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {
