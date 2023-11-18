@@ -128,17 +128,21 @@ public abstract class AbstractItemRenderer implements Keyed {
 
     public static void setItemLore(@Nullable ItemStack itemStack, @Nullable List<? extends Component> lore) {
         if (itemStack != null) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            if (itemMeta != null) {
-                if (BaseItem.isBarleyTeaItem(itemStack)) {
-                    AbstractItemRenderer renderer = getLastRenderer(itemStack);
-                    if (renderer == null) {
-                        renderer = getDefault();
-                    }
+            if (BaseItem.isBarleyTeaItem(itemStack)) {
+                AbstractItemRenderer renderer = getLastRenderer(itemStack);
+                if (renderer == null) {
+                    renderer = getDefault();
+                    renderer.beforeFirstRender(itemStack);
+                }
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null) {
                     renderer.setItemLore(itemMeta, lore);
                     itemStack.setItemMeta(itemMeta);
-                    renderer.render(itemStack);
-                } else {
+                }
+                renderer.render(itemStack);
+            } else {
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null) {
                     itemMeta.lore(lore);
                     itemStack.setItemMeta(itemMeta);
                 }

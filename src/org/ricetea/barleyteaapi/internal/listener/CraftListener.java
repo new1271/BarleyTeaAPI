@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import java.util.Arrays;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
@@ -14,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
@@ -38,7 +41,7 @@ public final class CraftListener implements Listener {
         if (event == null || event.getRecipe() == null)
             return;
         CraftingInventory inventory = event.getInventory();
-        ItemStack[] craftingMatrix = inventory.getMatrix().clone();
+        ItemStack[] craftingMatrix = Arrays.stream(inventory.getMatrix()).map(ItemHelper::getSingletonClone).toArray(ItemStack[]::new);
         int craftingMatrixLength = craftingMatrix.length;
         DataItemType[] craftingTypeOfMatrix = new DataItemType[craftingMatrixLength];
         boolean hasCustomItem = false;

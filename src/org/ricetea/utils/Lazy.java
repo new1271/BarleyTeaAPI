@@ -20,7 +20,7 @@ public class Lazy<T> implements Property<T> {
 
     @Nonnull
     public static <T> Lazy<T> create(@Nonnull Supplier<T> supplier) {
-        return Lazy.create(supplier);
+        return new Lazy<>(supplier);
     }
 
     @Nonnull
