@@ -45,6 +45,7 @@ import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.phys.Vec3D;
 
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
@@ -139,9 +140,6 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                         });
                         if (entity == null)
                             throw summonFailedMessage.create();
-                        org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-                        if (bukkitEntity == null)
-                            throw summonFailedMessage.create();
                         if (initialize && entity instanceof EntityInsentient)
                             ((EntityInsentient) entity).a((WorldAccess) source.e(), source.e().d_(entity.di()),
                                     EnumMobSpawn.n,
@@ -149,10 +147,18 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                         if (!worldserver.tryAddFreshEntityWithPassengers(entity,
                                 CreatureSpawnEvent.SpawnReason.COMMAND))
                             throw summonFailedMessage.create();
-                        if (!baseEntity.tryRegister(bukkitEntity,
+                        org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
+                        if (bukkitEntity == null)
+                            throw summonFailedMessage.create();
+                        if (baseEntity.tryRegister(bukkitEntity,
                                 _entity -> _entity != null
                                         && summonEntity.handleCommandSummon(
                                                 new DataCommandSummon(_entity, nbt.toString())))) {
+                            if (baseEntity instanceof FeatureChunkLoad feature && !bukkitEntity.isDead()) {
+                                feature.handleChunkLoaded(bukkitEntity);
+                            }
+
+                        } else {
                             bukkitEntity.remove();
                             throw summonFailedMessage.create();
                         }
