@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
@@ -39,6 +40,9 @@ public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingF
     public boolean filterAdditionType(@Nonnull DataItemType additionType) {
         return getAdditions().contains(additionType);
     }
+
+    @Nonnull
+    public abstract Recipe toBukkitRecipe(@Nonnull NamespacedKey key);
 
     @Nullable
     public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {

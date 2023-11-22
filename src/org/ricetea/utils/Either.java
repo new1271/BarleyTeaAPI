@@ -1,5 +1,6 @@
 package org.ricetea.utils;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -13,7 +14,7 @@ public class Either<L, R> {
     @Nullable
     final R right;
 
-    protected Either(@Nullable L left,@Nullable  R right) {
+    protected Either(@Nullable L left, @Nullable R right) {
         this.left = left;
         this.right = right;
     }
@@ -72,19 +73,10 @@ public class Either<L, R> {
     }
 
     public boolean equals(Object another) {
-        if (another instanceof Either<?, ?> either) {
-            L left = left();
-            R right = right();
-            Object anotherLeft = either.left();
-            Object anotherRight = either.right();
-            if (left != null && anotherLeft != null) {
-                return left.equals(anotherLeft);
-            } else if (right != null && anotherRight != null) {
-                return right.equals(anotherRight);
-            } else {
-                return isEmpty() && either.isEmpty();
-            }
+        if (!super.equals(another) && another instanceof Either<?, ?> either) {
+            return Objects.equals(left(), either.left()) &&
+                    Objects.equals(right(), either.right());
         }
-        return super.equals(another);
+        return true;
     }
 }

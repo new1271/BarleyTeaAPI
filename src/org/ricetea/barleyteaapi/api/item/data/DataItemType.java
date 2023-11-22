@@ -83,7 +83,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
                 if (itemType != null)
                     return get(itemType);
             }
-            return get(itemStack);
+            return get(itemStack.getType());
         }
     }
 

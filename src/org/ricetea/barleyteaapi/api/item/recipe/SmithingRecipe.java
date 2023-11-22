@@ -45,7 +45,7 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
-    public SmithingTransformRecipe toBukkitRecipe(NamespacedKey key) {
+    public SmithingTransformRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         return new SmithingTransformRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
                 new MaterialChoice(CollectionUtil.firstOrDefault(getTemplates(), DataItemType::empty)
                         .getMaterialBasedOn()),

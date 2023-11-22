@@ -2,6 +2,7 @@ package org.ricetea.barleyteaapi.api.item.registration;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,8 +47,7 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
             .requireNonNull(LinkedHashMultimap.create());
 
     @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert = Objects
-            .requireNonNull(LinkedHashMultimap.create());
+    private final HashMap<NamespacedKey, NamespacedKey> collidingTable_revert = new HashMap<>();
 
     @Nonnull
     private final AtomicInteger flowNumber = new AtomicInteger(0);
@@ -70,73 +70,45 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
     public void register(@Nullable BaseSmithingRecipe recipe) {
         if (recipe == null)
             return;
-        lookupTable.put(recipe.getKey(), recipe);
+        NamespacedKey recipeKey = recipe.getKey();
+        if (lookupTable.put(recipeKey, recipe) != null)
+            unlinkMap(recipeKey);
         int recipeTypeIndex = 0;
-        Recipe bukkitRecipe;
-        if (recipe instanceof SmithingRecipe smithingRecipe) {
+        Recipe bukkitRecipe = null;
+        if (recipe instanceof SmithingRecipe) {
             recipeTypeIndex = 1;
-            bukkitRecipe = smithingRecipe.toBukkitRecipe(
-                    NamespacedKeyUtil.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().getMaterialBasedOn());
-                ItemStack templateItem = new ItemStack(
-                        CollectionUtil.firstOrDefault(smithingRecipe.getTemplates(), DataItemType::empty)
-                                .getMaterialBasedOn());
-                ItemStack additionItem = new ItemStack(
-                        CollectionUtil.firstOrDefault(smithingRecipe.getAdditions(), DataItemType::empty)
-                                .getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
-                        if (iteratingSmithingRecipe.getBase().test(originalItem)
-                                && iteratingSmithingRecipe.getTemplate().test(templateItem)
-                                && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    } else if (iteratingRecipe instanceof SmithingTrimRecipe iteratingSmithingRecipe) {
-                        if (iteratingSmithingRecipe.getBase().test(originalItem)
-                                && iteratingSmithingRecipe.getTemplate().test(templateItem)
-                                && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else if (recipe instanceof ArmorTrimSmithingRecipe smithingRecipe) {
+        } else if (recipe instanceof ArmorTrimSmithingRecipe) {
             recipeTypeIndex = 2;
-            bukkitRecipe = smithingRecipe.toBukkitRecipe(
-                    NamespacedKeyUtil.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smithingRecipe.getOriginal().getMaterialBasedOn());
-                ItemStack templateItem = new ItemStack(
-                        CollectionUtil.firstOrDefault(smithingRecipe.getTemplates(), DataItemType::empty)
-                                .getMaterialBasedOn());
-                ItemStack additionItem = new ItemStack(
-                        CollectionUtil.firstOrDefault(smithingRecipe.getAdditions(), DataItemType::empty)
-                                .getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
-                        if (iteratingSmithingRecipe.getBase().test(originalItem)
-                                && iteratingSmithingRecipe.getTemplate().test(templateItem)
-                                && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    } else if (iteratingRecipe instanceof SmithingTrimRecipe iteratingSmithingRecipe) {
-                        if (iteratingSmithingRecipe.getBase().test(originalItem)
-                                && iteratingSmithingRecipe.getTemplate().test(templateItem)
-                                && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    }
+        }
+        ItemStack originalItem = new ItemStack(recipe.getOriginal().getMaterialBasedOn());
+        ItemStack templateItem = new ItemStack(
+                CollectionUtil.firstOrDefault(recipe.getTemplates(), DataItemType::empty)
+                        .getMaterialBasedOn());
+        ItemStack additionItem = new ItemStack(
+                CollectionUtil.firstOrDefault(recipe.getAdditions(), DataItemType::empty)
+                        .getMaterialBasedOn());
+        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
+            Recipe iteratingRecipe = iterator.next();
+            if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
+                if (iteratingSmithingRecipe.getBase().test(originalItem)
+                        && iteratingSmithingRecipe.getTemplate().test(templateItem)
+                        && iteratingSmithingRecipe.getAddition().test(additionItem)) {
+                    bukkitRecipe = iteratingRecipe;
+                    break;
+                }
+            } else if (iteratingRecipe instanceof SmithingTrimRecipe iteratingSmithingRecipe) {
+                if (iteratingSmithingRecipe.getBase().test(originalItem)
+                        && iteratingSmithingRecipe.getTemplate().test(templateItem)
+                        && iteratingSmithingRecipe.getAddition().test(additionItem)) {
+                    bukkitRecipe = iteratingRecipe;
+                    break;
                 }
             }
-        } else {
-            bukkitRecipe = null;
+        }
+        if (bukkitRecipe == null) {
+            bukkitRecipe = recipe.toBukkitRecipe(
+                    NamespacedKeyUtil.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
+            Bukkit.addRecipe(bukkitRecipe);
         }
         if (bukkitRecipe instanceof Keyed keyed) {
             collidingTable.put(keyed.getKey(), recipe.getKey());
@@ -167,20 +139,21 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
         if (recipe == null)
             return;
         lookupTable.remove(recipe.getKey());
-        Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipe.getKey());
-        if (headers != null) {
-            for (NamespacedKey header : headers) {
-                collidingTable.remove(header, recipe);
-                if (!collidingTable.containsKey(headers)) {
-                    Bukkit.removeRecipe(header);
-                }
-            }
-        }
+        unlinkMap(recipe.getKey());
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 logger.info("unregistered " + recipe.getKey().toString());
+            }
+        }
+    }
+
+    private void unlinkMap(@Nonnull NamespacedKey recipeKey) {
+        NamespacedKey header = collidingTable_revert.remove(recipeKey);
+        if (header != null) {
+            if (collidingTable.remove(header, recipeKey) && !collidingTable.containsKey(header)) {
+                Bukkit.removeRecipe(header);
             }
         }
     }
