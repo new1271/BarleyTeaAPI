@@ -126,7 +126,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     }
 
     @Nonnull
-    public ShapedRecipe toBukkitRecipe(NamespacedKey key) {
+    public ShapedRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         ShapedRecipe result = new ShapedRecipe(key,
                 new ItemStack(getResult().getMaterialBasedOn()));
         HashMap<Material, Character> collectMap = new HashMap<>();

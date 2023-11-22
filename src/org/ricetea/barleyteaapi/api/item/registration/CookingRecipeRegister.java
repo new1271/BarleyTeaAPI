@@ -1,56 +1,28 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.BlastingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.CampfireRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.FurnaceRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmokingRecipe;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-
-public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe> {
+public final class CookingRecipeRegister extends RecipeRegister<BaseCookingRecipe> {
 
     @Nonnull
     private static final Lazy<CookingRecipeRegister> inst = Lazy.create(CookingRecipeRegister::new);
 
-    @Nonnull
-    private final Hashtable<NamespacedKey, BaseCookingRecipe> lookupTable = new Hashtable<>();
-
-    @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Objects
-            .requireNonNull(LinkedHashMultimap.create());
-
-    @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert = Objects
-            .requireNonNull(LinkedHashMultimap.create());
-
-    @Nonnull
-    private final AtomicInteger flowNumber = new AtomicInteger(0);
-
     private CookingRecipeRegister() {
+        super("dummy_cooking_recipe");
     }
 
     @Nonnull
@@ -65,248 +37,63 @@ public final class CookingRecipeRegister implements IRegister<BaseCookingRecipe>
     }
 
     @Override
-    public void register(@Nullable BaseCookingRecipe recipe) {
-        if (recipe == null)
-            return;
-        lookupTable.put(recipe.getKey(), recipe);
-        int recipeTypeIndex = 0;
-        Recipe bukkitRecipe;
-        if (recipe instanceof FurnaceRecipe furnaceRecipe) {
-            recipeTypeIndex = 1;
-            bukkitRecipe = furnaceRecipe
-                    .toBukkitRecipe(
-                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(furnaceRecipe.getOriginal().getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingFurnaceRecipe) {
-                        if (iteratingFurnaceRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
+    @Nullable
+    protected NamespacedKey findDummyRecipeKey(@Nonnull BaseCookingRecipe recipe) {
+        boolean isCampfireRecipe = recipe instanceof CampfireRecipe;
+        boolean isSmokingRecipe = recipe instanceof SmokingRecipe;
+        boolean isBlastingRecipe = recipe instanceof BlastingRecipe;
+        ItemStack originalItem = new ItemStack(recipe.getOriginal().getMaterialBasedOn());
+        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
+            Recipe iteratingRecipe = iterator.next();
+            if (isCampfireRecipe) {
+                if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingRecipe1) {
+                    if (iteratingRecipe1.getInputChoice().test(originalItem)) {
+                        return iteratingRecipe1.getKey();
+                    }
+                }
+            } else {
+                if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingRecipe1) {
+                    if (iteratingRecipe1.getInputChoice().test(originalItem)) {
+                        return iteratingRecipe1.getKey();
+                    }
+                } else {
+                    if (isSmokingRecipe) {
+                        if (iteratingRecipe instanceof org.bukkit.inventory.SmokingRecipe iteratingRecipe1) {
+                            if (iteratingRecipe1.getInputChoice().test(originalItem)) {
+                                return iteratingRecipe1.getKey();
+                            }
+                        }
+                    } else if (isBlastingRecipe) {
+                        if (iteratingRecipe instanceof org.bukkit.inventory.BlastingRecipe iteratingRecipe1) {
+                            if (iteratingRecipe1.getInputChoice().test(originalItem)) {
+                                return iteratingRecipe1.getKey();
+                            }
                         }
                     }
                 }
             }
-        } else if (recipe instanceof SmokingRecipe smokingRecipe) {
-            recipeTypeIndex = 2;
-            bukkitRecipe = smokingRecipe
-                    .toBukkitRecipe(
-                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(smokingRecipe.getOriginal().getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof org.bukkit.inventory.SmokingRecipe iteratingFurnaceRecipe) {
-                        if (iteratingFurnaceRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    } else if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingFurnaceRecipe) {
-                        if (iteratingFurnaceRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else if (recipe instanceof BlastingRecipe blastingRecipe) {
-            recipeTypeIndex = 3;
-            bukkitRecipe = blastingRecipe
-                    .toBukkitRecipe(
-                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(blastingRecipe.getOriginal().getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof org.bukkit.inventory.BlastingRecipe iteratingFurnaceRecipe) {
-                        if (iteratingFurnaceRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    } else if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingFurnaceRecipe) {
-                        if (iteratingFurnaceRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else if (recipe instanceof CampfireRecipe campfireRecipe) {
-            recipeTypeIndex = 4;
-            bukkitRecipe = campfireRecipe
-                    .toBukkitRecipe(
-                            NamespacedKeyUtil.BarleyTeaAPI("dummy_cooking_recipe_" + flowNumber.getAndIncrement()));
-            if (!Bukkit.addRecipe(bukkitRecipe)) {
-                ItemStack originalItem = new ItemStack(campfireRecipe.getOriginal().getMaterialBasedOn());
-                for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
-                    Recipe iteratingRecipe = iterator.next();
-                    if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingCampfireRecipe) {
-                        if (iteratingCampfireRecipe.getInputChoice().test(originalItem)) {
-                            bukkitRecipe = iteratingRecipe;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            bukkitRecipe = null;
         }
-        if (bukkitRecipe instanceof Keyed keyed) {
-            collidingTable.put(keyed.getKey(), recipe.getKey());
-            collidingTable_revert.put(recipe.getKey(), keyed.getKey());
-        }
+        return null;
+    }
+
+    @Override
+    protected void afterRegisterRecipe(@Nonnull BaseCookingRecipe recipe) {
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                switch (recipeTypeIndex) {
-                    case 1:
-                        logger.info("registered " + recipe.getKey().toString() + " as furnace recipe!");
-                        break;
-                    case 2:
-                        logger.info("registered " + recipe.getKey().toString() + " as smoker recipe!");
-                        break;
-                    case 3:
-                        logger.info("registered " + recipe.getKey().toString() + " as blast-furnace recipe!");
-                        break;
-                    case 4:
-                        logger.info("registered " + recipe.getKey().toString() + " as campfire recipe!");
-                        break;
-                    default:
-                        logger.warning(
-                                "registered " + recipe.getKey().toString() + " as unknown-type cooking recipe!");
-                        break;
+                if (recipe instanceof CampfireRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as campfire recipe!");
+                } else if (recipe instanceof SmokingRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as smoker recipe!");
+                } else if (recipe instanceof BlastingRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as blast-furnace recipe!");
+                } else if (recipe instanceof FurnaceRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as furnace recipe!");
+                } else {
+                    logger.info("registered " + recipe.getKey().toString() + " as unknown-type cooking recipe!");
                 }
             }
         }
-    }
-
-    @Override
-    public void unregister(@Nullable BaseCookingRecipe recipe) {
-        if (recipe == null)
-            return;
-        lookupTable.remove(recipe.getKey());
-        Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipe.getKey());
-        if (headers != null) {
-            for (NamespacedKey header : headers) {
-                collidingTable.remove(header, recipe);
-                if (!collidingTable.containsKey(headers)) {
-                    Bukkit.removeRecipe(header);
-                }
-            }
-        }
-        if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                Logger logger = inst.getLogger();
-                logger.info("unregistered " + recipe.getKey().toString());
-            }
-        }
-    }
-
-    @Override
-    public void unregisterAll() {
-        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        lookupTable.clear();
-        collidingTable_revert.clear();
-        collidingTable.keySet().forEach(key -> {
-            if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI)) {
-                Bukkit.removeRecipe(key);
-            }
-        });
-        collidingTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
-        if (logger != null) {
-            for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey().toString());
-            }
-        }
-    }
-
-    @Override
-    public void unregisterAll(@Nullable Predicate<BaseCookingRecipe> predicate) {
-        if (predicate == null)
-            unregisterAll();
-        else {
-            for (BaseCookingRecipe item : listAll(predicate)) {
-                unregister(item);
-            }
-        }
-    }
-
-    @Nullable
-    public BaseCookingRecipe lookup(@Nullable NamespacedKey key) {
-        if (key == null)
-            return null;
-        return lookupTable.get(key);
-    }
-
-    public boolean has(@Nullable NamespacedKey key) {
-        if (key == null)
-            return false;
-        return lookupTable.containsKey(key);
-    }
-
-    public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
-    }
-
-    @Override
-    @Nonnull
-    public Collection<BaseCookingRecipe> listAll() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<BaseCookingRecipe> listAll(@Nullable Predicate<BaseCookingRecipe> predicate) {
-        return predicate == null ? listAll()
-                : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseCookingRecipe> predicate) {
-        return predicate == null ? listAllKeys()
-                : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                                .collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
-    }
-
-    @Nonnull
-    public Collection<BaseCookingRecipe> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
-        return ObjectUtil.letNonNull(
-                collidingTable.get(key).stream().map(this::lookup).collect(Collectors.toUnmodifiableSet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nullable
-    public BaseCookingRecipe findFirst(@Nullable Predicate<BaseCookingRecipe> predicate) {
-        var stream = lookupTable.values().stream();
-        if (predicate != null)
-            stream = stream.filter(predicate);
-        return stream.findFirst().orElse(null);
-    }
-
-    @Override
-    @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<BaseCookingRecipe> predicate) {
-        var stream = lookupTable.entrySet().stream();
-        if (predicate != null)
-            stream = stream.filter(new Filter<>(predicate));
-        return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 }

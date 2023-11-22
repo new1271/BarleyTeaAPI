@@ -18,6 +18,7 @@ public class CampfireRecipe extends BaseCookingRecipe {
         super(key, original, result, experience, cookingTime);
     }
 
+    @Nonnull
     public org.bukkit.inventory.CampfireRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         return new org.bukkit.inventory.CampfireRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
                 getOriginal().getMaterialBasedOn(), getExperience(), getCookingTime());

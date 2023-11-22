@@ -17,7 +17,8 @@ public class SmokingRecipe extends BaseCookingRecipe {
             float experience, int cookingTime) {
         super(key, original, result, experience, cookingTime);
     }
-
+    
+    @Nonnull 
     public org.bukkit.inventory.SmokingRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         return new org.bukkit.inventory.SmokingRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
                 getOriginal().getMaterialBasedOn(), getExperience(), getCookingTime());

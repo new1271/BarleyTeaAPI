@@ -18,6 +18,7 @@ public class BlastingRecipe extends BaseCookingRecipe {
         super(key, original, result, experience, cookingTime);
     }
 
+    @Nonnull
     public org.bukkit.inventory.BlastingRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         return new org.bukkit.inventory.BlastingRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
                 getOriginal().getMaterialBasedOn(), getExperience(), getCookingTime());

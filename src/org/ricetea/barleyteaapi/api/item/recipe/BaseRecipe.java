@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 
@@ -38,4 +39,7 @@ public abstract class BaseRecipe implements Keyed {
     public DataItemType getResult() {
         return result;
     }
+
+    @Nonnull
+    public abstract Recipe toBukkitRecipe(@Nonnull NamespacedKey key);
 }

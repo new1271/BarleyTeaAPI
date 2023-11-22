@@ -1,58 +1,30 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.inventory.SmithingTrimRecipe;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.ArmorTrimSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmithingRecipe;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-
-public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecipe> {
+public final class SmithingRecipeRegister extends RecipeRegister<BaseSmithingRecipe> {
 
     @Nonnull
     private static final Lazy<SmithingRecipeRegister> inst = Lazy.create(SmithingRecipeRegister::new);
 
-    @Nonnull
-    private final Hashtable<NamespacedKey, BaseSmithingRecipe> lookupTable = new Hashtable<>();
-
-    @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Objects
-            .requireNonNull(LinkedHashMultimap.create());
-
-    @Nonnull
-    private final HashMap<NamespacedKey, NamespacedKey> collidingTable_revert = new HashMap<>();
-
-    @Nonnull
-    private final AtomicInteger flowNumber = new AtomicInteger(0);
-
     private SmithingRecipeRegister() {
+        super("dummy_smithing_recipe");
     }
 
     @Nonnull
@@ -67,19 +39,8 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
     }
 
     @Override
-    public void register(@Nullable BaseSmithingRecipe recipe) {
-        if (recipe == null)
-            return;
-        NamespacedKey recipeKey = recipe.getKey();
-        if (lookupTable.put(recipeKey, recipe) != null)
-            unlinkMap(recipeKey);
-        int recipeTypeIndex = 0;
-        Recipe bukkitRecipe = null;
-        if (recipe instanceof SmithingRecipe) {
-            recipeTypeIndex = 1;
-        } else if (recipe instanceof ArmorTrimSmithingRecipe) {
-            recipeTypeIndex = 2;
-        }
+    @Nullable
+    protected NamespacedKey findDummyRecipeKey(@Nonnull BaseSmithingRecipe recipe) {
         ItemStack originalItem = new ItemStack(recipe.getOriginal().getMaterialBasedOn());
         ItemStack templateItem = new ItemStack(
                 CollectionUtil.firstOrDefault(recipe.getTemplates(), DataItemType::empty)
@@ -93,173 +54,33 @@ public final class SmithingRecipeRegister implements IRegister<BaseSmithingRecip
                 if (iteratingSmithingRecipe.getBase().test(originalItem)
                         && iteratingSmithingRecipe.getTemplate().test(templateItem)
                         && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                    bukkitRecipe = iteratingRecipe;
-                    break;
+                    return iteratingSmithingRecipe.getKey();
                 }
             } else if (iteratingRecipe instanceof SmithingTrimRecipe iteratingSmithingRecipe) {
                 if (iteratingSmithingRecipe.getBase().test(originalItem)
                         && iteratingSmithingRecipe.getTemplate().test(templateItem)
                         && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                    bukkitRecipe = iteratingRecipe;
-                    break;
+                    return iteratingSmithingRecipe.getKey();
                 }
             }
         }
-        if (bukkitRecipe == null) {
-            bukkitRecipe = recipe.toBukkitRecipe(
-                    NamespacedKeyUtil.BarleyTeaAPI("dummy_smithing_recipe_" + flowNumber.getAndIncrement()));
-            Bukkit.addRecipe(bukkitRecipe);
-        }
-        if (bukkitRecipe instanceof Keyed keyed) {
-            collidingTable.put(keyed.getKey(), recipe.getKey());
-            collidingTable_revert.put(recipe.getKey(), keyed.getKey());
-        }
+        return null;
+    }
+
+    @Override
+    protected void afterRegisterRecipe(@Nonnull BaseSmithingRecipe recipe) {
         if (BarleyTeaAPI.checkPluginUsable()) {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                switch (recipeTypeIndex) {
-                    case 1:
-                        logger.info("registered " + recipe.getKey().toString() + " as normal smithing recipe!");
-                        break;
-                    case 2:
-                        logger.info("registered " + recipe.getKey().toString() + " as armor-trimming smithing recipe!");
-                        break;
-                    default:
-                        logger.warning(
-                                "registered " + recipe.getKey().toString() + " as unknown-type smithing recipe!");
-                        break;
+                if (recipe instanceof SmithingRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as normal smithing recipe!");
+                } else if (recipe instanceof ArmorTrimSmithingRecipe) {
+                    logger.info("registered " + recipe.getKey().toString() + " as armor-trimming smithing recipe!");
+                } else {
+                    logger.info("registered " + recipe.getKey().toString() + " as unknown-type smithing recipe!");
                 }
             }
         }
-    }
-
-    @Override
-    public void unregister(@Nullable BaseSmithingRecipe recipe) {
-        if (recipe == null)
-            return;
-        lookupTable.remove(recipe.getKey());
-        unlinkMap(recipe.getKey());
-        if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                Logger logger = inst.getLogger();
-                logger.info("unregistered " + recipe.getKey().toString());
-            }
-        }
-    }
-
-    private void unlinkMap(@Nonnull NamespacedKey recipeKey) {
-        NamespacedKey header = collidingTable_revert.remove(recipeKey);
-        if (header != null) {
-            if (collidingTable.remove(header, recipeKey) && !collidingTable.containsKey(header)) {
-                Bukkit.removeRecipe(header);
-            }
-        }
-    }
-
-    @Override
-    public void unregisterAll() {
-        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        lookupTable.clear();
-        collidingTable_revert.clear();
-        collidingTable.keySet().forEach(key -> {
-            if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI)) {
-                Bukkit.removeRecipe(key);
-            }
-        });
-        collidingTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
-        if (logger != null) {
-            for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey().toString());
-            }
-        }
-    }
-
-    @Override
-    public void unregisterAll(@Nullable Predicate<BaseSmithingRecipe> predicate) {
-        if (predicate == null)
-            unregisterAll();
-        else {
-            for (BaseSmithingRecipe item : listAll(predicate)) {
-                unregister(item);
-            }
-        }
-    }
-
-    @Nullable
-    public BaseSmithingRecipe lookup(@Nullable NamespacedKey key) {
-        if (key == null)
-            return null;
-        return lookupTable.get(key);
-    }
-
-    public boolean has(@Nullable NamespacedKey key) {
-        if (key == null)
-            return false;
-        return lookupTable.containsKey(key);
-    }
-
-    public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
-    }
-
-    @Override
-    @Nonnull
-    public Collection<BaseSmithingRecipe> listAll() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<BaseSmithingRecipe> listAll(@Nullable Predicate<BaseSmithingRecipe> predicate) {
-        return predicate == null ? listAll()
-                : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseSmithingRecipe> predicate) {
-        return predicate == null ? listAllKeys()
-                : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                                .collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
-    }
-
-    @Nonnull
-    public Collection<BaseSmithingRecipe> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
-        return ObjectUtil.letNonNull(
-                collidingTable.get(key).stream().map(this::lookup).collect(Collectors.toUnmodifiableSet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nullable
-    public BaseSmithingRecipe findFirst(@Nullable Predicate<BaseSmithingRecipe> predicate) {
-        var stream = lookupTable.values().stream();
-        if (predicate != null)
-            stream = stream.filter(predicate);
-        return stream.findFirst().orElse(null);
-    }
-
-    @Override
-    @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<BaseSmithingRecipe> predicate) {
-        var stream = lookupTable.entrySet().stream();
-        if (predicate != null)
-            stream = stream.filter(new Filter<>(predicate));
-        return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 }
