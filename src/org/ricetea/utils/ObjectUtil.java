@@ -1,17 +1,16 @@
 package org.ricetea.utils;
 
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.ricetea.utils.function.*;
+
 public final class ObjectUtil {
 
     @Nonnull
-    public static <T> T letNonNull(@Nullable T obj, @Nonnull Supplier<T> supplierWhenNull) {
+    public static <T> T letNonNull(@Nullable T obj, @Nonnull NonnullSupplier<T> supplierWhenNull) {
         return obj == null ? Objects.requireNonNull(Objects.requireNonNull(supplierWhenNull).get()) : obj;
     }
 
@@ -45,7 +44,7 @@ public final class ObjectUtil {
     }
 
     @Nullable
-    public static <T, R> R mapWhenNonnull(@Nullable T obj, @Nullable Function<T, R> mapFunction) {
+    public static <T, R> R mapWhenNonnull(@Nullable T obj, @Nullable NonnullFunction<T, R> mapFunction) {
         if (obj == null || mapFunction == null) {
             return null;
         } else {
@@ -53,7 +52,7 @@ public final class ObjectUtil {
         }
     }
 
-    public static <T> void callWhenNonnull(@Nullable T obj, @Nullable Consumer<T> callFunction) {
+    public static <T> void callWhenNonnull(@Nullable T obj, @Nullable NonnullConsumer<T> callFunction) {
         if (obj != null && callFunction != null) {
             callFunction.accept(obj);
         }

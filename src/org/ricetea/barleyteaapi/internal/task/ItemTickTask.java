@@ -68,15 +68,17 @@ public final class ItemTickTask extends AbstractTask {
                             }
                         }
                         ItemStack[] storage = inv.getStorageContents();
-                        for (int i = 0, count = storage.length; i < count; i++) {
-                            final int slot = i;
-                            ItemStack itemStack = inv.getItem(slot);
-                            if (itemStack != null) {
-                                NamespacedKey id = BaseItem.getItemID(itemStack);
-                                if (id != null
-                                        && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                    scheduler.runTask(api, () -> itemTickFeature.handleTickOnInventory(player, inv,
-                                            itemStack, slot));
+                        if (storage != null) {
+                            for (int i = 0, count = storage.length; i < count; i++) {
+                                final int slot = i;
+                                ItemStack itemStack = inv.getItem(slot);
+                                if (itemStack != null) {
+                                    NamespacedKey id = BaseItem.getItemID(itemStack);
+                                    if (id != null
+                                            && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
+                                        scheduler.runTask(api, () -> itemTickFeature.handleTickOnInventory(player, inv,
+                                                itemStack, slot));
+                                    }
                                 }
                             }
                         }

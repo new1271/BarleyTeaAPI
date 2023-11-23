@@ -43,9 +43,8 @@ public abstract class AbstractItemRenderer implements Keyed {
     public static AbstractItemRenderer getLastRenderer(@Nullable ItemStack itemStack) {
         if (itemStack != null && itemStack.hasItemMeta()) {
             ItemMeta meta = itemStack.getItemMeta();
-            String resultString = meta.getPersistentDataContainer().getOrDefault(lastRenderingKey,
-                    PersistentDataType.STRING,
-                    null);
+            String resultString = meta.getPersistentDataContainer().get(lastRenderingKey,
+                    PersistentDataType.STRING);
             if (resultString != null && resultString.contains(":")) {
                 return ItemRendererRegister.getInstance()
                         .lookup(Objects.requireNonNull(NamespacedKey.fromString(resultString)));
@@ -71,6 +70,7 @@ public abstract class AbstractItemRenderer implements Keyed {
         this.key = key;
     }
 
+    @Nonnull
     @Override
     public NamespacedKey getKey() {
         return key;

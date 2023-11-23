@@ -118,7 +118,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     }
 
     @Override
-    public ItemStack apply(ItemStack[] matrix) {
+    public ItemStack apply(@Nonnull ItemStack[] matrix) {
         return getResult().mapLeftOrRight(ItemStack::new, right -> {
             return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
                     itemGiveFeature -> itemGiveFeature.handleItemGive(1));

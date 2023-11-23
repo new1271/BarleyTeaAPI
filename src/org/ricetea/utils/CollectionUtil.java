@@ -2,10 +2,11 @@ package org.ricetea.utils;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.ricetea.utils.function.NonnullSupplier;
 
 public class CollectionUtil {
     private CollectionUtil() {
@@ -24,7 +25,7 @@ public class CollectionUtil {
     }
 
     @Nonnull
-    public static <T> T firstOrDefault(@Nullable Collection<T> collection, @Nonnull Supplier<T> supplier) {
+    public static <T> T firstOrDefault(@Nullable Collection<T> collection, @Nonnull NonnullSupplier<T> supplier) {
         return ObjectUtil.letNonNull(first(collection), supplier);
     }
 
@@ -50,7 +51,7 @@ public class CollectionUtil {
     }
 
     @Nonnull
-    public static <T> T lastOrDefault(@Nullable Collection<T> collection, @Nonnull Supplier<T> supplier) {
+    public static <T> T lastOrDefault(@Nullable Collection<T> collection, @Nonnull NonnullSupplier<T> supplier) {
         return ObjectUtil.letNonNull(last(collection), supplier);
     }
 }

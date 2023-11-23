@@ -166,7 +166,9 @@ public abstract class BaseItem implements Keyed {
 
     protected final void setDefaultAttribute(@Nullable ItemMeta itemMeta, @Nullable Attribute attribute,
             double amount, @Nullable Operation operation, @Nullable EquipmentSlot equipmentSlot) {
-        if (itemMeta != null && getItemID(itemMeta) != null) {
+        if (itemMeta == null || attribute == null || operation == null)
+            return;
+        if (getItemID(itemMeta) != null) {
             itemMeta.removeAttributeModifier(attribute);
             itemMeta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
                     "default modifiers", amount, operation, equipmentSlot));
@@ -232,7 +234,7 @@ public abstract class BaseItem implements Keyed {
                                     : originalRarity;
                             if (!rarity.isSimilar(displayName.style()) &&
                                     (originalRarity == rarity || !originalRarity.isSimilar(displayName.style()))) {
-                                        displayName = displayName.style(Style.empty());
+                                displayName = displayName.style(Style.empty());
                             }
                         }
                     }
@@ -288,9 +290,9 @@ public abstract class BaseItem implements Keyed {
 
     public final boolean isCertainItem(@Nullable ItemStack itemStack) {
         return itemStack != null && itemStack.hasItemMeta()
-                && key.toString()
-                        .equals(itemStack.getItemMeta().getPersistentDataContainer().getOrDefault(
-                                DefaultNamespacedKey, PersistentDataType.STRING, null));
+                && key.toString().equals(
+                        itemStack.getItemMeta().getPersistentDataContainer()
+                                .get(DefaultNamespacedKey, PersistentDataType.STRING));
     }
 
     public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
@@ -350,7 +352,7 @@ public abstract class BaseItem implements Keyed {
             return null;
         NamespacedKey result;
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
         if (namespacedKeyString == null) {
             result = null;
             if (!FallbackNamespacedKeys.isEmpty()) {
@@ -358,7 +360,7 @@ public abstract class BaseItem implements Keyed {
                     var entry = iterator.next();
                     NamespacedKey key = entry.getKey();
                     if (key != null) {
-                        namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+                        namespacedKeyString = container.get(key, PersistentDataType.STRING);
                         if (namespacedKeyString != null) {
                             Function<String, NamespacedKey> function = entry.getValue();
                             result = function == null ? NamespacedKey.fromString(namespacedKeyString)

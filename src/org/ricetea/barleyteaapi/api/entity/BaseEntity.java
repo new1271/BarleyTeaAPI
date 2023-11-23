@@ -87,7 +87,7 @@ public abstract class BaseEntity implements Keyed {
             @Nullable Predicate<T> afterEntityRegistered) {
         if (entity != null) {
             PersistentDataContainer container = entity.getPersistentDataContainer();
-            String previousID = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+            String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
             container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
             if (afterEntityRegistered != null) {
                 if (!afterEntityRegistered.test(entity)) {
@@ -106,8 +106,8 @@ public abstract class BaseEntity implements Keyed {
 
     public final boolean isCertainEntity(@Nullable Entity entity) {
         return entity != null
-                && key.toString().equals(entity.getPersistentDataContainer().getOrDefault(DefaultNamespacedKey,
-                        PersistentDataType.STRING, null));
+                && key.toString().equals(entity.getPersistentDataContainer().get(DefaultNamespacedKey,
+                        PersistentDataType.STRING));
     }
 
     public static void registerEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
@@ -124,7 +124,7 @@ public abstract class BaseEntity implements Keyed {
             return null;
         NamespacedKey result;
         PersistentDataContainer container = entity.getPersistentDataContainer();
-        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
         if (namespacedKeyString == null) {
             result = null;
             if (!FallbackNamespacedKeys.isEmpty()) {
@@ -132,7 +132,7 @@ public abstract class BaseEntity implements Keyed {
                     var entry = iterator.next();
                     NamespacedKey key = entry.getKey();
                     if (key != null) {
-                        namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+                        namespacedKeyString = container.get(key, PersistentDataType.STRING);
                         if (namespacedKeyString != null) {
                             Function<String, NamespacedKey> function = entry.getValue();
                             result = function == null ? NamespacedKey.fromString(namespacedKeyString)

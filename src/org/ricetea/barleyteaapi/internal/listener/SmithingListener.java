@@ -36,8 +36,6 @@ public final class SmithingListener implements Listener {
         if (event == null)
             return;
         SmithingInventory inventory = event.getInventory();
-        if (inventory == null)
-            return;
         Recipe smithingRecipe = inventory.getRecipe();
         if (smithingRecipe == null)
             return;

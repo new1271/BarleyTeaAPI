@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import java.util.function.Function;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -24,17 +22,15 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
     @Nullable
     private final Lazy<DataEntityType> shooterType;
 
-    @SuppressWarnings("null")
     public DataEntityHit(@Nonnull ProjectileHitEvent event) {
         super(event, event.getHitEntity());
         projectileType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
         shooter = ObjectUtil.tryCast(event.getEntity().getShooter(), Entity.class);
         shooterType = ObjectUtil.mapWhenNonnull(shooter,
-                (Function<Entity, Lazy<DataEntityType>>) shooter -> Lazy.create(
+                shooter -> Lazy.create(
                         () -> BaseEntity.getEntityType(shooter)));
     }
-
-    @SuppressWarnings("null")
+    
     @Nonnull
     public Projectile getProjectile() {
         return event.getEntity();

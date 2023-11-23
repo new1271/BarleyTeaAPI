@@ -81,7 +81,7 @@ public abstract class BaseBlock implements Keyed {
             @Nullable Predicate<Block> afterBlockRegistered) {
         if (block != null) {
             PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
-            String previousID = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+            String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
             container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
             if (afterBlockRegistered != null) {
                 if (!afterBlockRegistered.test(block)) {
@@ -106,7 +106,7 @@ public abstract class BaseBlock implements Keyed {
             PersistentDataContainer container = getPersistentDataContainer(block, false);
             if (container != null) {
                 return key.toString()
-                        .equals(container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null));
+                        .equals(container.get(DefaultNamespacedKey, PersistentDataType.STRING));
             }
         }
         return false;
@@ -144,12 +144,12 @@ public abstract class BaseBlock implements Keyed {
     public static NamespacedKey getBlockID(@Nullable PersistentDataContainer container) {
         if (container == null)
             return null;
-        String namespacedKeyString = container.getOrDefault(DefaultNamespacedKey, PersistentDataType.STRING, null);
+        String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
         if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
             for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
                 NamespacedKey key = iterator.next();
                 if (key != null)
-                    namespacedKeyString = container.getOrDefault(key, PersistentDataType.STRING, null);
+                    namespacedKeyString = container.get(key, PersistentDataType.STRING);
             }
         }
         return namespacedKeyString == null ? null

@@ -27,8 +27,7 @@ public class ChunkStorage {
         int y = block.getY();
         int z = block.getZ() & 15;
         NamespacedKey key = NamespacedKeyUtil.BarleyTeaAPI("block." + x + "." + y + "." + z);
-        PersistentDataContainer result = container.getOrDefault(key, PersistentDataType.TAG_CONTAINER,
-                null);
+        PersistentDataContainer result = container.get(key, PersistentDataType.TAG_CONTAINER);
         if (result == null && create) {
             result = Objects.requireNonNull(container.getAdapterContext().newPersistentDataContainer());
             container.set(key, PersistentDataType.TAG_CONTAINER, result);

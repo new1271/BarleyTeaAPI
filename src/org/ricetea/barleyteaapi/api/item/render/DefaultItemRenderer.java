@@ -309,7 +309,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
 
     public @Nullable List<Component> getItemLore(@Nonnull ItemMeta itemMeta) {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-        String loreInJSON = container.getOrDefault(ItemLoreKey, PersistentDataType.STRING, null);
+        String loreInJSON = container.get(ItemLoreKey, PersistentDataType.STRING);
         if (loreInJSON == null)
             return null;
         else {

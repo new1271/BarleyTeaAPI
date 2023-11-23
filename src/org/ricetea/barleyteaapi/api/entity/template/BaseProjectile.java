@@ -47,8 +47,6 @@ public abstract class BaseProjectile extends BaseEntity
         if (world == null)
             return null;
         Projectile entity = (Projectile) world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
-        if (entity == null)
-            return null;
         entity.setShooter(shooter);
         if (tryRegister(entity, this::handleEntitySpawn)) {
             return entity;

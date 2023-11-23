@@ -204,18 +204,20 @@ public final class BarleyTeaAPI extends JavaPlugin {
                                 }
                             }
                             ItemStack[] storage = inv.getStorageContents();
-                            for (int i = 0, count = storage.length; i < count; i++) {
-                                final int slot = i;
-                                ItemStack itemStack = inv.getItem(slot);
-                                if (itemStack != null) {
-                                    NamespacedKey id = BaseItem.getItemID(itemStack);
-                                    if (id != null) {
-                                        if (itemRegister.lookup(
-                                                id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                            try {
-                                                apiLoadItem.handleAPILoaded(itemStack);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
+                            if (storage != null) {
+                                for (int i = 0, count = storage.length; i < count; i++) {
+                                    final int slot = i;
+                                    ItemStack itemStack = inv.getItem(slot);
+                                    if (itemStack != null) {
+                                        NamespacedKey id = BaseItem.getItemID(itemStack);
+                                        if (id != null) {
+                                            if (itemRegister.lookup(
+                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
+                                                try {
+                                                    apiLoadItem.handleAPILoaded(itemStack);
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
                                             }
                                         }
                                     }
@@ -304,17 +306,19 @@ public final class BarleyTeaAPI extends JavaPlugin {
                                 }
                             }
                             ItemStack[] storage = inv.getStorageContents();
-                            for (int i = 0, count = storage.length; i < count; i++) {
-                                ItemStack itemStack = inv.getItem(i);
-                                if (itemStack != null) {
-                                    NamespacedKey id = BaseItem.getItemID(itemStack);
-                                    if (id != null) {
-                                        if (itemRegister.lookup(
-                                                id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                            try {
-                                                apiLoadItem.handleAPIUnloaded(itemStack);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
+                            if (storage != null) {
+                                for (int i = 0, count = storage.length; i < count; i++) {
+                                    ItemStack itemStack = inv.getItem(i);
+                                    if (itemStack != null) {
+                                        NamespacedKey id = BaseItem.getItemID(itemStack);
+                                        if (id != null) {
+                                            if (itemRegister.lookup(
+                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
+                                                try {
+                                                    apiLoadItem.handleAPIUnloaded(itemStack);
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
                                             }
                                         }
                                     }

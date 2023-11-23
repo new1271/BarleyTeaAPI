@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import java.util.function.Function;
-
 import javax.annotation.Nonnull;
 
 import org.bukkit.Material;
@@ -11,8 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.function.NonnullFunction;
 
-public abstract class BaseCookingRecipe extends BaseRecipe implements Function<ItemStack, ItemStack> {
+public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFunction<ItemStack, ItemStack> {
 
     public static final int DefaultCookingTime = 200;
     public static final float DefaultExperience = 0.0f;
@@ -52,7 +51,7 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements Function<I
     public abstract boolean filterAcceptedBlock(@Nonnull Block block);
 
     @Nonnull
-    public ItemStack apply(ItemStack source) {
+    public ItemStack apply(@Nonnull ItemStack source) {
         return ObjectUtil.letNonNull(getResult().mapLeftOrRight(ItemStack::new, right -> {
             return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
                     itemGiveFeature -> itemGiveFeature.handleItemGive(1));

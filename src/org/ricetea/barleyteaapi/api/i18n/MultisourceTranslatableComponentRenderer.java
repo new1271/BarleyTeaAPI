@@ -22,7 +22,7 @@ public class MultisourceTranslatableComponentRenderer extends TranslatableCompon
     }
 
     @Override
-    protected @Nullable MessageFormat translate(final String key, final Locale context) {
+    protected @Nullable MessageFormat translate(final @Nonnull String key, final @Nonnull Locale context) {
         for (Translator source : sources) {
             MessageFormat format = source.translate(key, context);
             if (format != null)
@@ -31,10 +31,9 @@ public class MultisourceTranslatableComponentRenderer extends TranslatableCompon
         return null;
     }
 
-    @SuppressWarnings("null")
     @Override
-    protected @Nonnull Component renderTranslatable(final TranslatableComponent component,
-            final Locale context) {
+    protected @Nonnull Component renderTranslatable(final @Nonnull TranslatableComponent component,
+            final @Nonnull Locale context) {
         Component translated = null;
         for (Translator source : sources) {
             translated = source.translate(component, context);

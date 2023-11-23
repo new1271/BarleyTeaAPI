@@ -99,8 +99,6 @@ public final class CookListener implements Listener {
         if (event == null)
             return;
         Block block = event.getBlock();
-        if (block == null)
-            return;
         Recipe furnaceRecipe = event.getRecipe();
         if (furnaceRecipe instanceof Keyed keyedRecipe) {
             DataItemType itemType = ObjectUtil.letNonNull(
@@ -126,8 +124,6 @@ public final class CookListener implements Listener {
         if (event == null)
             return;
         Block block = event.getBlock();
-        if (block == null)
-            return;
         CampfireRecipe campfireRecipe = event.getRecipe();
         DataItemType itemType = ObjectUtil.letNonNull(
                 ObjectUtil.mapWhenNonnull(event.getSource(), BaseItem::getItemType),

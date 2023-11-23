@@ -34,15 +34,14 @@ public abstract class BaseArrow extends BaseProjectile {
     }
 
     @Nullable
-    public Arrow handleEntitySpawn(@Nullable Location location, @Nullable Vector vector, @Nullable ProjectileSource shooter, float speed, float spread) {
+    public Arrow handleEntitySpawn(@Nullable Location location, @Nullable Vector vector,
+            @Nullable ProjectileSource shooter, float speed, float spread) {
         if (location == null)
             return null;
         World world = location.getWorld();
         if (world == null)
             return null;
-        Arrow entity = world.spawnArrow(location, vector, speed, spread);
-        if (entity == null)
-            return null;
+        Arrow entity = world.spawnArrow(location, vector == null ? new Vector(0, 0, 0) : vector, speed, spread);
         entity.setShooter(shooter);
         if (tryRegister(entity, this::handleEntitySpawn)) {
             return entity;

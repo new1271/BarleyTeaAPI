@@ -29,8 +29,6 @@ public abstract class SpawnableEntity extends BaseEntity
         if (world == null)
             return null;
         Entity entity = world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
-        if (entity == null)
-            return null;
         if (tryRegister(entity, this::handleEntitySpawn)) {
             return entity;
         } else {

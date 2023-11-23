@@ -8,18 +8,7 @@
         "https://json.schemastore.org/bukkit-plugin.json": "src/plugin.yml"
     },
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -javaagent:\"c:\\Users\\User\\.vscode\\extensions\\gabrielbb.vscode-lombok-1.0.1\\server\\lombok.jar\"",
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Xmx4G -Xms256M -Dsun.zip.disableMemoryMapping=true -XX:+IgnoreUnrecognizedVMOptions -Dsun.zip.disableMemoryMapping=true -Xlog:disable -javaagent:\"c:\\Users\\User\\.vscode\\extensions\\gabrielbb.vscode-lombok-1.0.1\\server\\lombok.jar\"",
     "java.codeGeneration.generateComments": true,
-    "java.compile.nullAnalysis.nullable": [
-        "javax.annotation.Nullable",
-        "org.jetbrains.annotations.Nullable",
-        "org.eclipse.jdt.annotation.Nullable",
-        "org.springframework.lang.Nullable"
-    ],
-    "java.compile.nullAnalysis.nonnull": [
-        "javax.annotation.Nonnull",
-        "org.jetbrains.annotations.NotNull",
-        "org.eclipse.jdt.annotation.NonNull",
-        "org.springframework.lang.NonNull"
-    ]
+    "java.settings.url": ".vscode/org.eclipse.jdt.core.prefs"
 }

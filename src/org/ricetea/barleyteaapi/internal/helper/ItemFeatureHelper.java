@@ -34,24 +34,26 @@ public final class ItemFeatureHelper {
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity != null && event != null) {
-            EntityEquipment equipment = entity.getEquipment();
-            boolean isCopy = !(equipment instanceof PlayerInventory);
-            for (EquipmentSlot slot : SLOTS) {
-                if (slot != null) {
-                    try {
-                        ItemStack itemStack = equipment.getItem(slot);
-                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                                dataConstructor);
-                        if (isCopy)
-                            equipment.setItem(slot,
-                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                    true);
-                        if (isCancelled)
-                            return false;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        if (entity == null || event == null)
+            return true;
+        EntityEquipment equipment = entity.getEquipment();
+        if (equipment == null)
+            return true;
+        boolean isCopy = !(equipment instanceof PlayerInventory);
+        for (EquipmentSlot slot : SLOTS) {
+            if (slot != null) {
+                try {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                            dataConstructor);
+                    if (isCopy)
+                        equipment.setItem(slot,
+                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                true);
+                    if (isCancelled)
+                        return false;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -62,24 +64,26 @@ public final class ItemFeatureHelper {
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity != null && event != null) {
-            EntityEquipment equipment = entity.getEquipment();
-            boolean isCopy = !(equipment instanceof PlayerInventory);
-            for (EquipmentSlot slot : SLOTS_JustHands) {
-                if (slot != null) {
-                    try {
-                        ItemStack itemStack = equipment.getItem(slot);
-                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                                dataConstructor);
-                        if (isCopy)
-                            equipment.setItem(slot,
-                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                    true);
-                        if (isCancelled)
-                            return false;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        if (entity == null || event == null)
+            return true;
+        EntityEquipment equipment = entity.getEquipment();
+        if (equipment == null)
+            return true;
+        boolean isCopy = !(equipment instanceof PlayerInventory);
+        for (EquipmentSlot slot : SLOTS_JustHands) {
+            if (slot != null) {
+                try {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                            dataConstructor);
+                    if (isCopy)
+                        equipment.setItem(slot,
+                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                true);
+                    if (isCancelled)
+                        return false;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -90,25 +94,27 @@ public final class ItemFeatureHelper {
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nullable TEvent2 event2,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
-        if (entity != null && event != null) {
-            EntityEquipment equipment = entity.getEquipment();
-            boolean isCopy = !(equipment instanceof PlayerInventory);
-            for (EquipmentSlot slot : SLOTS_JustHands) {
-                if (slot != null) {
-                    try {
-                        ItemStack itemStack = equipment.getItem(slot);
-                        boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
-                                featureFunc,
-                                dataConstructor);
-                        if (isCopy)
-                            equipment.setItem(slot,
-                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                    true);
-                        if (isCancelled)
-                            return false;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        if (entity == null || event == null)
+            return true;
+        EntityEquipment equipment = entity.getEquipment();
+        if (equipment == null)
+            return true;
+        boolean isCopy = !(equipment instanceof PlayerInventory);
+        for (EquipmentSlot slot : SLOTS_JustHands) {
+            if (slot != null) {
+                try {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
+                            featureFunc,
+                            dataConstructor);
+                    if (isCopy)
+                        equipment.setItem(slot,
+                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                true);
+                    if (isCancelled)
+                        return false;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -119,21 +125,23 @@ public final class ItemFeatureHelper {
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity != null && event != null) {
-            EntityEquipment equipment = entity.getEquipment();
-            boolean isCopy = !(equipment instanceof PlayerInventory);
-            for (EquipmentSlot slot : SLOTS) {
-                if (slot != null) {
-                    try {
-                        ItemStack itemStack = equipment.getItem(slot);
-                        doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
-                        if (isCopy)
-                            equipment.setItem(slot,
-                                    itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                    true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        if (entity == null || event == null)
+            return;
+        EntityEquipment equipment = entity.getEquipment();
+        if (equipment == null)
+            return;
+        boolean isCopy = !(equipment instanceof PlayerInventory);
+        for (EquipmentSlot slot : SLOTS) {
+            if (slot != null) {
+                try {
+                    ItemStack itemStack = equipment.getItem(slot);
+                    doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
+                    if (isCopy)
+                        equipment.setItem(slot,
+                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                                true);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
