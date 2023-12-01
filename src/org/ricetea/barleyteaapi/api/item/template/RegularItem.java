@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
@@ -30,31 +29,15 @@ public abstract class RegularItem extends BaseItem
     }
 
     public int getDurabilityDamage(@Nonnull ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta())
-            return 0;
-        ItemMeta meta = itemStack.getItemMeta();
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (container.has(ItemAlternateDamageNamespacedKey)) {
-            Integer damage = container.get(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER);
-            if (damage == null) {
-                container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, 0);
-                damage = 0;
-            }
-            return damage;
-        } else if (meta instanceof Damageable) {
-            Damageable damageable = (Damageable) meta;
-            return damageable.getDamage();
-        }
-        return 0;
+        return getDurabilityDamage0(itemStack);
     }
 
     public void setDurabilityDamage(@Nonnull ItemStack itemStack, int damage) {
+        setDurabilityDamage0(itemStack, damage);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return;
-        PersistentDataContainer container = meta.getPersistentDataContainer();
         if (this instanceof FeatureItemCustomDurability customDurabilityFeature) {
-            container.set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
             if (meta instanceof Damageable damageable) {
                 if (damage == 0) {
                     damageable.setDamage(0);
@@ -74,14 +57,34 @@ public abstract class RegularItem extends BaseItem
                         damageable.setDamage(visualDamage);
                     }
                 }
+                itemStack.setItemMeta(damageable);
             }
-        } else if (meta instanceof Damageable damageable) {
-            damageable.setDamage(damage);
-        } else {
-            return;
+            AbstractItemRenderer.renderItem(itemStack);
         }
+    }
+
+    protected int getDurabilityDamage0(@Nonnull ItemStack itemStack) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null)
+            return 0;
+        if (this instanceof FeatureItemCustomDurability)
+            return meta.getPersistentDataContainer().getOrDefault(ItemAlternateDamageNamespacedKey,
+                    PersistentDataType.INTEGER,
+                    0);
+        else if (meta instanceof Damageable damageable)
+            return damageable.getDamage();
+        return 0;
+    }
+
+    protected void setDurabilityDamage0(@Nonnull ItemStack itemStack, int damage) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null)
+            return;
+        if (this instanceof FeatureItemCustomDurability)
+            meta.getPersistentDataContainer().set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
+        else if (meta instanceof Damageable damageable)
+            damageable.setDamage(damage);
         itemStack.setItemMeta(meta);
-        AbstractItemRenderer.renderItem(itemStack);
     }
 
     @Nullable
