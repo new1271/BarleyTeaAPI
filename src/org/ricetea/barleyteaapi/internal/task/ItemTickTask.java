@@ -61,8 +61,9 @@ public final class ItemTickTask extends AbstractTask {
                                     NamespacedKey id = BaseItem.getItemID(itemStack);
                                     if (id != null
                                             && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                        scheduler.runTask(api, () -> itemTickFeature.handleTickOnEquipment(player, inv,
-                                                itemStack, slot));
+                                        scheduler.scheduleSyncDelayedTask(api,
+                                                () -> itemTickFeature.handleTickOnEquipment(player, inv,
+                                                        itemStack, slot));
                                     }
                                 }
                             }
@@ -76,8 +77,9 @@ public final class ItemTickTask extends AbstractTask {
                                     NamespacedKey id = BaseItem.getItemID(itemStack);
                                     if (id != null
                                             && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                        scheduler.runTask(api, () -> itemTickFeature.handleTickOnInventory(player, inv,
-                                                itemStack, slot));
+                                        scheduler.scheduleSyncDelayedTask(api,
+                                                () -> itemTickFeature.handleTickOnInventory(player, inv,
+                                                        itemStack, slot));
                                     }
                                 }
                             }

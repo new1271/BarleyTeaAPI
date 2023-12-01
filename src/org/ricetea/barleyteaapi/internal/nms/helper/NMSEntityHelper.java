@@ -40,9 +40,15 @@ public final class NMSEntityHelper {
         return nmsDamagee.a(damageSource, damage);
     }
 
+    @Nonnull
     private static DamageSource buildDamageSource(IRegistry<DamageType> registry, ResourceKey<DamageType> key,
             @Nullable net.minecraft.world.entity.Entity attacker, boolean withoutScaling) {
-        Holder<DamageType> holder = registry.f(key);
+        return buildDamageSource(registry, registry.f(key), attacker, withoutScaling);
+    }
+
+    @Nonnull
+    private static DamageSource buildDamageSource(IRegistry<DamageType> registry, Holder<DamageType> holder,
+            @Nullable net.minecraft.world.entity.Entity attacker, boolean withoutScaling) {
         if (withoutScaling) {
             DamageType oldDamageType = holder.a();
             if (!oldDamageType.b().equals(DamageScaling.a))

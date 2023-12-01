@@ -50,8 +50,8 @@ public final class ChunkListener implements Listener {
                     if (id != null) {
                         BaseEntity entityType = register.lookup(id);
                         try {
-                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad entityChunkLoad) {
-                                entityChunkLoad.handleChunkLoaded(entity);
+                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad entityChunkLoad) {
+                                entityChunkLoad.handleEntityLoaded(entity);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -78,8 +78,8 @@ public final class ChunkListener implements Listener {
                     if (id != null) {
                         BaseEntity entityType = register.lookup(id);
                         try {
-                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad entityChunkLoad) {
-                                entityChunkLoad.handleChunkUnloaded(entity);
+                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad entityChunkLoad) {
+                                entityChunkLoad.handleEntityUnloaded(entity);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -106,8 +106,8 @@ public final class ChunkListener implements Listener {
                     if (id != null) {
                         BaseBlock blockType = register.lookup(id);
                         try {
-                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad blockChunkLoad) {
-                                blockChunkLoad.handleChunkLoaded(block);
+                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad blockChunkLoad) {
+                                blockChunkLoad.handleBlockLoaded(block);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -134,8 +134,8 @@ public final class ChunkListener implements Listener {
                     if (id != null) {
                         BaseBlock blockType = register.lookup(id);
                         try {
-                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad blockChunkLoad) {
-                                blockChunkLoad.handleChunkUnloaded(block);
+                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad blockChunkLoad) {
+                                blockChunkLoad.handleBlockUnloaded(block);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

@@ -3,7 +3,6 @@ package org.ricetea.barleyteaapi.api.entity.helper;
 import javax.annotation.Nullable;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
@@ -21,8 +20,7 @@ public final class EntityHelper {
         if (entityType == null)
             return false;
         else {
-            EntityType type = entityType.getEntityTypeForMinecraftBuiltInMob();
-            return type != null && type.equals(EntityType.PLAYER);
+            return entityType.isPlayer();
         }
     }
 

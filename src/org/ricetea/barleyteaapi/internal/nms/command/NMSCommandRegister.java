@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.nms;
+package org.ricetea.barleyteaapi.internal.nms.command;
 
 import java.util.Objects;
 
@@ -27,11 +27,11 @@ public final class NMSCommandRegister {
         return _inst.get();
     }
 
-    public void register(NMSBaseCommand command) {
+    public void register(NMSCommand command) {
         command.register(dispatcher);
     }
 
-    public void unregister(NMSBaseCommand command) {
+    public void unregister(NMSCommand command) {
         command.register(dispatcher);
     }
 

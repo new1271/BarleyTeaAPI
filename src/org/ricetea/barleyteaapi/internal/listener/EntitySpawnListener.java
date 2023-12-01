@@ -14,7 +14,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
@@ -72,10 +72,10 @@ public final class EntitySpawnListener implements Listener {
                     StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
                     switch (result) {
                         case Handled:
-                            if (entityType instanceof FeatureChunkLoad feature) {
+                            if (entityType instanceof FeatureEntityLoad feature) {
                                 Entity entity = event.getEntity();
                                 if (!entity.isDead())
-                                    feature.handleChunkLoaded(entity);
+                                    feature.handleEntityLoaded(entity);
                             }
                             return;
                         case Cancelled:

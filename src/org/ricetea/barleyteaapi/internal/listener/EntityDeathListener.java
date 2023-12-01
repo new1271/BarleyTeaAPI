@@ -5,18 +5,25 @@ import javax.annotation.Nullable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.projectiles.ProjectileSource;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
+import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDeath;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityKill;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDeath;
@@ -26,6 +33,8 @@ import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import net.kyori.adventure.text.TranslatableComponent;
 
 public final class EntityDeathListener implements Listener {
     private static final Lazy<EntityDeathListener> inst = Lazy.create(EntityDeathListener::new);
@@ -77,10 +86,40 @@ public final class EntityDeathListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        EntityFeatureHelper.doFeature(entity, FeatureChunkLoad.class, FeatureChunkLoad::handleChunkUnloaded);
+        EntityFeatureHelper.doFeature(entity, FeatureEntityLoad.class, FeatureEntityLoad::handleEntityUnloaded);
     }
 
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
+        if (event.deathMessage() instanceof TranslatableComponent deathMessage && lastDamageEvent != null) {
+            String key = deathMessage.key().toLowerCase();
+            if (key.startsWith("death.attack.") && key.endsWith(".item")) {
+                Entity damager = lastDamageEvent.getDamager();
+                if (damager instanceof Projectile projectile) {
+                    ProjectileSource source = projectile.getShooter();
+                    if (source instanceof Entity sourceEntity) {
+                        damager = sourceEntity;
+                    }
+                }
+                if (damager instanceof LivingEntity livingDamager) {
+                    EntityEquipment equipment = livingDamager.getEquipment();
+                    if (equipment != null) {
+                        ItemStack weapon = equipment.getItemInMainHand();
+                        if (!weapon.getType().isAir()) {
+                            BaseItem itemType = DataItemType.get(weapon).asCustomItem();
+                            if (itemType != null) {
+                                ItemMeta meta = weapon.getItemMeta();
+                                if (meta != null && meta.displayName() instanceof TranslatableComponent displayName &&
+                                        displayName.key().equalsIgnoreCase(itemType.getNameInTranslateKey())) {
+                                    key = key.substring(0, key.length() - 5);
+                                    event.deathMessage(deathMessage.key(key).args(deathMessage.args().subList(0, 2)));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Entity damager = ObjectUtil.mapWhenNonnull(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
                 lastDamageEvent, FeatureItemHoldEntityKill.class,

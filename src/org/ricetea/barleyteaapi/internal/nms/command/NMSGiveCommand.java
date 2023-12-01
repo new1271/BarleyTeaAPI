@@ -1,16 +1,4 @@
-package org.ricetea.barleyteaapi.internal.nms;
-
-import com.mojang.brigadier.Message;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+package org.ricetea.barleyteaapi.internal.nms.command;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,12 +12,29 @@ import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
-import net.minecraft.commands.CommandDispatcher;
+import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
+import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
+import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
+import org.ricetea.barleyteaapi.internal.nms.util.*;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
+
+import com.mojang.brigadier.Message;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+
 import net.minecraft.commands.CommandListenerWrapper;
 import net.minecraft.commands.ICompletionProvider;
-import net.minecraft.commands.arguments.ArgumentEntity;
-import net.minecraft.commands.arguments.ArgumentMinecraftKeyRegistered;
-import net.minecraft.commands.arguments.ArgumentNBTTag;
 import net.minecraft.core.RegistryBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NBTTagCompound;
@@ -43,70 +48,45 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
-import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
-import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
-import org.ricetea.utils.ObjectUtil;
-
-public final class NMSGiveCommand implements NMSBaseCommand {
+public final class NMSGiveCommand extends NMSRegularCommand {
+	@Nonnull
 	private static final SimpleCommandExceptionType giveFailedMessage = new SimpleCommandExceptionType(
 			(Message) IChatBaseComponent.c("command.failed"));
 
-	private SuggestionProvider suggestionProvider;
+	@Nonnull
+	private static final Lazy<SuggestionProviderImpl> suggestionProvider = Lazy.create(SuggestionProviderImpl::new);
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void register(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
-		LiteralCommandNode<CommandListenerWrapper> mainNode = dispatcher
-				.register((LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("givebarley")
-						.requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)))
-						.then(
-								CommandDispatcher.a("targets", (ArgumentType) ArgumentEntity.d()).then(
-										((RequiredArgumentBuilder) CommandDispatcher
-												.a("item", (ArgumentType) ArgumentMinecraftKeyRegistered.a())
-												.suggests(suggestionProvider = new SuggestionProvider())
-												// /givebarley <targets> <item>
-												.executes(
-														commandcontext -> command(
-																(CommandListenerWrapper) commandcontext.getSource(),
-																ArgumentEntity.f(commandcontext, "targets"),
-																ArgumentMinecraftKeyRegistered.e(commandcontext,
-																		"item"),
-																1,
-																new NBTTagCompound())))
-												// /givebarley <targets> <item> <count>
-												.then(((RequiredArgumentBuilder) CommandDispatcher
-														.a("count", (ArgumentType) IntegerArgumentType.integer(1))
-														.executes(commandcontext -> command(
-																(CommandListenerWrapper) commandcontext.getSource(),
-																ArgumentEntity.f(commandcontext, "targets"),
-																ArgumentMinecraftKeyRegistered.e(commandcontext,
-																		"item"),
-																IntegerArgumentType.getInteger(commandcontext, "count"),
-																new NBTTagCompound())))
-														// /givebarley <targets> <item> <count> [nbt]
-														.then(CommandDispatcher
-																.a("nbt", (ArgumentType) ArgumentNBTTag.a())
-																.executes(commandcontext -> command(
-																		(CommandListenerWrapper) commandcontext
-																				.getSource(),
-																		ArgumentEntity.f(commandcontext, "targets"),
-																		ArgumentMinecraftKeyRegistered.e(commandcontext,
-																				"item"),
-																		IntegerArgumentType.getInteger(commandcontext,
-																				"count"),
-																		ArgumentNBTTag.a(commandcontext, "nbt"))))))));
-		dispatcher.register(
-				(LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("give2")
-						.requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
-		dispatcher.register(
-				(LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("giveb")
-						.requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
+	public NMSGiveCommand() {
+		super(NamespacedKeyUtil.BarleyTeaAPI("givebarley"), NamespacedKeyUtil.BarleyTeaAPI("give2"));
 	}
 
-	private int command(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey itemKey,
+	@Override
+	public LiteralArgumentBuilder<CommandListenerWrapper> prepareCommand(
+			@Nonnull LiteralArgumentBuilder<CommandListenerWrapper> builder) {
+		return builder.requires(NMSCommandUtil::needOp)
+				.then(NMSCommandUtil.argument("targets", NMSCommandArgument.selectPlayers())
+						.then(NMSCommandUtil.argument("item", NMSCommandArgument.selectMinecraftKey())
+								.suggests(suggestionProvider.get())
+								.executes(context -> execute(context.getSource(),
+										NMSCommandArgument.decodePlayerArgumentMultiple(context, "targets"),
+										NMSCommandArgument.decodeMinecraftKey(context, "item"), 1,
+										new NBTTagCompound()))
+								.then(NMSCommandUtil.argument("count", IntegerArgumentType.integer(1))
+										.executes(context -> execute(context.getSource(),
+												NMSCommandArgument.decodePlayerArgumentMultiple(context, "targets"),
+												NMSCommandArgument.decodeMinecraftKey(context, "item"),
+												IntegerArgumentType.getInteger(context, "count"),
+												new NBTTagCompound()))
+										.then(NMSCommandUtil.argument("nbt", NMSCommandArgument.selectNBTTag())
+												.executes(context -> execute(context.getSource(),
+														NMSCommandArgument.decodePlayerArgumentMultiple(context,
+																"targets"),
+														NMSCommandArgument.decodeMinecraftKey(context, "item"),
+														IntegerArgumentType.getInteger(context, "count"),
+														NMSCommandArgument.decodeNBTTag(context, "nbt")))))));
+	}
+
+	private int execute(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey itemKey,
 			int count, NBTTagCompound nbt) throws CommandSyntaxException {
 		try {
 			String namespace = itemKey.b();
@@ -206,26 +186,20 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 		}
 	}
 
-	public void unregister(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
-		var root = dispatcher.getRoot();
-		root.removeCommand("givebarley");
-		root.removeCommand("give2");
-		root.removeCommand("giveb");
+	@Override
+	public void updateSuggestions() {
+		ObjectUtil.callWhenNonnull(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
 	}
 
-	public void update() {
-		ObjectUtil.callWhenNonnull(suggestionProvider, SuggestionProvider::updateRegisterList);
-	}
-
-	public static class SuggestionProvider
-			implements com.mojang.brigadier.suggestion.SuggestionProvider<ICompletionProvider>, Iterable<MinecraftKey> {
+	private static class SuggestionProviderImpl
+			implements SuggestionProvider<CommandListenerWrapper>, Iterable<MinecraftKey> {
 
 		@Nonnull
 		private final List<MinecraftKey> builtinKeys;
 		@Nullable
 		private List<MinecraftKey> customKeys;
 
-		public SuggestionProvider() {
+		public SuggestionProviderImpl() {
 			RegistryBlocks<Item> itemRegistries = BuiltInRegistries.i;
 			builtinKeys = ObjectUtil.letNonNull(
 					itemRegistries.s().map(itemType -> itemRegistries.b(itemType)).toList(),
@@ -233,7 +207,7 @@ public final class NMSGiveCommand implements NMSBaseCommand {
 		}
 
 		@Override
-		public CompletableFuture<Suggestions> getSuggestions(CommandContext<ICompletionProvider> provider,
+		public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandListenerWrapper> provider,
 				SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
 			String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
 			if (!lowerCasedRemaining.contains("/")) {

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.nms;
+package org.ricetea.barleyteaapi.internal.nms.util;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import org.ricetea.utils.ObjectUtil;
 
 import net.minecraft.resources.MinecraftKey;
 
-public class MinecraftKeyCombinedIterator implements Iterator<MinecraftKey> {
+public final class MinecraftKeyCombinedIterator implements Iterator<MinecraftKey> {
 
     boolean isInBuiltin = true;
     @Nonnull

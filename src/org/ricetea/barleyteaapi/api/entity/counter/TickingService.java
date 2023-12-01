@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
-import org.ricetea.utils.CachedList;
+import org.ricetea.utils.CachedSet;
 import org.ricetea.utils.Lazy;
 
 public final class TickingService {
@@ -72,7 +72,7 @@ public final class TickingService {
         private static final Lazy<SyncGlobalTickingTask> _inst = Lazy.create(SyncGlobalTickingTask::new);
 
         @Nonnull
-        private final ConcurrentHashMap<Entity, CachedList<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<Entity, CachedSet<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
 
         private SyncGlobalTickingTask() {
             taskID = 0;
@@ -85,14 +85,14 @@ public final class TickingService {
 
         @Override
         public void run() {
-            for (Iterator<Entry<Entity, CachedList<AbstractTickCounter>>> iterator = entityMap.entrySet()
+            for (Iterator<Entry<Entity, CachedSet<AbstractTickCounter>>> iterator = entityMap.entrySet()
                     .iterator(); iterator.hasNext();) {
-                Entry<Entity, CachedList<AbstractTickCounter>> entry = iterator.next();
+                Entry<Entity, CachedSet<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
                 if (entity == null || entity.isDead()) {
                     iterator.remove();
                 } else {
-                    CachedList<AbstractTickCounter> list = entry.getValue();
+                    CachedSet<AbstractTickCounter> list = entry.getValue();
                     if (list != null) {
                         AbstractTickCounter[] array;
                         synchronized (list) {
@@ -113,9 +113,9 @@ public final class TickingService {
         }
 
         public void addEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {
-            CachedList<AbstractTickCounter> list = entityMap.get(entity);
+            CachedSet<AbstractTickCounter> list = entityMap.get(entity);
             if (list == null) {
-                list = new CachedList<>(AbstractTickCounter.class, 1);
+                list = new CachedSet<>(AbstractTickCounter.class, 1);
                 entityMap.put(entity, list);
             }
             synchronized (list) {
@@ -126,7 +126,7 @@ public final class TickingService {
         }
 
         public void removeEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {
-            CachedList<AbstractTickCounter> list = entityMap.get(entity);
+            CachedSet<AbstractTickCounter> list = entityMap.get(entity);
             if (list != null) {
                 synchronized (list) {
                     list.remove(counter);
@@ -159,7 +159,7 @@ public final class TickingService {
         private static final Lazy<AsyncGlobalTickingTask> _inst = Lazy.create(AsyncGlobalTickingTask::new);
 
         @Nonnull
-        private final ConcurrentHashMap<Entity, CachedList<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<Entity, CachedSet<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
 
         private AsyncGlobalTickingTask() {
             super(50, 0);
@@ -172,14 +172,14 @@ public final class TickingService {
 
         @Override
         public void runInternal() {
-            for (Iterator<Entry<Entity, CachedList<AbstractTickCounter>>> iterator = entityMap.entrySet()
+            for (Iterator<Entry<Entity, CachedSet<AbstractTickCounter>>> iterator = entityMap.entrySet()
                     .iterator(); iterator.hasNext();) {
-                Entry<Entity, CachedList<AbstractTickCounter>> entry = iterator.next();
+                Entry<Entity, CachedSet<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
                 if (entity == null || entity.isDead()) {
                     iterator.remove();
                 } else {
-                    CachedList<AbstractTickCounter> list = entry.getValue();
+                    CachedSet<AbstractTickCounter> list = entry.getValue();
                     if (list == null)
                         iterator.remove();
                     else {
@@ -202,9 +202,9 @@ public final class TickingService {
         }
 
         public void addEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {
-            CachedList<AbstractTickCounter> list = entityMap.get(entity);
+            CachedSet<AbstractTickCounter> list = entityMap.get(entity);
             if (list == null) {
-                list = new CachedList<>(AbstractTickCounter.class, 1);
+                list = new CachedSet<>(AbstractTickCounter.class, 1);
                 entityMap.put(entity, list);
             }
             list.add(counter);
@@ -214,7 +214,7 @@ public final class TickingService {
         }
 
         public void removeEntityWithCounter(@Nonnull Entity entity, @Nonnull AbstractTickCounter counter) {
-            CachedList<AbstractTickCounter> list = entityMap.get(entity);
+            CachedSet<AbstractTickCounter> list = entityMap.get(entity);
             if (list != null) {
                 list.remove(counter);
                 counter.cleanCounter(entity);

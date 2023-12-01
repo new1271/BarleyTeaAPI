@@ -137,11 +137,12 @@ public final class PlayerEventListener implements Listener {
                         int visualDamage = damageable.getDamage();
                         damageable.setDamage(repairAmount);
                         itemStack.setItemMeta(damageable);
-                        Bukkit.getScheduler().runTask(BarleyTeaAPI.getInstance(), () -> {
-                            Damageable _damageable = (Damageable) itemStack.getItemMeta();
-                            _damageable.setDamage(visualDamage);
-                            itemStack.setItemMeta(_damageable);
-                        });
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
+                                () -> {
+                                    Damageable _damageable = (Damageable) itemStack.getItemMeta();
+                                    _damageable.setDamage(visualDamage);
+                                    itemStack.setItemMeta(_damageable);
+                                });
                     }
                 } else {
                     if (baseItem instanceof FeatureItemDamage itemDamageFeature) {

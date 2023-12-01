@@ -25,7 +25,7 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockEntityChange;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockFalling;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByEntityExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByEntity;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockEntityChange;
@@ -140,9 +140,9 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                     if (baseBlock instanceof FeatureBlockTick) {
                                         BlockTickTask.getInstance().removeBlock(block);
                                     }
-                                    if (baseBlock instanceof FeatureChunkLoad feature) {
+                                    if (baseBlock instanceof FeatureBlockLoad feature) {
                                         try {
-                                            feature.handleChunkUnloaded(block);
+                                            feature.handleBlockUnloaded(block);
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
@@ -180,9 +180,9 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                         if (baseBlock instanceof FeatureBlockTick) {
                                             BlockTickTask.getInstance().addBlock(block);
                                         }
-                                        if (baseBlock instanceof FeatureChunkLoad feature) {
+                                        if (baseBlock instanceof FeatureBlockLoad feature) {
                                             try {
-                                                feature.handleChunkLoaded(block);
+                                                feature.handleBlockLoaded(block);
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
@@ -214,9 +214,9 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 if (baseBlock instanceof FeatureBlockTick) {
                                     BlockTickTask.getInstance().removeBlock(block);
                                 }
-                                if (baseBlock instanceof FeatureChunkLoad feature) {
+                                if (baseBlock instanceof FeatureBlockLoad feature) {
                                     try {
-                                        feature.handleChunkUnloaded(block);
+                                        feature.handleBlockUnloaded(block);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }

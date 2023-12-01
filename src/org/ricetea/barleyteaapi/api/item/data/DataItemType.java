@@ -1,7 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.data;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,7 +24,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     private static final DataItemType EMPTY = create(Material.AIR);
 
     @Nonnull
-    private static final HashMap<Material, DataItemType> vanillaMaterialMap = new HashMap<>();
+    private static final Hashtable<Material, DataItemType> vanillaMaterialMap = new Hashtable<>();
 
     @Nonnull
     public static DataItemType empty() {
@@ -97,7 +97,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     //This method should be used internally
     @Deprecated
     @Nonnull
-    private static DataItemType create(Material type) {
+    private static DataItemType create(@Nonnull Material type) {
         return new DataItemType(type, null);
     }
 

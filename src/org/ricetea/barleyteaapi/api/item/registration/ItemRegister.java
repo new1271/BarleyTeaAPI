@@ -17,7 +17,7 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
-import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
+import org.ricetea.barleyteaapi.internal.nms.command.NMSRegularCommand;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -56,7 +56,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + item.getKey().toString() + " as item!");
                 if (item instanceof FeatureCommandGive) {
-                    ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
+                    ObjectUtil.callWhenNonnull(inst.giveCommand, NMSRegularCommand::updateSuggestions);
                 }
                 if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
                     ItemTickTask.getInstance().start();
@@ -66,15 +66,14 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     public void unregister(@Nullable BaseItem item) {
-        if (item == null)
+        if (item == null || !lookupTable.remove(item.getKey(), item))
             return;
-        lookupTable.remove(item.getKey());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + item.getKey().toString());
             if (item instanceof FeatureCommandGive) {
-                ObjectUtil.callWhenNonnull(inst.giveCommand, NMSBaseCommand::update);
+                ObjectUtil.callWhenNonnull(inst.giveCommand, NMSRegularCommand::updateSuggestions);
             }
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();

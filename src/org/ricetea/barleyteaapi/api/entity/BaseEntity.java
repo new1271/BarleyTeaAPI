@@ -22,9 +22,9 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
-import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Lazy;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -40,10 +40,14 @@ public abstract class BaseEntity implements Keyed {
     private final NamespacedKey key;
     @Nonnull
     private final EntityType entityTypeBasedOn;
+    @Nonnull
+    private final Lazy<DataEntityType> lazyType;
 
+    @SuppressWarnings("deprecation")
     public BaseEntity(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
         this.key = key;
         this.entityTypeBasedOn = entityTypeBasedOn;
+        lazyType = Lazy.create(() -> DataEntityType.create(this));
     }
 
     @Nonnull
@@ -64,6 +68,11 @@ public abstract class BaseEntity implements Keyed {
     @Nonnull
     public final EntityType getEntityTypeBasedOn() {
         return entityTypeBasedOn;
+    }
+
+    @Nonnull
+    public final DataEntityType getType() {
+        return lazyType.get();
     }
 
     public final void register(@Nullable Entity entity) {
@@ -169,26 +178,12 @@ public abstract class BaseEntity implements Keyed {
 
     @Nonnull
     public static DataEntityType getEntityType(@Nonnull Entity entity) {
-        NamespacedKey entityTypeID = BaseEntity.getEntityID(entity);
-        if (entityTypeID == null) {
-            return DataEntityType.create(entity.getType());
-        } else {
-            EntityRegister register = EntityRegister.getInstanceUnsafe();
-            if (register == null) {
-                return DataEntityType.create(entity.getType());
-            } else {
-                BaseEntity baseEntity = register.lookup(entityTypeID);
-                if (baseEntity == null)
-                    return DataEntityType.create(entity.getType());
-                else
-                    return DataEntityType.create(baseEntity);
-            }
-        }
+        return DataEntityType.get(entity);
     }
 
     @Nonnull
     public final Component getDefaultNameComponent() {
-        return Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
+        return Component.translatable(getNameInTranslateKey());
     }
 
     @Deprecated
@@ -284,7 +279,7 @@ public abstract class BaseEntity implements Keyed {
 
     protected void setHealth(@Nullable Entity entity, double health) {
         if (entity instanceof LivingEntity livingEntity) {
-            livingEntity.setHealth(Math.max(Math.min(livingEntity.getHealth(), getMaxHealth(livingEntity)), 0));
+            livingEntity.setHealth(Math.max(Math.min(health, getMaxHealth(livingEntity)), 0));
         }
     }
 

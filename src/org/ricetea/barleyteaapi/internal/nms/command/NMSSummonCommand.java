@@ -1,16 +1,13 @@
-package org.ricetea.barleyteaapi.internal.nms;
+package org.ricetea.barleyteaapi.internal.nms.command;
 
 import com.mojang.brigadier.Message;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -22,12 +19,8 @@ import javax.annotation.Nullable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.CommandListenerWrapper;
 import net.minecraft.commands.ICompletionProvider;
-import net.minecraft.commands.arguments.ArgumentMinecraftKeyRegistered;
-import net.minecraft.commands.arguments.ArgumentNBTTag;
-import net.minecraft.commands.arguments.coordinates.ArgumentVec3;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.RegistryBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -45,62 +38,56 @@ import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.phys.Vec3D;
 
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureChunkLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.nms.util.*;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-public final class NMSSummonCommand implements NMSBaseCommand {
+public final class NMSSummonCommand extends NMSRegularCommand {
+    @Nonnull
     private static final SimpleCommandExceptionType summonFailedMessage = new SimpleCommandExceptionType(
             (Message) IChatBaseComponent.c("commands.summon.failed"));
 
+    @Nonnull
     private static final SimpleCommandExceptionType summonFailedWithPositionMessage = new SimpleCommandExceptionType(
             (Message) IChatBaseComponent.c("commands.summon.invalidPosition"));
 
-    private SuggestionProvider suggestionProvider;
+    @Nonnull
+    private final Lazy<SuggestionProviderImpl> suggestionProvider = Lazy.create(SuggestionProviderImpl::new);
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void register(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
-        LiteralCommandNode<CommandListenerWrapper> mainNode = dispatcher
-                .register((LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summonbarley")
-                        .requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)))
-                        .then(
-                                ((RequiredArgumentBuilder) CommandDispatcher
-                                        .a("entity", (ArgumentType) ArgumentMinecraftKeyRegistered.a())
-                                        .suggests(suggestionProvider = new SuggestionProvider())
-                                        // /summonbarley <entity>
-                                        .executes(
-                                                commandcontext -> command(
-                                                        (CommandListenerWrapper) commandcontext.getSource(),
-                                                        ArgumentMinecraftKeyRegistered.e(commandcontext, "entity"),
-                                                        ((CommandListenerWrapper) commandcontext.getSource()).d(),
-                                                        new NBTTagCompound(), true)))
-                                        // /summonbarley <entity> <pos>
-                                        .then(((RequiredArgumentBuilder) CommandDispatcher
-                                                .a("pos", (ArgumentType) ArgumentVec3.a())
-                                                .executes(commandcontext -> command(
-                                                        (CommandListenerWrapper) commandcontext.getSource(),
-                                                        ArgumentMinecraftKeyRegistered.e(commandcontext, "entity"),
-                                                        ArgumentVec3.a(commandcontext, "pos"),
-                                                        new NBTTagCompound(), true)))
-                                                // /summonbarley <entity> <pos> [nbt]
-                                                .then(CommandDispatcher.a("nbt", (ArgumentType) ArgumentNBTTag.a())
-                                                        .executes(commandcontext -> command(
-                                                                (CommandListenerWrapper) commandcontext.getSource(),
-                                                                ArgumentMinecraftKeyRegistered.e(commandcontext,
-                                                                        "entity"),
-                                                                ArgumentVec3.a(commandcontext, "pos"),
-                                                                ArgumentNBTTag.a(commandcontext, "nbt"), false))))));
-        dispatcher.register(
-                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summon2")
-                        .requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
-        dispatcher.register(
-                (LiteralArgumentBuilder) ((LiteralArgumentBuilder) CommandDispatcher.a("summonb")
-                        .requires(commandlistenerwrapper -> commandlistenerwrapper.c(2)).redirect(mainNode)));
+    public NMSSummonCommand() {
+        super(NamespacedKeyUtil.BarleyTeaAPI("summonbarley"), NamespacedKeyUtil.BarleyTeaAPI("summon2"));
     }
 
-    private int command(CommandListenerWrapper source, MinecraftKey entityKey, Vec3D pos, NBTTagCompound nbt,
+    @Override
+    public LiteralArgumentBuilder<CommandListenerWrapper> prepareCommand(
+            @Nonnull LiteralArgumentBuilder<CommandListenerWrapper> builder) {
+        return builder.requires(NMSCommandUtil::needOp)
+                .then(NMSCommandUtil.argument("entity", NMSCommandArgument.selectMinecraftKey())
+                        .suggests(suggestionProvider.get())
+                        .executes(context -> execute(context.getSource(),
+                                NMSCommandArgument.decodeMinecraftKey(context, "entity"),
+                                context.getSource().d(), new NBTTagCompound(), true))
+                        .then(NMSCommandUtil.argument("pos", NMSCommandArgument.selectVector3D())
+                                .executes(context -> execute(context.getSource(),
+                                        NMSCommandArgument.decodeMinecraftKey(context, "entity"),
+                                        NMSCommandArgument.decodeVector3D(context, "pos"),
+                                        new NBTTagCompound(), true))
+                                .then(NMSCommandUtil.argument("nbt", NMSCommandArgument.selectNBTTag())
+                                        .executes(context -> execute(context.getSource(),
+                                                NMSCommandArgument.decodeMinecraftKey(context, "entity"),
+                                                NMSCommandArgument.decodeVector3D(context, "pos"),
+                                                NMSCommandArgument.decodeNBTTag(context, "nbt"),
+                                                false)))));
+    }
+
+    private int execute(CommandListenerWrapper source, MinecraftKey entityKey, Vec3D pos, NBTTagCompound nbt,
             boolean initialize) throws CommandSyntaxException {
         try {
             BlockPosition blockposition = BlockPosition.a(pos);
@@ -154,10 +141,12 @@ public final class NMSSummonCommand implements NMSBaseCommand {
                                 _entity -> _entity != null
                                         && summonEntity.handleCommandSummon(
                                                 new DataCommandSummon(_entity, nbt.toString())))) {
-                            if (baseEntity instanceof FeatureChunkLoad feature && !bukkitEntity.isDead()) {
-                                feature.handleChunkLoaded(bukkitEntity);
+                            if (baseEntity instanceof FeatureEntityLoad feature && !bukkitEntity.isDead()) {
+                                feature.handleEntityLoaded(bukkitEntity);
                             }
-
+                            if (baseEntity instanceof FeatureEntityTick) {
+                                EntityTickTask.getInstance().addEntity(bukkitEntity);
+                            }
                         } else {
                             bukkitEntity.remove();
                             throw summonFailedMessage.create();
@@ -180,26 +169,20 @@ public final class NMSSummonCommand implements NMSBaseCommand {
         }
     }
 
-    public void unregister(com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher) {
-        var root = dispatcher.getRoot();
-        root.removeCommand("summonbarley");
-        root.removeCommand("summon2");
-        root.removeCommand("summonb");
+    @Override
+    public void updateSuggestions() {
+        ObjectUtil.callWhenNonnull(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
     }
 
-    public void update() {
-        ObjectUtil.callWhenNonnull(suggestionProvider, SuggestionProvider::updateRegisterList);
-    }
-
-    public static class SuggestionProvider
-            implements com.mojang.brigadier.suggestion.SuggestionProvider<ICompletionProvider>, Iterable<MinecraftKey> {
+    public static class SuggestionProviderImpl
+            implements SuggestionProvider<CommandListenerWrapper>, Iterable<MinecraftKey> {
 
         @Nonnull
         private final List<MinecraftKey> builtinKeys;
         @Nullable
         private List<MinecraftKey> customKeys;
 
-        public SuggestionProvider() {
+        public SuggestionProviderImpl() {
             RegistryBlocks<EntityTypes<?>> entityRegistries = BuiltInRegistries.h;
             builtinKeys = ObjectUtil.letNonNull(
                     entityRegistries.s().filter(EntityTypes::c).map(entityType -> entityRegistries.b(entityType))
@@ -208,7 +191,7 @@ public final class NMSSummonCommand implements NMSBaseCommand {
         }
 
         @Override
-        public CompletableFuture<Suggestions> getSuggestions(CommandContext<ICompletionProvider> provider,
+        public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandListenerWrapper> provider,
                 SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
             String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
             if (!lowerCasedRemaining.contains("/")) {

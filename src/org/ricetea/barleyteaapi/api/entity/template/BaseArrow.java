@@ -11,6 +11,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 public abstract class BaseArrow extends BaseProjectile {
 
@@ -44,6 +47,12 @@ public abstract class BaseArrow extends BaseProjectile {
         Arrow entity = world.spawnArrow(location, vector == null ? new Vector(0, 0, 0) : vector, speed, spread);
         entity.setShooter(shooter);
         if (tryRegister(entity, this::handleEntitySpawn)) {
+            if (this instanceof FeatureEntityLoad feature) {
+                feature.handleEntityLoaded(entity);
+            }
+            if (this instanceof FeatureEntityTick feature) {
+                EntityTickTask.getInstance().addEntity(entity);
+            }
             return entity;
         } else {
             entity.remove();

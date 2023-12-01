@@ -197,7 +197,7 @@ public abstract class BaseItem implements Keyed {
 
     @Nonnull
     public final Component getDefaultNameComponent(boolean isRarityStyled) {
-        Component component = Objects.requireNonNull(Component.translatable(getNameInTranslateKey(), getDefaultName()));
+        Component component = Objects.requireNonNull(Component.translatable(getNameInTranslateKey()));
         if (isRarityStyled)
             component = rarity.apply(component);
         return component;

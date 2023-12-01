@@ -16,9 +16,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Consumer;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Lazy;
 
 public abstract class BaseBlock implements Keyed {
     @Nonnull
@@ -29,10 +29,14 @@ public abstract class BaseBlock implements Keyed {
     private final NamespacedKey key;
     @Nonnull
     private final Material blockTypeBasedOn;
+    @Nonnull
+    private final Lazy<DataBlockType> typeLazy;
 
+    @SuppressWarnings("deprecation")
     public BaseBlock(@Nonnull NamespacedKey key, @Nonnull Material blockTypeBasedOn) {
         this.key = key;
         this.blockTypeBasedOn = blockTypeBasedOn;
+        this.typeLazy = Lazy.createInThreadSafe(() -> DataBlockType.create(this));
     }
 
     @Nonnull
@@ -53,6 +57,11 @@ public abstract class BaseBlock implements Keyed {
     @Nonnull
     public final Material getBlockTypeBasedOn() {
         return blockTypeBasedOn;
+    }
+
+    @Nonnull
+    public final DataBlockType getType() {
+        return typeLazy.get();
     }
 
     @Nullable
@@ -162,21 +171,7 @@ public abstract class BaseBlock implements Keyed {
 
     @Nonnull
     public static DataBlockType getBlockType(@Nonnull Block block) {
-        NamespacedKey blockTypeID = BaseBlock.getBlockID(block);
-        if (blockTypeID == null) {
-            return DataBlockType.create(block.getType());
-        } else {
-            BlockRegister register = BlockRegister.getInstanceUnsafe();
-            if (register == null) {
-                return DataBlockType.create(block.getType());
-            } else {
-                BaseBlock baseBlock = register.lookup(blockTypeID);
-                if (baseBlock == null)
-                    return DataBlockType.create(block.getType());
-                else
-                    return DataBlockType.create(baseBlock);
-            }
-        }
+        return DataBlockType.get(block);
     }
 
     public boolean equals(Object obj) {

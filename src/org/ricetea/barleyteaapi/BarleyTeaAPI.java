@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -8,37 +7,21 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
-import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
-import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
-import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.listener.*;
-import org.ricetea.barleyteaapi.internal.nms.NMSBaseCommand;
-import org.ricetea.barleyteaapi.internal.nms.NMSCommandRegister;
-import org.ricetea.barleyteaapi.internal.nms.NMSGiveCommand;
-import org.ricetea.barleyteaapi.internal.nms.NMSSummonCommand;
+import org.ricetea.barleyteaapi.internal.nms.command.NMSCommandRegister;
+import org.ricetea.barleyteaapi.internal.nms.command.NMSGiveCommand;
+import org.ricetea.barleyteaapi.internal.nms.command.NMSRegularCommand;
+import org.ricetea.barleyteaapi.internal.nms.command.NMSSummonCommand;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
@@ -47,7 +30,7 @@ import org.ricetea.utils.ObjectUtil;
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
     public boolean hasExcellentEnchants;
-    public NMSBaseCommand summonCommand, giveCommand;
+    public NMSRegularCommand summonCommand, giveCommand;
 
     @Nonnull
     public static BarleyTeaAPI getInstance() {
@@ -82,11 +65,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         commandRegister.register(summonCommand = new NMSSummonCommand());
         logger.info("initializing API...");
         DefaultItemRenderer.getInstance();
-        try {
-            announceAPILoaded();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }
@@ -101,6 +79,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);
         pluginManager.registerEvents(EntityDeathListener.getInstance(), this);
         pluginManager.registerEvents(EntityMountListener.getInstance(), this);
+        pluginManager.registerEvents(EntityMoveListener.getInstance(), this);
         pluginManager.registerEvents(EntitySpawnListener.getInstance(), this);
         pluginManager.registerEvents(EntityTameListener.getInstance(), this);
         pluginManager.registerEvents(EntityTargetListener.getInstance(), this);
@@ -128,209 +107,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         }
     }
 
-    private void announceAPILoaded() {
-        ItemRegister itemRegister = ItemRegister.getInstanceUnsafe();
-        EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
-        BlockRegister blockRegister = BlockRegister.getInstanceUnsafe();
-        boolean hasItem = itemRegister != null && itemRegister.hasAnyRegistered();
-        boolean hasEntity = entityRegister != null && entityRegister.hasAnyRegistered();
-        boolean hasBlock = blockRegister != null && blockRegister.hasAnyRegistered();
-        if (hasItem || hasEntity || hasBlock) {
-            for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
-                World world = worldIterator.next();
-                if (world != null) {
-                    if (hasBlock && blockRegister != null) {
-                        for (Chunk chunk : world.getLoadedChunks()) {
-                            if (chunk != null) {
-                                for (var entry : ChunkStorage.getBlockDataContainersFromChunk(chunk)) {
-                                    Block block = entry.getKey();
-                                    if (block != null) {
-                                        NamespacedKey id = BaseBlock.getBlockID(block);
-                                        if (id != null) {
-                                            if (blockRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBarleyTeaAPILoad apiLoadBlock) {
-                                                try {
-                                                    apiLoadBlock.handleAPILoaded(block);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (hasEntity && entityRegister != null) {
-                        for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator
-                                .hasNext();) {
-                            Entity entity = entityIterator.next();
-                            if (entity != null) {
-                                NamespacedKey id = BaseEntity.getEntityID(entity);
-                                if (id != null) {
-                                    if (entityRegister.lookup(
-                                            id) instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad apiLoadEntity) {
-                                        try {
-                                            apiLoadEntity.handleAPILoaded(entity);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (hasItem && itemRegister != null) {
-                        for (Iterator<Player> playerIterator = world.getPlayers().iterator(); playerIterator
-                                .hasNext();) {
-                            Player player = playerIterator.next();
-                            PlayerInventory inv = player.getInventory();
-                            for (EquipmentSlot slot : ItemTickTask.SLOTS) {
-                                if (slot != null) {
-                                    ItemStack itemStack = inv.getItem(slot);
-                                    if (itemStack != null) {
-                                        NamespacedKey id = BaseItem.getItemID(itemStack);
-                                        if (id != null) {
-                                            if (itemRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                                try {
-                                                    apiLoadItem.handleAPILoaded(itemStack);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            ItemStack[] storage = inv.getStorageContents();
-                            if (storage != null) {
-                                for (int i = 0, count = storage.length; i < count; i++) {
-                                    final int slot = i;
-                                    ItemStack itemStack = inv.getItem(slot);
-                                    if (itemStack != null) {
-                                        NamespacedKey id = BaseItem.getItemID(itemStack);
-                                        if (id != null) {
-                                            if (itemRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                                try {
-                                                    apiLoadItem.handleAPILoaded(itemStack);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void announceAPIUnloaded() {
-        ItemRegister itemRegister = ItemRegister.getInstanceUnsafe();
-        EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
-        BlockRegister blockRegister = BlockRegister.getInstanceUnsafe();
-        boolean hasItem = itemRegister != null && itemRegister.hasAnyRegistered();
-        boolean hasEntity = entityRegister != null && entityRegister.hasAnyRegistered();
-        boolean hasBlock = blockRegister != null && blockRegister.hasAnyRegistered();
-        if (hasItem || hasEntity || hasBlock) {
-            for (Iterator<World> worldIterator = Bukkit.getWorlds().iterator(); worldIterator.hasNext();) {
-                World world = worldIterator.next();
-                if (world != null) {
-                    if (hasBlock && blockRegister != null) {
-                        for (Chunk chunk : world.getLoadedChunks()) {
-                            if (chunk != null) {
-                                for (var entry : ChunkStorage.getBlockDataContainersFromChunk(chunk)) {
-                                    Block block = entry.getKey();
-                                    if (block != null) {
-                                        NamespacedKey id = BaseBlock.getBlockID(block);
-                                        if (id != null) {
-                                            if (blockRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBarleyTeaAPILoad apiLoadBlock) {
-                                                try {
-                                                    apiLoadBlock.handleAPIUnloaded(block);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (hasEntity && entityRegister != null) {
-                        for (Iterator<Entity> entityIterator = world.getEntities().iterator(); entityIterator
-                                .hasNext();) {
-                            Entity entity = entityIterator.next();
-                            if (entity != null) {
-                                NamespacedKey id = BaseEntity.getEntityID(entity);
-                                if (id != null) {
-                                    if (entityRegister.lookup(
-                                            id) instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureBarleyTeaAPILoad apiLoadEntity) {
-                                        try {
-                                            apiLoadEntity.handleAPIUnloaded(entity);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (hasItem && itemRegister != null) {
-                        for (Iterator<Player> playerIterator = world.getPlayers().iterator(); playerIterator
-                                .hasNext();) {
-                            Player player = playerIterator.next();
-                            PlayerInventory inv = player.getInventory();
-                            for (EquipmentSlot slot : ItemTickTask.SLOTS) {
-                                if (slot != null) {
-                                    ItemStack itemStack = inv.getItem(slot);
-                                    if (itemStack != null) {
-                                        NamespacedKey id = BaseItem.getItemID(itemStack);
-                                        if (id != null) {
-                                            if (itemRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                                try {
-                                                    apiLoadItem.handleAPIUnloaded(itemStack);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            ItemStack[] storage = inv.getStorageContents();
-                            if (storage != null) {
-                                for (int i = 0, count = storage.length; i < count; i++) {
-                                    ItemStack itemStack = inv.getItem(i);
-                                    if (itemStack != null) {
-                                        NamespacedKey id = BaseItem.getItemID(itemStack);
-                                        if (id != null) {
-                                            if (itemRegister.lookup(
-                                                    id) instanceof org.ricetea.barleyteaapi.api.item.feature.FeatureBarleyTeaAPILoad apiLoadItem) {
-                                                try {
-                                                    apiLoadItem.handleAPIUnloaded(itemStack);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void onDisable() {
         Logger logger = getLogger();
@@ -341,11 +117,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         commandRegister.unregister(summonCommand);
         logger.info("uninitializing API...");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
-        try {
-            announceAPIUnloaded();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         try {
             if (hasExcellentEnchants) {
                 ExcellentEnchantsBridge.unregisterTranslations();

@@ -69,7 +69,8 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
         if (recipe == null)
             return;
         NamespacedKey recipeKey = recipe.getKey();
-        lookupTable.remove(recipeKey);
+        if (!lookupTable.remove(recipeKey, recipe))
+            return;
         unlinkMap(recipeKey);
         afterUnregisterRecipe(recipe);
     }
@@ -198,7 +199,7 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
     @Nullable
     protected abstract NamespacedKey findDummyRecipeKey(@Nonnull T recipe);
 
-    protected void createDummyRecipe(@Nonnull T recipe, @Nonnull NamespacedKey dummyKey){
+    protected void createDummyRecipe(@Nonnull T recipe, @Nonnull NamespacedKey dummyKey) {
         Recipe bukkitRecipe = recipe.toBukkitRecipe(dummyKey);
         Bukkit.addRecipe(bukkitRecipe);
     }

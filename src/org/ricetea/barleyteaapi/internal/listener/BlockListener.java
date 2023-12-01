@@ -23,7 +23,7 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockExplode;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockMove;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockPlace;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureChunkLoad;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByBlockExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByPlayer;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByPlayer;
@@ -74,8 +74,8 @@ public final class BlockListener implements Listener {
             e.printStackTrace();
         }
         try {
-            BlockFeatureHelper.doFeature(event.getBlock(), FeatureChunkLoad.class,
-                    FeatureChunkLoad::handleChunkLoaded);
+            BlockFeatureHelper.doFeature(event.getBlock(), FeatureBlockLoad.class,
+                    FeatureBlockLoad::handleBlockLoaded);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,9 +106,9 @@ public final class BlockListener implements Listener {
                     if (baseBlock instanceof FeatureBlockTick) {
                         BlockTickTask.getInstance().removeBlock(block);
                     }
-                    if (baseBlock instanceof FeatureChunkLoad feature) {
+                    if (baseBlock instanceof FeatureBlockLoad feature) {
                         try {
-                            feature.handleChunkUnloaded(block);
+                            feature.handleBlockUnloaded(block);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -175,9 +175,9 @@ public final class BlockListener implements Listener {
                             if (baseBlock instanceof FeatureBlockTick) {
                                 BlockTickTask.getInstance().removeBlock(block);
                             }
-                            if (baseBlock instanceof FeatureChunkLoad feature) {
+                            if (baseBlock instanceof FeatureBlockLoad feature) {
                                 try {
-                                    feature.handleChunkUnloaded(block);
+                                    feature.handleBlockUnloaded(block);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -212,9 +212,9 @@ public final class BlockListener implements Listener {
                     ChunkStorage.removeBlockDataContainer(from);
                 }
                 ChunkStorage.setBlockDataContainer(to, container);
-                if (baseBlock instanceof FeatureChunkLoad feature) {
-                    feature.handleChunkUnloaded(from);
-                    feature.handleChunkLoaded(to);
+                if (baseBlock instanceof FeatureBlockLoad feature) {
+                    feature.handleBlockUnloaded(from);
+                    feature.handleBlockLoaded(to);
                 }
             }
         }

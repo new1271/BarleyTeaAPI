@@ -10,11 +10,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 public abstract class SpawnableEntity extends BaseEntity
         implements FeatureCommandSummon, FeatureEntitySpawn {
@@ -30,6 +33,12 @@ public abstract class SpawnableEntity extends BaseEntity
             return null;
         Entity entity = world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
         if (tryRegister(entity, this::handleEntitySpawn)) {
+            if (this instanceof FeatureEntityLoad feature) {
+                feature.handleEntityLoaded(entity);
+            }
+            if (this instanceof FeatureEntityTick feature) {
+                EntityTickTask.getInstance().addEntity(entity);
+            }
             return entity;
         } else {
             entity.remove();

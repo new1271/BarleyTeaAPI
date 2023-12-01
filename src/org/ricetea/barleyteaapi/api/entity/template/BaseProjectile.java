@@ -12,11 +12,14 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectileSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 public abstract class BaseProjectile extends BaseEntity
         implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
@@ -49,6 +52,12 @@ public abstract class BaseProjectile extends BaseEntity
         Projectile entity = (Projectile) world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
         entity.setShooter(shooter);
         if (tryRegister(entity, this::handleEntitySpawn)) {
+            if (this instanceof FeatureEntityLoad feature) {
+                feature.handleEntityLoaded(entity);
+            }
+            if (this instanceof FeatureEntityTick feature) {
+                EntityTickTask.getInstance().addEntity(entity);
+            }
             return entity;
         } else {
             entity.remove();
