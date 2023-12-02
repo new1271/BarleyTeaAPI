@@ -286,14 +286,12 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                                     FeatureEntityLoad feature = record.oldFeature();
                                     if (feature != null) {
                                         final FeatureEntityLoad finalFeature = feature;
-                                        plugin.getLogger().info("Unloading " + entity.getUniqueId() + " (" + key + ")");
                                         scheduler.scheduleSyncDelayedTask(plugin,
                                                 () -> finalFeature.handleEntityUnloaded(entity));
                                     }
                                     feature = record.newFeature();
                                     if (feature != null) {
                                         final FeatureEntityLoad finalFeature = feature;
-                                        plugin.getLogger().info("Loading " + entity.getUniqueId() + " (" + key + ")");
                                         scheduler.scheduleSyncDelayedTask(plugin,
                                                 () -> finalFeature.handleEntityLoaded(entity));
                                     }
@@ -302,17 +300,11 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                                 boolean hasTickingNew = record.hasTickingNew();
                                 if (hasTickingOld != hasTickingNew) {
                                     if (hasTickingOld) {
-                                        if (plugin != null)
-                                            plugin.getLogger()
-                                                    .info("Unticking " + entity.getUniqueId() + " (" + key + ")");
                                         EntityTickTask task = EntityTickTask.getInstanceUnsafe();
                                         if (task != null) {
                                             task.removeEntity(entity);
                                         }
                                     } else {
-                                        if (plugin != null)
-                                            plugin.getLogger()
-                                                    .info("Ticking " + entity.getUniqueId() + " (" + key + ")");
                                         EntityTickTask.getInstance().addEntity(entity);
                                     }
                                 }
