@@ -1,10 +1,13 @@
 package org.ricetea.barleyteaapi.internal.task;
 
 import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -17,11 +20,24 @@ import org.ricetea.utils.Lazy;
 
 public final class BlockTickTask extends AbstractTask {
 
+    private static record BlockLocation(int x, int y, int z) {
+
+        public BlockLocation(@Nonnull Block block) {
+            this(block.getX(), block.getY(), block.getZ());
+        }
+
+        @Nonnull
+        public Block getBlock(@Nonnull World world) {
+            return world.getBlockAt(x, y, z);
+        }
+
+    }
+
     @Nonnull
     private static final Lazy<BlockTickTask> _inst = Lazy.create(BlockTickTask::new);
 
     @Nonnull
-    private final Hashtable<Block, Integer> tickingTable = new Hashtable<>();
+    private final Hashtable<World, Hashtable<BlockLocation, Integer>> tickingTable = new Hashtable<>();
 
     /*
      * Operations
@@ -31,7 +47,7 @@ public final class BlockTickTask extends AbstractTask {
      */
 
     @Nonnull
-    private final Hashtable<Block, Integer> operationTable = new Hashtable<>();
+    private final ConcurrentHashMap<World, ConcurrentHashMap<BlockLocation, Integer>> operationTable = new ConcurrentHashMap<>();
 
     private BlockTickTask() {
         super(50, 0);
@@ -55,60 +71,62 @@ public final class BlockTickTask extends AbstractTask {
         if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {
             stop();
         } else {
-            synchronized (operationTable) {
-                operationTable.forEach((block, op) -> {
-                    switch (op) {
-                        case 0 -> {
-                            tickingTable.putIfAbsent(block, 0);
-                        }
-                        case 1 -> {
-                            tickingTable.computeIfPresent(block, (a, b) -> 0);
-                        }
-                        case 2 -> {
-                            tickingTable.remove(block);
+            for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext();) {
+                var entry = iterator.next();
+                World world = entry.getKey();
+                var table = entry.getValue();
+                var affectTable = tickingTable.computeIfAbsent(world, ignored -> new Hashtable<>());
+                synchronized (table) {
+                    for (var iterator2 = table.entrySet().iterator(); iterator2.hasNext(); iterator2.remove()) {
+                        var entry2 = iterator2.next();
+                        BlockLocation location = entry2.getKey();
+                        Integer op = entry2.getValue();
+                        if (op == null)
+                            continue;
+                        switch (op) {
+                            case 0 -> {
+                                affectTable.putIfAbsent(location, 0);
+                            }
+                            case 1 -> {
+                                affectTable.computeIfPresent(location, (a, b) -> 0);
+                            }
+                            case 2 -> {
+                                Integer id = affectTable.remove(location);
+                                if (id != null && id != 0)
+                                    scheduler.cancelTask(id);
+                            }
                         }
                     }
-                });
-                operationTable.clear();
+                }
             }
-            if (tickingTable.isEmpty()) {
+            if (tickingTable.isEmpty() || tickingTable.values().stream().allMatch(Hashtable::isEmpty)) {
                 stop();
             } else {
-                tickingTable.replaceAll((block, taskId) -> {
-                    if (taskId != 0)
-                        return taskId;
-                    if (block == null || block.isEmpty()) {
-                        removeBlock(block);
-                        return 0;
-                    }
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id == null) {
-                        removeBlock(block);
-                        return 0;
-                    }
-                    BaseBlock baseBlock = register.lookup(id);
-                    if (baseBlock instanceof FeatureBlockTick tickingBlock) {
-                        try {
-                            return scheduler.scheduleSyncDelayedTask(api,
-                                    new _Task(tickingBlock, block, operationTable));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        removeBlock(block);
-                    }
-                    return 0;
-                });
+                for (var entry : tickingTable.entrySet()) {
+                    World world = entry.getKey();
+                    var table = entry.getValue();
+                    table.replaceAll((location, taskId) -> {
+                        if (taskId != 0)
+                            return taskId;
+                        return scheduler.scheduleSyncDelayedTask(api, new _Task(world, location, table));
+                    });
+                }
             }
         }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        tickingTable.clear();
+        operationTable.clear();
     }
 
     public void addBlock(@Nullable Block block) {
         if (block == null || !BaseBlock.isBarleyTeaBlock(block) || !BarleyTeaAPI.checkPluginUsable())
             return;
-        synchronized (operationTable) {
-            operationTable.merge(block, 0, Math::max);
-        }
+        var table = operationTable.computeIfAbsent(block.getWorld(), ignored -> new ConcurrentHashMap<>());
+        table.merge(new BlockLocation(block), 0, Math::max);
         if (!isRunning)
             start();
     }
@@ -116,38 +134,53 @@ public final class BlockTickTask extends AbstractTask {
     public void removeBlock(@Nullable Block block) {
         if (block == null || !BarleyTeaAPI.checkPluginUsable())
             return;
-        synchronized (operationTable) {
-            operationTable.merge(block, 2, Math::max);
-        }
+        var table = operationTable.computeIfAbsent(block.getWorld(), ignored -> new ConcurrentHashMap<>());
+        table.merge(new BlockLocation(block), 2, Math::max);
         if (!isRunning)
             start();
     }
 
     private static class _Task implements Runnable {
         @Nonnull
-        private final FeatureBlockTick feature;
+        private final World world;
         @Nonnull
-        private final Block entity;
+        private final BlockLocation location;
         @Nonnull
-        private final Hashtable<Block, Integer> operationTable;
+        private final Hashtable<BlockLocation, Integer> operationTable;
 
-        _Task(@Nonnull FeatureBlockTick feature, @Nonnull Block entity,
-                @Nonnull Hashtable<Block, Integer> entityOperationTable) {
-            this.feature = feature;
-            this.entity = entity;
-            this.operationTable = entityOperationTable;
+        _Task(@Nonnull World world, BlockLocation location,
+                @Nonnull Hashtable<BlockLocation, Integer> blockOperationTable) {
+            this.world = world;
+            this.location = location;
+            this.operationTable = blockOperationTable;
         }
 
         @Override
         public void run() {
-            try {
-                feature.handleTick(entity);
-            } catch (Exception e) {
-                e.printStackTrace();
+            int code = doJob() ? 1 : 2;
+            operationTable.merge(location, code, Math::max);
+        }
+
+        private boolean doJob() {
+            BlockRegister register = BlockRegister.getInstanceUnsafe();
+            if (register == null)
+                return false;
+            Block block = location.getBlock(world);
+            if (block == null || block.isEmpty())
+                return false;
+            NamespacedKey id = BaseBlock.getBlockID(block);
+            if (id == null)
+                return false;
+            BaseBlock baseBlock = register.lookup(id);
+            if (baseBlock instanceof FeatureBlockTick feature) {
+                try {
+                    feature.handleTick(block);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
-            synchronized (operationTable) {
-                operationTable.merge(entity, 1, Math::max);
-            }
+            return baseBlock == null;
         }
     }
 }

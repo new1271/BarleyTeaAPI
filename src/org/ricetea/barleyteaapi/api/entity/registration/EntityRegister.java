@@ -1,10 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.registration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     private static final Lazy<EntityRegister> inst = Lazy.create(EntityRegister::new);
 
     @Nonnull
-    private final Hashtable<NamespacedKey, BaseEntity> lookupTable = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, BaseEntity> lookupTable = new ConcurrentHashMap<>();
 
     private EntityRegister() {
     }
@@ -154,17 +155,26 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         if (predicate == null)
             unregisterAll();
         else {
-            unloadCustomEntities(predicate);
+            ArrayList<RefreshCustomEntityRecord> collectingList = new ArrayList<>();
             Logger logger = null;
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 logger = inst.getLogger();
             }
-            for (NamespacedKey key : listAllKeys(predicate)) {
-                lookupTable.remove(key);
-                if (logger != null)
-                    logger.info("unregistered " + key.toString());
+            for (var iterator = lookupTable.entrySet().iterator(); iterator.hasNext();) {
+                var entry = iterator.next();
+                NamespacedKey key = entry.getKey();
+                BaseEntity entityType = entry.getValue();
+                if (predicate.test(entityType)) {
+                    iterator.remove();
+                    var record = RefreshCustomEntityRecord.create(entityType, null);
+                    if (record != null)
+                        collectingList.add(record);
+                    if (logger != null)
+                        logger.info("unregistered " + key.toString());
+                }
             }
+            refreshCustomEntities(collectingList);
             if (inst != null)
                 inst.summonCommand.updateSuggestions();
         }
@@ -265,7 +275,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                 for (Entity entity : world.getEntities()) {
                     NamespacedKey key = BaseEntity.getEntityID(entity);
                     if (key == null)
-                        return;
+                        continue;
                     records.stream()
                             .filter(record -> record.key().equals(key))
                             .findAny()
@@ -273,22 +283,36 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                                 BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();
                                 if (plugin != null) {
                                     BukkitScheduler scheduler = Bukkit.getScheduler();
-                                    ObjectUtil.callWhenNonnull(record.oldFeature(),
-                                            feature -> scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> feature.handleEntityUnloaded(entity)));
-                                    ObjectUtil.callWhenNonnull(record.newFeature(),
-                                            feature -> scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> feature.handleEntityLoaded(entity)));
+                                    FeatureEntityLoad feature = record.oldFeature();
+                                    if (feature != null) {
+                                        final FeatureEntityLoad finalFeature = feature;
+                                        plugin.getLogger().info("Unloading " + entity.getUniqueId() + " (" + key + ")");
+                                        scheduler.scheduleSyncDelayedTask(plugin,
+                                                () -> finalFeature.handleEntityUnloaded(entity));
+                                    }
+                                    feature = record.newFeature();
+                                    if (feature != null) {
+                                        final FeatureEntityLoad finalFeature = feature;
+                                        plugin.getLogger().info("Loading " + entity.getUniqueId() + " (" + key + ")");
+                                        scheduler.scheduleSyncDelayedTask(plugin,
+                                                () -> finalFeature.handleEntityLoaded(entity));
+                                    }
                                 }
                                 boolean hasTickingOld = record.hasTickingOld();
                                 boolean hasTickingNew = record.hasTickingNew();
                                 if (hasTickingOld != hasTickingNew) {
                                     if (hasTickingOld) {
+                                        if (plugin != null)
+                                            plugin.getLogger()
+                                                    .info("Unticking " + entity.getUniqueId() + " (" + key + ")");
                                         EntityTickTask task = EntityTickTask.getInstanceUnsafe();
                                         if (task != null) {
                                             task.removeEntity(entity);
                                         }
                                     } else {
+                                        if (plugin != null)
+                                            plugin.getLogger()
+                                                    .info("Ticking " + entity.getUniqueId() + " (" + key + ")");
                                         EntityTickTask.getInstance().addEntity(entity);
                                     }
                                 }
@@ -296,31 +320,5 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                 }
             }
         }
-    }
-
-    private void unloadCustomEntities(@Nullable Predicate<BaseEntity> predicate) {
-        Bukkit.getWorlds().forEach(world -> {
-            world.getEntities().forEach(iteratedEntity -> {
-                NamespacedKey key = BaseEntity.getEntityID(iteratedEntity);
-                if (key == null)
-                    return;
-                BaseEntity entity = lookupTable.get(key);
-                if (entity == null)
-                    return;
-                BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();
-                if (plugin != null) {
-                    BukkitScheduler scheduler = Bukkit.getScheduler();
-                    if (entity instanceof FeatureEntityLoad feature)
-                        scheduler.scheduleSyncDelayedTask(plugin,
-                                () -> feature.handleEntityUnloaded(iteratedEntity));
-                }
-                if (entity instanceof FeatureEntityTick) {
-                    EntityTickTask task = EntityTickTask.getInstanceUnsafe();
-                    if (task != null) {
-                        task.removeEntity(iteratedEntity);
-                    }
-                }
-            });
-        });
     }
 }

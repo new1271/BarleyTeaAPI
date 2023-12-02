@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.api.block.registration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -98,7 +99,27 @@ public final class BlockRegister implements IRegister<BaseBlock> {
     @Override
     public void unregisterAll() {
         var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        unloadCustomBlocks(null);
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) {
+                if (!chunk.isGenerated())
+                    continue;
+                for (var entry : ChunkStorage.getBlockDataContainersFromChunk(chunk)) {
+                    Block iteratedBlock = entry.getKey();
+                    NamespacedKey key = BaseBlock.getBlockID(entry.getValue());
+                    if (key == null)
+                        continue;
+                    BaseBlock block = lookupTable.get(key);
+                    if (block instanceof FeatureBlockLoad feature)
+                        feature.handleBlockUnloaded(iteratedBlock);
+                    if (block instanceof FeatureBlockTick) {
+                        BlockTickTask task = BlockTickTask.getInstanceUnsafe();
+                        if (task != null) {
+                            task.removeBlock(iteratedBlock);
+                        }
+                    }
+                }
+            }
+        }
         lookupTable.clear();
         Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
@@ -113,17 +134,26 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         if (predicate == null)
             unregisterAll();
         else {
-            unloadCustomBlocks(predicate);
+            ArrayList<RefreshCustomBlockRecord> collectingList = new ArrayList<>();
             Logger logger = null;
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 logger = inst.getLogger();
             }
-            for (NamespacedKey key : listAllKeys(predicate)) {
-                lookupTable.remove(key);
-                if (logger != null)
-                    logger.info("unregistered " + key.toString());
+            for (var iterator = lookupTable.entrySet().iterator(); iterator.hasNext();) {
+                var entry = iterator.next();
+                NamespacedKey key = entry.getKey();
+                BaseBlock entityType = entry.getValue();
+                if (predicate.test(entityType)) {
+                    iterator.remove();
+                    var record = RefreshCustomBlockRecord.create(entityType, null);
+                    if (record != null)
+                        collectingList.add(record);
+                    if (logger != null)
+                        logger.info("unregistered " + key.toString());
+                }
             }
+            refreshCustomBlocks(collectingList);
         }
     }
 
@@ -235,12 +265,18 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                                     BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();
                                     if (plugin != null) {
                                         BukkitScheduler scheduler = Bukkit.getScheduler();
-                                        ObjectUtil.callWhenNonnull(record.oldFeature(),
-                                                feature -> scheduler.scheduleSyncDelayedTask(plugin,
-                                                        () -> feature.handleBlockUnloaded(block)));
-                                        ObjectUtil.callWhenNonnull(record.newFeature(),
-                                                feature -> scheduler.scheduleSyncDelayedTask(plugin,
-                                                        () -> feature.handleBlockLoaded(block)));
+                                        FeatureBlockLoad feature = record.oldFeature();
+                                        if (feature != null) {
+                                            final FeatureBlockLoad finalFeature = feature;
+                                            scheduler.scheduleSyncDelayedTask(plugin,
+                                                        () -> finalFeature.handleBlockUnloaded(block));
+                                        }
+                                        feature = record.newFeature;
+                                        if (feature != null) {
+                                            final FeatureBlockLoad finalFeature = feature;
+                                            scheduler.scheduleSyncDelayedTask(plugin,
+                                                        () -> finalFeature.handleBlockLoaded(block));
+                                        }
                                     }
                                     boolean hasTickingOld = record.hasTickingOld();
                                     boolean hasTickingNew = record.hasTickingNew();
@@ -259,36 +295,5 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                 }
             }
         }
-    }
-
-    private void unloadCustomBlocks(@Nullable Predicate<BaseBlock> predicate) {
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                if (!chunk.isGenerated())
-                    continue;
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        for (int y = world.getMinHeight(), maxY = world.getMaxHeight(); y < maxY; y++) {
-                            Block iteratedBlock = chunk.getBlock(x, y, z);
-                            NamespacedKey key = BaseBlock.getBlockID(iteratedBlock);
-                            if (key == null)
-                                return;
-                            BaseBlock block = lookupTable.get(key);
-                            if (block == null || predicate != null && !predicate.test(block))
-                                continue;
-                            if (block instanceof FeatureBlockLoad feature)
-                                feature.handleBlockUnloaded(iteratedBlock);
-                            if (block instanceof FeatureBlockTick) {
-                                BlockTickTask task = BlockTickTask.getInstanceUnsafe();
-                                if (task != null) {
-                                    task.removeBlock(iteratedBlock);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        ;
     }
 }

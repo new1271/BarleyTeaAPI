@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.internal.task;
 
 import java.util.*;
+import java.util.concurrent.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -21,7 +22,7 @@ public final class EntityTickTask extends AbstractTask {
     private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
 
     @Nonnull
-    private final Hashtable<Entity, Integer> tickingTable = new Hashtable<>();
+    private final Hashtable<UUID, Integer> tickingTable = new Hashtable<>();
 
     /*
      * Operations
@@ -31,7 +32,7 @@ public final class EntityTickTask extends AbstractTask {
      */
 
     @Nonnull
-    private final Hashtable<Entity, Integer> operationTable = new Hashtable<>();
+    private final ConcurrentHashMap<UUID, Integer> operationTable = new ConcurrentHashMap<>();
 
     private EntityTickTask() {
         super(50, 0);
@@ -55,60 +56,49 @@ public final class EntityTickTask extends AbstractTask {
         if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {
             stop();
         } else {
-            synchronized (operationTable) {
-                operationTable.forEach((entity, op) -> {
-                    switch (op) {
-                        case 0 -> {
-                            tickingTable.putIfAbsent(entity, 0);
-                        }
-                        case 1 -> {
-                            tickingTable.computeIfPresent(entity, (a, b) -> 0);
-                        }
-                        case 2 -> {
-                            tickingTable.remove(entity);
-                        }
+            for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
+                var entry = iterator.next();
+                UUID uuid = entry.getKey();
+                Integer op = entry.getValue();
+                if (op == null)
+                    continue;
+                switch (op) {
+                    case 0 -> {
+                        tickingTable.putIfAbsent(uuid, 0);
                     }
-                });
-                operationTable.clear();
+                    case 1 -> {
+                        tickingTable.computeIfPresent(uuid, (a, b) -> 0);
+                    }
+                    case 2 -> {
+                        Integer id = tickingTable.remove(uuid);
+                        if (id != null && id != 0)
+                            scheduler.cancelTask(id);
+                    }
+                }
             }
             if (tickingTable.isEmpty()) {
                 stop();
             } else {
-                tickingTable.replaceAll((entity, taskId) -> {
+                tickingTable.replaceAll((uuid, taskId) -> {
                     if (taskId != 0)
                         return taskId;
-                    if (entity == null || entity.isDead()) {
-                        removeEntity(entity);
-                        return 0;
-                    }
-                    NamespacedKey id = BaseEntity.getEntityID(entity);
-                    if (id == null) {
-                        removeEntity(entity);
-                        return 0;
-                    }
-                    BaseEntity baseEntity = register.lookup(id);
-                    if (baseEntity instanceof FeatureEntityTick tickingEntity) {
-                        try {
-                            return scheduler.scheduleSyncDelayedTask(api,
-                                    new _Task(tickingEntity, entity, operationTable));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        removeEntity(entity);
-                    }
-                    return 0;
+                    return scheduler.scheduleSyncDelayedTask(api, new _Task(uuid, operationTable));
                 });
             }
         }
     }
 
+    @Override
+    public void stop() {
+        super.stop();
+        tickingTable.clear();
+        operationTable.clear();
+    }
+
     public void addEntity(@Nullable Entity entity) {
         if (entity == null || !BaseEntity.isBarleyTeaEntity(entity) || !BarleyTeaAPI.checkPluginUsable())
             return;
-        synchronized (operationTable) {
-            operationTable.merge(entity, 0, Math::max);
-        }
+        operationTable.merge(entity.getUniqueId(), 0, Math::max);
         if (!isRunning)
             start();
     }
@@ -116,38 +106,48 @@ public final class EntityTickTask extends AbstractTask {
     public void removeEntity(@Nullable Entity entity) {
         if (entity == null || !BarleyTeaAPI.checkPluginUsable())
             return;
-        synchronized (operationTable) {
-            operationTable.merge(entity, 2, Math::max);
-        }
+        operationTable.merge(entity.getUniqueId(), 2, Math::max);
         if (!isRunning)
             start();
     }
 
     private static class _Task implements Runnable {
         @Nonnull
-        private final FeatureEntityTick feature;
+        private final UUID uuid;
         @Nonnull
-        private final Entity entity;
-        @Nonnull
-        private final Hashtable<Entity, Integer> operationTable;
+        private final Map<UUID, Integer> operationTable;
 
-        _Task(@Nonnull FeatureEntityTick feature, @Nonnull Entity entity,
-                @Nonnull Hashtable<Entity, Integer> entityOperationTable) {
-            this.feature = feature;
-            this.entity = entity;
+        _Task(@Nonnull UUID uuid, @Nonnull Map<UUID, Integer> entityOperationTable) {
+            this.uuid = uuid;
             this.operationTable = entityOperationTable;
         }
 
         @Override
         public void run() {
-            try {
-                feature.handleTick(entity);
-            } catch (Exception e) {
-                e.printStackTrace();
+            int code = doJob() ? 1 : 2;
+            operationTable.merge(uuid, code, Math::max);
+        }
+
+        private boolean doJob() {
+            EntityRegister register = EntityRegister.getInstanceUnsafe();
+            if (register == null)
+                return false;
+            Entity entity = Bukkit.getEntity(uuid);
+            if (entity == null || entity.isDead())
+                return false;
+            NamespacedKey id = BaseEntity.getEntityID(entity);
+            if (id == null)
+                return false;
+            BaseEntity baseEntity = register.lookup(id);
+            if (baseEntity instanceof FeatureEntityTick feature) {
+                try {
+                    feature.handleTick(entity);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
-            synchronized (operationTable) {
-                operationTable.merge(entity, 1, Math::max);
-            }
+            return baseEntity == null;
         }
     }
 }
