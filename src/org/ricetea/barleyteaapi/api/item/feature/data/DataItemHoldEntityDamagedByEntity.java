@@ -18,14 +18,12 @@ public final class DataItemHoldEntityDamagedByEntity extends BaseItemHoldEntityF
     @Nonnull
     private final Lazy<DataEntityType> damagerType;
 
-    @SuppressWarnings("null")
     public DataItemHoldEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
         damagerType = Lazy.create(() -> BaseEntity.getEntityType(getDamager()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getDamager() {
         return event.getDamager();
@@ -48,7 +46,6 @@ public final class DataItemHoldEntityDamagedByEntity extends BaseItemHoldEntityF
         return event.getFinalDamage();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();

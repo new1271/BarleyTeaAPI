@@ -18,7 +18,6 @@ public final class DataEntityDismount extends BaseEntityFeatureData<EntityDismou
         dismountedType = Lazy.create(() -> BaseEntity.getEntityType(getDismounted()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getDismounted() {
         return event.getDismounted();

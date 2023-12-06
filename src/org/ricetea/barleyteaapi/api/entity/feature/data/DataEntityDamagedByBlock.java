@@ -1,12 +1,12 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;
 
@@ -16,11 +16,10 @@ public final class DataEntityDamagedByBlock extends BaseEntityFeatureData<Entity
 
     public DataEntityDamagedByBlock(@Nonnull EntityDamageByBlockEvent event) {
         super(event);
-        blockType = Lazy.create(() -> BaseBlock.getBlockType(getDamager()));
+        blockType = Lazy.create(() -> DataBlockType.get(getDamager()));
     }
 
-    @SuppressWarnings("null")
-    @Nonnull
+    @Nullable
     public Block getDamager() {
         return event.getDamager();
     }
@@ -38,7 +37,6 @@ public final class DataEntityDamagedByBlock extends BaseEntityFeatureData<Entity
         event.setDamage(damage);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();

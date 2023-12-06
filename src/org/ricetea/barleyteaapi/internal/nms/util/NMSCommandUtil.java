@@ -37,12 +37,12 @@ public final class NMSCommandUtil {
     }
 
     public static void sendErrorMessage(@Nonnull CommandListenerWrapper source,
-                                           @Nonnull IChatBaseComponent component, boolean withStyle) {
+            @Nonnull IChatBaseComponent component, boolean withStyle) {
         source.sendFailure(component, withStyle);
     }
 
     public static void sendErrorMessage(@Nonnull CommandListenerWrapper source, @Nonnull Component component,
-                                           boolean withStyle) {
+            boolean withStyle) {
         if (withStyle) {
             component = component.style(Style.style(NamedTextColor.RED));
         }

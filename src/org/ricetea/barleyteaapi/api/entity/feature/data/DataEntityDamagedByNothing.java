@@ -18,7 +18,6 @@ public final class DataEntityDamagedByNothing extends BaseEntityFeatureData<Enti
         event.setDamage(damage);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,7 +60,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
         return _inst.get();
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     @Override
     public void render(@Nonnull ItemStack itemStack) {
         BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstanceUnsafe();

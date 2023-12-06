@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.block.Block;
@@ -19,10 +21,9 @@ public final class DataEntityShotBlock extends BaseEntityShotFeatureData {
         blockType = Lazy.create(() -> BaseBlock.getBlockType(getHitBlock()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Block getHitBlock() {
-        return event.getHitBlock();
+        return Objects.requireNonNull(event.getHitBlock());
     }
 
     @Nonnull

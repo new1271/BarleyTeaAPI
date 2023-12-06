@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
 public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
-    @SuppressWarnings("null")
+
     public DataItemHoldEntityDamagedByNothing(@Nonnull EntityDamageEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
@@ -27,7 +27,6 @@ public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntity
         return event.getFinalDamage();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();

@@ -98,7 +98,7 @@ public interface NonnullFunction<@Nonnull T, R> {
      *
      * @see #compose(Function)
      */
-    @SuppressWarnings("null")
+
     @Nonnull
     default <V> NonnullFunction<T, V> andThen(NonnullFunction<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
@@ -115,7 +115,7 @@ public interface NonnullFunction<@Nonnull T, R> {
     }
 
     @Nonnull
-    static <@Nonnull T, @Nullable R> NonnullFunction<T,R> fromFunction(@Nonnull Function<T, R> function) {
+    static <@Nonnull T, @Nullable R> NonnullFunction<T, R> fromFunction(@Nonnull Function<T, R> function) {
         return (T t) -> function.apply(Objects.requireNonNull(t));
     }
 

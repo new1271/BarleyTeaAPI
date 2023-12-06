@@ -10,7 +10,6 @@ public final class DataEntityLostTarget extends BaseEntityFeatureData<EntityTarg
         super(event);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityTargetEvent.TargetReason getReason() {
         return event.getReason();

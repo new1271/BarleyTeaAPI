@@ -25,6 +25,8 @@ public final class ItemTickTask extends AbstractTask {
     @Nonnull
     public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
 
+    private int lastTick;
+
     private ItemTickTask() {
         super(50, 0);
     }
@@ -47,37 +49,41 @@ public final class ItemTickTask extends AbstractTask {
         if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
             stop();
         } else {
-            Player[] players = Bukkit.getOnlinePlayers().toArray(Player[]::new);
-            if (players != null) {
-                for (Player player : players) {
-                    if (player == null || player.isDead()) {
-                        continue;
-                    } else {
-                        PlayerInventory inv = player.getInventory();
-                        for (EquipmentSlot slot : SLOTS) {
-                            if (slot != null) {
+            int currentTick = Bukkit.getCurrentTick();
+            if (currentTick != lastTick) {
+                lastTick = currentTick;
+                Player[] players = Bukkit.getOnlinePlayers().toArray(Player[]::new);
+                if (players != null) {
+                    for (Player player : players) {
+                        if (player == null || player.isDead()) {
+                            continue;
+                        } else {
+                            PlayerInventory inv = player.getInventory();
+                            for (EquipmentSlot slot : SLOTS) {
+                                if (slot != null) {
+                                    ItemStack itemStack = inv.getItem(slot);
+                                    if (itemStack != null) {
+                                        NamespacedKey id = BaseItem.getItemID(itemStack);
+                                        if (id != null
+                                                && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
+                                            scheduler.scheduleSyncDelayedTask(api,
+                                                    () -> itemTickFeature.handleTickOnEquipment(player, inv,
+                                                            itemStack, slot));
+                                        }
+                                    }
+                                }
+                            }
+                            for (int i = 0, count = inv.getSize(); i < count; i++) {
+                                final int slot = i;
                                 ItemStack itemStack = inv.getItem(slot);
                                 if (itemStack != null) {
                                     NamespacedKey id = BaseItem.getItemID(itemStack);
                                     if (id != null
                                             && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
                                         scheduler.scheduleSyncDelayedTask(api,
-                                                () -> itemTickFeature.handleTickOnEquipment(player, inv,
+                                                () -> itemTickFeature.handleTickOnInventory(player, inv,
                                                         itemStack, slot));
                                     }
-                                }
-                            }
-                        }
-                        for (int i = 0, count = inv.getSize(); i < count; i++) {
-                            final int slot = i;
-                            ItemStack itemStack = inv.getItem(slot);
-                            if (itemStack != null) {
-                                NamespacedKey id = BaseItem.getItemID(itemStack);
-                                if (id != null
-                                        && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                    scheduler.scheduleSyncDelayedTask(api,
-                                            () -> itemTickFeature.handleTickOnInventory(player, inv,
-                                                    itemStack, slot));
                                 }
                             }
                         }

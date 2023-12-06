@@ -3,13 +3,14 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.inventory.RecipeChoice.MaterialChoice;
+import org.bukkit.inventory.SmithingTransformRecipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.internal.helper.SmithingHelper;
 import org.ricetea.utils.CollectionUtil;

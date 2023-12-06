@@ -8,9 +8,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public interface FeatureItemTick {
-    void handleTickOnEquipment(@Nonnull Player player, @Nonnull PlayerInventory inventory, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot slot);
+        void handleTickOnEquipment(@Nonnull Player player, @Nonnull PlayerInventory inventory,
+                        @Nonnull ItemStack itemStack,
+                        @Nonnull EquipmentSlot slot);
 
-    void handleTickOnInventory(@Nonnull Player player, @Nonnull PlayerInventory inventory, @Nonnull ItemStack itemStack,
-            int slot);
+        void handleTickOnInventory(@Nonnull Player player, @Nonnull PlayerInventory inventory,
+                        @Nonnull ItemStack itemStack,
+                        int slot);
 }

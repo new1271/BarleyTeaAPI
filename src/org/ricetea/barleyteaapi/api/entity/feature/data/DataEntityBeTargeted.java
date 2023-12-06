@@ -18,7 +18,6 @@ public final class DataEntityBeTargeted extends BaseEntityFeatureData<EntityTarg
         entityWhoTargetingType = Lazy.create(() -> BaseEntity.getEntityType(getEntityWhoTargeting()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getEntityWhoTargeting() {
         return event.getEntity();
@@ -29,7 +28,6 @@ public final class DataEntityBeTargeted extends BaseEntityFeatureData<EntityTarg
         return entityWhoTargetingType.get();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityTargetEvent.TargetReason getReason() {
         return event.getReason();

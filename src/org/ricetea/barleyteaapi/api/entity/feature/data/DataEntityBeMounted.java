@@ -18,7 +18,6 @@ public final class DataEntityBeMounted extends BaseEntityFeatureData<EntityMount
         passengerType = Lazy.create(() -> BaseEntity.getEntityType(getPassenger()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getPassenger() {
         return event.getEntity();

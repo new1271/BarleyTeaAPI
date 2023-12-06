@@ -1,7 +1,10 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -24,11 +27,12 @@ public final class EntityTickTask extends AbstractTask {
     @Nonnull
     private final Hashtable<UUID, Integer> tickingTable = new Hashtable<>();
 
+    private int lastTick;
+
     /*
      * Operations
      * 0 = Add
-     * 1 = Reset Task Id
-     * 2 = Remove
+     * 1 = Remove
      */
 
     @Nonnull
@@ -67,9 +71,6 @@ public final class EntityTickTask extends AbstractTask {
                         tickingTable.putIfAbsent(uuid, 0);
                     }
                     case 1 -> {
-                        tickingTable.computeIfPresent(uuid, (a, b) -> 0);
-                    }
-                    case 2 -> {
                         Integer id = tickingTable.remove(uuid);
                         if (id != null && id != 0)
                             scheduler.cancelTask(id);
@@ -79,13 +80,19 @@ public final class EntityTickTask extends AbstractTask {
             if (tickingTable.isEmpty()) {
                 stop();
             } else {
-                tickingTable.replaceAll((uuid, taskId) -> {
-                    if (taskId != 0)
-                        return taskId;
-                    return scheduler.scheduleSyncDelayedTask(api, new _Task(uuid, operationTable));
-                });
+                int currentTick = Bukkit.getCurrentTick();
+                if (currentTick != lastTick) {
+                    lastTick = currentTick;
+                    tickingTable.replaceAll((uuid, taskId) -> {
+                        if (taskId != null && taskId != 0
+                                && (scheduler.isCurrentlyRunning(taskId) || scheduler.isQueued(taskId)))
+                            return taskId;
+                        return scheduler.scheduleSyncDelayedTask(api, new _Task(uuid, operationTable));
+                    });
+                }
             }
         }
+
     }
 
     @Override
@@ -106,7 +113,7 @@ public final class EntityTickTask extends AbstractTask {
     public void removeEntity(@Nullable Entity entity) {
         if (entity == null || !BarleyTeaAPI.checkPluginUsable())
             return;
-        operationTable.merge(entity.getUniqueId(), 2, Math::max);
+        operationTable.merge(entity.getUniqueId(), 1, Math::max);
         if (!isRunning)
             start();
     }
@@ -124,8 +131,8 @@ public final class EntityTickTask extends AbstractTask {
 
         @Override
         public void run() {
-            int code = doJob() ? 1 : 2;
-            operationTable.merge(uuid, code, Math::max);
+            if (!doJob())
+                operationTable.merge(uuid, 1, Math::max);
         }
 
         private boolean doJob() {

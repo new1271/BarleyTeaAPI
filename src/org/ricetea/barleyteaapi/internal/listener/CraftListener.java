@@ -41,7 +41,8 @@ public final class CraftListener implements Listener {
         if (event == null || event.getRecipe() == null)
             return;
         CraftingInventory inventory = event.getInventory();
-        ItemStack[] craftingMatrix = Arrays.stream(inventory.getMatrix()).map(ItemHelper::getSingletonClone).toArray(ItemStack[]::new);
+        ItemStack[] craftingMatrix = Arrays.stream(inventory.getMatrix()).map(ItemHelper::getSingletonClone)
+                .toArray(ItemStack[]::new);
         int craftingMatrixLength = craftingMatrix.length;
         DataItemType[] craftingTypeOfMatrix = new DataItemType[craftingMatrixLength];
         boolean hasCustomItem = false;

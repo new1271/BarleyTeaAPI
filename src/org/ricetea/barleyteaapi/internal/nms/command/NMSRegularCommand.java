@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.nms.command;
 
+import java.util.Locale;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.NamespacedKey;
@@ -11,8 +13,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 
 import net.minecraft.commands.CommandListenerWrapper;
-
-import java.util.Locale;
 
 public abstract class NMSRegularCommand implements NMSCommand {
 

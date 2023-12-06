@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.inventory.ItemStack;
 
-public final class DataCommandGive{
+public final class DataCommandGive {
 
     @Nonnull
     private final ItemStack itemStack;
@@ -28,4 +28,3 @@ public final class DataCommandGive{
         return nbt;
     }
 }
-

@@ -17,20 +17,18 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
 public final class DataItemHoldEntityKillPlayer extends BaseItemHoldEntityFeatureData<PlayerDeathEvent> {
-    @SuppressWarnings("null")
+
     public DataItemHoldEntityKillPlayer(@Nonnull PlayerDeathEvent event,
             @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) lastDamageCauseByEntityEvent.getDamager(), itemStack, equipmentSlot);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Player getDecedent() {
         return event.getEntity();
     }
 
-    
     public @Nonnull List<ItemStack> getDecedentDrops() {
         return Objects.requireNonNull(event.getDrops());
     }

@@ -5,7 +5,9 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.ricetea.utils.function.*;
+import org.ricetea.utils.function.NonnullConsumer;
+import org.ricetea.utils.function.NonnullFunction;
+import org.ricetea.utils.function.NonnullSupplier;
 
 public final class ObjectUtil {
 

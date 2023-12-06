@@ -16,19 +16,16 @@ public final class DataNaturalSpawn extends BaseEntityFeatureData<CreatureSpawnE
         super(event);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public LivingEntity getEntity() {
         return event.getEntity();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public SpawnReason getSpawnReason() {
         return event.getSpawnReason();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Location getLocation() {
         return event.getLocation();

@@ -19,7 +19,6 @@ public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<Entit
         damagerType = Lazy.create(() -> BaseEntity.getEntityType(getDamager()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getDamager() {
         return event.getDamager();
@@ -42,7 +41,6 @@ public final class DataEntityDamagedByEntity extends BaseEntityFeatureData<Entit
         return event.getFinalDamage();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityDamageEvent.DamageCause getDamageCause() {
         return event.getCause();

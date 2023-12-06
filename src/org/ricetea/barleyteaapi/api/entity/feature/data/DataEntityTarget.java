@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Entity;
@@ -18,10 +20,9 @@ public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEv
         targetType = Lazy.create(() -> BaseEntity.getEntityType(getTarget()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getTarget() {
-        return event.getTarget();
+        return Objects.requireNonNull(event.getTarget());
     }
 
     @Nonnull
@@ -29,7 +30,6 @@ public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEv
         return targetType.get();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public EntityTargetEvent.TargetReason getReason() {
         return event.getReason();

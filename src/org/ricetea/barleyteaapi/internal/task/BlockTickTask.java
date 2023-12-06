@@ -7,8 +7,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
@@ -39,11 +39,12 @@ public final class BlockTickTask extends AbstractTask {
     @Nonnull
     private final Hashtable<World, Hashtable<BlockLocation, Integer>> tickingTable = new Hashtable<>();
 
+    private int lastTick;
+
     /*
      * Operations
      * 0 = Add
-     * 1 = Reset Task Id
-     * 2 = Remove
+     * 1 = Remove
      */
 
     @Nonnull
@@ -88,9 +89,6 @@ public final class BlockTickTask extends AbstractTask {
                                 affectTable.putIfAbsent(location, 0);
                             }
                             case 1 -> {
-                                affectTable.computeIfPresent(location, (a, b) -> 0);
-                            }
-                            case 2 -> {
                                 Integer id = affectTable.remove(location);
                                 if (id != null && id != 0)
                                     scheduler.cancelTask(id);
@@ -102,14 +100,18 @@ public final class BlockTickTask extends AbstractTask {
             if (tickingTable.isEmpty() || tickingTable.values().stream().allMatch(Hashtable::isEmpty)) {
                 stop();
             } else {
-                for (var entry : tickingTable.entrySet()) {
-                    World world = entry.getKey();
-                    var table = entry.getValue();
-                    table.replaceAll((location, taskId) -> {
-                        if (taskId != 0)
-                            return taskId;
-                        return scheduler.scheduleSyncDelayedTask(api, new _Task(world, location, table));
-                    });
+                int currentTick = Bukkit.getCurrentTick();
+                if (currentTick != lastTick) {
+                    lastTick = currentTick;
+                    for (var entry : tickingTable.entrySet()) {
+                        World world = entry.getKey();
+                        var table = entry.getValue();
+                        table.replaceAll((location, taskId) -> {
+                            if (taskId != 0 && (scheduler.isCurrentlyRunning(taskId) || scheduler.isQueued(taskId)))
+                                return taskId;
+                            return scheduler.scheduleSyncDelayedTask(api, new _Task(world, location, table));
+                        });
+                    }
                 }
             }
         }
@@ -135,7 +137,7 @@ public final class BlockTickTask extends AbstractTask {
         if (block == null || !BarleyTeaAPI.checkPluginUsable())
             return;
         var table = operationTable.computeIfAbsent(block.getWorld(), ignored -> new ConcurrentHashMap<>());
-        table.merge(new BlockLocation(block), 2, Math::max);
+        table.merge(new BlockLocation(block), 1, Math::max);
         if (!isRunning)
             start();
     }
@@ -157,8 +159,8 @@ public final class BlockTickTask extends AbstractTask {
 
         @Override
         public void run() {
-            int code = doJob() ? 1 : 2;
-            operationTable.merge(location, code, Math::max);
+            if (!doJob())
+                operationTable.merge(location, 1, Math::max);
         }
 
         private boolean doJob() {

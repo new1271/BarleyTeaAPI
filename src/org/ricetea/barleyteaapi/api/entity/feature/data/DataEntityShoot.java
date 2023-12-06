@@ -19,7 +19,6 @@ public final class DataEntityShoot extends BaseEntityFeatureData<ProjectileLaunc
         entityType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Projectile getProjectile() {
         return event.getEntity();

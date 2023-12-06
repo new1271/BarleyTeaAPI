@@ -29,7 +29,7 @@ public final class DataItemWearOff extends BasePlayerFeatureData<PlayerArmorChan
 
     @Nonnull
     public EquipmentSlot getEquipmentSlot() {
-        switch (getSlotType()){
+        switch (getSlotType()) {
             case CHEST:
                 return EquipmentSlot.CHEST;
             case FEET:
@@ -59,7 +59,7 @@ public final class DataItemWearOff extends BasePlayerFeatureData<PlayerArmorChan
     }
 
     @Nonnull
-    public DataItemType getNewItemType(){
+    public DataItemType getNewItemType() {
         return newItemType.get();
     }
 }

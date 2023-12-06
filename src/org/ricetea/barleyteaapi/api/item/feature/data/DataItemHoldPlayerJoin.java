@@ -12,12 +12,11 @@ import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
 public final class DataItemHoldPlayerJoin extends BaseItemHoldEntityFeatureData<PlayerJoinEvent> {
 
-    @SuppressWarnings("null")
     public DataItemHoldPlayerJoin(@Nonnull PlayerJoinEvent event, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getPlayer(), itemStack, equipmentSlot);
     }
-    
+
     @Nonnull
     public Player getEntity() {
         return Objects.requireNonNull(event.getPlayer());

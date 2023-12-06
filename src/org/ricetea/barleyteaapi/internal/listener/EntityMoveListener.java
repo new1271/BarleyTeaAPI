@@ -6,7 +6,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMove;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityMove;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 
 import io.papermc.paper.event.entity.EntityMoveEvent;
@@ -28,6 +31,9 @@ public final class EntityMoveListener implements Listener {
             return;
         if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityMove.class,
                 FeatureEntityMove::handleEntityMove, DataEntityMove::new))
+            event.setCancelled(true);
+        if (!ItemFeatureHelper.forEachEquipmentCancellable(event.getEntity(), event, FeatureItemHoldEntityMove.class,
+                FeatureItemHoldEntityMove::handleItemHoldEntityEntityMove, DataItemHoldEntityMove::new))
             event.setCancelled(true);
     }
 }

@@ -269,13 +269,13 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                                         if (feature != null) {
                                             final FeatureBlockLoad finalFeature = feature;
                                             scheduler.scheduleSyncDelayedTask(plugin,
-                                                        () -> finalFeature.handleBlockUnloaded(block));
+                                                    () -> finalFeature.handleBlockUnloaded(block));
                                         }
                                         feature = record.newFeature;
                                         if (feature != null) {
                                             final FeatureBlockLoad finalFeature = feature;
                                             scheduler.scheduleSyncDelayedTask(plugin,
-                                                        () -> finalFeature.handleBlockLoaded(block));
+                                                    () -> finalFeature.handleBlockLoaded(block));
                                         }
                                     }
                                     boolean hasTickingOld = record.hasTickingOld();

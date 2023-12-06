@@ -1,7 +1,13 @@
 package org.ricetea.barleyteaapi.internal.nms.util;
 
+import java.util.Collection;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
 import net.minecraft.commands.CommandListenerWrapper;
 import net.minecraft.commands.arguments.ArgumentEntity;
 import net.minecraft.commands.arguments.ArgumentMinecraftKeyRegistered;
@@ -11,11 +17,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.phys.Vec3D;
-
-import java.util.Collection;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
 
 public final class NMSCommandArgument {
     @Nonnull

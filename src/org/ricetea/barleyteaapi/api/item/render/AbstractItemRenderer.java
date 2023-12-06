@@ -248,7 +248,6 @@ public abstract class AbstractItemRenderer implements Keyed {
         return false;
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public static Set<ItemFlag> getItemFlags(@Nullable ItemStack itemStack) {
         if (itemStack != null) {

@@ -17,9 +17,9 @@ public final class DataEntityTame extends BaseEntityFeatureData<EntityTameEvent>
 
     public @Nonnull LivingEntity getEntity() {
         return Objects.requireNonNull(event.getEntity());
-     }
-  
-     public @Nonnull AnimalTamer getOwner() {
+    }
+
+    public @Nonnull AnimalTamer getOwner() {
         return Objects.requireNonNull(event.getOwner());
-     }
+    }
 }

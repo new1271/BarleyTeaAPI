@@ -37,7 +37,6 @@ public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent
         return decedentType.get();
     }
 
-    
     public @Nonnull List<ItemStack> getDecedentDrops() {
         return Objects.requireNonNull(event.getDrops());
     }

@@ -27,7 +27,6 @@ public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData
         entityType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Projectile getProjectile() {
         return event.getEntity();

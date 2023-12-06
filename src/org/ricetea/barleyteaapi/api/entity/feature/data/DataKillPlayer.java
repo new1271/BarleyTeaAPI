@@ -22,7 +22,6 @@ public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent
         super(event, lastDamageCauseByEntityEvent.getDamager());
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Player getDecedent() {
         return event.getEntity();
@@ -37,7 +36,6 @@ public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent
         event.deathMessage(component);
     }
 
-    
     public @Nonnull List<ItemStack> getDecedentDrops() {
         return Objects.requireNonNull(event.getDrops());
     }

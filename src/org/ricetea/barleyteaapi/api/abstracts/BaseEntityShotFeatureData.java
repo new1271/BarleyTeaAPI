@@ -18,7 +18,6 @@ public abstract class BaseEntityShotFeatureData extends BaseEntityFeatureData<Pr
         projectileType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Projectile getProjectile() {
         return event.getEntity();

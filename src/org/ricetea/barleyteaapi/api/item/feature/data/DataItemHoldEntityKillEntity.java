@@ -22,7 +22,6 @@ public final class DataItemHoldEntityKillEntity extends BaseItemHoldEntityFeatur
     @Nonnull
     private final Lazy<DataEntityType> decedentType;
 
-    @SuppressWarnings("null")
     public DataItemHoldEntityKillEntity(@Nonnull EntityDeathEvent event,
             @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {
@@ -40,7 +39,6 @@ public final class DataItemHoldEntityKillEntity extends BaseItemHoldEntityFeatur
         return decedentType.get();
     }
 
-    
     public @Nonnull List<ItemStack> getDecedentDrops() {
         return Objects.requireNonNull(event.getDrops());
     }

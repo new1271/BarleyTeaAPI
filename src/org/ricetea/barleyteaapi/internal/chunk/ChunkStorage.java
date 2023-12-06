@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.internal.chunk;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

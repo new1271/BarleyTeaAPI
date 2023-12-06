@@ -30,7 +30,6 @@ public class ExcellentEnchantsBridge {
                 ExcellentEnchant::getDisplayName);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public static String getEnchantmentNameUnsafe(@Nonnull Enchantment enchantment) {
         return ((ExcellentEnchant) enchantment).getDisplayName();

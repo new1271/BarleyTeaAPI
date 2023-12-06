@@ -28,7 +28,6 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
         this(event, (Projectile) event.getEntity());
     }
 
-    @SuppressWarnings("null")
     public BaseProjectileFeatureData(@Nonnull T event, @CheckForNull Projectile entity) {
         super(event);
         this.entity = Objects.requireNonNull(entity);

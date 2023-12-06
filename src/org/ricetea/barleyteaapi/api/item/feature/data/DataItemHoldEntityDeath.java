@@ -30,7 +30,6 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     @Nonnull
     private final Lazy<DataEntityType> decedentType;
 
-    @SuppressWarnings("null")
     public DataItemHoldEntityDeath(@Nonnull EntityDeathEvent event,
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
             @Nonnull EquipmentSlot equipmentSlot) {

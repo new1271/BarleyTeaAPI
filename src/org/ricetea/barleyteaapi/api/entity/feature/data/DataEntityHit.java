@@ -30,7 +30,7 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
                 shooter -> Lazy.create(
                         () -> BaseEntity.getEntityType(shooter)));
     }
-    
+
     @Nonnull
     public Projectile getProjectile() {
         return event.getEntity();

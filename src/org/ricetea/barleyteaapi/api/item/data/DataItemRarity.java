@@ -77,7 +77,6 @@ public class DataItemRarity {
         this(null, rarityStyle);
     }
 
-    @SuppressWarnings("null")
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity, @Nullable Style rarityStyle) {
         Style style = rarityStyle == null ? Style.empty() : rarityStyle;
         if (!style.hasDecoration(TextDecoration.ITALIC))
@@ -91,7 +90,6 @@ public class DataItemRarity {
         return apply(component, false);
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Component apply(@Nonnull Component component, boolean isRenamedItem) {
         Component result = component.style(style);
@@ -146,7 +144,8 @@ public class DataItemRarity {
     }
 
     @Nonnull
-    private static DataItemRarity fromVanillaItemRarity(@Nullable DataItemRarity nextLevelRarity, @Nonnull ItemRarity rarity) {
+    private static DataItemRarity fromVanillaItemRarity(@Nullable DataItemRarity nextLevelRarity,
+            @Nonnull ItemRarity rarity) {
         return new DataItemRarity(nextLevelRarity, Style.style(rarity.getColor()));
     }
 

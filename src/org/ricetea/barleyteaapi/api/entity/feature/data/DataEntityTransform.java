@@ -22,7 +22,6 @@ public final class DataEntityTransform extends BaseEntityFeatureData<EntityTrans
         transformedEntityType = Lazy.create(() -> BaseEntity.getEntityType(getTransformedEntity()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getTransformedEntity() {
         return event.getTransformedEntity();
@@ -33,13 +32,11 @@ public final class DataEntityTransform extends BaseEntityFeatureData<EntityTrans
         return transformedEntityType.get();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public List<Entity> getTransformedEntities() {
         return event.getTransformedEntities();
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public TransformReason getTransformReason() {
         return event.getTransformReason();

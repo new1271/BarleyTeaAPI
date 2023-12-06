@@ -18,7 +18,6 @@ public final class DataEntityMount extends BaseEntityFeatureData<EntityMountEven
         mountType = Lazy.create(() -> BaseEntity.getEntityType(getMount()));
     }
 
-    @SuppressWarnings("null")
     @Nonnull
     public Entity getMount() {
         return event.getMount();

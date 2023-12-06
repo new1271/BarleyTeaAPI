@@ -1,10 +1,13 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.*;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
