@@ -69,17 +69,25 @@ public abstract class BaseBlock implements Keyed {
         return ChunkStorage.getBlockDataContainer(block, create);
     }
 
+    protected static final void setPersistentDataContainer(@Nonnull Block block,
+            @Nullable PersistentDataContainer container) {
+        ChunkStorage.setBlockDataContainer(block, container);
+    }
+
     public final void register(@Nullable Block block) {
-        if (block != null)
-            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(DefaultNamespacedKey,
-                    PersistentDataType.STRING, key.toString());
+        if (block != null) {
+            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            setPersistentDataContainer(block, container);
+        }
     }
 
     public final void register(@Nullable Block block,
             @Nullable Consumer<Block> afterBlockRegistered) {
-        if (block != null) {
-            Objects.requireNonNull(getPersistentDataContainer(block, true)).set(DefaultNamespacedKey,
-                    PersistentDataType.STRING, key.toString());
+        if (block != null) {            
+            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            setPersistentDataContainer(block, container);
             if (afterBlockRegistered != null) {
                 afterBlockRegistered.accept(block);
             }
@@ -105,6 +113,7 @@ public abstract class BaseBlock implements Keyed {
                     return false;
                 }
             }
+            setPersistentDataContainer(block, container);
             return true;
         }
         return false;

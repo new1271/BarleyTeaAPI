@@ -99,6 +99,7 @@ public interface NonnullFunction<@Nonnull T, R> {
      * @see #compose(Function)
      */
 
+    @SuppressWarnings("null")
     @Nonnull
     default <V> NonnullFunction<T, V> andThen(NonnullFunction<? super R, ? extends V> after) {
         Objects.requireNonNull(after);

@@ -250,7 +250,7 @@ public class DefaultItemRenderer extends AbstractItemRenderer {
                                     lores.remove(lores.size() - 1);
                             }
                         }
-                        if (isTool) {
+                        if (isTool && MainHandLore != null) {
                             toolDamage = Math.round(toolDamage * 100.0) / 100.0;
                             String toolDamageString = Double.toString(toolDamage);
                             if (toolDamageString.endsWith(".0"))

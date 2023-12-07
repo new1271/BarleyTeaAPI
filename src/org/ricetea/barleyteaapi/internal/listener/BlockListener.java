@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
+import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockExplode;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
@@ -79,6 +80,9 @@ public final class BlockListener implements Listener {
                     FeatureBlockLoad::handleBlockLoaded);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (DataBlockType.get(event.getBlock()).asCustomBlock() instanceof FeatureBlockTick) {
+            BlockTickTask.getInstance().addBlock(event.getBlock());
         }
     }
 

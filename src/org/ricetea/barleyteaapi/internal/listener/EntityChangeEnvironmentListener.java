@@ -162,7 +162,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 if (rawId != null) {
                                     NamespacedKey id = NamespacedKey.fromString(rawId);
                                     if (register != null && id != null && block != null) {
-                                        BaseBlock baseBlock = register.lookup(key);
+                                        BaseBlock baseBlock = register.lookup(id);
                                         PersistentDataContainer previousDataContainer = ChunkStorage
                                                 .getBlockDataContainer(block,
                                                         false);
@@ -259,7 +259,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 if (rawId != null) {
                                     NamespacedKey id = NamespacedKey.fromString(rawId);
                                     if (register != null && id != null) {
-                                        BaseBlock baseBlock = register.lookup(key);
+                                        BaseBlock baseBlock = register.lookup(id);
                                         try {
                                             if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
                                                     &&
