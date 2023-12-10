@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.internal.item.renderer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ public final class UnregisteredItemRendererImpl extends AbstractItemRendererImpl
 
     @Override
     @Nonnull
-    public ItemStack render(@Nonnull ItemStack itemStack, @Nonnull Player player) {
+    public ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player) {
         showWarning();
         return itemStack;
     }

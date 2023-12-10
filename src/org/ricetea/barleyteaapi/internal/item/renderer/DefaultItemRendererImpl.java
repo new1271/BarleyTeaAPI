@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -21,6 +23,8 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtra;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDisplay;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDisplay;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.render.ItemRendererRegister;
@@ -57,7 +61,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
     @Override
     @Nonnull
-    public ItemStack render(@Nonnull ItemStack itemStack, @Nonnull Player player) {
+    public ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player) {
         if (!isRegistered())
             ItemRendererRegister.getInstance().register(this);
 
@@ -83,10 +87,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         double toolDamage, toolSpeed;
         if (isTool) {
-            AttributeInstance attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
-            toolDamage = attributeInstance == null ? DEFAULT_TOOL_DAMAGE : attributeInstance.getBaseValue();
-            attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
-            toolSpeed = attributeInstance == null ? DEFAULT_TOOL_SPEED : attributeInstance.getBaseValue();
+            if (player == null) {
+                toolDamage = DEFAULT_TOOL_DAMAGE;
+                toolSpeed = DEFAULT_TOOL_SPEED;
+            } else {
+                AttributeInstance attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+                toolDamage = attributeInstance == null ? DEFAULT_TOOL_DAMAGE : attributeInstance.getBaseValue();
+                attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
+                toolSpeed = attributeInstance == null ? DEFAULT_TOOL_SPEED : attributeInstance.getBaseValue();
+            }
         } else {
             toolDamage = 0;
             toolSpeed = 0;
@@ -94,7 +103,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
             boolean hasExcellentEnchants = apiInstance.hasExcellentEnchants;
-            Box<Double> toolDamageIncreaseBox = Box.box(0.0);
+            final List<Component> finalRenderLore = renderLore;
+            final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
             meta.getEnchants().forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
                     return;
@@ -130,7 +140,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     component = component.append(Component.text(" ").append(levelComponent)
                             .color(color).decoration(TextDecoration.ITALIC, false));
                 }
-                renderLore.add(component);
+                finalRenderLore.add(component);
             });
         }
 
@@ -283,18 +293,18 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         if (customItem != null) {
             boolean isRenamed;
             if (displayName == null) {
-                displayName = Component.translatable(customItem, customItem.getDefaultName());
+                displayName = customItem.getDefaultNameComponent();
                 isRenamed = false;
             } else {
                 isRenamed = true;
             }
             displayName = customItem.getRarity().apply(displayName, isRenamed, false);
 
-            if (customItem instanceof FeatureItemCustomDurability customDurability) {
-                int maxDura = customDurability.getMaxDurability(itemStack);
-                int dura = maxDura - customDurability.getDurabilityDamage(itemStack);
+            if (customItem instanceof FeatureItemCustomDurability feature) {
+                int maxDura = feature.getMaxDurability(itemStack);
+                int dura = maxDura - feature.getDurabilityDamage(itemStack);
                 if (dura < maxDura ||
-                        customDurability instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
+                        feature instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
                                 customDurabilityExtra.isAlwaysShowDurabilityHint(itemStack)) {
                     renderLore.add(Component.translatable("item.durability", NamedTextColor.WHITE)
                             .args(Component.text(dura), Component.text(maxDura))
@@ -303,6 +313,13 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             }
             renderLore.add(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
+
+            if (customItem instanceof FeatureItemDisplay feature) {
+                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, renderLore);
+                feature.handleItemDisplay(data);
+                displayName = data.getDisplayName();
+                renderLore = data.getLore();
+            }
         }
 
         meta.displayName(displayName);
