@@ -1,9 +1,13 @@
 package org.ricetea.barleyteaapi.internal.item.renderer;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.Map.Entry;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -20,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtra;
@@ -47,6 +52,11 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     private static final @Nonnull Lazy<DefaultItemRendererImpl> _inst = Lazy.create(DefaultItemRendererImpl::new);
     private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
     private static final @Nonnull Operation[] operations = Operation.values();
+    private static final @Nonnull Comparator<Attribute> attributeComparator = (a, b) -> {
+        String keyA = a.getKey().getKey();
+        String keyB = b.getKey().getKey();
+        return keyA.compareTo(keyB);
+    };
     private static final double DEFAULT_TOOL_DAMAGE = 1.0;
     private static final double DEFAULT_TOOL_SPEED = 4.0;
 
@@ -59,11 +69,14 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         return _inst.get();
     }
 
+    public void checkIsRegistered() {
+        if (!isRegistered())
+            ItemRendererRegister.getInstance().register(this);
+    }
+
     @Override
     @Nonnull
     public ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player) {
-        if (!isRegistered())
-            ItemRendererRegister.getInstance().register(this);
 
         BarleyTeaAPI apiInstance = BarleyTeaAPI.getInstanceUnsafe();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
@@ -142,6 +155,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 }
                 finalRenderLore.add(component);
             });
+            toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
         }
 
         if (itemLore != null) {
@@ -155,51 +169,61 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
             if (attributeMap == null)
                 attributeMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
-            if (attributeMap != null && attributeMap.isEmpty()) {
+            if (attributeMap != null && !attributeMap.isEmpty()) {
                 ArrayList<Component> slotAttributeLore = new ArrayList<>();
-                HashMap<EquipmentSlot, HashMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
-                for (Entry<Attribute, AttributeModifier> entry : attributeMap.entries()) {
-                    Attribute attribute = entry.getKey();
-                    AttributeModifier modifier = entry.getValue();
-                    double amount = modifier.getAmount();
-                    Operation operation = modifier.getOperation();
-                    if (attribute == null || amount == 0 || operation == null)
-                        continue;
-                    EquipmentSlot slot = modifier.getSlot();
-                    if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
-                        if (operation.equals(AttributeModifier.Operation.ADD_NUMBER)) {
-                            switch (entry.getKey()) {
-                                case GENERIC_ATTACK_DAMAGE:
-                                    toolDamage += entry.getValue().getAmount();
-                                    continue;
-                                case GENERIC_ATTACK_SPEED:
-                                    toolSpeed += entry.getValue().getAmount();
-                                    continue;
-                                default:
-                                    break;
+                HashMap<EquipmentSlot, TreeMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
+                final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
+                final Box<Double> toolSpeedIncreaseBox = Box.box(0.0);
+                attributeMap.asMap().forEach((attribute, modifiers) -> {
+                    if (attribute == null)
+                        return;
+                    Box<Double> increaseBox = switch (attribute) {
+                        case GENERIC_ATTACK_DAMAGE -> toolDamageIncreaseBox;
+                        case GENERIC_ATTACK_SPEED -> toolSpeedIncreaseBox;
+                        default -> null;
+                    };
+                    modifiers.forEach(modifier -> {
+                        double amount = modifier.getAmount();
+                        Operation operation = modifier.getOperation();
+                        if (amount == 0 || operation == null)
+                            return;
+                        EquipmentSlot slot = modifier.getSlot();
+                        if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
+                            if (operation.equals(AttributeModifier.Operation.ADD_NUMBER)) {
+                                if (increaseBox != null) {
+                                    increaseBox.set(
+                                            ObjectUtil.letNonNull(increaseBox.get(), 0.0) + amount);
+                                    return;
+                                }
                             }
                         }
-                    }
-                    if (slot == null) {
-                        for (EquipmentSlot iteratedSlot : slots) {
-                            if (iteratedSlot == null)
-                                continue;
-                            HashMap<Attribute, double[]> hmap = slotAttributeMap.computeIfAbsent(iteratedSlot,
-                                    ignored -> new HashMap<>());
-                            double[] values = hmap.computeIfAbsent(attribute, ignored -> new double[operations.length]);
+                        if (slot == null) {
+                            for (EquipmentSlot iteratedSlot : slots) {
+                                if (iteratedSlot == null)
+                                    continue;
+                                TreeMap<Attribute, double[]> hmap = slotAttributeMap.computeIfAbsent(
+                                        iteratedSlot,
+                                        ignored -> new TreeMap<>(attributeComparator));
+                                double[] values = hmap.computeIfAbsent(attribute,
+                                        ignored -> new double[operations.length]);
+                                values[operation.ordinal()] += amount;
+                            }
+                        } else {
+                            TreeMap<Attribute, double[]> hmap = slotAttributeMap.computeIfAbsent(slot,
+                                    ignored -> new TreeMap<>(attributeComparator));
+                            double[] values = hmap.computeIfAbsent(attribute,
+                                    ignored -> new double[operations.length]);
                             values[operation.ordinal()] += amount;
                         }
-                    } else {
-                        HashMap<Attribute, double[]> hmap = slotAttributeMap.computeIfAbsent(slot,
-                                ignored -> new HashMap<>());
-                        double[] values = hmap.computeIfAbsent(attribute, ignored -> new double[operations.length]);
-                        values[operation.ordinal()] += amount;
-                    }
-                }
+                    });
+                });
+                toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
+                toolSpeed += ObjectUtil.letNonNull(toolSpeedIncreaseBox.get(), 0.0);
+
                 for (EquipmentSlot slot : slots) {
                     if (slot == null)
                         continue;
-                    HashMap<Attribute, double[]> attributeOperationMap = slotAttributeMap.get(slot);
+                    TreeMap<Attribute, double[]> attributeOperationMap = slotAttributeMap.get(slot);
                     if (attributeOperationMap == null)
                         continue;
                     String slotStringKey;
@@ -280,8 +304,6 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                                 Component.text(toolSpeedString),
                                 Component.translatable("attribute.name.generic.attack_speed")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-            }
-            if (isTool) {
                 renderLore.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, false));
                 renderLore.addAll(toolAttributeLore);
@@ -298,7 +320,12 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             } else {
                 isRenamed = true;
             }
-            displayName = customItem.getRarity().apply(displayName, isRenamed, false);
+
+            DataItemRarity rarity = customItem.getRarity();
+            if (customItem.isRarityUpgraded(itemStack)) {
+                rarity = rarity.upgrade();
+            }
+            displayName = rarity.apply(displayName, isRenamed, false);
 
             if (customItem instanceof FeatureItemCustomDurability feature) {
                 int maxDura = feature.getMaxDurability(itemStack);

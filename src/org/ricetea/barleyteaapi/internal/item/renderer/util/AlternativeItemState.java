@@ -56,8 +56,10 @@ public final class AlternativeItemState {
 
     @Nonnull
     public static ItemMeta restore(@Nonnull ItemMeta meta) {
-        if (meta.getPersistentDataContainer().getOrDefault(IsStoredKey, PersistentDataType.BOOLEAN, false)) {
-            return restoreFlags(restoreLore(restoreName(meta)));
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (container.getOrDefault(IsStoredKey, PersistentDataType.BOOLEAN, false)) {
+            meta = restoreFlags(restoreLore(restoreName(meta)));
+            container.remove(IsStoredKey);
         }
         return meta;
     }
@@ -106,12 +108,10 @@ public final class AlternativeItemState {
     private static @Nonnull ItemMeta restoreName(@Nonnull ItemMeta itemMeta) {
         final PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         final String name = container.get(ItemNameKey, PersistentDataType.STRING);
-        if (name != null) {
-            if (name.equals(NamespacedKeyUtil.empty().toString())) {
-                itemMeta.displayName(null);
-            } else {
-                itemMeta.displayName(JSONComponentSerializer.json().deserialize(name));
-            }
+        if (name == null)
+            itemMeta.displayName(null);
+        else {
+            itemMeta.displayName(JSONComponentSerializer.json().deserialize(name));
             container.remove(ItemNameKey);
         }
         return itemMeta;
@@ -120,26 +120,24 @@ public final class AlternativeItemState {
     private static @Nonnull ItemMeta restoreLore(@Nonnull ItemMeta itemMeta) {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         String loreInJSON = container.get(ItemLoreKey, PersistentDataType.STRING);
-        if (loreInJSON != null) {
-            if (loreInJSON.equals(NamespacedKeyUtil.empty().toString())) {
-                itemMeta.lore(null);
-            } else {
-                try {
-                    JSONArray array = (JSONArray) JSONValue.parse(loreInJSON);
-                    int length = array.size();
-                    Component[] components = new Component[length];
-                    JSONComponentSerializer serializer = JSONComponentSerializer.json();
-                    for (int i = 0; i < length; i++) {
-                        try {
-                            components[i] = serializer.deserialize(array.get(i).toString());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        if (loreInJSON == null)
+            itemMeta.lore(null);
+        else {
+            try {
+                JSONArray array = (JSONArray) JSONValue.parse(loreInJSON);
+                int length = array.size();
+                Component[] components = new Component[length];
+                JSONComponentSerializer serializer = JSONComponentSerializer.json();
+                for (int i = 0; i < length; i++) {
+                    try {
+                        components[i] = serializer.deserialize(array.get(i).toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    itemMeta.lore(Arrays.asList(components));
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                itemMeta.lore(Arrays.asList(components));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             container.remove(ItemLoreKey);
         }

@@ -88,7 +88,6 @@ public final class ProtocolLibBridge {
                 return;
             PacketContainer container = event.getPacket();
             Player player = event.getPlayer();
-            Translator translator = GlobalTranslators.getInstance().getServerTranslator();
             {
                 StructureModifier<Component> modifier = container.getSpecificModifier(Component.class);
                 int size = modifier.size();
@@ -102,21 +101,21 @@ public final class ProtocolLibBridge {
                             if (component != null) {
                                 rawComponent.setJson(serializer.serialize(
                                         Objects.requireNonNull(
-                                                searchHoverEventAndRender(translator, component, player))));
+                                                searchHoverEventAndRender(component, player))));
                             }
                             return rawComponent;
                         });
                     }
                 } else {
                     for (int i = 0; i < size; i++) {
-                        modifier.modify(i, component -> searchHoverEventAndRender(translator, component, player));
+                        modifier.modify(i, component -> searchHoverEventAndRender(component, player));
                     }
                 }
             }
             {
                 StructureModifier<ItemStack> modifier = container.getItemModifier();
                 for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStack -> renderItem(translator, itemStack, player));
+                    modifier.modify(i, itemStack -> renderItem(itemStack, player));
                 }
             }
             if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
@@ -124,7 +123,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList.forEach(pair -> pair
-                                .setSecond(renderItem(translator, pair.getSecond(), player)));
+                                .setSecond(renderItem(pair.getSecond(), player)));
                         return itemStackList;
                     });
                 }
@@ -137,7 +136,7 @@ public final class ProtocolLibBridge {
                                     recipe.setIngredients(
                                             recipe.getIngredients()
                                                     .stream()
-                                                    .map(itemStack -> renderItem(translator, itemStack, player))
+                                                    .map(itemStack -> renderItem(itemStack, player))
                                                     .toList());
                                     return recipe;
                                 });
@@ -149,7 +148,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList
-                                .replaceAll(itemStack -> renderItem(translator, itemStack, player));
+                                .replaceAll(itemStack -> renderItem(itemStack, player));
                         return itemStackList;
                     });
                 }
@@ -172,19 +171,18 @@ public final class ProtocolLibBridge {
         }
 
         @Nonnull
-        private static ItemStack renderItem(@Nonnull Translator translator, @Nonnull ItemStack itemStack,
-                @Nonnull Player player) {
+        private static ItemStack renderItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
             ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
             if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
                 renderer = ItemRenderer.getDefault();
-                itemStack = renderer.render(itemStack, player);
             }
+            if (renderer != null)
+                itemStack = renderer.render(itemStack, player);
             return itemStack;
         }
 
         @Nonnull
-        private static Component renderHoverEvent(@Nonnull Translator translator,
-                @Nonnull Component component, @Nonnull Player player) {
+        private static Component renderHoverEvent(@Nonnull Component component, @Nonnull Player player) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
                 BinaryTagHolder nbtHolder = showItem.nbt();
@@ -202,27 +200,32 @@ public final class ProtocolLibBridge {
                     itemStack = null;
                 }
                 if (itemStack != null) {
-                    itemStack = renderItem(translator, itemStack, player);
-                    component = component.hoverEvent(itemStack.asHoverEvent());
+                    itemStack = renderItem(itemStack, player);
+                    return itemStack.displayName().hoverEvent(itemStack.asHoverEvent());
                 }
             }
             return component;
         }
 
         @Nullable
-        private static Component searchHoverEventAndRender(@Nonnull Translator translator,
-                @Nullable Component component, @Nonnull Player player) {
+        private static Component searchHoverEventAndRender(@Nullable Component component, @Nonnull Player player) {
             if (component == null)
                 return null;
             Component result = component;
             HoverEvent<?> hoverEvent = result.hoverEvent();
             if (hoverEvent != null) {
-                result = renderHoverEvent(translator, result, player);
+                result = renderHoverEvent(result, player);
+            }
+            if (result instanceof TranslatableComponent translatable) {
+                result = translatable.args(translatable.args()
+                        .stream()
+                        .map(arg -> searchHoverEventAndRender(arg, player))
+                        .toList());
             }
             return result
                     .children(result.children()
                             .stream()
-                            .map(arg -> searchHoverEventAndRender(translator, arg, player))
+                            .map(arg -> searchHoverEventAndRender(arg, player))
                             .toList());
         }
     }

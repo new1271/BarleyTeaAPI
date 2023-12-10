@@ -65,7 +65,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         logger.info("registering '/summonbarley' command...");
         commandRegister.register(summonCommand = new NMSSummonCommand());
         logger.info("initializing API...");
-        DefaultItemRendererImpl.getInstance();
+        DefaultItemRendererImpl.getInstance().checkIsRegistered();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
         ProtocolLibBridge.enable();
