@@ -35,8 +35,8 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getEntity(), itemStack, equipmentSlot);
         decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
-        killer = ObjectUtil.mapWhenNonnull(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
-        killerType = ObjectUtil.mapWhenNonnull(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));
+        killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
+        killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));
     }
 
     @Nonnull

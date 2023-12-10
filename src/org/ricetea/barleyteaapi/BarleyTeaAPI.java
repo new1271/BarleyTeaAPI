@@ -14,9 +14,10 @@ import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
-import org.ricetea.barleyteaapi.api.item.render.DefaultItemRenderer;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
+import org.ricetea.barleyteaapi.internal.bridge.ProtocolLibBridge;
+import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.nms.command.NMSCommandRegister;
 import org.ricetea.barleyteaapi.internal.nms.command.NMSGiveCommand;
@@ -64,9 +65,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         logger.info("registering '/summonbarley' command...");
         commandRegister.register(summonCommand = new NMSSummonCommand());
         logger.info("initializing API...");
-        DefaultItemRenderer.getInstance();
+        DefaultItemRendererImpl.getInstance();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
+        ProtocolLibBridge.enable();
     }
 
     private void registerEventListeners() {
@@ -109,6 +111,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        ProtocolLibBridge.disable();
         Logger logger = getLogger();
         logger.info("unregistering '/givebarley' command...");
         NMSCommandRegister commandRegister = NMSCommandRegister.getInstance();
@@ -124,10 +127,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ObjectUtil.callWhenNonnull(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
-        ObjectUtil.callWhenNonnull(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
-        ObjectUtil.callWhenNonnull(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
-        ObjectUtil.callWhenNonnull(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
+        ObjectUtil.safeCall(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
+        ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
+        ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
+        ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
         TickingService.shutdown();
         TaskService.shutdown();
         Bukkit.getScheduler().cancelTasks(this);

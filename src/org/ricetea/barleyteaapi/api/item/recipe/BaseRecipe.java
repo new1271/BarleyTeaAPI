@@ -16,7 +16,7 @@ public abstract class BaseRecipe implements Keyed {
 
     public BaseRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result) throws UnsupportedOperationException {
         this.key = key;
-        result.processLeftOrRight(left -> {
+        result.call(left -> {
             if (left.isAir()) {
                 throw new UnsupportedOperationException(
                         "'result' cannot be an air!");

@@ -91,7 +91,7 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
     @Override
     public NamespacedKey getKey() {
         return ObjectUtil.letNonNull(
-                mapLeftOrRight(EntityType::getKey, BaseEntity::getKey),
+                map(EntityType::getKey, BaseEntity::getKey),
                 NamespacedKeyUtil::empty);
     }
 

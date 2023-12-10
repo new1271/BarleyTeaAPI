@@ -43,8 +43,8 @@ public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingF
 
     @Nullable
     public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {
-        return getResult().mapLeftOrRight(ItemStack::new, right -> {
-            return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
+        return getResult().map(ItemStack::new, right -> {
+            return ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
                     itemGiveFeature -> itemGiveFeature.handleItemGive(1));
         });
     }

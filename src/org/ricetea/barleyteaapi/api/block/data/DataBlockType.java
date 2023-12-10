@@ -105,7 +105,7 @@ public final class DataBlockType extends Either<Material, BaseBlock> implements 
     @Override
     public NamespacedKey getKey() {
         return ObjectUtil.letNonNull(
-                mapLeftOrRight(Material::getKey, BaseBlock::getKey),
+                map(Material::getKey, BaseBlock::getKey),
                 NamespacedKeyUtil::empty);
     }
 

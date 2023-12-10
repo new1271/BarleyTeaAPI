@@ -52,8 +52,8 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFun
 
     @Nonnull
     public ItemStack apply(@Nonnull ItemStack source) {
-        return ObjectUtil.letNonNull(getResult().mapLeftOrRight(ItemStack::new, right -> {
-            return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(right, FeatureItemGive.class),
+        return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right -> {
+            return ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
                     itemGiveFeature -> itemGiveFeature.handleItemGive(1));
         }), () -> new ItemStack(Material.AIR));
     }

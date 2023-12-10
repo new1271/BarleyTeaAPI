@@ -121,7 +121,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
             }
         }
         lookupTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
                 logger.info("unregistered " + key.getKey().toString());

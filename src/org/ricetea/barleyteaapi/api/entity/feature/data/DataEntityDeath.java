@@ -29,8 +29,8 @@ public final class DataEntityDeath extends BaseEntityFeatureData<EntityDeathEven
     public DataEntityDeath(@Nonnull EntityDeathEvent event,
             @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event);
-        killer = ObjectUtil.mapWhenNonnull(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
-        killerType = ObjectUtil.mapWhenNonnull(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));
+        killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
+        killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));
     }
 
     @Nonnull

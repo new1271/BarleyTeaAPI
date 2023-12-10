@@ -24,7 +24,7 @@ public final class DataItemWear extends BasePlayerFeatureData<PlayerArmorChangeE
     public DataItemWear(@Nonnull PlayerArmorChangeEvent event) {
         super(event);
         oldItemType = Lazy.create(() -> ObjectUtil
-                .letNonNull(ObjectUtil.mapWhenNonnull(getOldItem(), BaseItem::getItemType), DataItemType::empty));
+                .letNonNull(ObjectUtil.safeMap(getOldItem(), BaseItem::getItemType), DataItemType::empty));
     }
 
     @Nonnull

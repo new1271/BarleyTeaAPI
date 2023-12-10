@@ -16,7 +16,6 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.nms.helper.NMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.util.*;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
@@ -108,7 +107,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
 					nmsItemType = null;
 				} else {
 					barleyTeaItemType = ItemRegister.getInstance().lookup(alterItemKey);
-					nmsItemType = ObjectUtil.mapWhenNonnull(barleyTeaItemType,
+					nmsItemType = ObjectUtil.safeMap(barleyTeaItemType,
 							type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
 				}
 			}
@@ -126,7 +125,6 @@ public final class NMSGiveCommand extends NMSRegularCommand {
 						_itemStack -> _itemStack != null && commandGiveType
 								.handleCommandGive(
 										new DataCommandGive(_itemStack, nbt.toString())))) {
-					AbstractItemRenderer.renderItem(bukkitStack);
 					itemstack = Objects.requireNonNull(NMSItemHelper.getNmsItem(bukkitStack));
 				} else {
 					throw giveFailedMessage.create();
@@ -188,7 +186,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
 
 	@Override
 	public void updateSuggestions() {
-		ObjectUtil.callWhenNonnull(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
+		ObjectUtil.safeCall(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
 	}
 
 	private static class SuggestionProviderImpl

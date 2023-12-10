@@ -73,7 +73,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                 Logger logger = inst.getLogger();
                 for (BaseEntity entity : entities)
                     logger.info("registered " + entity.getKey().toString() + " as entity!");
-                ObjectUtil.callWhenNonnull(inst.summonCommand, NMSRegularCommand::updateSuggestions);
+                ObjectUtil.safeCall(inst.summonCommand, NMSRegularCommand::updateSuggestions);
             }
         }
     }
@@ -104,7 +104,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                             + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
                 }
                 if (entity instanceof FeatureCommandSummon)
-                    ObjectUtil.callWhenNonnull(inst.summonCommand, NMSRegularCommand::updateSuggestions);
+                    ObjectUtil.safeCall(inst.summonCommand, NMSRegularCommand::updateSuggestions);
             }
         }
     }
@@ -119,7 +119,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + entity.getKey().toString());
             if (entity instanceof FeatureCommandSummon)
-                ObjectUtil.callWhenNonnull(inst.summonCommand, NMSRegularCommand::updateSuggestions);
+                ObjectUtil.safeCall(inst.summonCommand, NMSRegularCommand::updateSuggestions);
         }
     }
 
@@ -146,7 +146,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             for (NamespacedKey key : keySet) {
                 logger.info("unregistered " + key.toString());
             }
-            ObjectUtil.callWhenNonnull(inst.summonCommand, NMSRegularCommand::updateSuggestions);
+            ObjectUtil.safeCall(inst.summonCommand, NMSRegularCommand::updateSuggestions);
         }
     }
 

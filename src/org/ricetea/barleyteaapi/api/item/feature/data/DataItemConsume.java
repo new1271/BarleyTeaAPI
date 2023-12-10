@@ -49,7 +49,7 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
         DataItemType replacementType = this.replacementType;
         if (replacementType == null)
             this.replacementType = replacementType = ObjectUtil
-                    .letNonNull(ObjectUtil.mapWhenNonnull(getReplacement(), BaseItem::getItemType),
+                    .letNonNull(ObjectUtil.safeMap(getReplacement(), BaseItem::getItemType),
                             DataItemType.empty());
         return replacementType;
     }

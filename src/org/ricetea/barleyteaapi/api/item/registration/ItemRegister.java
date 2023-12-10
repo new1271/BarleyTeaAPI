@@ -56,7 +56,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
                 Logger logger = inst.getLogger();
                 logger.info("registered " + item.getKey().toString() + " as item!");
                 if (item instanceof FeatureCommandGive) {
-                    ObjectUtil.callWhenNonnull(inst.giveCommand, NMSRegularCommand::updateSuggestions);
+                    ObjectUtil.safeCall(inst.giveCommand, NMSRegularCommand::updateSuggestions);
                 }
                 if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
                     ItemTickTask.getInstance().start();
@@ -73,7 +73,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
             Logger logger = inst.getLogger();
             logger.info("unregistered " + item.getKey().toString());
             if (item instanceof FeatureCommandGive) {
-                ObjectUtil.callWhenNonnull(inst.giveCommand, NMSRegularCommand::updateSuggestions);
+                ObjectUtil.safeCall(inst.giveCommand, NMSRegularCommand::updateSuggestions);
             }
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();
@@ -85,7 +85,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public void unregisterAll() {
         var keySet = Collections.unmodifiableSet(lookupTable.keySet());
         lookupTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
                 logger.info("unregistered " + key.getKey().toString());

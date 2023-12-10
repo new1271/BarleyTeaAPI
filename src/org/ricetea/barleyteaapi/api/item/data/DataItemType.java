@@ -105,7 +105,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     @Override
     public NamespacedKey getKey() {
         return ObjectUtil.letNonNull(
-                mapLeftOrRight(Material::getKey, BaseItem::getKey),
+                map(Material::getKey, BaseItem::getKey),
                 NamespacedKeyUtil::empty);
     }
 

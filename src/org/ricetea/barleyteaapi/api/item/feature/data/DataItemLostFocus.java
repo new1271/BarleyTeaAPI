@@ -55,7 +55,7 @@ public final class DataItemLostFocus extends BasePlayerFeatureData<PlayerItemHel
         ItemStack itemStackGotFocus = getItemStackGotFocus();
         if (itemGotFocusType == null || this.itemStackGotFocus != itemStackGotFocus) {
             this.itemGotFocusType = itemGotFocusType = ObjectUtil
-                    .letNonNull(ObjectUtil.mapWhenNonnull(itemStackGotFocus, BaseItem::getItemType),
+                    .letNonNull(ObjectUtil.safeMap(itemStackGotFocus, BaseItem::getItemType),
                             DataItemType.empty());
             this.itemStackGotFocus = itemStackGotFocus;
         }

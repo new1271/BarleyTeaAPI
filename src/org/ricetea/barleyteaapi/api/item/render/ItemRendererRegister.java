@@ -3,8 +3,6 @@ package org.ricetea.barleyteaapi.api.item.render;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -13,22 +11,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-import net.kyori.adventure.text.Component;
-
-public final class ItemRendererRegister implements IRegister<AbstractItemRenderer> {
+public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     @Nonnull
     private static final Lazy<ItemRendererRegister> inst = Lazy.create(ItemRendererRegister::new);
 
     @Nonnull
-    private final Hashtable<NamespacedKey, AbstractItemRenderer> lookupTable = new Hashtable<>();
+    private final Hashtable<NamespacedKey, ItemRenderer> lookupTable = new Hashtable<>();
 
     private ItemRendererRegister() {
     }
@@ -39,8 +32,14 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
         return inst.get();
     }
 
+    @Nullable
+    public static ItemRendererRegister getInstanceUnsafe() {
+        BarleyTeaAPI.checkPluginUsable();
+        return inst.getUnsafe();
+    }
+
     @Override
-    public void register(@Nullable AbstractItemRenderer renderer) {
+    public void register(@Nullable ItemRenderer renderer) {
         if (renderer == null)
             return;
         lookupTable.put(renderer.getKey(), renderer);
@@ -54,11 +53,11 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
     }
 
     @Override
-    public void unregister(@Nullable AbstractItemRenderer renderer) {
+    public void unregister(@Nullable ItemRenderer renderer) {
         if (renderer == null)
             return;
         lookupTable.remove(renderer.getKey());
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             logger.info("unregistered " + renderer.getKey().toString());
         }
@@ -68,7 +67,7 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
     public void unregisterAll() {
         var keySet = Collections.unmodifiableSet(lookupTable.keySet());
         lookupTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
                 logger.info("unregistered " + key.getKey().toString());
@@ -77,11 +76,11 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<AbstractItemRenderer> predicate) {
+    public void unregisterAll(@Nullable Predicate<ItemRenderer> predicate) {
         if (predicate == null)
             unregisterAll();
         else {
-            for (AbstractItemRenderer item : listAll(predicate)) {
+            for (ItemRenderer item : listAll(predicate)) {
                 unregister(item);
             }
         }
@@ -89,18 +88,18 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     @Nullable
-    public AbstractItemRenderer lookup(@Nullable NamespacedKey key) {
+    public ItemRenderer lookup(@Nullable NamespacedKey key) {
         if (key == null)
             return null;
         return lookupTable.get(key);
     }
 
     @Nonnull
-    public AbstractItemRenderer lookupOrDefault(@Nullable NamespacedKey key,
-            @Nonnull AbstractItemRenderer defaultRenderer) {
+    public ItemRenderer lookupOrDefault(@Nullable NamespacedKey key,
+            @Nonnull ItemRenderer defaultRenderer) {
         if (key == null)
             return defaultRenderer;
-        return ObjectUtil.letNonNull(lookup(key), () -> new InvalidItemRenderer(key));
+        return ObjectUtil.letNonNull(lookup(key), defaultRenderer);
     }
 
     @Override
@@ -117,14 +116,14 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     @Nonnull
-    public Collection<AbstractItemRenderer> listAll() {
+    public Collection<ItemRenderer> listAll() {
         return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
                 Collections::emptySet);
     }
 
     @Override
     @Nonnull
-    public Collection<AbstractItemRenderer> listAll(@Nullable Predicate<AbstractItemRenderer> predicate) {
+    public Collection<ItemRenderer> listAll(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
                         lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
@@ -140,7 +139,7 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<AbstractItemRenderer> predicate) {
+    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
                         lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
@@ -150,7 +149,7 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     @Nullable
-    public AbstractItemRenderer findFirst(@Nullable Predicate<AbstractItemRenderer> predicate) {
+    public ItemRenderer findFirst(@Nullable Predicate<ItemRenderer> predicate) {
         var stream = lookupTable.values().stream();
         if (predicate != null)
             stream = stream.filter(predicate);
@@ -159,67 +158,10 @@ public final class ItemRendererRegister implements IRegister<AbstractItemRendere
 
     @Override
     @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<AbstractItemRenderer> predicate) {
+    public NamespacedKey findFirstKey(@Nullable Predicate<ItemRenderer> predicate) {
         var stream = lookupTable.entrySet().stream();
         if (predicate != null)
             stream = stream.filter(new Filter<>(predicate));
         return stream.map(new Mapper<>()).findFirst().orElse(null);
-    }
-
-    public static class InvalidItemRenderer extends AbstractItemRenderer {
-
-        public InvalidItemRenderer(@Nonnull NamespacedKey key) {
-            super(key);
-        }
-
-        @Override
-        public void render(@Nonnull ItemStack itemStack) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void beforeFirstRender(@Nonnull ItemStack itemStack) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected @Nullable List<Component> getItemLore(@Nonnull ItemMeta itemMeta) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void setItemLore(@Nonnull ItemMeta itemMeta, @Nullable List<? extends Component> lore) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void addItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag... flags) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void addItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull Set<ItemFlag> flags) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag... flags) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected void removeItemFlags(@Nonnull ItemMeta itemMeta, @Nonnull Set<ItemFlag> flags) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected boolean hasItemFlag(@Nonnull ItemMeta itemMeta, @Nonnull ItemFlag flag) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
-
-        @Override
-        protected @Nullable Set<ItemFlag> getItemFlags(@Nonnull ItemMeta itemMeta) {
-            throw new UnsupportedOperationException(getKey().toString() + " is isn't a registered ItemRenderer!");
-        }
     }
 }

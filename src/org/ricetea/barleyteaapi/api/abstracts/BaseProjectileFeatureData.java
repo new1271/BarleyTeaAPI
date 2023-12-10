@@ -32,7 +32,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
         super(event);
         this.entity = Objects.requireNonNull(entity);
         shooter = ObjectUtil.tryCast(entity.getShooter(), Entity.class);
-        shooterType = ObjectUtil.mapWhenNonnull(shooter,
+        shooterType = ObjectUtil.safeMap(shooter,
                 shooter -> Lazy.create(() -> BaseEntity.getEntityType(shooter)));
     }
 

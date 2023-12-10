@@ -57,7 +57,7 @@ public final class CraftingRecipeRegister extends RecipeRegister<BaseCraftingRec
         if (testingItemStacks.length < 9) {
             testingItemStacks = Arrays.copyOf(testingItemStacks, 9);
         }
-        return ObjectUtil.mapWhenNonnull(
+        return ObjectUtil.safeMap(
                 ObjectUtil.cast(Bukkit.getCraftingRecipe(testingItemStacks, Bukkit.getWorlds().get(0)), Keyed.class),
                 Keyed::getKey);
     }

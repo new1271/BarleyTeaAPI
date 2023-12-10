@@ -87,16 +87,26 @@ public class DataItemRarity {
 
     @Nonnull
     public Component apply(@Nonnull Component component) {
-        return apply(component, false);
+        return apply(component, false, false);
     }
 
     @Nonnull
-    public Component apply(@Nonnull Component component, boolean isRenamedItem) {
-        Component result = component.style(style);
-        if (isRenamedItem) {
-            result = result.decoration(TextDecoration.ITALIC,
-                    style.hasDecoration(TextDecoration.ITALIC) ? TextDecoration.State.FALSE
-                            : TextDecoration.State.TRUE);
+    public Component apply(@Nonnull Component component, boolean isRenamed, boolean force) {
+        Component result;
+        if (force) {
+            result = component.style(style);
+            if (isRenamed) {
+                result = result.decoration(TextDecoration.ITALIC, !style.hasDecoration(TextDecoration.ITALIC));
+            }
+        } else {
+            result = component;
+            if (component.color() == null) {
+                result = result.color(style.color());
+            }
+            if (component.decorations().isEmpty()) {
+                result = result.decorations(style.decorations())
+                        .decoration(TextDecoration.ITALIC, style.hasDecoration(TextDecoration.ITALIC) ^ isRenamed);
+            }
         }
         return result;
     }

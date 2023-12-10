@@ -46,7 +46,7 @@ public final class ObjectUtil {
     }
 
     @Nullable
-    public static <T, R> R mapWhenNonnull(@Nullable T obj, @Nullable NonnullFunction<T, R> mapFunction) {
+    public static <T, R> R safeMap(@Nullable T obj, @Nullable NonnullFunction<T, R> mapFunction) {
         if (obj == null || mapFunction == null) {
             return null;
         } else {
@@ -54,7 +54,7 @@ public final class ObjectUtil {
         }
     }
 
-    public static <T> void callWhenNonnull(@Nullable T obj, @Nullable NonnullConsumer<T> callFunction) {
+    public static <T> void safeCall(@Nullable T obj, @Nullable NonnullConsumer<T> callFunction) {
         if (obj != null && callFunction != null) {
             callFunction.accept(obj);
         }

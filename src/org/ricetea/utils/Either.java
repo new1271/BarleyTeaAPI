@@ -2,10 +2,14 @@ package org.ricetea.utils;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.ricetea.utils.function.NonnullFunction;
 
 public class Either<L, R> {
 
@@ -51,25 +55,59 @@ public class Either<L, R> {
         return left == null && right == null;
     }
 
-    public void processLeftOrRight(@Nonnull Consumer<L> consumerForLeft, @Nonnull Consumer<R> consumerForRight) {
+    public void call(@Nullable Consumer<L> consumerForLeft, @Nullable Consumer<R> consumerForRight) {
         L left = this.left;
         R right = this.right;
-        if (left != null)
+        if (left != null && consumerForLeft != null)
             consumerForLeft.accept(left);
-        if (right != null)
+        if (right != null && consumerForRight != null)
             consumerForRight.accept(right);
     }
 
+    public <T> void call(@Nullable BiConsumer<L, T> consumerForLeft, @Nullable BiConsumer<R, T> consumerForRight,
+            @Nullable T extra) {
+        L left = this.left;
+        R right = this.right;
+        if (left != null && consumerForLeft != null)
+            consumerForLeft.accept(left, extra);
+        if (right != null && consumerForRight != null)
+            consumerForRight.accept(right, extra);
+    }
+
     @Nullable
-    public <T> T mapLeftOrRight(@Nonnull Function<L, T> mapFunctionForLeft,
-            @Nonnull Function<R, T> mapFunctionForRight) {
+    public <T> T map(@Nullable Function<L, T> mapFunctionForLeft,
+            @Nullable Function<R, T> mapFunctionForRight) {
+        L left = this.left;
+        R right = this.right;
+        if (left != null && mapFunctionForLeft != null)
+            return mapFunctionForLeft.apply(left);
+        if (right != null && mapFunctionForRight != null)
+            return mapFunctionForRight.apply(right);
+        return null;
+    }
+
+    @Nullable
+    public <T, TReturn> TReturn map(@Nullable BiFunction<L, T, TReturn> mapFunctionForLeft,
+            @Nullable BiFunction<R, T, TReturn> mapFunctionForRight, @Nullable T extra) {
+        L left = this.left;
+        R right = this.right;
+        if (left != null && mapFunctionForLeft != null)
+            return mapFunctionForLeft.apply(left, extra);
+        if (right != null && mapFunctionForRight != null)
+            return mapFunctionForRight.apply(right, extra);
+        return null;
+    }
+
+    @Nonnull
+    public <T> T nonNullMap(@Nonnull NonnullFunction<L, T> mapFunctionForLeft,
+            @Nonnull NonnullFunction<R, T> mapFunctionForRight) {
         L left = this.left;
         R right = this.right;
         if (left != null)
             return mapFunctionForLeft.apply(left);
         if (right != null)
             return mapFunctionForRight.apply(right);
-        return null;
+        throw new NullPointerException();
     }
 
     public boolean equals(Object another) {
