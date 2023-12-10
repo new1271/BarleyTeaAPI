@@ -183,7 +183,7 @@ public abstract class BaseEntity implements Keyed {
 
     @Nonnull
     public final Component getDefaultNameComponent() {
-        return Component.translatable(getNameInTranslateKey());
+        return Component.translatable(getNameInTranslateKey(), getDefaultName());
     }
 
     @Deprecated

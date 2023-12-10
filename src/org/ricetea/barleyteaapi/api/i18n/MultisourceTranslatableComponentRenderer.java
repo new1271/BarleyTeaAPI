@@ -22,7 +22,7 @@ public class MultisourceTranslatableComponentRenderer extends TranslatableCompon
     }
 
     @Override
-    protected @Nullable MessageFormat translate(final @Nonnull String key, final @Nonnull Locale context) {
+    public @Nullable MessageFormat translate(final @Nonnull String key, final @Nonnull Locale context) {
         for (Translator source : sources) {
             MessageFormat format = source.translate(key, context);
             if (format != null)
