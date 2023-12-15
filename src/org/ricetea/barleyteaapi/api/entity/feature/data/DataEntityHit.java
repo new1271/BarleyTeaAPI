@@ -26,7 +26,7 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
         super(event, event.getHitEntity());
         projectileType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
         shooter = ObjectUtil.tryCast(event.getEntity().getShooter(), Entity.class);
-        shooterType = ObjectUtil.mapWhenNonnull(shooter,
+        shooterType = ObjectUtil.safeMap(shooter,
                 shooter -> Lazy.create(
                         () -> BaseEntity.getEntityType(shooter)));
     }

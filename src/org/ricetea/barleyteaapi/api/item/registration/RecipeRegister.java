@@ -90,7 +90,7 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
             }
         });
         collidingTable.clear();
-        Logger logger = ObjectUtil.mapWhenNonnull(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
+        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
                 afterUnregisterRecipe(logger, Objects.requireNonNull(key));

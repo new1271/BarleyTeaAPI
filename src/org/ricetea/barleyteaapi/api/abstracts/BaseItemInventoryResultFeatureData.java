@@ -37,7 +37,7 @@ public abstract class BaseItemInventoryResultFeatureData<T extends org.bukkit.ev
         DataItemType resultType = this.resultType;
         if (resultType == null)
             this.resultType = resultType = ObjectUtil
-                    .letNonNull(ObjectUtil.mapWhenNonnull(getResult(), BaseItem::getItemType), DataItemType.empty());
+                    .letNonNull(ObjectUtil.safeMap(getResult(), BaseItem::getItemType), DataItemType.empty());
         return resultType;
     }
 

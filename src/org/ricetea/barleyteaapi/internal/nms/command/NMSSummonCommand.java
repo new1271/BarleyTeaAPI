@@ -171,7 +171,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
 
     @Override
     public void updateSuggestions() {
-        ObjectUtil.callWhenNonnull(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
+        ObjectUtil.safeCall(suggestionProvider.get(), SuggestionProviderImpl::updateRegisterList);
     }
 
     public static class SuggestionProviderImpl

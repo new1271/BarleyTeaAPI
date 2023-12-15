@@ -20,7 +20,6 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -44,7 +43,7 @@ public final class CookListener implements Listener {
         Recipe cookRecipe = event.getRecipe();
         if (cookRecipe instanceof Keyed keyedRecipe) {
             DataItemType itemType = ObjectUtil.letNonNull(
-                    ObjectUtil.mapWhenNonnull(source, BaseItem::getItemType),
+                    ObjectUtil.safeMap(source, BaseItem::getItemType),
                     DataItemType::empty);
             NamespacedKey recipeKey = keyedRecipe.getKey();
             Block block = event.getBlock();
@@ -66,9 +65,6 @@ public final class CookListener implements Listener {
                     result = null;
                 }
                 if (oldResult != result) {
-                    if (BaseItem.isBarleyTeaItem(result)) {
-                        AbstractItemRenderer.renderItem(result);
-                    }
                     event.setResult(result != null ? result : event.getSource());
                 }
             }
@@ -102,7 +98,7 @@ public final class CookListener implements Listener {
         Recipe furnaceRecipe = event.getRecipe();
         if (furnaceRecipe instanceof Keyed keyedRecipe) {
             DataItemType itemType = ObjectUtil.letNonNull(
-                    ObjectUtil.mapWhenNonnull(event.getSource(), BaseItem::getItemType),
+                    ObjectUtil.safeMap(event.getSource(), BaseItem::getItemType),
                     DataItemType::empty);
             NamespacedKey recipeKey = keyedRecipe.getKey();
             if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
@@ -126,7 +122,7 @@ public final class CookListener implements Listener {
         Block block = event.getBlock();
         CampfireRecipe campfireRecipe = event.getRecipe();
         DataItemType itemType = ObjectUtil.letNonNull(
-                ObjectUtil.mapWhenNonnull(event.getSource(), BaseItem::getItemType),
+                ObjectUtil.safeMap(event.getSource(), BaseItem::getItemType),
                 DataItemType::empty);
         NamespacedKey recipeKey = campfireRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {

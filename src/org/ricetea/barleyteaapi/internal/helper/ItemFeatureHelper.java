@@ -310,7 +310,7 @@ public final class ItemFeatureHelper {
     public static ItemStack doItemRepair(@Nullable ItemStack itemStackA, @Nullable ItemStack itemStackB,
             @Nullable ItemStack itemStackResult) {
         BaseItem itemType = ObjectUtil
-                .letNonNull(ObjectUtil.mapWhenNonnull(itemStackA, BaseItem::getItemType), DataItemType::empty)
+                .letNonNull(ObjectUtil.safeMap(itemStackA, BaseItem::getItemType), DataItemType::empty)
                 .asCustomItem();
         if (itemType == null) {
             if (BaseItem.isBarleyTeaItem(itemStackB)) {

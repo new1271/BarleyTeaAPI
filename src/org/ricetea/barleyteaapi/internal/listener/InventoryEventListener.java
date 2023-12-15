@@ -26,9 +26,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemAnvilRepair;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemEnchant;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGrindstone;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
-import org.ricetea.barleyteaapi.util.ComponentUtil;
 import org.ricetea.utils.Lazy;
 
 public final class InventoryEventListener implements Listener {
@@ -66,7 +64,6 @@ public final class InventoryEventListener implements Listener {
                                 if (finalJob != null) {
                                     finalJob.accept(_itemStack);
                                 }
-                                AbstractItemRenderer.renderItem(_itemStack);
                             });
                 }
             }
@@ -100,8 +97,6 @@ public final class InventoryEventListener implements Listener {
                             }
                         }
                     }
-                    if (resultItem != null && BaseItem.isBarleyTeaItem(resultItem))
-                        AbstractItemRenderer.renderItem(resultItem);
                     if (oldResultItem != resultItem) {
                         event.setResult(resultItem);
                     }
@@ -122,7 +117,6 @@ public final class InventoryEventListener implements Listener {
         if (resultItem == null || resultItem.getType().isAir())
             return;
         final AnvilInventory inventory = event.getInventory();
-        final String renameText = inventory.getRenameText();
         final ItemStack firstItem = inventory.getFirstItem();
         final ItemStack secondItem = inventory.getSecondItem();
         if (firstItem != null) {
@@ -142,10 +136,6 @@ public final class InventoryEventListener implements Listener {
                             }
                         }
                     } else if (resultItem != null && BaseItem.isBarleyTeaItem(resultItem)) {
-                        if (!ComponentUtil.translatableComponentEquals(firstItem.displayName(),
-                                resultItem.displayName())) {
-                            BaseItem.setDisplayName(resultItem, renameText);
-                        }
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
                                 if (itemAnvilFeature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {
@@ -164,8 +154,6 @@ public final class InventoryEventListener implements Listener {
                             resultItem = null;
                         }
                     }
-                    if (resultItem != null && BaseItem.isBarleyTeaItem(resultItem))
-                        AbstractItemRenderer.renderItem(resultItem);
                     if (oldResultItem != resultItem) {
                         event.setResult(resultItem);
                     }

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.TextDecoration.State;
 
 public class DataItemRarity {
     @Nonnull
@@ -87,16 +88,26 @@ public class DataItemRarity {
 
     @Nonnull
     public Component apply(@Nonnull Component component) {
-        return apply(component, false);
+        return apply(component, false, false);
     }
 
     @Nonnull
-    public Component apply(@Nonnull Component component, boolean isRenamedItem) {
-        Component result = component.style(style);
-        if (isRenamedItem) {
-            result = result.decoration(TextDecoration.ITALIC,
-                    style.hasDecoration(TextDecoration.ITALIC) ? TextDecoration.State.FALSE
-                            : TextDecoration.State.TRUE);
+    public Component apply(@Nonnull Component component, boolean isRenamed, boolean force) {
+        Component result;
+        if (force) {
+            result = component.style(style)
+                    .decoration(TextDecoration.ITALIC,
+                            (style.hasDecoration(TextDecoration.ITALIC) ^ isRenamed) ? State.TRUE : State.FALSE);
+        } else {
+            result = component;
+            if (component.color() == null) {
+                result = result.color(style.color());
+            }
+            if (component.decorations().entrySet().stream().allMatch(entry -> entry.getValue().equals(State.NOT_SET))) {
+                result = result.decorations(style.decorations())
+                        .decoration(TextDecoration.ITALIC,
+                                (style.hasDecoration(TextDecoration.ITALIC) ^ isRenamed) ? State.TRUE : State.FALSE);
+            }
         }
         return result;
     }

@@ -19,7 +19,6 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -49,7 +48,7 @@ public final class CraftListener implements Listener {
         int availableItemCount = 0;
         for (int i = 0; i < craftingMatrixLength; i++) {
             ItemStack stack = craftingMatrix[i];
-            DataItemType itemType = ObjectUtil.letNonNull(ObjectUtil.mapWhenNonnull(stack, BaseItem::getItemType),
+            DataItemType itemType = ObjectUtil.letNonNull(ObjectUtil.safeMap(stack, BaseItem::getItemType),
                     DataItemType::empty);
             if (!itemType.isAir()) {
                 if (itemType.isRight()) {
@@ -122,9 +121,6 @@ public final class CraftListener implements Listener {
                     result = null;
                 }
                 if (oldResult != result) {
-                    if (BaseItem.isBarleyTeaItem(result)) {
-                        AbstractItemRenderer.renderItem(result);
-                    }
                     inventory.setResult(result);
                 }
             }

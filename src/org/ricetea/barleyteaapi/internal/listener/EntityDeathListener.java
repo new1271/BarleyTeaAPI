@@ -63,7 +63,7 @@ public final class EntityDeathListener implements Listener {
 
     private void onEntityDeath(@Nonnull EntityDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity entity = event.getEntity();
-        Entity damager = ObjectUtil.mapWhenNonnull(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
+        Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
                 lastDamageEvent, FeatureItemHoldEntityKill.class,
                 FeatureItemHoldEntityKill::handleItemHoldEntityKillEntity, DataItemHoldEntityKillEntity::new)) {
@@ -120,7 +120,7 @@ public final class EntityDeathListener implements Listener {
             }
         }
 
-        Entity damager = ObjectUtil.mapWhenNonnull(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
+        Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
                 lastDamageEvent, FeatureItemHoldEntityKill.class,
                 FeatureItemHoldEntityKill::handleItemHoldEntityKillPlayer, DataItemHoldEntityKillPlayer::new)) {

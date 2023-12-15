@@ -15,7 +15,6 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
-import org.ricetea.barleyteaapi.api.item.render.AbstractItemRenderer;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 
 public abstract class RegularItem extends BaseItem
@@ -59,7 +58,6 @@ public abstract class RegularItem extends BaseItem
                 }
                 itemStack.setItemMeta(damageable);
             }
-            AbstractItemRenderer.renderItem(itemStack);
         }
     }
 
@@ -92,9 +90,6 @@ public abstract class RegularItem extends BaseItem
         if (count > 0) {
             ItemStack itemStack = new ItemStack(getMaterialBasedOn(), count);
             if (tryRegister(itemStack, this::handleItemGive)) {
-                ItemMeta meta = itemStack.getItemMeta();
-                if (meta == null || !meta.hasDisplayName())
-                    setItemName(itemStack);
                 return itemStack;
             }
         }
@@ -106,9 +101,6 @@ public abstract class RegularItem extends BaseItem
     public boolean handleCommandGive(@Nonnull DataCommandGive data) {
         ItemStack itemStack = data.getItemStack();
         if (handleItemGive(itemStack)) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta == null || !meta.hasDisplayName())
-                setItemName(itemStack);
             return true;
         }
         return false;

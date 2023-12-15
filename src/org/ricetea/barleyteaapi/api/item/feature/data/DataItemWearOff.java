@@ -24,7 +24,7 @@ public final class DataItemWearOff extends BasePlayerFeatureData<PlayerArmorChan
     public DataItemWearOff(@Nonnull PlayerArmorChangeEvent event) {
         super(event);
         newItemType = Lazy.create(() -> ObjectUtil
-                .letNonNull(ObjectUtil.mapWhenNonnull(getNewItem(), BaseItem::getItemType), DataItemType::empty));
+                .letNonNull(ObjectUtil.safeMap(getNewItem(), BaseItem::getItemType), DataItemType::empty));
     }
 
     @Nonnull

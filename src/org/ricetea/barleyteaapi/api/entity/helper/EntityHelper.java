@@ -13,7 +13,7 @@ public final class EntityHelper {
 
     @Nullable
     public static Entity getProjectileShooterEntity(@Nullable Projectile projectile) {
-        return ObjectUtil.tryCast(ObjectUtil.mapWhenNonnull(projectile, Projectile::getShooter), Entity.class);
+        return ObjectUtil.tryCast(ObjectUtil.safeMap(projectile, Projectile::getShooter), Entity.class);
     }
 
     public static boolean isPlayer(@Nullable DataEntityType entityType) {

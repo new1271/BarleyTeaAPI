@@ -26,7 +26,7 @@ public class ExcellentEnchantsBridge {
 
     @Nullable
     public static String getEnchantmentName(@Nullable Enchantment enchantment) {
-        return ObjectUtil.mapWhenNonnull(ObjectUtil.tryCast(enchantment, ExcellentEnchant.class),
+        return ObjectUtil.safeMap(ObjectUtil.tryCast(enchantment, ExcellentEnchant.class),
                 ExcellentEnchant::getDisplayName);
     }
 
@@ -37,7 +37,7 @@ public class ExcellentEnchantsBridge {
 
     @Nullable
     public static TextColor getEnchantmentTierColorUnsafe(@Nonnull Enchantment enchantment) {
-        return ObjectUtil.mapWhenNonnull(
+        return ObjectUtil.safeMap(
                 (Style) ChatColorHelper.toKyoriStyle(((ExcellentEnchant) enchantment).getTier().getColor()),
                 Style::color);
     }
