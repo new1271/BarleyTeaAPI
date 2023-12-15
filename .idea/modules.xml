@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BarleyTeaAPI/BarleyTeaAPI.BarleyTeaAPI.main.iml" filepath="$PROJECT_DIR$/.idea/modules/BarleyTeaAPI/BarleyTeaAPI.BarleyTeaAPI.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nms/v1_20_R1/BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.main.iml" filepath="$PROJECT_DIR$/.idea/modules/nms/v1_20_R1/BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nms/v1_20_R1/BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.test.iml" filepath="$PROJECT_DIR$/.idea/modules/nms/v1_20_R1/BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1389752377/org.ricetea.BarleyTeaAPI.BarleyTeaAPI.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-1389752377/org.ricetea.BarleyTeaAPI.BarleyTeaAPI.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.main.iml" filepath="$PROJECT_DIR$/.idea/modules/org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.test.iml" filepath="$PROJECT_DIR$/.idea/modules/org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.test.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="barleyteaapi.internal.nms.v1_20_R1" target="17" />
+      <module name="barleyteaapi.internal.nms.v1_20_R1.main" target="17" />
+      <module name="barleyteaapi.internal.nms.v1_20_R1.test" target="17" />
+      <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1" target="17" />
+      <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1.main" target="17" />
+      <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1.test" target="17" />
+      <module name="BarleyTeaAPI.nms.v1_20_R1" target="17" />
+      <module name="BarleyTeaAPI.nms.v1_20_R1.main" target="17" />
+      <module name="BarleyTeaAPI.nms.v1_20_R1.test" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
