@@ -13,7 +13,7 @@ public class NamespacedKeyUtil {
 
     public static final String BarleyTeaAPI = "barleyteaapi";
 
-    private NamespacedKeyUtil() {
+    protected NamespacedKeyUtil() {
     }
 
     @Nonnull
