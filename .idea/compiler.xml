@@ -3,10 +3,13 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="BarleyTeaAPI" target="17" />
+      <module name="BarleyTeaAPI.BarleyTeaAPI" target="17" />
+      <module name="BarleyTeaAPI.BarleyTeaAPI.test" target="17" />
       <module name="barleyteaapi.internal.nms.v1_20_R1" target="17" />
       <module name="barleyteaapi.internal.nms.v1_20_R1.main" target="17" />
       <module name="barleyteaapi.internal.nms.v1_20_R1.test" target="17" />
       <module name="BarleyTeaAPI.main" target="17" />
+      <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports" target="17" />
       <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1" target="17" />
       <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1.main" target="17" />
       <module name="BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports-v1-20-R1.test" target="17" />
@@ -14,6 +17,9 @@
       <module name="BarleyTeaAPI.nms.v1_20_R1.main" target="17" />
       <module name="BarleyTeaAPI.nms.v1_20_R1.test" target="17" />
       <module name="BarleyTeaAPI.test" target="17" />
+      <module name="org.ricetea.BarleyTeaAPI.BarleyTeaAPI.main" target="17" />
+      <module name="org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.main" target="17" />
+      <module name="org.ricetea.BarleyTeaAPI.nms.BarleyTeaAPI-NMS-Supports.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
