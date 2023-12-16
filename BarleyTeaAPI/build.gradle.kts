@@ -45,12 +45,6 @@ tasks {
             expand(props)
         }
     }
-
-    jar {
-        manifest {
-            archiveBaseName.set("BarleyTeaAPI.jar")
-        }
-    }
 }
 
 tasks.register("prepareKotlinBuildScriptModel", {})

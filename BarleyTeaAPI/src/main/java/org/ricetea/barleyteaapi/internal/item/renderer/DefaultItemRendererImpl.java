@@ -1,14 +1,11 @@
 package org.ricetea.barleyteaapi.internal.item.renderer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Multimap;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -38,13 +35,9 @@ import org.ricetea.utils.Box;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-import com.google.common.collect.Multimap;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     private static final @Nonnull Lazy<DefaultItemRendererImpl> _inst = Lazy.create(DefaultItemRendererImpl::new);
@@ -90,7 +83,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         AlternativeItemState.store(meta);
 
         List<Component> itemLore = meta.lore();
-        List<Component> renderLore = new ArrayList<Component>();
+        List<Component> renderLore = new ArrayList<>();
 
         DataItemType itemType = DataItemType.get(itemStack);
 
@@ -167,7 +160,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
             if (attributeMap == null)
                 attributeMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
-            if (attributeMap != null && !attributeMap.isEmpty()) {
+            if (!attributeMap.isEmpty()) {
                 ArrayList<Component> slotAttributeLore = new ArrayList<>();
                 HashMap<EquipmentSlot, TreeMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
                 final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
@@ -183,7 +176,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     modifiers.forEach(modifier -> {
                         double amount = modifier.getAmount();
                         Operation operation = modifier.getOperation();
-                        if (amount == 0 || operation == null)
+                        if (amount == 0)
                             return;
                         EquipmentSlot slot = modifier.getSlot();
                         if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
@@ -224,29 +217,16 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     TreeMap<Attribute, double[]> attributeOperationMap = slotAttributeMap.get(slot);
                     if (attributeOperationMap == null)
                         continue;
-                    String slotStringKey;
-                    switch (slot) {
-                        case CHEST:
-                            slotStringKey = "item.modifiers.chest";
-                            break;
-                        case FEET:
-                            slotStringKey = "item.modifiers.feet";
-                            break;
-                        case HAND:
-                            slotStringKey = "item.modifiers.mainhand";
-                            break;
-                        case HEAD:
-                            slotStringKey = "item.modifiers.head";
-                            break;
-                        case LEGS:
-                            slotStringKey = "item.modifiers.legs";
-                            break;
-                        case OFF_HAND:
-                            slotStringKey = "item.modifiers.offhand";
-                            break;
-                        default:
-                            continue;
-                    }
+                    String slotStringKey = switch (slot) {
+                        case CHEST -> "item.modifiers.chest";
+                        case FEET -> "item.modifiers.feet";
+                        case HAND -> "item.modifiers.mainhand";
+                        case HEAD -> "item.modifiers.head";
+                        case LEGS -> "item.modifiers.legs";
+                        case OFF_HAND -> "item.modifiers.offhand";
+                        default -> "item.modifiers." +
+                                slot.toString().toLowerCase().replace("_", "");
+                    };
                     slotAttributeLore.add(Component.translatable(slotStringKey)
                             .color(NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false));
@@ -266,11 +246,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                                     value *= 10;
                                 }
                                 value = Math.round(value * 100.0) / 100.0;
-                                String valueString = Double.toString(value);
-                                if (valueString.endsWith(".0"))
-                                    valueString = valueString.substring(0, valueString.length() - 2);
                                 slotAttributeLore.add(Component.translatable(format)
-                                        .args(Component.text(valueString),
+                                        .args(Component.text(value),
                                                 Component.translatable(attributeTranslateKey))
                                         .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
                                         .decoration(TextDecoration.ITALIC, false));
@@ -293,14 +270,14 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 if (toolSpeedString.endsWith(".0"))
                     toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
                 toolAttributeLore.add(Component.space().append(
-                        Component.translatable("attribute.modifier.equals.0").args(
-                                Component.text(toolDamageString),
-                                Component.translatable("attribute.name.generic.attack_damage")))
+                                Component.translatable("attribute.modifier.equals.0").args(
+                                        Component.text(toolDamageString),
+                                        Component.translatable("attribute.name.generic.attack_damage")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
                 toolAttributeLore.add(Component.space().append(
-                        Component.translatable("attribute.modifier.equals.0").args(
-                                Component.text(toolSpeedString),
-                                Component.translatable("attribute.name.generic.attack_speed")))
+                                Component.translatable("attribute.modifier.equals.0").args(
+                                        Component.text(toolSpeedString),
+                                        Component.translatable("attribute.name.generic.attack_speed")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
                 renderLore.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, false));
