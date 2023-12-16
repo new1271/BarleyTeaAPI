@@ -245,11 +245,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                                 else if (attribute.equals(Attribute.GENERIC_KNOCKBACK_RESISTANCE)) {
                                     value *= 10;
                                 }
-                                value = Math.round(value * 100.0) / 100.0;
+                                boolean isPositive = value >= 0;
+                                value = Math.abs(Math.round(value * 100.0) / 100.0);
+                                String valueString = Double.toString(value);
+                                if (valueString.endsWith(".0"))
+                                    valueString = valueString.substring(0, valueString.length() - 2);
                                 slotAttributeLore.add(Component.translatable(format)
-                                        .args(Component.text(value),
+                                        .args(Component.text(valueString),
                                                 Component.translatable(attributeTranslateKey))
-                                        .color(value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED)
+                                        .color(isPositive ? NamedTextColor.BLUE : NamedTextColor.RED)
                                         .decoration(TextDecoration.ITALIC, false));
                             }
                         }
