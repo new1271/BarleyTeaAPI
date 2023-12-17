@@ -30,8 +30,10 @@ import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderUtil;
 import org.ricetea.barleyteaapi.internal.item.renderer.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
+import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.WithFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -95,11 +97,9 @@ public final class ProtocolLibBridge {
                     for (int i = 0; i < size; i++) {
                         legacyModifier.modify(i, rawComponent -> {
                             Component component = serializer.deserialize(rawComponent.getJson());
-                            if (component != null) {
-                                rawComponent.setJson(serializer.serialize(
-                                        Objects.requireNonNull(
-                                                searchHoverEventAndRender(component, player))));
-                            }
+                            rawComponent.setJson(serializer.serialize(
+                                    Objects.requireNonNull(
+                                            searchHoverEventAndRender(component, player))));
                             return rawComponent;
                         });
                     }
@@ -112,7 +112,7 @@ public final class ProtocolLibBridge {
             {
                 StructureModifier<ItemStack> modifier = container.getItemModifier();
                 for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStack -> renderItem(itemStack, player));
+                    modifier.modify(i, itemStack -> renderItem(itemStack, player).obj());
                 }
             }
             if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
@@ -120,7 +120,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList.forEach(pair -> pair
-                                .setSecond(renderItem(pair.getSecond(), player)));
+                                .setSecond(renderItem(pair.getSecond(), player).obj()));
                         return itemStackList;
                     });
                 }
@@ -130,11 +130,30 @@ public final class ProtocolLibBridge {
                     modifier.modify(i, recipeList -> {
                         recipeList
                                 .replaceAll(recipe -> {
-                                    recipe.setIngredients(
-                                            recipe.getIngredients()
-                                                    .stream()
-                                                    .map(itemStack -> renderItem(itemStack, player))
-                                                    .toList());
+                                    Box<Boolean> flagBox = Box.box(false);
+                                    List<ItemStack> newIngredients = recipe.getIngredients()
+                                            .stream()
+                                            .map(itemStack -> {
+                                                WithFlag<ItemStack> newItem = renderItem(itemStack, player);
+                                                if (newItem.flag()) {
+                                                    flagBox.set(true);
+                                                }
+                                                return newItem.obj();
+                                            })
+                                            .toList();
+                                    ItemStack oldResult = recipe.getResult();
+                                    WithFlag<ItemStack> newResult = renderItem(oldResult, player);
+                                    if (newResult.flag()) {
+                                        MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
+                                                recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
+                                                recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
+                                        newRecipe.setIngredients(newIngredients);
+                                        return newRecipe;
+                                    } else {
+                                        if (Boolean.TRUE.equals(flagBox.get())) {
+                                            recipe.setIngredients(newIngredients);
+                                        }
+                                    }
                                     return recipe;
                                 });
                         return recipeList;
@@ -145,7 +164,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList
-                                .replaceAll(itemStack -> renderItem(itemStack, player));
+                                .replaceAll(itemStack -> renderItem(itemStack, player).obj());
                         return itemStackList;
                     });
                 }
@@ -168,14 +187,14 @@ public final class ProtocolLibBridge {
         }
 
         @Nonnull
-        private static ItemStack renderItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
+        private static WithFlag<ItemStack> renderItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
             ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
             if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
                 renderer = ItemRenderer.getDefault();
             }
             if (renderer != null)
                 itemStack = renderer.render(itemStack, player);
-            return itemStack;
+            return new WithFlag<>(itemStack, renderer != null);
         }
 
         @Nonnull
@@ -194,7 +213,7 @@ public final class ProtocolLibBridge {
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
-                        itemStack = renderItem(itemStack, player);
+                        itemStack = renderItem(itemStack, player).obj();
                         return itemStack.displayName().hoverEvent(itemStack.asHoverEvent());
                     }
                 }
@@ -259,11 +278,9 @@ public final class ProtocolLibBridge {
                     for (int i = 0; i < size; i++) {
                         legacyModifier.modify(i, rawComponent -> {
                             Component component = serializer.deserialize(rawComponent.getJson());
-                            if (component != null) {
-                                rawComponent.setJson(serializer.serialize(
-                                        Objects.requireNonNull(
-                                                applyTranslateFallbacks(translator, component, locale))));
-                            }
+                            rawComponent.setJson(serializer.serialize(
+                                    Objects.requireNonNull(
+                                            applyTranslateFallbacks(translator, component, locale))));
                             return rawComponent;
                         });
                     }
@@ -276,7 +293,7 @@ public final class ProtocolLibBridge {
             {
                 StructureModifier<ItemStack> modifier = container.getItemModifier();
                 for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStack -> applyTranslateFallbacks(translator, itemStack, locale));
+                    modifier.modify(i, itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
                 }
             }
             if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
@@ -284,7 +301,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList.forEach(pair -> pair
-                                .setSecond(applyTranslateFallbacks(translator, pair.getSecond(), locale)));
+                                .setSecond(applyTranslateFallbacks(translator, pair.getSecond(), locale).obj()));
                         return itemStackList;
                     });
                 }
@@ -294,14 +311,32 @@ public final class ProtocolLibBridge {
                     modifier.modify(i, recipeList -> {
                         recipeList
                                 .replaceAll(recipe -> {
-                                    recipe.setIngredients(
-                                            recipe.getIngredients()
-                                                    .stream()
-                                                    .map(itemstack -> applyTranslateFallbacks(translator, itemstack,
-                                                            locale))
-                                                    .toList());
+                                    Box<Boolean> flagBox = Box.box(false);
+                                    List<ItemStack> newIngredients = recipe.getIngredients()
+                                            .stream()
+                                            .map(itemStack -> {
+                                                WithFlag<ItemStack> newItem = applyTranslateFallbacks(translator, itemStack, locale);
+                                                if (newItem.flag())
+                                                    flagBox.set(true);
+                                                return newItem.obj();
+                                            })
+                                            .toList();
+                                    ItemStack oldResult = recipe.getResult();
+                                    WithFlag<ItemStack> newResult = applyTranslateFallbacks(translator, oldResult, locale);
+                                    if (newResult.flag()) {
+                                        MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
+                                                recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
+                                                recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
+                                        newRecipe.setIngredients(newIngredients);
+                                        return newRecipe;
+                                    } else {
+                                        if (Boolean.TRUE.equals(flagBox.get())) {
+                                            recipe.setIngredients(newIngredients);
+                                        }
+                                    }
                                     return recipe;
                                 });
+
                         return recipeList;
                     });
                 }
@@ -310,7 +345,7 @@ public final class ProtocolLibBridge {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList
-                                .replaceAll(itemStack -> applyTranslateFallbacks(translator, itemStack, locale));
+                                .replaceAll(itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
                         return itemStackList;
                     });
                 }
@@ -333,11 +368,11 @@ public final class ProtocolLibBridge {
         }
 
         @Nonnull
-        private static ItemStack applyTranslateFallbacks(@Nonnull Translator translator, @Nonnull ItemStack itemStack,
-                                                         @Nonnull Locale locale) {
+        private static WithFlag<ItemStack> applyTranslateFallbacks(@Nonnull Translator translator, @Nonnull ItemStack itemStack,
+                                                                   @Nonnull Locale locale) {
             ItemMeta meta = itemStack.getItemMeta();
+            boolean isDirty = false;
             if (meta != null) {
-                boolean isDirty = false;
                 Component displayName = meta.displayName();
                 if (displayName != null) {
                     meta.displayName(applyTranslateFallbacks(translator, displayName, locale));
@@ -350,10 +385,11 @@ public final class ProtocolLibBridge {
                             .toList());
                     isDirty = true;
                 }
-                if (isDirty)
+                if (isDirty) {
                     itemStack.setItemMeta(meta);
+                }
             }
-            return itemStack;
+            return new WithFlag<>(itemStack, isDirty);
         }
 
         @Nonnull
@@ -429,7 +465,7 @@ public final class ProtocolLibBridge {
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
-                        return component.hoverEvent(applyTranslateFallbacks(translator, itemStack, locale).asHoverEvent());
+                        return component.hoverEvent(applyTranslateFallbacks(translator, itemStack, locale).obj().asHoverEvent());
                     }
                 }
             }
