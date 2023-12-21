@@ -82,8 +82,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         AlternativeItemState.restore(meta);
         AlternativeItemState.store(meta);
 
-        List<Component> itemLore = meta.lore();
-        List<Component> renderLore = new ArrayList<>();
+        Stack<Component> renderLoreStack = new Stack<>();
 
         DataItemType itemType = DataItemType.get(itemStack);
 
@@ -107,7 +106,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
             boolean hasExcellentEnchants = apiInstance.hasExcellentEnchants;
-            final List<Component> finalRenderLore = renderLore;
+            final Stack<Component> enchantLoreStack = new Stack<>();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
             meta.getEnchants().forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
@@ -144,24 +143,19 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     component = component.append(Component.text(" ").append(levelComponent)
                             .color(color).decoration(TextDecoration.ITALIC, false));
                 }
-                finalRenderLore.add(component);
+                enchantLoreStack.push(component);
             });
             toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
+            renderLoreStack.addAll(enchantLoreStack);
         }
-
-        if (itemLore != null) {
-            renderLore.addAll(itemLore);
-        }
-
-        renderLore.add(Component.empty());
 
         if (!meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-            ArrayList<Component> toolAttributeLore = (isTool ? new ArrayList<>() : null);
+            Stack<Component> toolAttributeLoreStack = (isTool ? new Stack<>() : null);
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
             if (attributeMap == null)
                 attributeMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
             if (!attributeMap.isEmpty()) {
-                ArrayList<Component> slotAttributeLore = new ArrayList<>();
+                Stack<Component> slotAttributeLoreStack = new Stack<>();
                 HashMap<EquipmentSlot, TreeMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
                 final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
                 final Box<Double> toolSpeedIncreaseBox = Box.box(0.0);
@@ -210,12 +204,11 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 });
                 toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
                 toolSpeed += ObjectUtil.letNonNull(toolSpeedIncreaseBox.get(), 0.0);
-
                 for (EquipmentSlot slot : slots) {
                     if (slot == null)
                         continue;
                     TreeMap<Attribute, double[]> attributeOperationMap = slotAttributeMap.get(slot);
-                    if (attributeOperationMap == null)
+                    if (attributeOperationMap == null || attributeOperationMap.isEmpty())
                         continue;
                     String slotStringKey = switch (slot) {
                         case CHEST -> "item.modifiers.chest";
@@ -227,7 +220,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                         default -> "item.modifiers." +
                                 slot.toString().toLowerCase().replace("_", "");
                     };
-                    slotAttributeLore.add(Component.translatable(slotStringKey)
+                    slotAttributeLoreStack.push(Component.translatable(slotStringKey)
                             .color(NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false));
                     attributeOperationMap.forEach((attribute, operationValues) -> {
@@ -250,7 +243,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                                 String valueString = Double.toString(value);
                                 if (valueString.endsWith(".0"))
                                     valueString = valueString.substring(0, valueString.length() - 2);
-                                slotAttributeLore.add(Component.translatable(format)
+                                slotAttributeLoreStack.push(Component.translatable(format)
                                         .args(Component.text(valueString),
                                                 Component.translatable(attributeTranslateKey))
                                         .color(isPositive ? NamedTextColor.BLUE : NamedTextColor.RED)
@@ -258,13 +251,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                             }
                         }
                     });
-                    slotAttributeLore.add(Component.empty());
+                    slotAttributeLoreStack.push(Component.empty());
                 }
-                renderLore.addAll(slotAttributeLore);
-                if (!isTool)
-                    renderLore.remove(renderLore.size() - 1);
+                if (!slotAttributeLoreStack.isEmpty()) {
+                    slotAttributeLoreStack.pop();
+                    renderLoreStack.push(Component.empty());
+                    renderLoreStack.addAll(slotAttributeLoreStack);
+                }
             }
-            if (toolAttributeLore != null) {
+            if (toolAttributeLoreStack != null) {
                 toolDamage = Math.round(toolDamage * 100.0) / 100.0;
                 String toolDamageString = Double.toString(toolDamage);
                 if (toolDamageString.endsWith(".0"))
@@ -273,19 +268,20 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 String toolSpeedString = Double.toString(toolSpeed);
                 if (toolSpeedString.endsWith(".0"))
                     toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
-                toolAttributeLore.add(Component.space().append(
+                toolAttributeLoreStack.push(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false));
+                toolAttributeLoreStack.push(Component.space().append(
                                 Component.translatable("attribute.modifier.equals.0").args(
                                         Component.text(toolDamageString),
                                         Component.translatable("attribute.name.generic.attack_damage")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                toolAttributeLore.add(Component.space().append(
+                toolAttributeLoreStack.push(Component.space().append(
                                 Component.translatable("attribute.modifier.equals.0").args(
                                         Component.text(toolSpeedString),
                                         Component.translatable("attribute.name.generic.attack_speed")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                renderLore.add(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false));
-                renderLore.addAll(toolAttributeLore);
+                renderLoreStack.push(Component.empty());
+                renderLoreStack.addAll(toolAttributeLoreStack);
             }
         }
 
@@ -312,24 +308,23 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 if (dura < maxDura ||
                         feature instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
                                 customDurabilityExtra.isAlwaysShowDurabilityHint(itemStack)) {
-                    renderLore.add(Component.translatable("item.durability", NamedTextColor.WHITE)
+                    renderLoreStack.push(Component.translatable("item.durability", NamedTextColor.WHITE)
                             .args(Component.text(dura), Component.text(maxDura))
                             .decoration(TextDecoration.ITALIC, false));
                 }
             }
-            renderLore.add(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
+            renderLoreStack.push(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
 
             if (customItem instanceof FeatureItemDisplay feature) {
-                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, renderLore);
+                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, renderLoreStack);
                 feature.handleItemDisplay(data);
                 displayName = data.getDisplayName();
-                renderLore = data.getLore();
             }
         }
 
         meta.displayName(displayName);
-        meta.lore(renderLore);
+        meta.lore(renderLoreStack);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(meta);
         return itemStack;
