@@ -37,7 +37,10 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Stack;
+import java.util.TreeMap;
 
 public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     private static final @Nonnull Lazy<DefaultItemRendererImpl> _inst = Lazy.create(DefaultItemRendererImpl::new);
@@ -88,21 +91,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         boolean isTool = itemType.nonNullMap(ItemHelper::materialIsTool, BaseItem::isTool);
 
-        double toolDamage, toolSpeed;
-        if (isTool) {
-            if (player == null) {
-                toolDamage = DEFAULT_TOOL_DAMAGE;
-                toolSpeed = DEFAULT_TOOL_SPEED;
-            } else {
-                AttributeInstance attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
-                toolDamage = attributeInstance == null ? DEFAULT_TOOL_DAMAGE : attributeInstance.getBaseValue();
-                attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
-                toolSpeed = attributeInstance == null ? DEFAULT_TOOL_SPEED : attributeInstance.getBaseValue();
-            }
-        } else {
-            toolDamage = 0;
-            toolSpeed = 0;
-        }
+        double toolDamage = 0, toolSpeed = 0;
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
             boolean hasExcellentEnchants = apiInstance.hasExcellentEnchants;
@@ -260,6 +249,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 }
             }
             if (toolAttributeLoreStack != null) {
+                if (player == null) {
+                    toolDamage += DEFAULT_TOOL_DAMAGE;
+                    toolSpeed += DEFAULT_TOOL_SPEED;
+                } else {
+                    AttributeInstance attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+                    toolDamage += attributeInstance == null ? DEFAULT_TOOL_DAMAGE : attributeInstance.getBaseValue();
+                    attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
+                    toolSpeed += attributeInstance == null ? DEFAULT_TOOL_SPEED : attributeInstance.getBaseValue();
+                }
                 toolDamage = Math.round(toolDamage * 100.0) / 100.0;
                 String toolDamageString = Double.toString(toolDamage);
                 if (toolDamageString.endsWith(".0"))
