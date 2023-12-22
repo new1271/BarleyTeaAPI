@@ -173,9 +173,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     public final boolean isCertainEntity(@Nullable Entity entity) {
-        return entity != null
-                && key.toString().equals(entity.getPersistentDataContainer().get(DefaultNamespacedKey,
-                PersistentDataType.STRING));
+        return entity != null && key.equals(getEntityID(entity));
     }
 
     @Nonnull

@@ -204,9 +204,7 @@ public abstract class BaseItem implements Keyed, Translatable {
 
     public final boolean isCertainItem(@Nullable ItemStack itemStack) {
         return itemStack != null && itemStack.hasItemMeta()
-                && key.toString().equals(
-                itemStack.getItemMeta().getPersistentDataContainer()
-                        .get(DefaultNamespacedKey, PersistentDataType.STRING));
+                && key.equals(getItemID(itemStack));
     }
 
     public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {

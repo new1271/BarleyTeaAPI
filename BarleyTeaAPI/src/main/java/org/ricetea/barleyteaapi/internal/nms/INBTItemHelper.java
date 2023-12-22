@@ -6,5 +6,5 @@ import javax.annotation.Nonnull;
 
 public interface INBTItemHelper extends IHelper {
     @Nonnull
-    ItemStack copyNbt(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying);
+    ItemStack copyNbtWhenSmithing(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying);
 }

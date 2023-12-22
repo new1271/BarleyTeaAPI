@@ -35,7 +35,7 @@ public final class SmithingHelper {
                 0);
         INBTItemHelper helper = NMSHelperRegister.getHelper(INBTItemHelper.class);
         if (helper != null) {
-            result = helper.copyNbt(result, original);
+            result = helper.copyNbtWhenSmithing(result, original);
             if (damage > 0) {
                 DataItemType resultType = recipe.getResult();
                 if (resultType.isVanilla()) {

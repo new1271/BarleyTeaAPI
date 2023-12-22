@@ -174,8 +174,7 @@ public abstract class BaseBlock implements Keyed {
         if (block != null) {
             PersistentDataContainer container = getPersistentDataContainer(block, false);
             if (container != null) {
-                return key.toString()
-                        .equals(container.get(DefaultNamespacedKey, PersistentDataType.STRING));
+                return key.equals(getBlockID(container));
             }
         }
         return false;

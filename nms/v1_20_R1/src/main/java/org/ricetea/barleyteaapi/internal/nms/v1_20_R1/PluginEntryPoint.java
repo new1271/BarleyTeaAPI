@@ -77,7 +77,7 @@ public final class PluginEntryPoint extends JavaPlugin implements Listener {
         NMSHelperRegister.setHelper(new INBTItemHelper() {
             @Nonnull
             @Override
-            public ItemStack copyNbt(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying) {
+            public ItemStack copyNbtWhenSmithing(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying) {
                 var compound = NBTItemHelper.getNBT(original);
                 var compound2 = NBTItemHelper.getNBT(itemStackCopying);
                 return NBTItemHelper.setNBT(original, NBTTagCompoundHelper.merge(compound2, compound));

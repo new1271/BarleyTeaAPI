@@ -152,6 +152,10 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             enchantLoreStack.clear();
         }
 
+        var lore = meta.lore();
+        if (lore != null && !lore.isEmpty())
+            renderLoreStack.addAll(meta.lore());
+
         if (!meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
             Queue<Component> toolAttributeLoreStack = (isTool ? renderLoreStackList.get(2).get() : null);
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
