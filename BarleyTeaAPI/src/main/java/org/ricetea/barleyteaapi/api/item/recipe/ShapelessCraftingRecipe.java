@@ -17,7 +17,7 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     private final DataItemType[] ingredients;
 
     public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredients,
-            @Nonnull DataItemType result) {
+                                   @Nonnull DataItemType result) {
         super(key, result);
         int length = ingredients.length;
         if (length <= 0) {
@@ -63,8 +63,8 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     @Override
     public ItemStack apply(@Nonnull ItemStack[] matrix) {
         return getResult().map(ItemStack::new, right ->
-            ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                    itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
         );
     }
 

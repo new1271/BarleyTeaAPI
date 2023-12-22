@@ -12,7 +12,7 @@ import java.util.Objects;
 public final class DataItemHoldPlayerJoin extends BaseItemHoldEntityFeatureData<PlayerJoinEvent> {
 
     public DataItemHoldPlayerJoin(@Nonnull PlayerJoinEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                  @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getPlayer(), itemStack, equipmentSlot);
     }
 

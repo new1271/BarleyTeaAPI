@@ -78,6 +78,63 @@ public final class ProtocolLibBridge {
                     PacketType.Play.Client.SET_CREATIVE_SLOT);
         }
 
+        @Nonnull
+        private static WithFlag<ItemStack> renderItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
+            ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
+            if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
+                renderer = ItemRenderer.getDefault();
+            }
+            if (renderer != null)
+                itemStack = renderer.render(itemStack, player);
+            return new WithFlag<>(itemStack, renderer != null);
+        }
+
+        @Nonnull
+        private static Component renderHoverEvent(@Nonnull Component component, @Nonnull Player player) {
+            HoverEvent<?> hoverEvent = component.hoverEvent();
+            if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
+                BinaryTagHolder nbtHolder = showItem.nbt();
+                String rawNbt;
+                if (nbtHolder == null)
+                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":\"" + showItem.count() + "\"}";
+                else {
+                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
+                            + nbtHolder.string() + "}";
+                }
+                INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
+                if (helper != null) {
+                    ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
+                    if (itemStack != null) {
+                        itemStack = renderItem(itemStack, player).obj();
+                        return itemStack.displayName().hoverEvent(itemStack.asHoverEvent());
+                    }
+                }
+            }
+            return component;
+        }
+
+        @Nullable
+        private static Component searchHoverEventAndRender(@Nullable Component component, @Nonnull Player player) {
+            if (component == null)
+                return null;
+            Component result = component;
+            HoverEvent<?> hoverEvent = result.hoverEvent();
+            if (hoverEvent != null) {
+                result = renderHoverEvent(result, player);
+            }
+            if (result instanceof TranslatableComponent translatable) {
+                result = translatable.args(translatable.args()
+                        .stream()
+                        .map(arg -> searchHoverEventAndRender(arg, player))
+                        .toList());
+            }
+            return result
+                    .children(result.children()
+                            .stream()
+                            .map(arg -> searchHoverEventAndRender(arg, player))
+                            .toList());
+        }
+
         @Override
         public void onPacketSending(PacketEvent event) {
             if (event == null)
@@ -185,63 +242,6 @@ public final class ProtocolLibBridge {
                 itemModifier.modify(i, AlternativeItemState::restore);
             }
         }
-
-        @Nonnull
-        private static WithFlag<ItemStack> renderItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
-            ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
-            if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
-                renderer = ItemRenderer.getDefault();
-            }
-            if (renderer != null)
-                itemStack = renderer.render(itemStack, player);
-            return new WithFlag<>(itemStack, renderer != null);
-        }
-
-        @Nonnull
-        private static Component renderHoverEvent(@Nonnull Component component, @Nonnull Player player) {
-            HoverEvent<?> hoverEvent = component.hoverEvent();
-            if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                BinaryTagHolder nbtHolder = showItem.nbt();
-                String rawNbt;
-                if (nbtHolder == null)
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":\"" + showItem.count() + "\"}";
-                else {
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
-                            + nbtHolder.string() + "}";
-                }
-                INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
-                if (helper != null) {
-                    ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
-                    if (itemStack != null) {
-                        itemStack = renderItem(itemStack, player).obj();
-                        return itemStack.displayName().hoverEvent(itemStack.asHoverEvent());
-                    }
-                }
-            }
-            return component;
-        }
-
-        @Nullable
-        private static Component searchHoverEventAndRender(@Nullable Component component, @Nonnull Player player) {
-            if (component == null)
-                return null;
-            Component result = component;
-            HoverEvent<?> hoverEvent = result.hoverEvent();
-            if (hoverEvent != null) {
-                result = renderHoverEvent(result, player);
-            }
-            if (result instanceof TranslatableComponent translatable) {
-                result = translatable.args(translatable.args()
-                        .stream()
-                        .map(arg -> searchHoverEventAndRender(arg, player))
-                        .toList());
-            }
-            return result
-                    .children(result.children()
-                            .stream()
-                            .map(arg -> searchHoverEventAndRender(arg, player))
-                            .toList());
-        }
     }
 
     private static class ComponentFallbackInjector extends PacketAdapter {
@@ -256,115 +256,6 @@ public final class ProtocolLibBridge {
                     PacketType.Play.Server.SYSTEM_CHAT,
                     PacketType.Play.Server.DISGUISED_CHAT,
                     PacketType.Play.Client.SET_CREATIVE_SLOT);
-        }
-
-        @Override
-        public void onPacketSending(PacketEvent event) {
-            if (event == null)
-                return;
-            PacketType packetType = event.getPacketType();
-            if (packetType == null || packetType.isClient())
-                return;
-            PacketContainer container = event.getPacket();
-            Locale locale = event.getPlayer().locale();
-            Translator translator = GlobalTranslators.getInstance().getServerTranslator();
-            {
-                StructureModifier<Component> modifier = container.getSpecificModifier(Component.class);
-                int size = modifier.size();
-                if (size <= 0) {
-                    StructureModifier<WrappedChatComponent> legacyModifier = container.getChatComponents();
-                    JSONComponentSerializer serializer = JSONComponentSerializer.json();
-                    size = legacyModifier.size();
-                    for (int i = 0; i < size; i++) {
-                        legacyModifier.modify(i, rawComponent -> {
-                            Component component = serializer.deserialize(rawComponent.getJson());
-                            rawComponent.setJson(serializer.serialize(
-                                    Objects.requireNonNull(
-                                            applyTranslateFallbacks(translator, component, locale))));
-                            return rawComponent;
-                        });
-                    }
-                } else {
-                    for (int i = 0; i < size; i++) {
-                        modifier.modify(i, component -> applyTranslateFallbacks(translator, component, locale));
-                    }
-                }
-            }
-            {
-                StructureModifier<ItemStack> modifier = container.getItemModifier();
-                for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
-                }
-            }
-            if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
-                StructureModifier<List<Pair<ItemSlot, ItemStack>>> modifier = container.getSlotStackPairLists();
-                for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStackList -> {
-                        itemStackList.forEach(pair -> pair
-                                .setSecond(applyTranslateFallbacks(translator, pair.getSecond(), locale).obj()));
-                        return itemStackList;
-                    });
-                }
-            } else if (packetType.equals(PacketType.Play.Server.OPEN_WINDOW_MERCHANT)) {
-                StructureModifier<List<MerchantRecipe>> modifier = container.getMerchantRecipeLists();
-                for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, recipeList -> {
-                        recipeList
-                                .replaceAll(recipe -> {
-                                    Box<Boolean> flagBox = Box.box(false);
-                                    List<ItemStack> newIngredients = recipe.getIngredients()
-                                            .stream()
-                                            .map(itemStack -> {
-                                                WithFlag<ItemStack> newItem = applyTranslateFallbacks(translator, itemStack, locale);
-                                                if (newItem.flag())
-                                                    flagBox.set(true);
-                                                return newItem.obj();
-                                            })
-                                            .toList();
-                                    ItemStack oldResult = recipe.getResult();
-                                    WithFlag<ItemStack> newResult = applyTranslateFallbacks(translator, oldResult, locale);
-                                    if (newResult.flag()) {
-                                        MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
-                                                recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
-                                                recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
-                                        newRecipe.setIngredients(newIngredients);
-                                        return newRecipe;
-                                    } else {
-                                        if (Boolean.TRUE.equals(flagBox.get())) {
-                                            recipe.setIngredients(newIngredients);
-                                        }
-                                    }
-                                    return recipe;
-                                });
-
-                        return recipeList;
-                    });
-                }
-            } else {
-                StructureModifier<List<ItemStack>> modifier = container.getItemListModifier();
-                for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStackList -> {
-                        itemStackList
-                                .replaceAll(itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
-                        return itemStackList;
-                    });
-                }
-            }
-
-        }
-
-        @Override
-        public void onPacketReceiving(PacketEvent event) {
-            if (event == null)
-                return;
-            PacketType packetType = event.getPacketType();
-            if (packetType == null || packetType.isServer())
-                return;
-            PacketContainer container = event.getPacket();
-            StructureModifier<ItemStack> itemModifier = container.getItemModifier();
-            for (int i = 0, size = itemModifier.size(); i < size; i++) {
-                itemModifier.modify(i, ComponentFallbackInjector::eraseTranslateFallbacks);
-            }
         }
 
         @Nonnull
@@ -491,6 +382,115 @@ public final class ProtocolLibBridge {
                             .stream()
                             .map(ComponentFallbackInjector::eraseTranslateFallbacks)
                             .toList());
+        }
+
+        @Override
+        public void onPacketSending(PacketEvent event) {
+            if (event == null)
+                return;
+            PacketType packetType = event.getPacketType();
+            if (packetType == null || packetType.isClient())
+                return;
+            PacketContainer container = event.getPacket();
+            Locale locale = event.getPlayer().locale();
+            Translator translator = GlobalTranslators.getInstance().getServerTranslator();
+            {
+                StructureModifier<Component> modifier = container.getSpecificModifier(Component.class);
+                int size = modifier.size();
+                if (size <= 0) {
+                    StructureModifier<WrappedChatComponent> legacyModifier = container.getChatComponents();
+                    JSONComponentSerializer serializer = JSONComponentSerializer.json();
+                    size = legacyModifier.size();
+                    for (int i = 0; i < size; i++) {
+                        legacyModifier.modify(i, rawComponent -> {
+                            Component component = serializer.deserialize(rawComponent.getJson());
+                            rawComponent.setJson(serializer.serialize(
+                                    Objects.requireNonNull(
+                                            applyTranslateFallbacks(translator, component, locale))));
+                            return rawComponent;
+                        });
+                    }
+                } else {
+                    for (int i = 0; i < size; i++) {
+                        modifier.modify(i, component -> applyTranslateFallbacks(translator, component, locale));
+                    }
+                }
+            }
+            {
+                StructureModifier<ItemStack> modifier = container.getItemModifier();
+                for (int i = 0, size = modifier.size(); i < size; i++) {
+                    modifier.modify(i, itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
+                }
+            }
+            if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
+                StructureModifier<List<Pair<ItemSlot, ItemStack>>> modifier = container.getSlotStackPairLists();
+                for (int i = 0, size = modifier.size(); i < size; i++) {
+                    modifier.modify(i, itemStackList -> {
+                        itemStackList.forEach(pair -> pair
+                                .setSecond(applyTranslateFallbacks(translator, pair.getSecond(), locale).obj()));
+                        return itemStackList;
+                    });
+                }
+            } else if (packetType.equals(PacketType.Play.Server.OPEN_WINDOW_MERCHANT)) {
+                StructureModifier<List<MerchantRecipe>> modifier = container.getMerchantRecipeLists();
+                for (int i = 0, size = modifier.size(); i < size; i++) {
+                    modifier.modify(i, recipeList -> {
+                        recipeList
+                                .replaceAll(recipe -> {
+                                    Box<Boolean> flagBox = Box.box(false);
+                                    List<ItemStack> newIngredients = recipe.getIngredients()
+                                            .stream()
+                                            .map(itemStack -> {
+                                                WithFlag<ItemStack> newItem = applyTranslateFallbacks(translator, itemStack, locale);
+                                                if (newItem.flag())
+                                                    flagBox.set(true);
+                                                return newItem.obj();
+                                            })
+                                            .toList();
+                                    ItemStack oldResult = recipe.getResult();
+                                    WithFlag<ItemStack> newResult = applyTranslateFallbacks(translator, oldResult, locale);
+                                    if (newResult.flag()) {
+                                        MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
+                                                recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
+                                                recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
+                                        newRecipe.setIngredients(newIngredients);
+                                        return newRecipe;
+                                    } else {
+                                        if (Boolean.TRUE.equals(flagBox.get())) {
+                                            recipe.setIngredients(newIngredients);
+                                        }
+                                    }
+                                    return recipe;
+                                });
+
+                        return recipeList;
+                    });
+                }
+            } else {
+                StructureModifier<List<ItemStack>> modifier = container.getItemListModifier();
+                for (int i = 0, size = modifier.size(); i < size; i++) {
+                    modifier.modify(i, itemStackList -> {
+                        itemStackList
+                                .replaceAll(itemStack -> applyTranslateFallbacks(translator, itemStack, locale).obj());
+                        return itemStackList;
+                    });
+                }
+            }
+
+        }
+
+        @Override
+        public void onPacketReceiving(PacketEvent event) {
+            if (event == null)
+                return;
+            PacketType packetType = event.getPacketType();
+            if (packetType == null || packetType.isServer())
+                return;
+            PacketContainer container = event.getPacket();
+            StructureModifier<ItemStack> itemModifier = container.getItemModifier();
+            for (int i = 0, size = itemModifier.size(); i < size; i++) {
+                itemModifier.modify(i, ComponentFallbackInjector::eraseTranslateFallbacks);
+            }
         }
     }
 }

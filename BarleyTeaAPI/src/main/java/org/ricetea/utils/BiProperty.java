@@ -8,6 +8,22 @@ import java.util.function.Function;
 
 public interface BiProperty<T, R> extends BiConsumer<T, R>, BiFunction<T, R, R> {
 
+    @Nonnull
+    static <T, R> BiProperty<T, R> create(@Nonnull Function<T, R> getMethod,
+                                          @Nonnull BiConsumer<T, R> setMethod) {
+        return new DefaultPropertyImpl<>(getMethod, setMethod);
+    }
+
+    @Nonnull
+    static <T, R> BiProperty<T, R> readonly(@Nonnull Function<T, R> getMethod) {
+        return new DefaultPropertyImpl<>(getMethod, null);
+    }
+
+    @Nonnull
+    static <T, R> BiProperty<T, R> writeonly(@Nonnull BiConsumer<T, R> setMethod) {
+        return new DefaultPropertyImpl<>(null, setMethod);
+    }
+
     @Nullable
     R get(T obj);
 
@@ -27,22 +43,6 @@ public interface BiProperty<T, R> extends BiConsumer<T, R>, BiFunction<T, R, R> 
 
     default Property<R> wrap(@Nonnull T obj) {
         return new BiPropertyWrapper<>(this, obj);
-    }
-
-    @Nonnull
-    static <T, R> BiProperty<T, R> create(@Nonnull Function<T, R> getMethod,
-            @Nonnull BiConsumer<T, R> setMethod) {
-        return new DefaultPropertyImpl<>(getMethod, setMethod);
-    }
-
-    @Nonnull
-    static <T, R> BiProperty<T, R> readonly(@Nonnull Function<T, R> getMethod) {
-        return new DefaultPropertyImpl<>(getMethod, null);
-    }
-
-    @Nonnull
-    static <T, R> BiProperty<T, R> writeonly(@Nonnull BiConsumer<T, R> setMethod) {
-        return new DefaultPropertyImpl<>(null, setMethod);
     }
 
     class DefaultPropertyImpl<T, R> implements BiProperty<T, R> {

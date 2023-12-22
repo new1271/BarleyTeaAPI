@@ -20,7 +20,7 @@ public final class TickingService {
     }
 
     public static void addEntityWithCounter(@Nullable Entity entity, @Nullable AbstractTickCounter counter,
-            boolean isAsync) {
+                                            boolean isAsync) {
         if (entity != null && counter != null && BarleyTeaAPI.checkPluginUsable()) {
             if (isAsync) {
                 AsyncGlobalTickingTask.getInstance().addEntityWithCounter(entity, counter);
@@ -35,7 +35,7 @@ public final class TickingService {
     }
 
     public static void removeEntityWithCounter(@Nullable Entity entity, @Nullable AbstractTickCounter counter,
-            boolean isAsync) {
+                                               boolean isAsync) {
         if (entity != null && counter != null && BarleyTeaAPI.checkPluginUsable()) {
             if (isAsync) {
                 AsyncGlobalTickingTask.getInstance().removeEntityWithCounter(entity, counter);
@@ -65,13 +65,11 @@ public final class TickingService {
     }
 
     private static final class SyncGlobalTickingTask implements Runnable {
-        int taskID;
-
         @Nonnull
         private static final Lazy<SyncGlobalTickingTask> _inst = Lazy.create(SyncGlobalTickingTask::new);
-
         @Nonnull
         private final ConcurrentHashMap<Entity, CachedSet<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
+        int taskID;
 
         private SyncGlobalTickingTask() {
             taskID = 0;
@@ -82,10 +80,20 @@ public final class TickingService {
             return _inst.get();
         }
 
+        public static void shutdown() {
+            SyncGlobalTickingTask inst = _inst.getUnsafe();
+            if (inst != null) {
+                int taskID = inst.taskID;
+                inst.taskID = 0;
+                if (taskID != 0)
+                    Bukkit.getScheduler().cancelTask(taskID);
+            }
+        }
+
         @Override
         public void run() {
             for (Iterator<Entry<Entity, CachedSet<AbstractTickCounter>>> iterator = entityMap.entrySet()
-                    .iterator(); iterator.hasNext();) {
+                    .iterator(); iterator.hasNext(); ) {
                 Entry<Entity, CachedSet<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
                 if (entity == null || entity.isDead()) {
@@ -141,16 +149,6 @@ public final class TickingService {
                 taskID = 0;
             }
         }
-
-        public static void shutdown() {
-            SyncGlobalTickingTask inst = _inst.getUnsafe();
-            if (inst != null) {
-                int taskID = inst.taskID;
-                inst.taskID = 0;
-                if (taskID != 0)
-                    Bukkit.getScheduler().cancelTask(taskID);
-            }
-        }
     }
 
     private static final class AsyncGlobalTickingTask extends AbstractTask {
@@ -169,10 +167,17 @@ public final class TickingService {
             return _inst.get();
         }
 
+        public static void shutdown() {
+            AsyncGlobalTickingTask inst = _inst.getUnsafe();
+            if (inst != null && inst.isRunning) {
+                inst.stop();
+            }
+        }
+
         @Override
         public void runInternal() {
             for (Iterator<Entry<Entity, CachedSet<AbstractTickCounter>>> iterator = entityMap.entrySet()
-                    .iterator(); iterator.hasNext();) {
+                    .iterator(); iterator.hasNext(); ) {
                 Entry<Entity, CachedSet<AbstractTickCounter>> entry = iterator.next();
                 Entity entity = entry.getKey();
                 if (entity == null || entity.isDead()) {
@@ -224,13 +229,6 @@ public final class TickingService {
             entityMap.remove(entity);
             if (isRunning && entityMap.size() <= 0) {
                 stop();
-            }
-        }
-
-        public static void shutdown() {
-            AsyncGlobalTickingTask inst = _inst.getUnsafe();
-            if (inst != null && inst.isRunning) {
-                inst.stop();
             }
         }
 

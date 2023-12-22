@@ -10,6 +10,11 @@ import javax.annotation.Nullable;
 
 public interface ItemRenderer extends Keyed {
 
+    @Nonnull
+    static ItemRenderer getDefault() {
+        return DefaultItemRendererImpl.getInstance();
+    }
+
     boolean isRegistered();
 
     @Nonnull
@@ -19,9 +24,4 @@ public interface ItemRenderer extends Keyed {
 
     @Nonnull
     ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player);
-
-    @Nonnull
-    static ItemRenderer getDefault() {
-        return DefaultItemRendererImpl.getInstance();
-    }
 }

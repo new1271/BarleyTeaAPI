@@ -283,25 +283,6 @@ public final class ItemFeatureHelper {
         }
     }
 
-    @FunctionalInterface
-    public interface ItemDataConstructor<T extends Event, R extends BaseFeatureData<T>> {
-        @Nonnull
-        R apply(@Nonnull T event);
-    }
-
-    @FunctionalInterface
-    public interface ItemDataConstructorForEquipment<T extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
-        @Nonnull
-        R apply(@Nonnull T event, @Nonnull ItemStack itemStack, @Nonnull EquipmentSlot equipmentSlot);
-    }
-
-    @FunctionalInterface
-    public interface ItemDataConstructorForEquipment2<T extends Event, T2 extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
-        @Nonnull
-        R apply(@Nonnull T event, @Nullable T2 event2, @Nonnull ItemStack itemStack,
-                @Nonnull EquipmentSlot equipmentSlot);
-    }
-
     public static ItemStack doItemRepair(@Nullable ItemStack itemStackA, @Nullable ItemStack itemStackB,
                                          @Nullable ItemStack itemStackResult) {
         BaseItem itemType = ObjectUtil
@@ -342,5 +323,24 @@ public final class ItemFeatureHelper {
                 return null;
             }
         }
+    }
+
+    @FunctionalInterface
+    public interface ItemDataConstructor<T extends Event, R extends BaseFeatureData<T>> {
+        @Nonnull
+        R apply(@Nonnull T event);
+    }
+
+    @FunctionalInterface
+    public interface ItemDataConstructorForEquipment<T extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
+        @Nonnull
+        R apply(@Nonnull T event, @Nonnull ItemStack itemStack, @Nonnull EquipmentSlot equipmentSlot);
+    }
+
+    @FunctionalInterface
+    public interface ItemDataConstructorForEquipment2<T extends Event, T2 extends Event, R extends BaseItemHoldEntityFeatureData<T>> {
+        @Nonnull
+        R apply(@Nonnull T event, @Nullable T2 event2, @Nonnull ItemStack itemStack,
+                @Nonnull EquipmentSlot equipmentSlot);
     }
 }

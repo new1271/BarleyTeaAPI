@@ -18,8 +18,8 @@ import java.util.Objects;
 public final class DataItemHoldEntityKillPlayer extends BaseItemHoldEntityFeatureData<PlayerDeathEvent> {
 
     public DataItemHoldEntityKillPlayer(@Nonnull PlayerDeathEvent event,
-            @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                        @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
+                                        @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) lastDamageCauseByEntityEvent.getDamager(), itemStack, equipmentSlot);
     }
 

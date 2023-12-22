@@ -47,58 +47,12 @@ public abstract class BaseItem implements Keyed, Translatable {
         this.lazyType = Lazy.create(() -> DataItemType.create(this));
     }
 
-    @Override
-    @Nonnull
-    public final NamespacedKey getKey() {
-        return key;
-    }
-
-    @Override
-    @Nonnull
-    public final String translationKey(){
-        return "item." + key.getNamespace() + "." + key.getKey();
-    }
-
-    @Nonnull
-    public final String getNameInTranslateKey() {
-        return translationKey();
-    }
-
-    @Nonnull
-    public String getDefaultName() {
-        return translationKey();
-    }
-
-    @Nonnull
-    public final Material getMaterialBasedOn() {
-        return materialBasedOn;
-    }
-
-    @Nonnull
-    public final DataItemType getType() {
-        return lazyType.get();
-    }
-
-    @Nonnull
-    public final DataItemRarity getRarity() {
-        return rarity;
-    }
-
-    public boolean isTool() {
-        return isTool;
-    }
-
-    @Nonnull
-    public Component getDefaultNameComponent(){
-        return Component.translatable(getNameInTranslateKey(), getDefaultName());
-    }
-
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
         addFallbackNamespacedKey(key, null);
     }
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key,
-            @Nullable Function<String, NamespacedKey> converter) {
+                                                @Nullable Function<String, NamespacedKey> converter) {
         if (key != null && !FallbackNamespacedKeys.containsKey(key)) {
             FallbackNamespacedKeys.put(key, converter == null ? NamespacedKey::fromString : converter);
         }
@@ -107,59 +61,6 @@ public abstract class BaseItem implements Keyed, Translatable {
     public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
         FallbackNamespacedKeys.remove(key);
     }
-
-    public final void register(@Nullable ItemStack itemStack) {
-        if (itemStack != null) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
-                        key.toString());
-                itemStack.setItemMeta(meta);
-            }
-        }
-    }
-
-    public final void register(@Nullable ItemStack itemStack,
-            @Nullable Consumer<ItemStack> afterItemStackRegistered) {
-        if (itemStack != null) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
-                        key.toString());
-                itemStack.setItemMeta(meta);
-                if (afterItemStackRegistered != null) {
-                    afterItemStackRegistered.accept(itemStack);
-                }
-            }
-        }
-    }
-
-    public final boolean tryRegister(@Nullable ItemStack itemStack,
-            @Nullable Predicate<ItemStack> afterItemStackRegistered) {
-        if (itemStack != null) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
-                        key.toString());
-                itemStack.setItemMeta(meta);
-                return afterItemStackRegistered == null || afterItemStackRegistered.test(itemStack);
-            }
-        }
-        return false;
-    }
-
-    public final boolean isCertainItem(@Nullable ItemStack itemStack) {
-        return itemStack != null && itemStack.hasItemMeta()
-                && key.toString().equals(
-                        itemStack.getItemMeta().getPersistentDataContainer()
-                                .get(DefaultNamespacedKey, PersistentDataType.STRING));
-    }
-
-    public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
-        return ObjectUtil.letNonNull(ObjectUtil.safeMap(itemStack.getItemMeta(), ItemMeta::hasEnchants), false);
-    }
-
-    
 
     public static void registerItem(@Nullable ItemStack itemStack, @Nonnull BaseItem itemType) {
         itemType.register(itemStack);
@@ -213,6 +114,103 @@ public abstract class BaseItem implements Keyed, Translatable {
     @Nonnull
     public static DataItemType getItemType(@Nonnull ItemStack itemStack) {
         return DataItemType.get(itemStack);
+    }
+
+    @Override
+    @Nonnull
+    public final NamespacedKey getKey() {
+        return key;
+    }
+
+    @Override
+    @Nonnull
+    public final String translationKey() {
+        return "item." + key.getNamespace() + "." + key.getKey();
+    }
+
+    @Nonnull
+    public final String getNameInTranslateKey() {
+        return translationKey();
+    }
+
+    @Nonnull
+    public String getDefaultName() {
+        return translationKey();
+    }
+
+    @Nonnull
+    public final Material getMaterialBasedOn() {
+        return materialBasedOn;
+    }
+
+    @Nonnull
+    public final DataItemType getType() {
+        return lazyType.get();
+    }
+
+    @Nonnull
+    public final DataItemRarity getRarity() {
+        return rarity;
+    }
+
+    public boolean isTool() {
+        return isTool;
+    }
+
+    @Nonnull
+    public Component getDefaultNameComponent() {
+        return Component.translatable(getNameInTranslateKey(), getDefaultName());
+    }
+
+    public final void register(@Nullable ItemStack itemStack) {
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+            }
+        }
+    }
+
+    public final void register(@Nullable ItemStack itemStack,
+                               @Nullable Consumer<ItemStack> afterItemStackRegistered) {
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+                if (afterItemStackRegistered != null) {
+                    afterItemStackRegistered.accept(itemStack);
+                }
+            }
+        }
+    }
+
+    public final boolean tryRegister(@Nullable ItemStack itemStack,
+                                     @Nullable Predicate<ItemStack> afterItemStackRegistered) {
+        if (itemStack != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
+                        key.toString());
+                itemStack.setItemMeta(meta);
+                return afterItemStackRegistered == null || afterItemStackRegistered.test(itemStack);
+            }
+        }
+        return false;
+    }
+
+    public final boolean isCertainItem(@Nullable ItemStack itemStack) {
+        return itemStack != null && itemStack.hasItemMeta()
+                && key.toString().equals(
+                itemStack.getItemMeta().getPersistentDataContainer()
+                        .get(DefaultNamespacedKey, PersistentDataType.STRING));
+    }
+
+    public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
+        return ObjectUtil.letNonNull(ObjectUtil.safeMap(itemStack.getItemMeta(), ItemMeta::hasEnchants), false);
     }
 
     public boolean equals(Object obj) {

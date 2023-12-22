@@ -48,6 +48,67 @@ public abstract class BaseEntity implements Keyed {
         lazyType = Lazy.create(() -> DataEntityType.create(this));
     }
 
+    public static void registerEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
+        entityType.register(entity);
+    }
+
+    public static boolean isBarleyTeaEntity(@Nullable Entity entity) {
+        return entity != null && getEntityID(entity) != null;
+    }
+
+    @Nullable
+    public static NamespacedKey getEntityID(@Nullable Entity entity) {
+        if (entity == null)
+            return null;
+        NamespacedKey result;
+        PersistentDataContainer container = entity.getPersistentDataContainer();
+        String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
+        if (namespacedKeyString == null) {
+            result = null;
+            if (!FallbackNamespacedKeys.isEmpty()) {
+                for (Map.Entry<NamespacedKey, Function<String, NamespacedKey>> entry : FallbackNamespacedKeys.entrySet()) {
+                    NamespacedKey key = entry.getKey();
+                    if (key != null) {
+                        namespacedKeyString = container.get(key, PersistentDataType.STRING);
+                        if (namespacedKeyString != null) {
+                            Function<String, NamespacedKey> function = entry.getValue();
+                            result = function == null ? NamespacedKey.fromString(namespacedKeyString)
+                                    : function.apply(namespacedKeyString);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            result = NamespacedKey.fromString(namespacedKeyString);
+        }
+        return result;
+    }
+
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        addFallbackNamespacedKey(key, null);
+    }
+
+    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key,
+                                                @Nullable Function<String, NamespacedKey> converter) {
+        if (key != null && !FallbackNamespacedKeys.containsKey(key)) {
+            FallbackNamespacedKeys.put(key, converter == null ? NamespacedKey::fromString : converter);
+        }
+    }
+
+    public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
+        FallbackNamespacedKeys.remove(key);
+    }
+
+    public static boolean isCertainEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
+        return entityType.isCertainEntity(entity);
+    }
+
+    @Nonnull
+    public static DataEntityType getEntityType(@Nonnull Entity entity) {
+        return DataEntityType.get(entity);
+    }
+
     @Nonnull
     public final NamespacedKey getKey() {
         return key;
@@ -115,67 +176,6 @@ public abstract class BaseEntity implements Keyed {
         return entity != null
                 && key.toString().equals(entity.getPersistentDataContainer().get(DefaultNamespacedKey,
                 PersistentDataType.STRING));
-    }
-
-    public static void registerEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
-        entityType.register(entity);
-    }
-
-    public static boolean isBarleyTeaEntity(@Nullable Entity entity) {
-        return entity != null && getEntityID(entity) != null;
-    }
-
-    @Nullable
-    public static NamespacedKey getEntityID(@Nullable Entity entity) {
-        if (entity == null)
-            return null;
-        NamespacedKey result;
-        PersistentDataContainer container = entity.getPersistentDataContainer();
-        String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
-        if (namespacedKeyString == null) {
-            result = null;
-            if (!FallbackNamespacedKeys.isEmpty()) {
-                for (Map.Entry<NamespacedKey, Function<String, NamespacedKey>> entry : FallbackNamespacedKeys.entrySet()) {
-                    NamespacedKey key = entry.getKey();
-                    if (key != null) {
-                        namespacedKeyString = container.get(key, PersistentDataType.STRING);
-                        if (namespacedKeyString != null) {
-                            Function<String, NamespacedKey> function = entry.getValue();
-                            result = function == null ? NamespacedKey.fromString(namespacedKeyString)
-                                    : function.apply(namespacedKeyString);
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            result = NamespacedKey.fromString(namespacedKeyString);
-        }
-        return result;
-    }
-
-    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
-        addFallbackNamespacedKey(key, null);
-    }
-
-    public static void addFallbackNamespacedKey(@Nullable NamespacedKey key,
-                                                @Nullable Function<String, NamespacedKey> converter) {
-        if (key != null && !FallbackNamespacedKeys.containsKey(key)) {
-            FallbackNamespacedKeys.put(key, converter == null ? NamespacedKey::fromString : converter);
-        }
-    }
-
-    public static void removeFallbackNamespacedKey(@Nullable NamespacedKey key) {
-        FallbackNamespacedKeys.remove(key);
-    }
-
-    public static boolean isCertainEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
-        return entityType.isCertainEntity(entity);
-    }
-
-    @Nonnull
-    public static DataEntityType getEntityType(@Nonnull Entity entity) {
-        return DataEntityType.get(entity);
     }
 
     @Nonnull

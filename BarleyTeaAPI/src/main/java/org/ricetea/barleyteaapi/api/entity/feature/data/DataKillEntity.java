@@ -21,7 +21,7 @@ public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent
     private final Lazy<DataEntityType> decedentType;
 
     public DataKillEntity(@Nonnull EntityDeathEvent event,
-            @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
+                          @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event, lastDamageCauseByEntityEvent.getDamager());
         decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
     }

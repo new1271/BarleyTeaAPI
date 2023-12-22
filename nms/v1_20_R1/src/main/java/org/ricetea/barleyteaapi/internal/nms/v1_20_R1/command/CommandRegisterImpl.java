@@ -14,6 +14,18 @@ import java.util.Objects;
 
 public final class CommandRegisterImpl extends CommandRegister<CommandDispatcher<CommandSourceStack>> {
 
+    private final @Nonnull CommandRegistrationContextImpl registrationContext = new CommandRegistrationContextImpl();
+
+    @Override
+    protected void register0(@Nonnull Command<CommandDispatcher<CommandSourceStack>> command) {
+        command.register(registrationContext);
+    }
+
+    @Override
+    protected void unregister0(@Nonnull Command<CommandDispatcher<CommandSourceStack>> command) {
+        command.unregister(registrationContext);
+    }
+
     private static class CommandRegistrationContextImpl
             extends CommandRegistrationContext<CommandDispatcher<CommandSourceStack>> {
 
@@ -28,17 +40,5 @@ public final class CommandRegisterImpl extends CommandRegister<CommandDispatcher
         public CommandDispatcher<CommandSourceStack> getContext() {
             return contextLazy.get();
         }
-    }
-
-    private final @Nonnull CommandRegistrationContextImpl registrationContext = new CommandRegistrationContextImpl();
-
-    @Override
-    protected void register0(@Nonnull Command<CommandDispatcher<CommandSourceStack>> command) {
-        command.register(registrationContext);
-    }
-
-    @Override
-    protected void unregister0(@Nonnull Command<CommandDispatcher<CommandSourceStack>> command) {
-        command.unregister(registrationContext);
     }
 }

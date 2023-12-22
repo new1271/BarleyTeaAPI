@@ -15,15 +15,13 @@ public final class DataItemDisplay {
 
     @Nonnull
     private final ItemStack itemStack;
-
+    @Nonnull
+    private final List<Component> lore;
     @Nullable
     private Component displayName;
 
-    @Nonnull
-    private final List<Component> lore;
-
     public DataItemDisplay(@Nullable Player player, @Nonnull ItemStack itemStack, @Nullable Component displayName,
-            @Nonnull List<Component> lore) {
+                           @Nonnull List<Component> lore) {
         this.player = player;
         this.itemStack = itemStack;
         this.displayName = displayName;
@@ -45,12 +43,12 @@ public final class DataItemDisplay {
         return displayName;
     }
 
+    public void setDisplayName(@Nullable Component displayName) {
+        this.displayName = displayName;
+    }
+
     @Nonnull
     public List<Component> getLore() {
         return lore;
-    }
-
-    public void setDisplayName(@Nullable Component displayName) {
-        this.displayName = displayName;
     }
 }

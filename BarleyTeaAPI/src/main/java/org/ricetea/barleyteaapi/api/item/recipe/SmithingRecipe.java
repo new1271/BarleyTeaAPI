@@ -22,12 +22,12 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     private final DataItemType template, addition;
 
     public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType template,
-            @Nonnull DataItemType addition, @Nonnull DataItemType result) {
+                          @Nonnull DataItemType addition, @Nonnull DataItemType result) {
         this(key, original, template, addition, result, true);
     }
 
     public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType template,
-            @Nonnull DataItemType addition, @Nonnull DataItemType result, boolean copyNbt) {
+                          @Nonnull DataItemType addition, @Nonnull DataItemType result, boolean copyNbt) {
         super(key, original, result);
         this.template = template;
         this.addition = addition;
@@ -57,7 +57,7 @@ public class SmithingRecipe extends BaseSmithingRecipe {
 
     @Nullable
     @Override
-    public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {    
+    public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {
         ItemStack result;
         if (copyNbt) {
             if (getOriginal() == getResult()) {

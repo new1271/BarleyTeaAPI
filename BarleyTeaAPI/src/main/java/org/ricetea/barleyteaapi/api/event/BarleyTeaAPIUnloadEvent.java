@@ -13,14 +13,14 @@ public final class BarleyTeaAPIUnloadEvent extends Event {
     public BarleyTeaAPIUnloadEvent() {
     }
 
-    @Override
     @Nonnull
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return lazyHandlerList.get();
     }
 
+    @Override
     @Nonnull
-    public static HandlerList getHandlerList() {
+    public HandlerList getHandlers() {
         return lazyHandlerList.get();
     }
 }

@@ -10,5 +10,6 @@ public interface Command<T> extends Keyed {
 
     void unregister(@Nonnull CommandRegistrationContext<T> registrationContext);
 
-    @Nonnull NamespacedKey[] getAliases();
+    @Nonnull
+    NamespacedKey[] getAliases();
 }

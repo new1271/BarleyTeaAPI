@@ -32,7 +32,7 @@ public class MultisourceTranslatableComponentRenderer extends TranslatableCompon
 
     @Override
     protected @Nonnull Component renderTranslatable(final @Nonnull TranslatableComponent component,
-            final @Nonnull Locale context) {
+                                                    final @Nonnull Locale context) {
         Component translated = null;
         for (Translator source : sources) {
             translated = source.translate(component, context);

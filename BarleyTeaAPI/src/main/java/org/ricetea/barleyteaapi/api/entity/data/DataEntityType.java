@@ -26,13 +26,13 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
     @Nonnull
     private static final ConcurrentHashMap<EntityType, DataEntityType> vanillaEntityTypeMap = new ConcurrentHashMap<>();
 
+    private DataEntityType(@Nullable EntityType left, @Nullable BaseEntity right) {
+        super(left, right);
+    }
+
     @Nonnull
     public static DataEntityType empty() {
         return EMPTY;
-    }
-
-    private DataEntityType(@Nullable EntityType left, @Nullable BaseEntity right) {
-        super(left, right);
     }
 
     @Nonnull
@@ -84,14 +84,6 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
         }
     }
 
-    @Nonnull
-    @Override
-    public NamespacedKey getKey() {
-        return ObjectUtil.letNonNull(
-                map(EntityType::getKey, BaseEntity::getKey),
-                NamespacedKeyUtil::empty);
-    }
-
     //This method should be used internally
     @ApiStatus.Internal
     @Nonnull
@@ -104,6 +96,14 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
     @Nonnull
     private static DataEntityType create(@Nonnull EntityType type) {
         return new DataEntityType(type, null);
+    }
+
+    @Nonnull
+    @Override
+    public NamespacedKey getKey() {
+        return ObjectUtil.letNonNull(
+                map(EntityType::getKey, BaseEntity::getKey),
+                NamespacedKeyUtil::empty);
     }
 
     public boolean isVanilla() {

@@ -35,6 +35,16 @@ public final class BarleyFallingBlock extends BaseEntity implements FeatureEntit
         return _inst.get();
     }
 
+    public static void setBlockDataContainer(@Nonnull Entity entity,
+                                             @Nonnull PersistentDataContainer blockDataContainer) {
+        entity.getPersistentDataContainer().set(blockDataKey, PersistentDataType.TAG_CONTAINER, blockDataContainer);
+    }
+
+    @Nullable
+    public static PersistentDataContainer getBlockDataContainer(@Nonnull Entity entity) {
+        return entity.getPersistentDataContainer().get(blockDataKey, PersistentDataType.TAG_CONTAINER);
+    }
+
     @Override
     @Nonnull
     public Entity handleEntitySpawn(@Nonnull Location location) {
@@ -52,15 +62,5 @@ public final class BarleyFallingBlock extends BaseEntity implements FeatureEntit
             entity.getPersistentDataContainer().set(blockDataKey, PersistentDataType.TAG_CONTAINER, blockDataContainer);
         }
         return entity;
-    }
-
-    public static void setBlockDataContainer(@Nonnull Entity entity,
-            @Nonnull PersistentDataContainer blockDataContainer) {
-        entity.getPersistentDataContainer().set(blockDataKey, PersistentDataType.TAG_CONTAINER, blockDataContainer);
-    }
-
-    @Nullable
-    public static PersistentDataContainer getBlockDataContainer(@Nonnull Entity entity) {
-        return entity.getPersistentDataContainer().get(blockDataKey, PersistentDataType.TAG_CONTAINER);
     }
 }

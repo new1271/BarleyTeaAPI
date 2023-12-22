@@ -121,17 +121,17 @@ public final class EntityRegister implements IRegister<BaseEntity> {
     @Override
     public void unregisterAll() {
         Bukkit.getWorlds().forEach(world ->
-            world.getEntities().forEach(iteratedEntity -> {
-                BaseEntity entity = DataEntityType.get(iteratedEntity).asCustomEntity();
-                if (entity instanceof FeatureEntityLoad feature)
-                    feature.handleEntityUnloaded(iteratedEntity);
-                if (entity instanceof FeatureEntityTick) {
-                    EntityTickTask task = EntityTickTask.getInstanceUnsafe();
-                    if (task != null) {
-                        task.removeEntity(iteratedEntity);
+                world.getEntities().forEach(iteratedEntity -> {
+                    BaseEntity entity = DataEntityType.get(iteratedEntity).asCustomEntity();
+                    if (entity instanceof FeatureEntityLoad feature)
+                        feature.handleEntityUnloaded(iteratedEntity);
+                    if (entity instanceof FeatureEntityTick) {
+                        EntityTickTask task = EntityTickTask.getInstanceUnsafe();
+                        if (task != null) {
+                            task.removeEntity(iteratedEntity);
+                        }
                     }
-                }
-            })
+                })
         );
         var keySet = Collections.unmodifiableSet(lookupTable.keySet());
         var values = CollectionUtil.toUnmodifiableList(lookupTable.values());
@@ -246,28 +246,6 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 
-    private record RefreshCustomEntityRecord(@Nullable NamespacedKey key,
-                                             @Nullable FeatureEntityLoad oldFeature,
-                                             @Nullable FeatureEntityLoad newFeature,
-                                             boolean hasTickingOld, boolean hasTickingNew) {
-
-        @Nullable
-        public static RefreshCustomEntityRecord create(@Nullable BaseEntity oldBlock, @Nullable BaseEntity newBlock) {
-            BaseEntity compareBlock = newBlock == null ? oldBlock : newBlock;
-            if (compareBlock == null)
-                return null;
-            return new RefreshCustomEntityRecord(compareBlock.getKey(),
-                    ObjectUtil.tryCast(oldBlock, FeatureEntityLoad.class),
-                    ObjectUtil.tryCast(newBlock, FeatureEntityLoad.class),
-                    oldBlock instanceof FeatureEntityTick,
-                    newBlock instanceof FeatureEntityTick);
-        }
-
-        public boolean needOperate() {
-            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
-        }
-    }
-
     private void refreshCustomEntities(@Nonnull Collection<RefreshCustomEntityRecord> records) {
         if (records.stream().anyMatch(RefreshCustomEntityRecord::needOperate)) {
             for (World world : Bukkit.getWorlds()) {
@@ -310,6 +288,28 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                             });
                 }
             }
+        }
+    }
+
+    private record RefreshCustomEntityRecord(@Nullable NamespacedKey key,
+                                             @Nullable FeatureEntityLoad oldFeature,
+                                             @Nullable FeatureEntityLoad newFeature,
+                                             boolean hasTickingOld, boolean hasTickingNew) {
+
+        @Nullable
+        public static RefreshCustomEntityRecord create(@Nullable BaseEntity oldBlock, @Nullable BaseEntity newBlock) {
+            BaseEntity compareBlock = newBlock == null ? oldBlock : newBlock;
+            if (compareBlock == null)
+                return null;
+            return new RefreshCustomEntityRecord(compareBlock.getKey(),
+                    ObjectUtil.tryCast(oldBlock, FeatureEntityLoad.class),
+                    ObjectUtil.tryCast(newBlock, FeatureEntityLoad.class),
+                    oldBlock instanceof FeatureEntityTick,
+                    newBlock instanceof FeatureEntityTick);
+        }
+
+        public boolean needOperate() {
+            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
         }
     }
 }

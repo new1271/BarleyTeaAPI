@@ -12,24 +12,24 @@ public class PersistenceTickCounter extends AbstractTickCounter {
     final int startValue;
 
     public PersistenceTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function) {
+                                  @Nullable TickingOperationFunction function) {
         this(identifierKey, function, 0, (TickCounterTrigger[]) null);
     }
 
     @SafeVarargs
     public PersistenceTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, @Nullable TickCounterTrigger... predicates) {
+                                  @Nullable TickingOperationFunction function, @Nullable TickCounterTrigger... predicates) {
         this(identifierKey, function, 0, predicates);
     }
 
     public PersistenceTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, int startValue) {
+                                  @Nullable TickingOperationFunction function, int startValue) {
         this(identifierKey, function, startValue, (TickCounterTrigger[]) null);
     }
 
     @SafeVarargs
     public PersistenceTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, int startValue, @Nullable TickCounterTrigger... predicates) {
+                                  @Nullable TickingOperationFunction function, int startValue, @Nullable TickCounterTrigger... predicates) {
         super(identifierKey, function, predicates);
         this.startValue = startValue;
     }

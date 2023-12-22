@@ -25,6 +25,14 @@ public class Box<T> implements Property<T> {
         return box == null ? null : box.unbox();
     }
 
+    public static <T> boolean isNull(@Nullable Box<T> box) {
+        return box == null || box.isNull();
+    }
+
+    public static <T> boolean isNotNull(@Nullable Box<T> box) {
+        return box != null && box.isNotNull();
+    }
+
     @Nullable
     public T unbox() {
         return exchange(null);
@@ -57,14 +65,6 @@ public class Box<T> implements Property<T> {
 
     public boolean isNotNull() {
         return this.obj != null;
-    }
-
-    public static <T> boolean isNull(@Nullable Box<T> box) {
-        return box == null || box.isNull();
-    }
-
-    public static <T> boolean isNotNull(@Nullable Box<T> box) {
-        return box != null && box.isNotNull();
     }
 
     @Override

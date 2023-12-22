@@ -37,95 +37,14 @@ public abstract class BaseBlock implements Keyed {
         this.typeLazy = Lazy.createInThreadSafe(() -> DataBlockType.create(this));
     }
 
-    @Nonnull
-    public final NamespacedKey getKey() {
-        return key;
-    }
-
-    @Nonnull
-    public final String getNameInTranslateKey() {
-        return "block." + key.getNamespace() + "." + key.getKey();
-    }
-
-    @Nonnull
-    public String getDefaultName() {
-        return getNameInTranslateKey();
-    }
-
-    @Nonnull
-    public final Material getBlockTypeBasedOn() {
-        return blockTypeBasedOn;
-    }
-
-    @Nonnull
-    public final DataBlockType getType() {
-        return typeLazy.get();
-    }
-
     @Nullable
     protected static PersistentDataContainer getPersistentDataContainer(@Nonnull Block block, boolean create) {
         return ChunkStorage.getBlockDataContainer(block, create);
     }
 
     protected static void setPersistentDataContainer(@Nonnull Block block,
-            @Nullable PersistentDataContainer container) {
+                                                     @Nullable PersistentDataContainer container) {
         ChunkStorage.setBlockDataContainer(block, container);
-    }
-
-    public final void register(@Nullable Block block) {
-        if (block != null) {
-            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
-            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
-            setPersistentDataContainer(block, container);
-        }
-    }
-
-    public final void register(@Nullable Block block,
-            @Nullable Consumer<Block> afterBlockRegistered) {
-        if (block != null) {            
-            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
-            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
-            setPersistentDataContainer(block, container);
-            if (afterBlockRegistered != null) {
-                afterBlockRegistered.accept(block);
-            }
-        }
-    }
-
-    public final boolean tryRegister(@Nullable Block block,
-            @Nullable Predicate<Block> afterBlockRegistered) {
-        if (block != null) {
-            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
-            String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
-            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
-            if (afterBlockRegistered != null) {
-                if (!afterBlockRegistered.test(block)) {
-                    if (!block.isEmpty())
-                        if (previousID == null) {
-                            container.remove(DefaultNamespacedKey);
-                            if (container.isEmpty()) {
-                                ChunkStorage.removeBlockDataContainer(block);
-                            }
-                        } else
-                            container.set(DefaultNamespacedKey, PersistentDataType.STRING, previousID);
-                    return false;
-                }
-            }
-            setPersistentDataContainer(block, container);
-            return true;
-        }
-        return false;
-    }
-
-    public final boolean isCertainBlock(@Nullable Block block) {
-        if (block != null) {
-            PersistentDataContainer container = getPersistentDataContainer(block, false);
-            if (container != null) {
-                return key.toString()
-                        .equals(container.get(DefaultNamespacedKey, PersistentDataType.STRING));
-            }
-        }
-        return false;
     }
 
     public static void registerBlock(@Nullable Block block, @Nonnull BaseBlock blockType) {
@@ -162,7 +81,7 @@ public abstract class BaseBlock implements Keyed {
             return null;
         String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
         if (namespacedKeyString == null && !FallbackNamespacedKeys.isEmpty()) {
-            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null;) {
+            for (var iterator = FallbackNamespacedKeys.iterator(); iterator.hasNext() && namespacedKeyString == null; ) {
                 NamespacedKey key = iterator.next();
                 if (key != null)
                     namespacedKeyString = container.get(key, PersistentDataType.STRING);
@@ -179,6 +98,87 @@ public abstract class BaseBlock implements Keyed {
     @Nonnull
     public static DataBlockType getBlockType(@Nonnull Block block) {
         return DataBlockType.get(block);
+    }
+
+    @Nonnull
+    public final NamespacedKey getKey() {
+        return key;
+    }
+
+    @Nonnull
+    public final String getNameInTranslateKey() {
+        return "block." + key.getNamespace() + "." + key.getKey();
+    }
+
+    @Nonnull
+    public String getDefaultName() {
+        return getNameInTranslateKey();
+    }
+
+    @Nonnull
+    public final Material getBlockTypeBasedOn() {
+        return blockTypeBasedOn;
+    }
+
+    @Nonnull
+    public final DataBlockType getType() {
+        return typeLazy.get();
+    }
+
+    public final void register(@Nullable Block block) {
+        if (block != null) {
+            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            setPersistentDataContainer(block, container);
+        }
+    }
+
+    public final void register(@Nullable Block block,
+                               @Nullable Consumer<Block> afterBlockRegistered) {
+        if (block != null) {
+            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            setPersistentDataContainer(block, container);
+            if (afterBlockRegistered != null) {
+                afterBlockRegistered.accept(block);
+            }
+        }
+    }
+
+    public final boolean tryRegister(@Nullable Block block,
+                                     @Nullable Predicate<Block> afterBlockRegistered) {
+        if (block != null) {
+            PersistentDataContainer container = Objects.requireNonNull(getPersistentDataContainer(block, true));
+            String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
+            container.set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            if (afterBlockRegistered != null) {
+                if (!afterBlockRegistered.test(block)) {
+                    if (!block.isEmpty())
+                        if (previousID == null) {
+                            container.remove(DefaultNamespacedKey);
+                            if (container.isEmpty()) {
+                                ChunkStorage.removeBlockDataContainer(block);
+                            }
+                        } else
+                            container.set(DefaultNamespacedKey, PersistentDataType.STRING, previousID);
+                    return false;
+                }
+            }
+            setPersistentDataContainer(block, container);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean isCertainBlock(@Nullable Block block) {
+        if (block != null) {
+            PersistentDataContainer container = getPersistentDataContainer(block, false);
+            if (container != null) {
+                return key.toString()
+                        .equals(container.get(DefaultNamespacedKey, PersistentDataType.STRING));
+            }
+        }
+        return false;
     }
 
     public boolean equals(Object obj) {

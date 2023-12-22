@@ -14,7 +14,7 @@ public class CampfireRecipe extends BaseCookingRecipe {
     }
 
     public CampfireRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+                          float experience, int cookingTime) {
         super(key, original, result, experience, cookingTime);
     }
 

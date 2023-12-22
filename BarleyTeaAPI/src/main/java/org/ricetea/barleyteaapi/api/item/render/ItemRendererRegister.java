@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     @Nonnull
@@ -95,7 +94,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
 
     @Nonnull
     public ItemRenderer lookupOrDefault(@Nullable NamespacedKey key,
-            @Nonnull ItemRenderer defaultRenderer) {
+                                        @Nonnull ItemRenderer defaultRenderer) {
         if (key == null)
             return defaultRenderer;
         return ObjectUtil.letNonNull(lookup(key), defaultRenderer);
@@ -125,8 +124,8 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     public Collection<ItemRenderer> listAll(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).toList(),
-                        Collections::emptySet);
+                lookupTable.values().stream().filter(predicate).toList(),
+                Collections::emptySet);
     }
 
     @Override
@@ -141,11 +140,11 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream()
-                                .filter(new Filter<>(predicate))
-                                .map(new Mapper<>())
-                                .toList(),
-                        Collections::emptySet);
+                lookupTable.entrySet().stream()
+                        .filter(new Filter<>(predicate))
+                        .map(new Mapper<>())
+                        .toList(),
+                Collections::emptySet);
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.Objects;
 public final class DataItemHoldPlayerQuit extends BaseItemHoldEntityFeatureData<PlayerQuitEvent> {
 
     public DataItemHoldPlayerQuit(@Nonnull PlayerQuitEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                  @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getPlayer(), itemStack, equipmentSlot);
     }
 

@@ -18,7 +18,7 @@ public final class ComponentUtil {
                 if (needCheck > 0) {
                     ArrayList<Component> argsB = new ArrayList<>(translatableComponentB.args());
                     for (Component argA : argsA) {
-                        for (var iterator = argsB.iterator(); iterator.hasNext();) {
+                        for (var iterator = argsB.iterator(); iterator.hasNext(); ) {
                             Component argB = iterator.next();
                             if (translatableComponentEquals(argA, argB)) {
                                 iterator.remove();

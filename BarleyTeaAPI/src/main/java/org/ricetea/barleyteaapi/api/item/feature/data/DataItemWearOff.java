@@ -11,7 +11,6 @@ import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public final class DataItemWearOff extends BasePlayerFeatureData<PlayerArmorChangeEvent> {

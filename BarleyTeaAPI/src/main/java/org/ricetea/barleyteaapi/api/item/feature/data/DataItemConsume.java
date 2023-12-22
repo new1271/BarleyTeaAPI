@@ -44,6 +44,11 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
         return event.getReplacement();
     }
 
+    public void setReplacement(@Nullable ItemStack replacement) {
+        event.setReplacement(replacement);
+        replacementType = null;
+    }
+
     public @Nonnull DataItemType getReplacementType() {
         DataItemType replacementType = this.replacementType;
         if (replacementType == null)
@@ -51,10 +56,5 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
                     .letNonNull(ObjectUtil.safeMap(getReplacement(), BaseItem::getItemType),
                             DataItemType.empty());
         return replacementType;
-    }
-
-    public void setReplacement(@Nullable ItemStack replacement) {
-        event.setReplacement(replacement);
-        replacementType = null;
     }
 }

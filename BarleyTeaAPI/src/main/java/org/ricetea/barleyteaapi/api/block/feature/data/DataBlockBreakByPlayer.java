@@ -17,12 +17,12 @@ public final class DataBlockBreakByPlayer extends BaseBlockFeatureData<BlockBrea
         return Objects.requireNonNull(event.getPlayer());
     }
 
-    public void setDropItems(boolean dropItems) {
-        event.setDropItems(dropItems);
-    }
-
     public boolean isDropItems() {
         return event.isDropItems();
+    }
+
+    public void setDropItems(boolean dropItems) {
+        event.setDropItems(dropItems);
     }
 
     public int getExpToDrop() {

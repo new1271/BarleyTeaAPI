@@ -64,7 +64,7 @@ public class Either<L, R> {
     }
 
     public <T> void call(@Nullable BiConsumer<L, T> consumerForLeft, @Nullable BiConsumer<R, T> consumerForRight,
-            @Nullable T extra) {
+                         @Nullable T extra) {
         L left = this.left;
         R right = this.right;
         if (left != null && consumerForLeft != null)
@@ -75,7 +75,7 @@ public class Either<L, R> {
 
     @Nullable
     public <T> T map(@Nullable Function<L, T> mapFunctionForLeft,
-            @Nullable Function<R, T> mapFunctionForRight) {
+                     @Nullable Function<R, T> mapFunctionForRight) {
         L left = this.left;
         R right = this.right;
         if (left != null && mapFunctionForLeft != null)
@@ -87,7 +87,7 @@ public class Either<L, R> {
 
     @Nullable
     public <T, TReturn> TReturn map(@Nullable BiFunction<L, T, TReturn> mapFunctionForLeft,
-            @Nullable BiFunction<R, T, TReturn> mapFunctionForRight, @Nullable T extra) {
+                                    @Nullable BiFunction<R, T, TReturn> mapFunctionForRight, @Nullable T extra) {
         L left = this.left;
         R right = this.right;
         if (left != null && mapFunctionForLeft != null)
@@ -99,7 +99,7 @@ public class Either<L, R> {
 
     @Nonnull
     public <T> T nonNullMap(@Nonnull NonnullFunction<L, T> mapFunctionForLeft,
-            @Nonnull NonnullFunction<R, T> mapFunctionForRight) {
+                            @Nonnull NonnullFunction<R, T> mapFunctionForRight) {
         L left = this.left;
         R right = this.right;
         if (left != null)

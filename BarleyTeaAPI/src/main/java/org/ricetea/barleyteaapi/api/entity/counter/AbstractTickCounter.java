@@ -18,7 +18,7 @@ public abstract class AbstractTickCounter implements Keyed {
     final ArrayList<TickCounterTrigger> triggerList;
 
     public AbstractTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction tickingCountOperationFunction, @Nullable TickCounterTrigger[] triggers) {
+                               @Nullable TickingOperationFunction tickingCountOperationFunction, @Nullable TickCounterTrigger[] triggers) {
         key = identifierKey;
         function = tickingCountOperationFunction;
         triggerList = triggers == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(triggers));

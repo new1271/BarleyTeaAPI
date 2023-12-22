@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class BlockRegister implements IRegister<BaseBlock> {
     @Nonnull
@@ -239,28 +238,6 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 
-    private record RefreshCustomBlockRecord(@Nullable NamespacedKey key,
-                                            @Nullable FeatureBlockLoad oldFeature,
-                                            @Nullable FeatureBlockLoad newFeature,
-                                            boolean hasTickingOld, boolean hasTickingNew) {
-
-        @Nullable
-        public static RefreshCustomBlockRecord create(@Nullable BaseBlock oldBlock, @Nullable BaseBlock newBlock) {
-            BaseBlock compareBlock = newBlock == null ? oldBlock : newBlock;
-            if (compareBlock == null)
-                return null;
-            return new RefreshCustomBlockRecord(compareBlock.getKey(),
-                    ObjectUtil.tryCast(oldBlock, FeatureBlockLoad.class),
-                    ObjectUtil.tryCast(newBlock, FeatureBlockLoad.class),
-                    oldBlock instanceof FeatureBlockTick,
-                    newBlock instanceof FeatureBlockTick);
-        }
-
-        public boolean needOperate() {
-            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
-        }
-    }
-
     private void refreshCustomBlocks(@Nonnull Collection<RefreshCustomBlockRecord> records) {
         if (records.stream().anyMatch(RefreshCustomBlockRecord::needOperate)) {
             for (World world : Bukkit.getWorlds()) {
@@ -308,6 +285,28 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                     }
                 }
             }
+        }
+    }
+
+    private record RefreshCustomBlockRecord(@Nullable NamespacedKey key,
+                                            @Nullable FeatureBlockLoad oldFeature,
+                                            @Nullable FeatureBlockLoad newFeature,
+                                            boolean hasTickingOld, boolean hasTickingNew) {
+
+        @Nullable
+        public static RefreshCustomBlockRecord create(@Nullable BaseBlock oldBlock, @Nullable BaseBlock newBlock) {
+            BaseBlock compareBlock = newBlock == null ? oldBlock : newBlock;
+            if (compareBlock == null)
+                return null;
+            return new RefreshCustomBlockRecord(compareBlock.getKey(),
+                    ObjectUtil.tryCast(oldBlock, FeatureBlockLoad.class),
+                    ObjectUtil.tryCast(newBlock, FeatureBlockLoad.class),
+                    oldBlock instanceof FeatureBlockTick,
+                    newBlock instanceof FeatureBlockTick);
+        }
+
+        public boolean needOperate() {
+            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
         }
     }
 }

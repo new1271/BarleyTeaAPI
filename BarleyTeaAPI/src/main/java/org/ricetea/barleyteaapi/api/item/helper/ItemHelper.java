@@ -23,16 +23,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class ItemHelper {
-    private ItemHelper() {
-        //Do nothing
-    }
-
     @Nonnull
     private static final Multimap<Attribute, AttributeModifier> EMPTY_MAP = Objects
             .requireNonNull(ImmutableMultimap.of());
-
     @Nonnull
     private static final HashMap<Material, Multimap<Attribute, AttributeModifier>> defaultModifiers = new HashMap<>();
+
+    private ItemHelper() {
+        //Do nothing
+    }
 
     @Nonnull
     public static Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material) {

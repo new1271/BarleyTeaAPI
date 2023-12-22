@@ -31,13 +31,13 @@ public final class NBTEntityHelper {
     }
 
     public static void setString(@Nonnull org.bukkit.entity.Entity entity, @Nonnull String key,
-            @Nullable String value) {
+                                 @Nullable String value) {
         CraftEntity craftEntity = (CraftEntity) entity;
         setString(Objects.requireNonNull(craftEntity.getHandle()), key, value);
     }
 
     public static void setString(@Nonnull net.minecraft.world.entity.Entity entity, @Nonnull String key,
-            @Nullable String value) {
+                                 @Nullable String value) {
         CompoundTag compound = NBTEntityHelper.getNBT(entity);
         NBTTagCompoundHelper.put(compound, key, value);
         NBTEntityHelper.setNBT(entity, compound);

@@ -101,28 +101,28 @@ public final class PluginEntryPoint extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void listenEntitiesRegistered(EntitiesRegisteredEvent event){
+    public void listenEntitiesRegistered(EntitiesRegisteredEvent event) {
         if (event == null)
             return;
         summonCommand.updateSuggestions();
     }
 
     @EventHandler
-    public void listenEntitiesUnregistered(EntitiesUnregisteredEvent event){
+    public void listenEntitiesUnregistered(EntitiesUnregisteredEvent event) {
         if (event == null)
             return;
         summonCommand.updateSuggestions();
     }
 
     @EventHandler
-    public void listenItemsRegistered(ItemsRegisteredEvent event){
+    public void listenItemsRegistered(ItemsRegisteredEvent event) {
         if (event == null)
             return;
         giveCommand.updateSuggestions();
     }
 
     @EventHandler
-    public void listenItemsUnregistered(ItemsUnregisteredEvent event){
+    public void listenItemsUnregistered(ItemsUnregisteredEvent event) {
         if (event == null)
             return;
         giveCommand.updateSuggestions();

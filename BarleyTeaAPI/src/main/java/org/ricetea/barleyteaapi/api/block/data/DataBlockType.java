@@ -26,13 +26,13 @@ public final class DataBlockType extends Either<Material, BaseBlock> implements 
     @Nonnull
     private static final ConcurrentHashMap<Material, DataBlockType> vanillaMaterialMap = new ConcurrentHashMap<>();
 
+    private DataBlockType(@Nullable Material left, @Nullable BaseBlock right) {
+        super(left, right);
+    }
+
     @Nonnull
     public static DataBlockType empty() {
         return EMPTY;
-    }
-
-    private DataBlockType(@Nullable Material left, @Nullable BaseBlock right) {
-        super(left, right);
     }
 
     @Nonnull

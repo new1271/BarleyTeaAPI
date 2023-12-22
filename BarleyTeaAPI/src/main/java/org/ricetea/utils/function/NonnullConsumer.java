@@ -7,6 +7,11 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface NonnullConsumer<T> {
 
+    @Nonnull
+    static <T> NonnullConsumer<T> fromConsumer(@Nonnull Consumer<T> consumer) {
+        return (T t) -> consumer.accept(Objects.requireNonNull(t));
+    }
+
     /**
      * Performs this operation on the given argument.
      *
@@ -63,10 +68,5 @@ public interface NonnullConsumer<T> {
     @Nonnull
     default Consumer<T> toConsumer() {
         return (T t) -> accept(Objects.requireNonNull(t));
-    }
-
-    @Nonnull
-    static <T> NonnullConsumer<T> fromConsumer(@Nonnull Consumer<T> consumer) {
-        return (T t) -> consumer.accept(Objects.requireNonNull(t));
     }
 }

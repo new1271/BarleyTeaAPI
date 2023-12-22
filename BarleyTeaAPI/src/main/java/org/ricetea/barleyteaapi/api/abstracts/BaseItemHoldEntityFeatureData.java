@@ -25,8 +25,8 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
     private final EquipmentSlot equipmentSlot;
 
     public BaseItemHoldEntityFeatureData(@Nonnull T event, @Nonnull LivingEntity holderEntity,
-            @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                         @Nonnull ItemStack itemStack,
+                                         @Nonnull EquipmentSlot equipmentSlot) {
         super(event);
         this.holderEntity = holderEntity;
         this.holderEntityType = Lazy.create(() -> BaseEntity.getEntityType(this.holderEntity));

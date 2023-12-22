@@ -20,11 +20,9 @@ import javax.annotation.Nullable;
 public final class ItemTickTask extends AbstractTask {
 
     @Nonnull
-    private static final Lazy<ItemTickTask> _inst = Lazy.create(ItemTickTask::new);
-
-    @Nonnull
     public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
-
+    @Nonnull
+    private static final Lazy<ItemTickTask> _inst = Lazy.create(ItemTickTask::new);
     private int lastTick;
 
     private ItemTickTask() {

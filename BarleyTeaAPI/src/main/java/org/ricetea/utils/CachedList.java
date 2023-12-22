@@ -6,9 +6,9 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public final class CachedList<T> implements List<T> {
+    private final Class<T> clazz;
     private T[] _array;
     private ArrayList<T> _list;
-    private final Class<T> clazz;
 
     public CachedList(Class<T> clazz) {
         _list = new ArrayList<>();
@@ -168,7 +168,7 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean addAll(int index,@Nullable  Collection<? extends T> c) {
+    public boolean addAll(int index, @Nullable Collection<? extends T> c) {
         if (c == null)
             return false;
         ArrayList<T> list = _list;

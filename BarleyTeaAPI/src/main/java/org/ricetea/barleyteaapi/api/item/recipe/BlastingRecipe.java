@@ -14,7 +14,7 @@ public class BlastingRecipe extends BaseCookingRecipe {
     }
 
     public BlastingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+                          float experience, int cookingTime) {
         super(key, original, result, experience, cookingTime);
     }
 

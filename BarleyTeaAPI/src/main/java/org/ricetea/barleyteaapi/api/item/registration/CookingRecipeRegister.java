@@ -39,7 +39,7 @@ public final class CookingRecipeRegister extends RecipeRegister<BaseCookingRecip
         boolean isSmokingRecipe = recipe instanceof SmokingRecipe;
         boolean isBlastingRecipe = recipe instanceof BlastingRecipe;
         ItemStack originalItem = new ItemStack(recipe.getOriginal().getMaterialBasedOn());
-        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
+        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext(); ) {
             Recipe iteratingRecipe = iterator.next();
             if (isCampfireRecipe) {
                 if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingRecipe1) {

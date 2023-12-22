@@ -18,7 +18,7 @@ public final class DataItemHoldEntityDamagedByBlock extends BaseItemHoldEntityFe
     private final Lazy<DataBlockType> blockType;
 
     public DataItemHoldEntityDamagedByBlock(@Nonnull EntityDamageByBlockEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                            @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
         blockType = Lazy.create(() -> DataBlockType.get(getDamager()));
     }

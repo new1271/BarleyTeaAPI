@@ -48,7 +48,7 @@ public final class SmithingRecipeRegister extends RecipeRegister<BaseSmithingRec
         ItemStack additionItem = new ItemStack(
                 CollectionUtil.firstOrDefault(recipe.getAdditions(), DataItemType.empty())
                         .getMaterialBasedOn());
-        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
+        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext(); ) {
             Recipe iteratingRecipe = iterator.next();
             if (iteratingRecipe instanceof SmithingTransformRecipe iteratingSmithingRecipe) {
                 if (iteratingSmithingRecipe.getBase().test(originalItem)

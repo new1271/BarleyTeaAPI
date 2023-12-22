@@ -26,13 +26,13 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     @Nonnull
     private static final ConcurrentHashMap<Material, DataItemType> vanillaMaterialMap = new ConcurrentHashMap<>();
 
+    private DataItemType(@Nullable Material left, @Nullable BaseItem right) {
+        super(left, right);
+    }
+
     @Nonnull
     public static DataItemType empty() {
         return EMPTY;
-    }
-
-    private DataItemType(@Nullable Material left, @Nullable BaseItem right) {
-        super(left, right);
     }
 
     @Nonnull

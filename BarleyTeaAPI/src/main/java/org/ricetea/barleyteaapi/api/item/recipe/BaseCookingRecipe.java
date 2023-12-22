@@ -28,7 +28,7 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFun
     }
 
     public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
-            float experience, int cookingTime) {
+                             float experience, int cookingTime) {
         super(key, result);
         this.original = original;
         this.experience = experience;
@@ -53,8 +53,8 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFun
     @Nonnull
     public ItemStack apply(@Nonnull ItemStack source) {
         return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right ->
-            ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                    itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
         ), () -> new ItemStack(Material.AIR));
     }
 

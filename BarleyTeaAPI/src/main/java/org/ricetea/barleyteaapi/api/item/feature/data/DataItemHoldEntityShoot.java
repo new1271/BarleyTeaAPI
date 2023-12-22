@@ -20,7 +20,7 @@ public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData
     private final Lazy<DataEntityType> entityType;
 
     public DataItemHoldEntityShoot(@Nonnull ProjectileLaunchEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                   @Nonnull EquipmentSlot equipmentSlot) {
         super(event, Objects.requireNonNull(ObjectUtil.tryCast(event.getEntity().getShooter(), LivingEntity.class)),
                 itemStack, equipmentSlot);
         entityType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));

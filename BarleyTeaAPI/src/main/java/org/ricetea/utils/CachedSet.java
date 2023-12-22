@@ -6,9 +6,9 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public final class CachedSet<T> implements Set<T> {
+    private final Class<T> clazz;
     private T[] _array;
     private HashSet<T> _list;
-    private final Class<T> clazz;
 
     public CachedSet(Class<T> clazz) {
         _list = new HashSet<>();

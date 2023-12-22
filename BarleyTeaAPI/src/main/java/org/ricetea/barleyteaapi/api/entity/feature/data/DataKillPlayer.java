@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent> {
     public DataKillPlayer(@Nonnull PlayerDeathEvent event,
-            @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
+                          @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event, lastDamageCauseByEntityEvent.getDamager());
     }
 

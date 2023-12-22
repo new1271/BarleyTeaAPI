@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
 
     public DataItemHoldEntityDamagedByNothing(@Nonnull EntityDamageEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                              @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
     }
 

@@ -30,8 +30,8 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     private final Lazy<DataEntityType> decedentType;
 
     public DataItemHoldEntityDeath(@Nonnull EntityDeathEvent event,
-            @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                   @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
+                                   @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getEntity(), itemStack, equipmentSlot);
         decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
         killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);

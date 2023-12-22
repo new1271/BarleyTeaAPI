@@ -37,6 +37,25 @@ public final class BarleyTeaAPI extends JavaPlugin {
         return _inst;
     }
 
+    public static boolean checkPluginUsable() {
+        BarleyTeaAPI inst = _inst;
+        if (inst == null) {
+            Bukkit.getLogger().warning("BarleyTeaAPI isn't loaded, all of the features won't worked!");
+            return false;
+        } else if (!inst.isEnabled()) {
+            Bukkit.getLogger().warning("BarleyTeaAPI isn't enabled, all of the features won't worked!");
+            return false;
+        }
+        return true;
+    }
+
+    public static void warnWhenPluginUsable(String warnString) {
+        BarleyTeaAPI inst = _inst;
+        if (inst == null || !inst.isEnabled()) {
+            Bukkit.getLogger().warning(warnString);
+        }
+    }
+
     @Override
     public void onEnable() {
         _inst = this;
@@ -120,24 +139,5 @@ public final class BarleyTeaAPI extends JavaPlugin {
         Bukkit.getScheduler().cancelTasks(this);
         _inst = null;
         logger.info("BarleyTeaAPI successfully unloaded!");
-    }
-
-    public static boolean checkPluginUsable() {
-        BarleyTeaAPI inst = _inst;
-        if (inst == null) {
-            Bukkit.getLogger().warning("BarleyTeaAPI isn't loaded, all of the features won't worked!");
-            return false;
-        } else if (!inst.isEnabled()) {
-            Bukkit.getLogger().warning("BarleyTeaAPI isn't enabled, all of the features won't worked!");
-            return false;
-        }
-        return true;
-    }
-
-    public static void warnWhenPluginUsable(String warnString) {
-        BarleyTeaAPI inst = _inst;
-        if (inst == null || !inst.isEnabled()) {
-            Bukkit.getLogger().warning(warnString);
-        }
     }
 }

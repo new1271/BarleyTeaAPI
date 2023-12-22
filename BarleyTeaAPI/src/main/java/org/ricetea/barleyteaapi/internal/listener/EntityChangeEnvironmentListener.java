@@ -38,6 +38,7 @@ import java.util.Objects;
 public final class EntityChangeEnvironmentListener implements Listener {
     private static final Lazy<EntityChangeEnvironmentListener> inst = Lazy.create(
             EntityChangeEnvironmentListener::new);
+    private final HashMap<Entity, ArrayList<BaseBlock>> PrepareToDrops = new HashMap<>();
 
     private EntityChangeEnvironmentListener() {
     }
@@ -46,8 +47,6 @@ public final class EntityChangeEnvironmentListener implements Listener {
     public static EntityChangeEnvironmentListener getInstance() {
         return inst.get();
     }
-
-    private final HashMap<Entity, ArrayList<BaseBlock>> PrepareToDrops = new HashMap<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityExplode(EntityExplodeEvent event) {
@@ -60,7 +59,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-            for (var iterator = event.blockList().iterator(); iterator.hasNext();) {
+            for (var iterator = event.blockList().iterator(); iterator.hasNext(); ) {
                 Block block = iterator.next();
                 if (block != null) {
                     NamespacedKey id = BaseBlock.getBlockID(block);

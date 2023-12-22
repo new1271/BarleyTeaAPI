@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class ItemRegister implements IRegister<BaseItem> {
     @Nonnull
@@ -136,10 +135,10 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public Collection<BaseItem> listAll(@Nullable Predicate<BaseItem> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                        lookupTable.values().stream()
-                                .filter(predicate)
-                                .toList(),
-                        Collections::emptySet);
+                lookupTable.values().stream()
+                        .filter(predicate)
+                        .toList(),
+                Collections::emptySet);
     }
 
     @Override
@@ -154,11 +153,11 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseItem> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream()
-                                .filter(new Filter<>(predicate))
-                                .map(new Mapper<>())
-                                .toList(),
-                        Collections::emptySet);
+                lookupTable.entrySet().stream()
+                        .filter(new Filter<>(predicate))
+                        .map(new Mapper<>())
+                        .toList(),
+                Collections::emptySet);
     }
 
     @Override

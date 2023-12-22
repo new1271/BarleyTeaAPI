@@ -21,6 +21,11 @@ public final class ItemsRegisteredEvent extends Event {
     }
 
     @Nonnull
+    public static HandlerList getHandlerList() {
+        return lazyHandlerList.get();
+    }
+
+    @Nonnull
     public List<BaseItem> getItems() {
         return items;
     }
@@ -28,11 +33,6 @@ public final class ItemsRegisteredEvent extends Event {
     @Override
     @Nonnull
     public HandlerList getHandlers() {
-        return lazyHandlerList.get();
-    }
-
-    @Nonnull
-    public static HandlerList getHandlerList() {
         return lazyHandlerList.get();
     }
 }

@@ -36,12 +36,12 @@ public final class NMSCommandUtil {
     }
 
     public static void sendErrorMessage(@Nonnull CommandSourceStack source,
-            @Nonnull net.minecraft.network.chat.Component component, boolean withStyle) {
+                                        @Nonnull net.minecraft.network.chat.Component component, boolean withStyle) {
         source.sendFailure(component, withStyle);
     }
 
     public static void sendErrorMessage(@Nonnull CommandSourceStack source, @Nonnull Component component,
-            boolean withStyle) {
+                                        boolean withStyle) {
         if (withStyle) {
             component = component.style(Style.style(NamedTextColor.RED));
         }

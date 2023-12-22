@@ -26,7 +26,7 @@ public final class DataEntityDeath extends BaseEntityFeatureData<EntityDeathEven
     private final Lazy<DataEntityType> killerType;
 
     public DataEntityDeath(@Nonnull EntityDeathEvent event,
-            @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
+                           @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event);
         killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
         killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));

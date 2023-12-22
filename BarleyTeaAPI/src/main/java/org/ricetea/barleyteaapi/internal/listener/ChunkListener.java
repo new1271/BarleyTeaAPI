@@ -22,7 +22,6 @@ import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
-import java.util.Iterator;
 import java.util.Objects;
 
 public final class ChunkListener implements Listener {

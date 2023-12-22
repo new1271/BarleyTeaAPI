@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import java.text.MessageFormat;
 
 public final class Converters {
-    
+
     public static @Nonnull String toStringFormat(@Nonnull MessageFormat format) {
         format = (MessageFormat) format.clone();
         int length = format.getFormats().length;

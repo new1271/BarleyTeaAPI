@@ -10,27 +10,26 @@ import java.util.UUID;
 
 public class TemporaryTickCounter extends AbstractTickCounter {
 
+    final int startValue;
     private final HashMap<UUID, Integer> storer;
 
-    final int startValue;
-
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function) {
+                                @Nullable TickingOperationFunction function) {
         this(identifierKey, function, 0, (TickCounterTrigger[]) null);
     }
 
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, @Nullable TickCounterTrigger... predicates) {
+                                @Nullable TickingOperationFunction function, @Nullable TickCounterTrigger... predicates) {
         this(identifierKey, function, 0, predicates);
     }
 
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, int startValue) {
+                                @Nullable TickingOperationFunction function, int startValue) {
         this(identifierKey, function, startValue, (TickCounterTrigger[]) null);
     }
 
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
-            @Nullable TickingOperationFunction function, int startValue, @Nullable TickCounterTrigger... predicates) {
+                                @Nullable TickingOperationFunction function, int startValue, @Nullable TickCounterTrigger... predicates) {
         super(identifierKey, function, predicates);
         this.startValue = startValue;
         storer = new HashMap<>();

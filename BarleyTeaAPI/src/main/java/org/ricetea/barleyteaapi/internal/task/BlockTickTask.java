@@ -20,25 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class BlockTickTask extends AbstractTask {
 
-    private record BlockLocation(int x, int y, int z) {
-
-        public BlockLocation(@Nonnull Block block) {
-            this(block.getX(), block.getY(), block.getZ());
-        }
-
-        @Nonnull
-        public Block getBlock(@Nonnull World world) {
-            return world.getBlockAt(x, y, z);
-        }
-
-    }
-
     @Nonnull
     private static final Lazy<BlockTickTask> _inst = Lazy.create(BlockTickTask::new);
-
     @Nonnull
     private final Hashtable<World, Hashtable<BlockLocation, Integer>> tickingTable = new Hashtable<>();
-
+    @Nonnull
+    private final ConcurrentHashMap<World, ConcurrentHashMap<BlockLocation, Integer>> operationTable = new ConcurrentHashMap<>();
     private int lastTick;
 
     /*
@@ -46,9 +33,6 @@ public final class BlockTickTask extends AbstractTask {
      * 0 = Add
      * 1 = Remove
      */
-
-    @Nonnull
-    private final ConcurrentHashMap<World, ConcurrentHashMap<BlockLocation, Integer>> operationTable = new ConcurrentHashMap<>();
 
     private BlockTickTask() {
         super(50, 0);
@@ -139,6 +123,19 @@ public final class BlockTickTask extends AbstractTask {
             start();
     }
 
+    private record BlockLocation(int x, int y, int z) {
+
+        public BlockLocation(@Nonnull Block block) {
+            this(block.getX(), block.getY(), block.getZ());
+        }
+
+        @Nonnull
+        public Block getBlock(@Nonnull World world) {
+            return world.getBlockAt(x, y, z);
+        }
+
+    }
+
     private static class _Task implements Runnable {
         @Nonnull
         private final World world;
@@ -147,8 +144,8 @@ public final class BlockTickTask extends AbstractTask {
         @Nonnull
         private final Hashtable<BlockLocation, Integer> operationTable;
 
-        _Task(@Nonnull World world,@Nonnull BlockLocation location,
-                @Nonnull Hashtable<BlockLocation, Integer> blockOperationTable) {
+        _Task(@Nonnull World world, @Nonnull BlockLocation location,
+              @Nonnull Hashtable<BlockLocation, Integer> blockOperationTable) {
             this.world = world;
             this.location = location;
             this.operationTable = blockOperationTable;

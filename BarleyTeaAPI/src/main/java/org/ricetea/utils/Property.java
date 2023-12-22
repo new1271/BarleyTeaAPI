@@ -8,6 +8,21 @@ import java.util.function.UnaryOperator;
 
 public interface Property<T> extends UnaryOperator<T>, Supplier<T>, Consumer<T> {
 
+    @Nonnull
+    static <T> Property<T> create(@Nonnull Supplier<T> getMethod, @Nonnull Consumer<T> setMethod) {
+        return new DefaultPropertyImpl<>(getMethod, setMethod);
+    }
+
+    @Nonnull
+    static <T> Property<T> readonly(@Nonnull Supplier<T> getMethod) {
+        return new DefaultPropertyImpl<>(getMethod, null);
+    }
+
+    @Nonnull
+    static <T> Property<T> writeonly(@Nonnull Consumer<T> setMethod) {
+        return new DefaultPropertyImpl<>(null, setMethod);
+    }
+
     @Nullable
     T get();
 
@@ -23,21 +38,6 @@ public interface Property<T> extends UnaryOperator<T>, Supplier<T>, Consumer<T> 
 
     default void accept(T obj) {
         set(obj);
-    }
-
-    @Nonnull
-    static <T> Property<T> create(@Nonnull Supplier<T> getMethod, @Nonnull Consumer<T> setMethod) {
-        return new DefaultPropertyImpl<>(getMethod, setMethod);
-    }
-
-    @Nonnull
-    static <T> Property<T> readonly(@Nonnull Supplier<T> getMethod) {
-        return new DefaultPropertyImpl<>(getMethod, null);
-    }
-
-    @Nonnull
-    static <T> Property<T> writeonly(@Nonnull Consumer<T> setMethod) {
-        return new DefaultPropertyImpl<>(null, setMethod);
     }
 
     enum PropertyType {

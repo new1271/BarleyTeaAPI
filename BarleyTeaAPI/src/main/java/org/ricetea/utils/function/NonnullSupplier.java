@@ -7,6 +7,11 @@ import java.util.function.Supplier;
 @FunctionalInterface
 public interface NonnullSupplier<T> {
 
+    @Nonnull
+    static <T> NonnullSupplier<T> fromSupplier(@Nonnull Supplier<T> supplier) {
+        return () -> Objects.requireNonNull(supplier.get());
+    }
+
     /**
      * Gets a result.
      *
@@ -17,10 +22,5 @@ public interface NonnullSupplier<T> {
     @Nonnull
     default Supplier<T> toSupplier() {
         return this::get;
-    }
-
-    @Nonnull
-    static <T> NonnullSupplier<T> fromSupplier(@Nonnull Supplier<T> supplier) {
-        return () -> Objects.requireNonNull(supplier.get());
     }
 }

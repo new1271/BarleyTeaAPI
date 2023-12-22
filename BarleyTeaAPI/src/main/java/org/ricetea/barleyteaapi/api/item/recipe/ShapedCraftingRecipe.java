@@ -18,7 +18,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     private final int colCount, rowCount;
 
     public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredientMatrix,
-            int colCount, @Nonnull DataItemType result) {
+                                int colCount, @Nonnull DataItemType result) {
         super(key, result);
         if (colCount < 1 || colCount > 3) {
             throw new UnsupportedOperationException("'colCount' can't lower than 1 or greater then 3!");
@@ -114,8 +114,8 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     @Override
     public ItemStack apply(@Nonnull ItemStack[] matrix) {
         return getResult().map(ItemStack::new, right ->
-            ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                    itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
         );
     }
 

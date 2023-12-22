@@ -25,17 +25,15 @@ public final class EntityTickTask extends AbstractTask {
 
     @Nonnull
     private final Hashtable<UUID, Integer> tickingTable = new Hashtable<>();
-
-    private int lastTick;
+    @Nonnull
+    private final ConcurrentHashMap<UUID, Integer> operationTable = new ConcurrentHashMap<>();
 
     /*
      * Operations
      * 0 = Add
      * 1 = Remove
      */
-
-    @Nonnull
-    private final ConcurrentHashMap<UUID, Integer> operationTable = new ConcurrentHashMap<>();
+    private int lastTick;
 
     private EntityTickTask() {
         super(50, 0);

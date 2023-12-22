@@ -19,7 +19,7 @@ public final class DataItemHoldEntityDamagedByEntity extends BaseItemHoldEntityF
     private final Lazy<DataEntityType> damagerType;
 
     public DataItemHoldEntityDamagedByEntity(@Nonnull EntityDamageByEntityEvent event, @Nonnull ItemStack itemStack,
-            @Nonnull EquipmentSlot equipmentSlot) {
+                                             @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getEntity(), itemStack, equipmentSlot);
         damagerType = Lazy.create(() -> BaseEntity.getEntityType(getDamager()));
     }

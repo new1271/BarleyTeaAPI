@@ -37,20 +37,20 @@ public class DataItemRarity {
     }
 
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity, @Nullable TextColor rarityColor,
-            @Nullable TextDecoration... rarityDecorations) {
+                          @Nullable TextDecoration... rarityDecorations) {
         this(nextLevelRarity,
                 rarityDecorations == null ? Style.style(rarityColor) : Style.style(rarityColor, rarityDecorations));
     }
 
     @Deprecated
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity,
-            @Nullable org.bukkit.ChatColor... rarityColorAndStyle) {
+                          @Nullable org.bukkit.ChatColor... rarityColorAndStyle) {
         this(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
     @SuppressWarnings("deprecation")
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity,
-            @Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
+                          @Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
         this(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
@@ -59,7 +59,7 @@ public class DataItemRarity {
     }
 
     public DataItemRarity(@Nullable TextColor rarityColor,
-            @Nullable TextDecoration... rarityDecorations) {
+                          @Nullable TextDecoration... rarityDecorations) {
         this(null,
                 rarityDecorations == null ? Style.style(rarityColor) : Style.style(rarityColor, rarityDecorations));
     }
@@ -84,6 +84,25 @@ public class DataItemRarity {
             style = style.decoration(TextDecoration.ITALIC, false);
         this.style = style;
         this.nextLevelRarity = nextLevelRarity;
+    }
+
+    @Nonnull
+    private static DataItemRarity fromVanillaItemRarity(@Nullable DataItemRarity nextLevelRarity,
+                                                        @Nonnull ItemRarity rarity) {
+        return new DataItemRarity(nextLevelRarity, Style.style(rarity.getColor()));
+    }
+
+    @Nullable
+    public static DataItemRarity fromItemRarity(@Nullable ItemRarity rarity) {
+        if (rarity == null)
+            return null;
+        return switch (rarity) {
+            case COMMON -> COMMON;
+            case EPIC -> EPIC;
+            case RARE -> RARE;
+            case UNCOMMON -> UNCOMMON;
+            default -> null;
+        };
     }
 
     @Nonnull
@@ -152,24 +171,5 @@ public class DataItemRarity {
             return true;
         }
         return false;
-    }
-
-    @Nonnull
-    private static DataItemRarity fromVanillaItemRarity(@Nullable DataItemRarity nextLevelRarity,
-            @Nonnull ItemRarity rarity) {
-        return new DataItemRarity(nextLevelRarity, Style.style(rarity.getColor()));
-    }
-
-    @Nullable
-    public static DataItemRarity fromItemRarity(@Nullable ItemRarity rarity) {
-        if (rarity == null)
-            return null;
-        return switch (rarity) {
-            case COMMON -> COMMON;
-            case EPIC -> EPIC;
-            case RARE -> RARE;
-            case UNCOMMON -> UNCOMMON;
-            default -> null;
-        };
     }
 }

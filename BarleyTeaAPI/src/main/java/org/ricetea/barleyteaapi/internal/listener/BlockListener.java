@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 public final class BlockListener implements Listener {
     private static final Lazy<BlockListener> inst = Lazy.create(BlockListener::new);
+    private final HashMap<Location, NamespacedKey> PrepareToDrops = new HashMap<>();
 
     private BlockListener() {
     }
@@ -110,8 +111,6 @@ public final class BlockListener implements Listener {
         }
     }
 
-    private final HashMap<Location, NamespacedKey> PrepareToDrops = new HashMap<>();
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockDrop(BlockDropItemEvent event) {
         if (event == null || event.isCancelled())
@@ -138,7 +137,7 @@ public final class BlockListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-            for (var iterator = event.blockList().iterator(); iterator.hasNext();) {
+            for (var iterator = event.blockList().iterator(); iterator.hasNext(); ) {
                 Block block = iterator.next();
                 if (block != null) {
                     NamespacedKey id = BaseBlock.getBlockID(block);

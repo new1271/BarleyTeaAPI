@@ -9,50 +9,50 @@ import javax.annotation.Nonnull;
 
 public final class DataEntityMove extends BaseEntityFeatureData<EntityMoveEvent> {
 
-   public DataEntityMove(@Nonnull EntityMoveEvent event) {
-      super(event);
-   }
+    public DataEntityMove(@Nonnull EntityMoveEvent event) {
+        super(event);
+    }
 
-   @Nonnull
-   public LivingEntity getEntity() {
-      return event.getEntity();
-   }
+    @Nonnull
+    public LivingEntity getEntity() {
+        return event.getEntity();
+    }
 
-   @Nonnull
-   public Location getFrom() {
-      return event.getFrom();
-   }
+    @Nonnull
+    public Location getFrom() {
+        return event.getFrom();
+    }
 
-   public void setFrom(@Nonnull Location from) {
-      event.setFrom(from);
-   }
+    public void setFrom(@Nonnull Location from) {
+        event.setFrom(from);
+    }
 
-   @Nonnull
-   public Location getTo() {
-      return event.getTo();
-   }
+    @Nonnull
+    public Location getTo() {
+        return event.getTo();
+    }
 
-   public void setTo(@Nonnull Location to) {
-      event.setTo(to);
-   }
+    public void setTo(@Nonnull Location to) {
+        event.setTo(to);
+    }
 
-   public boolean hasChangedPosition() {
-      return event.hasChangedPosition();
-   }
+    public boolean hasChangedPosition() {
+        return event.hasChangedPosition();
+    }
 
-   public boolean hasExplicitlyChangedPosition() {
-      return event.hasExplicitlyChangedPosition();
-   }
+    public boolean hasExplicitlyChangedPosition() {
+        return event.hasExplicitlyChangedPosition();
+    }
 
-   public boolean hasChangedBlock() {
-      return event.hasChangedBlock();
-   }
+    public boolean hasChangedBlock() {
+        return event.hasChangedBlock();
+    }
 
-   public boolean hasExplicitlyChangedBlock() {
-      return event.hasExplicitlyChangedBlock();
-   }
+    public boolean hasExplicitlyChangedBlock() {
+        return event.hasExplicitlyChangedBlock();
+    }
 
-   public boolean hasChangedOrientation() {
-      return event.hasChangedOrientation();
-   }
+    public boolean hasChangedOrientation() {
+        return event.hasChangedOrientation();
+    }
 }
