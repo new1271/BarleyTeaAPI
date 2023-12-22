@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.feature;
 
-import javax.annotation.Nullable;
-
 import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nullable;
 
 public interface FeatureItemGive {
     @Nullable

@@ -1,14 +1,12 @@
 package org.ricetea.barleyteaapi.api.i18n;
 
-import java.util.Objects;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.Translator;
+import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.ricetea.utils.Lazy;
-
-import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.translation.Translator;
+import java.util.Objects;
 
 public final class GlobalTranslators {
     @Nonnull

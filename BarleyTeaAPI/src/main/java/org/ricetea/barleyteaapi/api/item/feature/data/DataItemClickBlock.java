@@ -1,9 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -12,10 +8,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerInteractEvent> {
 
@@ -29,12 +28,12 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
 
     public boolean isLeftClick() {
         Action action = event.getAction();
-        return action != null && (action.equals(Action.LEFT_CLICK_AIR) || action.equals(Action.LEFT_CLICK_BLOCK));
+        return action.equals(Action.LEFT_CLICK_AIR) || action.equals(Action.LEFT_CLICK_BLOCK);
     }
 
     public boolean isRightClick() {
         Action action = event.getAction();
-        return action != null && (action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK));
+        return action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK);
     }
 
     public boolean isInteractableBlock() {

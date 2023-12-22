@@ -1,14 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -26,10 +21,14 @@ import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class BaseEntity implements Keyed {
     @Nonnull
@@ -43,7 +42,6 @@ public abstract class BaseEntity implements Keyed {
     @Nonnull
     private final Lazy<DataEntityType> lazyType;
 
-    @SuppressWarnings("deprecation")
     public BaseEntity(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
         this.key = key;
         this.entityTypeBasedOn = entityTypeBasedOn;
@@ -82,7 +80,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     public final <T extends Entity> void register(@Nullable T entity,
-            @Nullable Consumer<T> afterEntityRegistered) {
+                                                  @Nullable Consumer<T> afterEntityRegistered) {
         if (entity != null) {
             entity.getPersistentDataContainer().set(DefaultNamespacedKey,
                     PersistentDataType.STRING, key.toString());
@@ -93,7 +91,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     public final <T extends Entity> boolean tryRegister(@Nullable T entity,
-            @Nullable Predicate<T> afterEntityRegistered) {
+                                                        @Nullable Predicate<T> afterEntityRegistered) {
         if (entity != null) {
             PersistentDataContainer container = entity.getPersistentDataContainer();
             String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
@@ -116,7 +114,7 @@ public abstract class BaseEntity implements Keyed {
     public final boolean isCertainEntity(@Nullable Entity entity) {
         return entity != null
                 && key.toString().equals(entity.getPersistentDataContainer().get(DefaultNamespacedKey,
-                        PersistentDataType.STRING));
+                PersistentDataType.STRING));
     }
 
     public static void registerEntity(@Nullable Entity entity, @Nonnull BaseEntity entityType) {
@@ -137,8 +135,7 @@ public abstract class BaseEntity implements Keyed {
         if (namespacedKeyString == null) {
             result = null;
             if (!FallbackNamespacedKeys.isEmpty()) {
-                for (var iterator = FallbackNamespacedKeys.entrySet().iterator(); iterator.hasNext();) {
-                    var entry = iterator.next();
+                for (Map.Entry<NamespacedKey, Function<String, NamespacedKey>> entry : FallbackNamespacedKeys.entrySet()) {
                     NamespacedKey key = entry.getKey();
                     if (key != null) {
                         namespacedKeyString = container.get(key, PersistentDataType.STRING);
@@ -162,7 +159,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key,
-            @Nullable Function<String, NamespacedKey> converter) {
+                                                @Nullable Function<String, NamespacedKey> converter) {
         if (key != null && !FallbackNamespacedKeys.containsKey(key)) {
             FallbackNamespacedKeys.put(key, converter == null ? NamespacedKey::fromString : converter);
         }
@@ -193,17 +190,19 @@ public abstract class BaseEntity implements Keyed {
 
     @Deprecated
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name,
-            @Nullable org.bukkit.ChatColor... colorAndStyles) {
+                                       @Nullable org.bukkit.ChatColor... colorAndStyles) {
         setEntityName(entity, name, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
+    @SuppressWarnings("deprecation")
     protected final void setEntityName(@Nonnull Entity entity,
-            @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
+                                       @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
         setEntityName(entity, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
+    @SuppressWarnings("deprecation")
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name,
-            @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
+                                       @Nullable net.md_5.bungee.api.ChatColor... colorAndStyles) {
         setEntityName(entity, name, ChatColorHelper.toKyoriStyle(colorAndStyles));
     }
 
@@ -212,8 +211,11 @@ public abstract class BaseEntity implements Keyed {
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nullable TextColor color,
-            @Nullable TextDecoration... decoration) {
-        setEntityName(entity, Style.style(color, decoration));
+                                       @Nullable TextDecoration... decoration) {
+        if (decoration == null)
+            setEntityName(entity, Style.style(color));
+        else
+            setEntityName(entity, Style.style(color, decoration));
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nullable Style style) {
@@ -226,7 +228,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     protected final void setEntityName(@Nonnull Entity entity, @Nonnull String name, @Nullable TextColor color,
-            @Nullable TextDecoration... decorations) {
+                                       @Nullable TextDecoration... decorations) {
         setEntityName(entity, name, decorations == null ? Style.style(color) : Style.style(color, decorations));
     }
 
@@ -253,7 +255,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     protected double getBaseMaxHealth(@Nullable Entity entity) {
-        if (entity instanceof LivingEntity livingEntity) {
+        if (entity instanceof LivingEntity) {
             AttributeInstance attributeInstance = getAttribute(entity, Attribute.GENERIC_MAX_HEALTH);
             if (attributeInstance != null)
                 return attributeInstance.getBaseValue();
@@ -262,7 +264,7 @@ public abstract class BaseEntity implements Keyed {
     }
 
     protected double getMaxHealth(@Nullable Entity entity) {
-        if (entity instanceof LivingEntity livingEntity) {
+        if (entity instanceof LivingEntity) {
             AttributeInstance attributeInstance = getAttribute(entity, Attribute.GENERIC_MAX_HEALTH);
             if (attributeInstance != null)
                 return attributeInstance.getValue();

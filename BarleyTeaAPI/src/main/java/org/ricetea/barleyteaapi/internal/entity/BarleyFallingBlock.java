@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.internal.entity;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -17,6 +14,9 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class BarleyFallingBlock extends BaseEntity implements FeatureEntitySpawn {
     @Nonnull
@@ -36,14 +36,14 @@ public final class BarleyFallingBlock extends BaseEntity implements FeatureEntit
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public Entity handleEntitySpawn(@Nonnull Location location) {
         Entity entity = location.getWorld().spawnEntity(location, getEntityTypeBasedOn());
         register(entity);
         return entity;
     }
 
-    @Nullable
+    @Nonnull
     public Entity handleEntitySpawn(@Nonnull Location location, @Nonnull Block block) {
         FallingBlock entity = location.getWorld().spawnFallingBlock(location, block.getBlockData());
         register(entity);

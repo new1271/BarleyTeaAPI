@@ -1,11 +1,10 @@
 package org.ricetea.utils;
 
-import java.util.Objects;
+import org.ricetea.utils.function.NonnullSupplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.ricetea.utils.function.NonnullSupplier;
+import java.util.Objects;
 
 public class Lazy<T> implements Property<T> {
 
@@ -60,7 +59,7 @@ public class Lazy<T> implements Property<T> {
         @Nonnull
         private final Object syncRoot = new Object();
 
-        protected ThreadSafeImpl(@Nonnull NonnullSupplier<T> supplier) {
+        private ThreadSafeImpl(@Nonnull NonnullSupplier<T> supplier) {
             super(supplier);
         }
 

@@ -1,11 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.counter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.persistence.PersistentDataType;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class PersistenceTickCounter extends AbstractTickCounter {
 

@@ -8,7 +8,6 @@ import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public final class EntitiesUnregisteredEvent extends Event {
@@ -28,7 +27,7 @@ public final class EntitiesUnregisteredEvent extends Event {
 
     @Override
     @Nonnull
-    public final HandlerList getHandlers() {
+    public HandlerList getHandlers() {
         return lazyHandlerList.get();
     }
 

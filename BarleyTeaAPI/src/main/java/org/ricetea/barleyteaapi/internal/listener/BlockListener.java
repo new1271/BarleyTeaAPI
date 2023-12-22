@@ -1,37 +1,17 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.HashMap;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockDropItemEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockExplode;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockMove;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockPlace;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByBlockExplode;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByPlayer;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByPlayer;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockExplode;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockMove;
-import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockPlaceByPlayer;
+import org.ricetea.barleyteaapi.api.block.feature.*;
+import org.ricetea.barleyteaapi.api.block.feature.data.*;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerPlace;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlock;
@@ -40,6 +20,9 @@ import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import java.util.HashMap;
 
 public final class BlockListener implements Listener {
     private static final Lazy<BlockListener> inst = Lazy.create(BlockListener::new);
@@ -92,7 +75,7 @@ public final class BlockListener implements Listener {
             return;
         Block block = event.getBlock();
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (block != null && register != null) {
+        if (register != null) {
             NamespacedKey id = BaseBlock.getBlockID(block);
             if (id != null) {
                 BaseBlock baseBlock = register.lookup(id);
@@ -203,7 +186,7 @@ public final class BlockListener implements Listener {
         Block from = event.getBlock();
         Block to = event.getToBlock();
         NamespacedKey id = BaseBlock.getBlockID(from);
-        if (id != null && from != null && to != null) {
+        if (id != null) {
             BlockRegister register = BlockRegister.getInstanceUnsafe();
             if (register != null) {
                 BaseBlock baseBlock = register.lookup(id);

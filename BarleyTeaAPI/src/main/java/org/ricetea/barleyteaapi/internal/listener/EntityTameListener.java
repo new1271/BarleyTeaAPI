@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -10,6 +8,8 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTame;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTame;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public final class EntityTameListener implements Listener {
     private static final Lazy<EntityTameListener> inst = Lazy.create(EntityTameListener::new);

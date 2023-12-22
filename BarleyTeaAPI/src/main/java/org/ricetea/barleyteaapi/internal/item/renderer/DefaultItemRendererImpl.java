@@ -34,13 +34,12 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.SoftCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Stack;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     private static final @Nonnull Lazy<DefaultItemRendererImpl> _inst = Lazy.create(DefaultItemRendererImpl::new);
@@ -53,6 +52,18 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     };
     private static final double DEFAULT_TOOL_DAMAGE = 1.0;
     private static final double DEFAULT_TOOL_SPEED = 4.0;
+    private static final int[] DequeCapacities = new int[]{64, 16, 32, 8};
+    private static final List<Supplier<Deque<Component>>> DequeGenerators = Arrays.stream(DequeCapacities)
+            .mapToObj(capacity -> (Supplier<Deque<Component>>) (() -> new ArrayDeque<>(capacity)))
+            .toList();
+    private final ThreadLocal<List<SoftCache<Deque<Component>>>> reusableRenderLoreStack = ThreadLocal.withInitial(() -> {
+        int capacity = DequeCapacities.length;
+        List<SoftCache<Deque<Component>>> result = new ArrayList<>(capacity);
+        for (int i = 0; i < capacity; i++) {
+            result.add(SoftCache.create(DequeGenerators.get(i)));
+        }
+        return Collections.unmodifiableList(result);
+    });
 
     private DefaultItemRendererImpl() {
         super(NamespacedKeyUtil.BarleyTeaAPI("default_item_renderer"));
@@ -85,7 +96,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         AlternativeItemState.restore(meta);
         AlternativeItemState.store(meta);
 
-        Stack<Component> renderLoreStack = new Stack<>();
+        List<SoftCache<Deque<Component>>> renderLoreStackList = reusableRenderLoreStack.get();
+        Deque<Component> renderLoreStack = renderLoreStackList.get(0).get();
 
         DataItemType itemType = DataItemType.get(itemStack);
 
@@ -95,9 +107,10 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
             boolean hasExcellentEnchants = apiInstance.hasExcellentEnchants;
-            final Stack<Component> enchantLoreStack = new Stack<>();
+            final Map<Enchantment, Integer> enchantmentMap = meta.getEnchants();
+            final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
-            meta.getEnchants().forEach((enchantment, boxedLevel) -> {
+            enchantmentMap.forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
                     return;
                 final int level = boxedLevel;
@@ -132,19 +145,20 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     component = component.append(Component.text(" ").append(levelComponent)
                             .color(color).decoration(TextDecoration.ITALIC, false));
                 }
-                enchantLoreStack.push(component);
+                enchantLoreStack.offer(component);
             });
             toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
             renderLoreStack.addAll(enchantLoreStack);
+            enchantLoreStack.clear();
         }
 
         if (!meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-            Stack<Component> toolAttributeLoreStack = (isTool ? new Stack<>() : null);
+            Queue<Component> toolAttributeLoreStack = (isTool ? renderLoreStackList.get(2).get() : null);
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
             if (attributeMap == null)
                 attributeMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
             if (!attributeMap.isEmpty()) {
-                Stack<Component> slotAttributeLoreStack = new Stack<>();
+                Deque<Component> slotAttributeLoreStack = renderLoreStackList.get(3).get();
                 HashMap<EquipmentSlot, TreeMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
                 final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
                 final Box<Double> toolSpeedIncreaseBox = Box.box(0.0);
@@ -209,7 +223,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                         default -> "item.modifiers." +
                                 slot.toString().toLowerCase().replace("_", "");
                     };
-                    slotAttributeLoreStack.push(Component.translatable(slotStringKey)
+                    slotAttributeLoreStack.offer(Component.translatable(slotStringKey)
                             .color(NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false));
                     attributeOperationMap.forEach((attribute, operationValues) -> {
@@ -232,7 +246,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                                 String valueString = Double.toString(value);
                                 if (valueString.endsWith(".0"))
                                     valueString = valueString.substring(0, valueString.length() - 2);
-                                slotAttributeLoreStack.push(Component.translatable(format)
+                                slotAttributeLoreStack.offer(Component.translatable(format)
                                         .args(Component.text(valueString),
                                                 Component.translatable(attributeTranslateKey))
                                         .color(isPositive ? NamedTextColor.BLUE : NamedTextColor.RED)
@@ -240,12 +254,13 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                             }
                         }
                     });
-                    slotAttributeLoreStack.push(Component.empty());
+                    slotAttributeLoreStack.offer(Component.empty());
                 }
                 if (!slotAttributeLoreStack.isEmpty()) {
-                    slotAttributeLoreStack.pop();
-                    renderLoreStack.push(Component.empty());
+                    slotAttributeLoreStack.removeLast();
+                    renderLoreStack.offer(Component.empty());
                     renderLoreStack.addAll(slotAttributeLoreStack);
+                    slotAttributeLoreStack.clear();
                 }
             }
             if (toolAttributeLoreStack != null) {
@@ -266,25 +281,27 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 String toolSpeedString = Double.toString(toolSpeed);
                 if (toolSpeedString.endsWith(".0"))
                     toolSpeedString = toolSpeedString.substring(0, toolSpeedString.length() - 2);
-                toolAttributeLoreStack.push(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
+                toolAttributeLoreStack.offer(Component.translatable("item.modifiers.mainhand", NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, false));
-                toolAttributeLoreStack.push(Component.space().append(
+                toolAttributeLoreStack.offer(Component.space().append(
                                 Component.translatable("attribute.modifier.equals.0").args(
                                         Component.text(toolDamageString),
                                         Component.translatable("attribute.name.generic.attack_damage")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                toolAttributeLoreStack.push(Component.space().append(
+                toolAttributeLoreStack.offer(Component.space().append(
                                 Component.translatable("attribute.modifier.equals.0").args(
                                         Component.text(toolSpeedString),
                                         Component.translatable("attribute.name.generic.attack_speed")))
                         .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false));
-                renderLoreStack.push(Component.empty());
+                renderLoreStack.offer(Component.empty());
                 renderLoreStack.addAll(toolAttributeLoreStack);
+                toolAttributeLoreStack.clear();
             }
         }
 
         Component displayName = meta.displayName();
         BaseItem customItem = itemType.asCustomItem();
+        List<Component> output = null;
         if (customItem != null) {
             boolean isRenamed;
             if (displayName == null) {
@@ -306,23 +323,34 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 if (dura < maxDura ||
                         feature instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
                                 customDurabilityExtra.isAlwaysShowDurabilityHint(itemStack)) {
-                    renderLoreStack.push(Component.translatable("item.durability", NamedTextColor.WHITE)
+                    renderLoreStack.offer(Component.translatable("item.durability", NamedTextColor.WHITE)
                             .args(Component.text(dura), Component.text(maxDura))
                             .decoration(TextDecoration.ITALIC, false));
                 }
             }
-            renderLoreStack.push(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
+            renderLoreStack.offer(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
 
             if (customItem instanceof FeatureItemDisplay feature) {
-                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, renderLoreStack);
-                feature.handleItemDisplay(data);
-                displayName = data.getDisplayName();
+                output = new ArrayList<>(renderLoreStack);
+                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, output);
+                try {
+                    feature.handleItemDisplay(data);
+                    displayName = data.getDisplayName();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    output = null;
+                }
             }
         }
 
+        if (output == null)
+            output = new ArrayList<>(renderLoreStack);
+
+        renderLoreStack.clear();
+
         meta.displayName(displayName);
-        meta.lore(renderLoreStack);
+        meta.lore(output);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(meta);
         return itemStack;

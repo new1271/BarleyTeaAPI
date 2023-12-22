@@ -1,13 +1,12 @@
 package org.ricetea.barleyteaapi.api.block.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataBlockMove extends BaseBlockFeatureData<BlockFromToEvent> {
 

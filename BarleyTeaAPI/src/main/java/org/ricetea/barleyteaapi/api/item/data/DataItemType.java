@@ -1,22 +1,22 @@
 package org.ricetea.barleyteaapi.api.item.data;
 
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Either;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class DataItemType extends Either<Material, BaseItem> implements Keyed {
 
@@ -24,7 +24,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     private static final DataItemType EMPTY = create(Material.AIR);
 
     @Nonnull
-    private static final Hashtable<Material, DataItemType> vanillaMaterialMap = new Hashtable<>();
+    private static final ConcurrentHashMap<Material, DataItemType> vanillaMaterialMap = new ConcurrentHashMap<>();
 
     @Nonnull
     public static DataItemType empty() {
@@ -65,10 +65,7 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
             Optional<Material> materialOptional = Arrays.stream(Material.values())
                     .filter(material -> material.getKey().equals(key))
                     .findAny();
-            if (materialOptional.isPresent()) {
-                return get(materialOptional.get());
-            }
-            return empty();
+            return materialOptional.map(DataItemType::get).orElseGet(DataItemType::empty);
         }
     }
 
@@ -88,14 +85,14 @@ public final class DataItemType extends Either<Material, BaseItem> implements Ke
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     public static DataItemType create(@Nonnull BaseItem itemType) {
         return new DataItemType(null, itemType);
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     private static DataItemType create(@Nonnull Material type) {
         return new DataItemType(type, null);

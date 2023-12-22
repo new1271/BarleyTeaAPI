@@ -1,15 +1,14 @@
 package org.ricetea.barleyteaapi.api.block.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataBlockBreakByBlockExplode extends BaseBlockFeatureData<BlockExplodeEvent> {
     @Nonnull

@@ -1,19 +1,17 @@
 package org.ricetea.barleyteaapi.api.item.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
-import org.ricetea.utils.ObjectUtil;
-
 import io.papermc.paper.inventory.ItemRarity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextDecoration.State;
+import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
+import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class DataItemRarity {
     @Nonnull
@@ -50,6 +48,7 @@ public class DataItemRarity {
         this(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
+    @SuppressWarnings("deprecation")
     public DataItemRarity(@Nullable DataItemRarity nextLevelRarity,
             @Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
         this(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
@@ -70,6 +69,7 @@ public class DataItemRarity {
         this(null, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
+    @SuppressWarnings("deprecation")
     public DataItemRarity(@Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
         this(null, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
@@ -161,20 +161,15 @@ public class DataItemRarity {
     }
 
     @Nullable
-    public static final DataItemRarity fromItemRarity(@Nullable ItemRarity rarity) {
+    public static DataItemRarity fromItemRarity(@Nullable ItemRarity rarity) {
         if (rarity == null)
             return null;
-        switch (rarity) {
-            case COMMON:
-                return COMMON;
-            case EPIC:
-                return EPIC;
-            case RARE:
-                return RARE;
-            case UNCOMMON:
-                return UNCOMMON;
-            default:
-                return null;
-        }
+        return switch (rarity) {
+            case COMMON -> COMMON;
+            case EPIC -> EPIC;
+            case RARE -> RARE;
+            case UNCOMMON -> UNCOMMON;
+            default -> null;
+        };
     }
 }

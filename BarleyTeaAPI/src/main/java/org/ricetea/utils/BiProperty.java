@@ -1,11 +1,10 @@
 package org.ricetea.utils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface BiProperty<T, R> extends BiConsumer<T, R>, BiFunction<T, R, R> {
 
@@ -27,26 +26,26 @@ public interface BiProperty<T, R> extends BiConsumer<T, R>, BiFunction<T, R, R> 
     }
 
     default Property<R> wrap(@Nonnull T obj) {
-        return new BiPropertyWrapper<T, R>(this, obj);
+        return new BiPropertyWrapper<>(this, obj);
     }
 
     @Nonnull
-    public static <T, R> BiProperty<T, R> create(@Nonnull Function<T, R> getMethod,
+    static <T, R> BiProperty<T, R> create(@Nonnull Function<T, R> getMethod,
             @Nonnull BiConsumer<T, R> setMethod) {
         return new DefaultPropertyImpl<>(getMethod, setMethod);
     }
 
     @Nonnull
-    public static <T, R> BiProperty<T, R> readonly(@Nonnull Function<T, R> getMethod) {
+    static <T, R> BiProperty<T, R> readonly(@Nonnull Function<T, R> getMethod) {
         return new DefaultPropertyImpl<>(getMethod, null);
     }
 
     @Nonnull
-    public static <T, R> BiProperty<T, R> writeonly(@Nonnull BiConsumer<T, R> setMethod) {
+    static <T, R> BiProperty<T, R> writeonly(@Nonnull BiConsumer<T, R> setMethod) {
         return new DefaultPropertyImpl<>(null, setMethod);
     }
 
-    static class DefaultPropertyImpl<T, R> implements BiProperty<T, R> {
+    class DefaultPropertyImpl<T, R> implements BiProperty<T, R> {
 
         @Nullable
         private final Function<T, R> getMethod;
@@ -109,7 +108,7 @@ public interface BiProperty<T, R> extends BiConsumer<T, R>, BiFunction<T, R, R> 
         }
     }
 
-    static class BiPropertyWrapper<T, R> implements Property<R> {
+    class BiPropertyWrapper<T, R> implements Property<R> {
 
         @Nonnull
         private final T obj;

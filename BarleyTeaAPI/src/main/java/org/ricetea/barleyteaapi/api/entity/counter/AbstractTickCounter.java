@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.api.entity.counter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public abstract class AbstractTickCounter implements Keyed {
     @Nonnull
@@ -54,7 +53,7 @@ public abstract class AbstractTickCounter implements Keyed {
 
     public abstract void cleanCounter(@Nonnull Entity affectedEntity);
 
-    private final boolean doTriggers(@Nonnull Entity affectedEntity, int count) {
+    private boolean doTriggers(@Nonnull Entity affectedEntity, int count) {
         for (TickCounterTrigger trigger : triggerList) {
             try {
                 if (trigger.triggerAndReturnNeedClean(affectedEntity, count)) {

@@ -5,14 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.commands.GiveCommand;
-import net.minecraft.server.commands.SummonCommand;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -59,20 +55,17 @@ public final class NMSCommandArgument {
     }
 
     @Nonnull
-    public static ResourceLocation decodeMinecraftKey(CommandContext<CommandSourceStack> context, String name)
-            throws CommandSyntaxException {
+    public static ResourceLocation decodeMinecraftKey(CommandContext<CommandSourceStack> context, String name) {
         return Objects.requireNonNull(ResourceLocationArgument.getId(context, name));
     }
 
     @Nonnull
-    public static CompoundTag decodeNBTTag(CommandContext<CommandSourceStack> context, String name)
-            throws CommandSyntaxException {
-        return (CompoundTag) Objects.requireNonNull(CompoundTagArgument.getCompoundTag(context, name));
+    public static CompoundTag decodeNBTTag(CommandContext<CommandSourceStack> context, String name) {
+        return Objects.requireNonNull(CompoundTagArgument.getCompoundTag(context, name));
     }
 
     @Nonnull
-    public static Vec3 decodeVector3D(CommandContext<CommandSourceStack> context, String name)
-            throws CommandSyntaxException {
+    public static Vec3 decodeVector3D(CommandContext<CommandSourceStack> context, String name) {
         return Objects.requireNonNull(Vec3Argument.getVec3(context, name));
     }
 }

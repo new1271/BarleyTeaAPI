@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import java.util.Objects;
+import org.bukkit.entity.Entity;
+import org.bukkit.event.entity.EntityEvent;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.event.entity.EntityEvent;
+import java.util.Objects;
 
 public abstract class BaseEntityFeatureData<T extends EntityEvent> extends BaseFeatureData<T> {
 

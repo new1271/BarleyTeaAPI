@@ -1,11 +1,7 @@
 package org.ricetea.barleyteaapi.internal.item.renderer.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -17,8 +13,10 @@ import org.json.simple.JSONValue;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public final class AlternativeItemState {
 
@@ -31,37 +29,38 @@ public final class AlternativeItemState {
     public static ItemStack store(@Nonnull ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta = store(meta);
-            itemStack.setItemMeta(meta);
+            itemStack.setItemMeta(store(meta));
         }
         return itemStack;
     }
 
     @Nonnull
     public static ItemMeta store(@Nonnull ItemMeta meta) {
-        meta = storeFlags(storeLore(storeName(meta)));
-        meta.getPersistentDataContainer().set(IsStoredKey, PersistentDataType.BOOLEAN, true);
-        return meta;
+        ItemMeta result = storeFlags(storeLore(storeName(meta)));
+        result.getPersistentDataContainer().set(IsStoredKey, PersistentDataType.BOOLEAN, true);
+        return result;
     }
 
     @Nonnull
     public static ItemStack restore(@Nonnull ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta = restore(meta);
-            itemStack.setItemMeta(meta);
+            itemStack.setItemMeta(restore(meta));
         }
         return itemStack;
     }
 
     @Nonnull
     public static ItemMeta restore(@Nonnull ItemMeta meta) {
+        ItemMeta result;
         PersistentDataContainer container = meta.getPersistentDataContainer();
         if (container.getOrDefault(IsStoredKey, PersistentDataType.BOOLEAN, false)) {
-            meta = restoreFlags(restoreLore(restoreName(meta)));
+            result = restoreFlags(restoreLore(restoreName(meta)));
             container.remove(IsStoredKey);
+        } else {
+            result = meta;
         }
-        return meta;
+        return result;
     }
 
     private static @Nonnull ItemMeta storeName(@Nonnull ItemMeta itemMeta) {

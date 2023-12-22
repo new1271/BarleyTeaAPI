@@ -1,13 +1,12 @@
 package org.ricetea.barleyteaapi.api.entity.counter;
 
-import java.util.HashMap;
-import java.util.UUID;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class TemporaryTickCounter extends AbstractTickCounter {
 
@@ -20,7 +19,6 @@ public class TemporaryTickCounter extends AbstractTickCounter {
         this(identifierKey, function, 0, (TickCounterTrigger[]) null);
     }
 
-    @SafeVarargs
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
             @Nullable TickingOperationFunction function, @Nullable TickCounterTrigger... predicates) {
         this(identifierKey, function, 0, predicates);
@@ -31,7 +29,6 @@ public class TemporaryTickCounter extends AbstractTickCounter {
         this(identifierKey, function, startValue, (TickCounterTrigger[]) null);
     }
 
-    @SafeVarargs
     public TemporaryTickCounter(@Nonnull NamespacedKey identifierKey,
             @Nullable TickingOperationFunction function, int startValue, @Nullable TickCounterTrigger... predicates) {
         super(identifierKey, function, predicates);

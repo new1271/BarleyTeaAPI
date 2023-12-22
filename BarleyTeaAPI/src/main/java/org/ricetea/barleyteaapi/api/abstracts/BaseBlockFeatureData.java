@@ -1,11 +1,10 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockEvent;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public abstract class BaseBlockFeatureData<T extends BlockEvent> extends BaseFeatureData<T> {
 

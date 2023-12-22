@@ -1,12 +1,5 @@
 package org.ricetea.barleyteaapi.internal.helper;
 
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
@@ -25,10 +18,16 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.utils.ObjectUtil;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+
 public final class ItemFeatureHelper {
     private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
-    private static final EquipmentSlot[] SLOTS_JustHands = new EquipmentSlot[] { EquipmentSlot.HAND,
-            EquipmentSlot.OFF_HAND };
+    private static final EquipmentSlot[] SLOTS_JustHands = new EquipmentSlot[]{EquipmentSlot.HAND,
+            EquipmentSlot.OFF_HAND};
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
@@ -71,20 +70,18 @@ public final class ItemFeatureHelper {
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
         for (EquipmentSlot slot : SLOTS_JustHands) {
-            if (slot != null) {
-                try {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot,
-                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                ItemStack itemStack = equipment.getItem(slot);
+                boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                        dataConstructor);
+                if (isCopy)
+                    equipment.setItem(slot,
+                            itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                            true);
+                if (isCancelled)
+                    return false;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return true;
@@ -101,21 +98,19 @@ public final class ItemFeatureHelper {
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
         for (EquipmentSlot slot : SLOTS_JustHands) {
-            if (slot != null) {
-                try {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
-                            featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot,
-                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                ItemStack itemStack = equipment.getItem(slot);
+                boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
+                        featureFunc,
+                        dataConstructor);
+                if (isCopy)
+                    equipment.setItem(slot,
+                            itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
+                            true);
+                if (isCancelled)
+                    return false;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return true;
@@ -308,7 +303,7 @@ public final class ItemFeatureHelper {
     }
 
     public static ItemStack doItemRepair(@Nullable ItemStack itemStackA, @Nullable ItemStack itemStackB,
-            @Nullable ItemStack itemStackResult) {
+                                         @Nullable ItemStack itemStackResult) {
         BaseItem itemType = ObjectUtil
                 .letNonNull(ObjectUtil.safeMap(itemStackA, BaseItem::getItemType), DataItemType::empty)
                 .asCustomItem();
@@ -319,8 +314,7 @@ public final class ItemFeatureHelper {
                 return itemStackResult;
             }
         } else {
-            if (itemStackA != null && itemStackB != null
-                    && itemType.isCertainItem(itemStackB)) {
+            if (itemStackA != null && itemType.isCertainItem(itemStackB)) {
                 if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
                     try {
                         itemStackResult = itemGiveFeature.handleItemGive(1);

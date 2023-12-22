@@ -1,14 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +7,9 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import java.util.*;
 
 public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
@@ -119,10 +113,10 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
     @Override
     public ItemStack apply(@Nonnull ItemStack[] matrix) {
-        return getResult().map(ItemStack::new, right -> {
-            return ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                    itemGiveFeature -> itemGiveFeature.handleItemGive(1));
-        });
+        return getResult().map(ItemStack::new, right ->
+            ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                    itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+        );
     }
 
     @Nonnull
@@ -145,7 +139,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
             if (shapeLet == null) {
                 shape[currentRowIndex] = Character.toString(ct);
             } else {
-                shape[currentRowIndex] = shapeLet + Character.toString(ct);
+                shape[currentRowIndex] = shapeLet + ct;
             }
             currentIndex++;
         }

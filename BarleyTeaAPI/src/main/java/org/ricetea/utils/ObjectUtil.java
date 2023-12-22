@@ -1,13 +1,12 @@
 package org.ricetea.utils;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.ricetea.utils.function.NonnullConsumer;
 import org.ricetea.utils.function.NonnullFunction;
 import org.ricetea.utils.function.NonnullSupplier;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 public final class ObjectUtil {
 
@@ -30,7 +29,7 @@ public final class ObjectUtil {
             if (castClass.isInstance(obj))
                 return castClass.cast(obj);
             else if (castClass.equals(String.class))
-                return (T) obj.toString();
+                return (T) obj;
             else
                 return null;
         }

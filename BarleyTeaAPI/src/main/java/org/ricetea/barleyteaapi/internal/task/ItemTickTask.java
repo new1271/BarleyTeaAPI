@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -16,6 +13,9 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class ItemTickTask extends AbstractTask {
 
@@ -46,7 +46,7 @@ public final class ItemTickTask extends AbstractTask {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (api == null || scheduler == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
+        if (api == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
             stop();
         } else {
             int currentTick = Bukkit.getCurrentTick();
@@ -55,21 +55,17 @@ public final class ItemTickTask extends AbstractTask {
                 Player[] players = Bukkit.getOnlinePlayers().toArray(Player[]::new);
                 if (players != null) {
                     for (Player player : players) {
-                        if (player == null || player.isDead()) {
-                            continue;
-                        } else {
+                        if (player != null && !player.isDead()) {
                             PlayerInventory inv = player.getInventory();
                             for (EquipmentSlot slot : SLOTS) {
                                 if (slot != null) {
                                     ItemStack itemStack = inv.getItem(slot);
-                                    if (itemStack != null) {
-                                        NamespacedKey id = BaseItem.getItemID(itemStack);
-                                        if (id != null
-                                                && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                            scheduler.scheduleSyncDelayedTask(api,
-                                                    () -> itemTickFeature.handleTickOnEquipment(player, inv,
-                                                            itemStack, slot));
-                                        }
+                                    NamespacedKey id = BaseItem.getItemID(itemStack);
+                                    if (id != null
+                                            && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
+                                        scheduler.scheduleSyncDelayedTask(api,
+                                                () -> itemTickFeature.handleTickOnEquipment(player, inv,
+                                                        itemStack, slot));
                                     }
                                 }
                             }

@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
+
+import javax.annotation.Nonnull;
 
 public interface FeatureEntityTick {
     void handleTick(@Nonnull Entity entity);

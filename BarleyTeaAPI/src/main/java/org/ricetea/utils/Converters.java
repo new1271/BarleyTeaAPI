@@ -1,8 +1,7 @@
 package org.ricetea.utils;
 
-import java.text.MessageFormat;
-
 import javax.annotation.Nonnull;
+import java.text.MessageFormat;
 
 public final class Converters {
     

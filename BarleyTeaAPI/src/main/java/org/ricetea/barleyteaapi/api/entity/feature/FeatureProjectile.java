@@ -1,10 +1,10 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
-import javax.annotation.Nonnull;
-
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitBlock;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
+
+import javax.annotation.Nonnull;
 
 public interface FeatureProjectile {
     boolean handleProjectileLaunch(@Nonnull DataProjectileLaunch data);

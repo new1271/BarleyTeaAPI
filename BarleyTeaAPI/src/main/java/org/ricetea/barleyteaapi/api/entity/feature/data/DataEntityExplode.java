@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Objects;
 
 public final class DataEntityExplode extends BaseEntityFeatureData<EntityExplodeEvent> {
 

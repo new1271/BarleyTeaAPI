@@ -1,11 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
-import javax.annotation.Nonnull;
-
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeDismounted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeMounted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDismount;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMount;
+
+import javax.annotation.Nonnull;
 
 public interface FeatureEntityMount {
     boolean handleEntityMount(@Nonnull DataEntityMount data);

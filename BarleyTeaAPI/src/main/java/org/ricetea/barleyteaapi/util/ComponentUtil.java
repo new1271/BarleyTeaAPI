@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ComponentUtil {
 

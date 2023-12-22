@@ -1,25 +1,22 @@
 package org.ricetea.barleyteaapi.api.entity.template;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectileSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class BaseProjectile extends BaseEntity
         implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
@@ -30,9 +27,10 @@ public abstract class BaseProjectile extends BaseEntity
 
     @Nonnull
     private static EntityType checkEntityType(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
-        if (!Projectile.class.isAssignableFrom(entityTypeBasedOn.getEntityClass())) {
+        Class<? extends Entity> clazz = entityTypeBasedOn.getEntityClass();
+        if (clazz != null && !Projectile.class.isAssignableFrom(clazz)) {
             BarleyTeaAPI.warnWhenPluginUsable(
-                    "BaseProjectile cannot be used on non-projectile entity type! (trigger at " + key.toString() + ")");
+                    "BaseProjectile cannot be used on non-projectile entity type! (trigger at " + key + ")");
         }
         return entityTypeBasedOn;
     }
@@ -55,7 +53,7 @@ public abstract class BaseProjectile extends BaseEntity
             if (this instanceof FeatureEntityLoad feature) {
                 feature.handleEntityLoaded(entity);
             }
-            if (this instanceof FeatureEntityTick feature) {
+            if (this instanceof FeatureEntityTick) {
                 EntityTickTask.getInstance().addEntity(entity);
             }
             return entity;

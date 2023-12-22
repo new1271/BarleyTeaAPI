@@ -1,12 +1,12 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
+
+import javax.annotation.Nonnull;
 
 public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
 

@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.Event;
+
+import javax.annotation.Nonnull;
 
 public abstract class BaseFeatureData<T extends Event> {
     @Nonnull

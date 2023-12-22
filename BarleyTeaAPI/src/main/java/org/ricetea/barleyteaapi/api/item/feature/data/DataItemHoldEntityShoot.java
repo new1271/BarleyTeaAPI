@@ -1,9 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -14,6 +10,9 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataItemHoldEntityShoot extends BaseItemHoldEntityFeatureData<ProjectileLaunchEvent> {
 

@@ -1,10 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -23,6 +18,10 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
 
+import javax.annotation.Nonnull;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public final class EntitySpawnListener implements Listener {
     private static final Lazy<EntitySpawnListener> inst = Lazy.create(EntitySpawnListener::new);
 
@@ -39,18 +38,16 @@ public final class EntitySpawnListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         Entity entity = event.getEntity();
-        if (entity != null) {
-            if (event instanceof CreatureSpawnEvent creatureSpawnEvent) {
-                onCreatureSpawn(creatureSpawnEvent);
-            }
-            if (!event.isCancelled()) {
-                NamespacedKey id = BaseEntity.getEntityID(entity);
-                EntityRegister register = EntityRegister.getInstanceUnsafe();
-                if (register != null && id != null) {
-                    BaseEntity baseEntity = register.lookup(id);
-                    if (baseEntity instanceof FeatureEntityTick) {
-                        EntityTickTask.getInstance().addEntity(entity);
-                    }
+        if (event instanceof CreatureSpawnEvent creatureSpawnEvent) {
+            onCreatureSpawn(creatureSpawnEvent);
+        }
+        if (!event.isCancelled()) {
+            NamespacedKey id = BaseEntity.getEntityID(entity);
+            EntityRegister register = EntityRegister.getInstanceUnsafe();
+            if (register != null && id != null) {
+                BaseEntity baseEntity = register.lookup(id);
+                if (baseEntity instanceof FeatureEntityTick) {
+                    EntityTickTask.getInstance().addEntity(entity);
                 }
             }
         }
@@ -59,8 +56,7 @@ public final class EntitySpawnListener implements Listener {
     private void onCreatureSpawn(@Nonnull CreatureSpawnEvent event) {
         SpawnReason reason = event.getSpawnReason();
         EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (reason == null || register == null || reason.equals(SpawnReason.CUSTOM)
-                || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
+        if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
         for (BaseEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
@@ -71,18 +67,20 @@ public final class EntitySpawnListener implements Listener {
                 if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
                     StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
                     switch (result) {
-                        case Handled:
+                        case Handled -> {
                             if (entityType instanceof FeatureEntityLoad feature) {
                                 Entity entity = event.getEntity();
                                 if (!entity.isDead())
                                     feature.handleEntityLoaded(entity);
                             }
                             return;
-                        case Cancelled:
+                        }
+                        case Cancelled -> {
                             event.setCancelled(true);
                             return;
-                        case Skipped:
-                            break;
+                        }
+                        case Skipped -> {
+                        }
                     }
                 }
             }

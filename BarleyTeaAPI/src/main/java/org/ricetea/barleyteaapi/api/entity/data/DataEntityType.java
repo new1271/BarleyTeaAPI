@@ -1,22 +1,22 @@
 package org.ricetea.barleyteaapi.api.entity.data;
 
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Either;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class DataEntityType extends Either<EntityType, BaseEntity> implements Keyed {
 
@@ -24,7 +24,7 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
     private static final DataEntityType EMPTY = create(EntityType.UNKNOWN);
 
     @Nonnull
-    private static final Hashtable<EntityType, DataEntityType> vanillaEntityTypeMap = new Hashtable<>();
+    private static final ConcurrentHashMap<EntityType, DataEntityType> vanillaEntityTypeMap = new ConcurrentHashMap<>();
 
     @Nonnull
     public static DataEntityType empty() {
@@ -65,10 +65,7 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
             Optional<EntityType> entityTypeOptional = Arrays.stream(EntityType.values())
                     .filter(entityType -> entityType.getKey().equals(key))
                     .findAny();
-            if (entityTypeOptional.isPresent()) {
-                return get(entityTypeOptional.get());
-            }
-            return empty();
+            return entityTypeOptional.map(DataEntityType::get).orElseGet(DataEntityType::empty);
         }
     }
 
@@ -96,14 +93,14 @@ public final class DataEntityType extends Either<EntityType, BaseEntity> impleme
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     public static DataEntityType create(@Nonnull BaseEntity itemType) {
         return new DataEntityType(null, itemType);
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     private static DataEntityType create(@Nonnull EntityType type) {
         return new DataEntityType(type, null);

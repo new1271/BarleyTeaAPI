@@ -1,13 +1,13 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityMountEvent;
+
+import javax.annotation.Nonnull;
 
 public final class DataEntityBeMounted extends BaseEntityFeatureData<EntityMountEvent> {
     @Nonnull

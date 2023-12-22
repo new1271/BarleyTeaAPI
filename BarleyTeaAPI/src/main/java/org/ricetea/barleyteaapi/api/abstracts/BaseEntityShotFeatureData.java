@@ -1,13 +1,13 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public abstract class BaseEntityShotFeatureData extends BaseEntityFeatureData<ProjectileHitEvent> {
     @Nonnull

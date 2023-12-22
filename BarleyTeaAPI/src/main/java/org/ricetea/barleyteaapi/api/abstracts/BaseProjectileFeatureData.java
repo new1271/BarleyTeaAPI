@@ -1,11 +1,5 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import java.util.Objects;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityEvent;
@@ -13,6 +7,11 @@ import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends BaseFeatureData<T> {
     @Nullable

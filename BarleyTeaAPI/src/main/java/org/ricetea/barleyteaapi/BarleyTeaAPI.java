@@ -1,11 +1,5 @@
 package org.ricetea.barleyteaapi;
 
-import java.util.Objects;
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -23,6 +17,11 @@ import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;

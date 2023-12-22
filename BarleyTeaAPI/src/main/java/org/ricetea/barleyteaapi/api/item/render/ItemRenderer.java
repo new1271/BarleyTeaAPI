@@ -1,12 +1,12 @@
 package org.ricetea.barleyteaapi.api.item.render;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface ItemRenderer extends Keyed {
 
@@ -21,7 +21,7 @@ public interface ItemRenderer extends Keyed {
     ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player);
 
     @Nonnull
-    public static ItemRenderer getDefault() {
+    static ItemRenderer getDefault() {
         return DefaultItemRendererImpl.getInstance();
     }
 }

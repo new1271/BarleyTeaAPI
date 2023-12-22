@@ -1,24 +1,23 @@
 package org.ricetea.barleyteaapi.api.i18n;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.renderer.TranslatableComponentRenderer;
 import net.kyori.adventure.translation.Translator;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 public class MultisourceTranslatableComponentRenderer extends TranslatableComponentRenderer<Locale> {
 
-    private List<Translator> sources;
+    private final List<Translator> sources;
 
     public MultisourceTranslatableComponentRenderer() {
-        sources = new ArrayList<Translator>();
+        sources = new ArrayList<>();
     }
 
     @Override
@@ -55,6 +54,6 @@ public class MultisourceTranslatableComponentRenderer extends TranslatableCompon
     public void removeSource(@Nullable Translator source) {
         if (source == null)
             return;
-        sources.removeIf(translator -> source.equals(translator));
+        sources.removeIf(source::equals);
     }
 }

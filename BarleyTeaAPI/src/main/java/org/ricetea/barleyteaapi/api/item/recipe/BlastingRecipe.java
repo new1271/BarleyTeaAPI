@@ -1,12 +1,12 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+
+import javax.annotation.Nonnull;
 
 public class BlastingRecipe extends BaseCookingRecipe {
     public BlastingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result) {

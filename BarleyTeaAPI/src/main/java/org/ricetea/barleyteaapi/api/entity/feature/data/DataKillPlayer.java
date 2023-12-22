@@ -1,11 +1,6 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -14,7 +9,10 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 
-import net.kyori.adventure.text.Component;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Objects;
 
 public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent> {
     public DataKillPlayer(@Nonnull PlayerDeathEvent event,

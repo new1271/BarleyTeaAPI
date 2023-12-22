@@ -1,15 +1,14 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
+import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bukkit.Keyed;
-import org.bukkit.NamespacedKey;
 
 public interface IRegister<T extends Keyed> {
     void register(@Nullable T key);
@@ -51,7 +50,7 @@ public interface IRegister<T extends Keyed> {
     @Nullable
     NamespacedKey findFirstKey(@Nullable Predicate<T> predicate);
 
-    public static class Filter<T extends Keyed> implements Predicate<Map.Entry<NamespacedKey, T>> {
+    class Filter<T extends Keyed> implements Predicate<Map.Entry<NamespacedKey, T>> {
 
         @Nonnull
         Predicate<T> filter;
@@ -67,7 +66,7 @@ public interface IRegister<T extends Keyed> {
 
     }
 
-    public static class Mapper<T extends Keyed> implements Function<Map.Entry<NamespacedKey, T>, NamespacedKey> {
+    class Mapper<T extends Keyed> implements Function<Map.Entry<NamespacedKey, T>, NamespacedKey> {
 
         @Override
         public NamespacedKey apply(Map.Entry<NamespacedKey, T> t) {

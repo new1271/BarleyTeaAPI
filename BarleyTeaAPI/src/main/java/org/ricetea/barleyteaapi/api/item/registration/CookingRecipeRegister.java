@@ -1,21 +1,16 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
-import org.ricetea.barleyteaapi.api.item.recipe.BlastingRecipe;
-import org.ricetea.barleyteaapi.api.item.recipe.CampfireRecipe;
-import org.ricetea.barleyteaapi.api.item.recipe.FurnaceRecipe;
-import org.ricetea.barleyteaapi.api.item.recipe.SmokingRecipe;
+import org.ricetea.barleyteaapi.api.item.recipe.*;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.logging.Logger;
 
 public final class CookingRecipeRegister extends RecipeRegister<BaseCookingRecipe> {
 
@@ -84,15 +79,15 @@ public final class CookingRecipeRegister extends RecipeRegister<BaseCookingRecip
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 if (recipe instanceof CampfireRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as campfire recipe!");
+                    logger.info("registered " + recipe.getKey() + " as campfire recipe!");
                 } else if (recipe instanceof SmokingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as smoker recipe!");
+                    logger.info("registered " + recipe.getKey() + " as smoker recipe!");
                 } else if (recipe instanceof BlastingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as blast-furnace recipe!");
+                    logger.info("registered " + recipe.getKey() + " as blast-furnace recipe!");
                 } else if (recipe instanceof FurnaceRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as furnace recipe!");
+                    logger.info("registered " + recipe.getKey() + " as furnace recipe!");
                 } else {
-                    logger.info("registered " + recipe.getKey().toString() + " as unknown-type cooking recipe!");
+                    logger.info("registered " + recipe.getKey() + " as unknown-type cooking recipe!");
                 }
             }
         }

@@ -1,11 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.feature;
 
-import javax.annotation.Nonnull;
-
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityAttack;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByBlock;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByNothing;
+
+import javax.annotation.Nonnull;
 
 public interface FeatureEntityDamage {
     boolean handleEntityDamagedByEntity(@Nonnull DataEntityDamagedByEntity data);

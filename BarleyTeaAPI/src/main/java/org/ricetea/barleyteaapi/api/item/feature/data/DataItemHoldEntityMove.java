@@ -1,13 +1,12 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import javax.annotation.Nonnull;
-
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.Location;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
+import javax.annotation.Nonnull;
 
 public final class DataItemHoldEntityMove extends BaseItemHoldEntityFeatureData<EntityMoveEvent> {
 

@@ -1,9 +1,8 @@
 package org.ricetea.utils.function;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import javax.annotation.Nonnull;
 
 @FunctionalInterface
 public interface NonnullSupplier<T> {

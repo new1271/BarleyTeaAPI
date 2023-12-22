@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+
+import javax.annotation.Nonnull;
 
 public final class DataEntityDamagedByNothing extends BaseEntityFeatureData<EntityDamageEvent> {
     public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {

@@ -1,15 +1,14 @@
 package org.ricetea.utils;
 
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.BiFunction;
+import org.ricetea.utils.function.NonnullFunction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.ricetea.utils.function.NonnullFunction;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Either<L, R> {
 
@@ -25,12 +24,12 @@ public class Either<L, R> {
 
     @Nonnull
     public static <L, R> Either<L, R> left(@Nonnull L left) {
-        return new Either<L, R>(left, null);
+        return new Either<>(left, null);
     }
 
     @Nonnull
     public static <L, R> Either<L, R> right(@Nonnull R right) {
-        return new Either<L, R>(null, right);
+        return new Either<>(null, right);
     }
 
     @Nullable

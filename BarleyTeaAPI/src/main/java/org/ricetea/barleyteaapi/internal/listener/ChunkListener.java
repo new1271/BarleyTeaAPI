@@ -1,10 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.Iterator;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -26,6 +21,10 @@ import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
 
+import javax.annotation.Nonnull;
+import java.util.Iterator;
+import java.util.Objects;
+
 public final class ChunkListener implements Listener {
     private static final Lazy<ChunkListener> inst = Lazy.create(ChunkListener::new);
 
@@ -43,8 +42,7 @@ public final class ChunkListener implements Listener {
             return;
         EntityRegister register = EntityRegister.getInstanceUnsafe();
         if (register != null && register.hasAnyRegistered()) {
-            for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
-                Entity entity = iterator.next();
+            for (Entity entity : event.getEntities()) {
                 if (entity != null) {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {
@@ -71,8 +69,7 @@ public final class ChunkListener implements Listener {
             return;
         EntityRegister register = EntityRegister.getInstanceUnsafe();
         if (register != null && register.hasAnyRegistered()) {
-            for (Iterator<Entity> iterator = event.getEntities().iterator(); iterator.hasNext();) {
-                Entity entity = iterator.next();
+            for (Entity entity : event.getEntities()) {
                 if (entity != null) {
                     NamespacedKey id = BaseEntity.getEntityID(entity);
                     if (id != null) {

@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.entity.counter;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
+
+import javax.annotation.Nonnull;
 
 @FunctionalInterface
 public interface TickCounterTrigger {

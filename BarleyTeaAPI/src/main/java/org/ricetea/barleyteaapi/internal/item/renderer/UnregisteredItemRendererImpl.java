@@ -1,12 +1,12 @@
 package org.ricetea.barleyteaapi.internal.item.renderer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class UnregisteredItemRendererImpl extends AbstractItemRendererImpl {
 
@@ -29,7 +29,7 @@ public final class UnregisteredItemRendererImpl extends AbstractItemRendererImpl
     private void showWarning() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         if (api != null) {
-            api.getLogger().warning(getKey().toString() + " isn't registered as a valid item renderer!");
+            api.getLogger().warning(getKey() + " isn't registered as a valid item renderer!");
         }
     }
 }

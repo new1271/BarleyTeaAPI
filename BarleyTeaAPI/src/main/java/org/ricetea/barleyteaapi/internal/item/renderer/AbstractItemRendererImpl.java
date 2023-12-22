@@ -1,10 +1,10 @@
 package org.ricetea.barleyteaapi.internal.item.renderer;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.ItemRendererRegister;
+
+import javax.annotation.Nonnull;
 
 public abstract class AbstractItemRendererImpl implements ItemRenderer {
     @Nonnull
@@ -22,6 +22,6 @@ public abstract class AbstractItemRendererImpl implements ItemRenderer {
     @Override
     public boolean isRegistered() {
         ItemRendererRegister register = ItemRendererRegister.getInstanceUnsafe();
-        return register == null ? false : register.lookup(getKey()) == this;
+        return register != null && register.lookup(getKey()) == this;
     }
 }

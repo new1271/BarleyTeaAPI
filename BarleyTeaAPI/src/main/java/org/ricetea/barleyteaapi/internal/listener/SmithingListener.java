@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
@@ -16,6 +14,8 @@ import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public final class SmithingListener implements Listener {
 

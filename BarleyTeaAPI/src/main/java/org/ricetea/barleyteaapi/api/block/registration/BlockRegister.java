@@ -22,6 +22,7 @@ import org.ricetea.utils.ObjectUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
     private static final Lazy<BlockRegister> inst = Lazy.create(BlockRegister::new);
 
     @Nonnull
-    private final Hashtable<NamespacedKey, BaseBlock> lookupTable = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, BaseBlock> lookupTable = new ConcurrentHashMap<>();
 
     private BlockRegister() {
     }
@@ -61,7 +62,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 for (BaseBlock block : blocks)
-                    logger.info("registered " + block.getKey().toString() + " as block!");
+                    logger.info("registered " + block.getKey() + " as block!");
                 Bukkit.getPluginManager().callEvent(new BlocksRegisteredEvent(blocks));
             }
         }
@@ -78,7 +79,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + block.getKey().toString() + " as block!");
+                logger.info("registered " + block.getKey() + " as block!");
                 Bukkit.getPluginManager().callEvent(new BlocksRegisteredEvent(List.of(block)));
             }
         }
@@ -94,7 +95,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
-            logger.info("unregistered " + block.getKey().toString());
+            logger.info("unregistered " + block.getKey());
             Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(List.of(block)));
         }
     }
@@ -128,7 +129,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
         Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey().toString());
+                logger.info("unregistered " + key.getKey());
             }
         }
         Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(values));
@@ -157,7 +158,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                         collectingList.add(record);
                     collectingList2.add(blockType);
                     if (logger != null)
-                        logger.info("unregistered " + key.toString());
+                        logger.info("unregistered " + key);
                 }
             }
             refreshCustomBlocks(collectingList);
@@ -180,7 +181,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
 
     @Override
     public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
+        return !lookupTable.isEmpty();
     }
 
     @Override
@@ -195,7 +196,9 @@ public final class BlockRegister implements IRegister<BaseBlock> {
     public Collection<BaseBlock> listAll(@Nullable Predicate<BaseBlock> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
+                lookupTable.values().stream()
+                        .filter(predicate)
+                        .toList(),
                 Collections::emptySet);
     }
 
@@ -211,8 +214,10 @@ public final class BlockRegister implements IRegister<BaseBlock> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseBlock> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                        .collect(Collectors.toUnmodifiableList()),
+                lookupTable.entrySet().stream()
+                        .filter(new Filter<>(predicate))
+                        .map(new Mapper<>())
+                        .toList(),
                 Collections::emptySet);
     }
 
@@ -268,7 +273,7 @@ public final class BlockRegister implements IRegister<BaseBlock> {
                         if (key == null)
                             continue;
                         records.stream()
-                                .filter(record -> record.key().equals(key))
+                                .filter(record -> key.equals(record.key()))
                                 .findAny()
                                 .ifPresent(record -> {
                                     BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();

@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -24,6 +22,8 @@ import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
 
 public final class EntityDamageListener implements Listener {
 
@@ -73,7 +73,6 @@ public final class EntityDamageListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(damagee, event, FeatureEntityDamage.class,
                 FeatureEntityDamage::handleEntityDamagedByEntity, DataEntityDamagedByEntity::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -88,7 +87,6 @@ public final class EntityDamageListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(damagee, event, FeatureEntityDamage.class,
                 FeatureEntityDamage::handleEntityDamagedByBlock, DataEntityDamagedByBlock::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -103,7 +101,6 @@ public final class EntityDamageListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(damagee, event, FeatureEntityDamage.class,
                 FeatureEntityDamage::handleEntityDamagedByNothing, DataEntityDamagedByNothing::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 }

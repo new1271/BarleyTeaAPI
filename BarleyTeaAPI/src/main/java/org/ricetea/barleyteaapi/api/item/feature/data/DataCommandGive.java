@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import org.bukkit.inventory.ItemStack;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.inventory.ItemStack;
 
 public final class DataCommandGive {
 
@@ -19,12 +19,12 @@ public final class DataCommandGive {
     }
 
     @Nonnull
-    public final ItemStack getItemStack() {
+    public ItemStack getItemStack() {
         return itemStack;
     }
 
     @Nonnull
-    public final String getNBT() {
+    public String getNBT() {
         return nbt;
     }
 }

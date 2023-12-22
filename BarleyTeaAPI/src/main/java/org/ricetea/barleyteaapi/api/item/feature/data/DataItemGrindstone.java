@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemInventoryResultFeatureData;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataItemGrindstone extends BaseItemInventoryResultFeatureData<PrepareGrindstoneEvent> {
 

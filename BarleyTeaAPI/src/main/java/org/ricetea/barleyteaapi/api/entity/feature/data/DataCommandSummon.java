@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
+import org.bukkit.entity.Entity;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.entity.Entity;
 
 public final class DataCommandSummon {
 
@@ -19,12 +19,12 @@ public final class DataCommandSummon {
     }
 
     @Nonnull
-    public final Entity getEntity() {
+    public Entity getEntity() {
         return entity;
     }
 
     @Nonnull
-    public final String getNBT() {
+    public String getNBT() {
         return nbt;
     }
 }

@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -10,6 +7,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class DataNaturalSpawn extends BaseEntityFeatureData<CreatureSpawnEvent> {
     public DataNaturalSpawn(@Nonnull CreatureSpawnEvent event) {

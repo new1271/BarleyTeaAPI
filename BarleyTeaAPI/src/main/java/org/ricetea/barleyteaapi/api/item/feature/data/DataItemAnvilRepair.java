@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemAnvilFeatureData;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataItemAnvilRepair extends BaseItemAnvilFeatureData {
 

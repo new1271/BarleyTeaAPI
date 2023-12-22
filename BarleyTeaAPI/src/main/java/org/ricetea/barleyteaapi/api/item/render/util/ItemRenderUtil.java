@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.render.util;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -12,6 +9,9 @@ import org.ricetea.barleyteaapi.api.item.render.ItemRendererRegister;
 import org.ricetea.barleyteaapi.internal.item.renderer.UnregisteredItemRendererImpl;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class ItemRenderUtil {
 

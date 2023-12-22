@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.EquipmentSlot;
@@ -9,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends BaseFeatureData<T> {
 

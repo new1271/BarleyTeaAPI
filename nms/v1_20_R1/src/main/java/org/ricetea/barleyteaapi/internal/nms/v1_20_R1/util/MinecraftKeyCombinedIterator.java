@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import net.minecraft.resources.ResourceLocation;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import net.minecraft.resources.ResourceLocation;
-import org.ricetea.utils.ObjectUtil;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 public final class MinecraftKeyCombinedIterator implements Iterator<ResourceLocation> {
 

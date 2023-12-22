@@ -1,13 +1,5 @@
 package org.ricetea.barleyteaapi.api.block;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,6 +11,13 @@ import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 public abstract class BaseBlock implements Keyed {
     @Nonnull
@@ -32,7 +31,6 @@ public abstract class BaseBlock implements Keyed {
     @Nonnull
     private final Lazy<DataBlockType> typeLazy;
 
-    @SuppressWarnings("deprecation")
     public BaseBlock(@Nonnull NamespacedKey key, @Nonnull Material blockTypeBasedOn) {
         this.key = key;
         this.blockTypeBasedOn = blockTypeBasedOn;
@@ -65,11 +63,11 @@ public abstract class BaseBlock implements Keyed {
     }
 
     @Nullable
-    protected static final PersistentDataContainer getPersistentDataContainer(@Nonnull Block block, boolean create) {
+    protected static PersistentDataContainer getPersistentDataContainer(@Nonnull Block block, boolean create) {
         return ChunkStorage.getBlockDataContainer(block, create);
     }
 
-    protected static final void setPersistentDataContainer(@Nonnull Block block,
+    protected static void setPersistentDataContainer(@Nonnull Block block,
             @Nullable PersistentDataContainer container) {
         ChunkStorage.setBlockDataContainer(block, container);
     }
@@ -142,7 +140,7 @@ public abstract class BaseBlock implements Keyed {
     }
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
-        if (key != null && !FallbackNamespacedKeys.contains(key)) {
+        if (key != null) {
             FallbackNamespacedKeys.add(key);
         }
     }

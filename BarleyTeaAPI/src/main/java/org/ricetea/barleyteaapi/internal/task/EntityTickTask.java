@@ -1,13 +1,5 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -18,6 +10,13 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class EntityTickTask extends AbstractTask {
 

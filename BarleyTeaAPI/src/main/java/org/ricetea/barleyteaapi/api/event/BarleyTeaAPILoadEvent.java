@@ -1,10 +1,10 @@
 package org.ricetea.barleyteaapi.api.event;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public final class BarleyTeaAPILoadEvent extends Event {
 
@@ -15,7 +15,7 @@ public final class BarleyTeaAPILoadEvent extends Event {
 
     @Override
     @Nonnull
-    public final HandlerList getHandlers() {
+    public HandlerList getHandlers() {
         return lazyHandlerList.get();
     }
 

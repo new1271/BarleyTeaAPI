@@ -1,15 +1,15 @@
 package org.ricetea.barleyteaapi.api.helper;
 
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+
 public final class ChatColorHelper {
+    @SuppressWarnings("deprecation")
     @Nullable
     public static Style toKyoriStyle(@Nullable net.md_5.bungee.api.ChatColor... chatColors) {
         if (chatColors == null)
@@ -58,76 +58,34 @@ public final class ChatColorHelper {
             } else {
                 if (chatColor.isFormat()) {
                     switch (chatColor) {
-                        case ITALIC:
-                            decorations.add(TextDecoration.ITALIC);
-                            break;
-                        case BOLD:
-                            decorations.add(TextDecoration.BOLD);
-                            break;
-                        case STRIKETHROUGH:
-                            decorations.add(TextDecoration.STRIKETHROUGH);
-                            break;
-                        case UNDERLINE:
-                            decorations.add(TextDecoration.UNDERLINED);
-                            break;
-                        case MAGIC:
-                            decorations.add(TextDecoration.OBFUSCATED);
-                            break;
-                        default:
-                            break;
+                        case ITALIC -> decorations.add(TextDecoration.ITALIC);
+                        case BOLD -> decorations.add(TextDecoration.BOLD);
+                        case STRIKETHROUGH -> decorations.add(TextDecoration.STRIKETHROUGH);
+                        case UNDERLINE -> decorations.add(TextDecoration.UNDERLINED);
+                        case MAGIC -> decorations.add(TextDecoration.OBFUSCATED);
+                        default -> {
+                        }
                     }
                 } else if (chatColor.isColor()) {
                     switch (chatColor) {
-                        case AQUA:
-                            color = NamedTextColor.AQUA;
-                            break;
-                        case BLACK:
-                            color = NamedTextColor.BLACK;
-                            break;
-                        case BLUE:
-                            color = NamedTextColor.BLUE;
-                            break;
-                        case DARK_AQUA:
-                            color = NamedTextColor.DARK_AQUA;
-                            break;
-                        case DARK_BLUE:
-                            color = NamedTextColor.DARK_BLUE;
-                            break;
-                        case DARK_GRAY:
-                            color = NamedTextColor.DARK_GRAY;
-                            break;
-                        case DARK_GREEN:
-                            color = NamedTextColor.DARK_GREEN;
-                            break;
-                        case DARK_PURPLE:
-                            color = NamedTextColor.DARK_PURPLE;
-                            break;
-                        case DARK_RED:
-                            color = NamedTextColor.DARK_RED;
-                            break;
-                        case GOLD:
-                            color = NamedTextColor.GOLD;
-                            break;
-                        case GRAY:
-                            color = NamedTextColor.GRAY;
-                            break;
-                        case GREEN:
-                            color = NamedTextColor.GREEN;
-                            break;
-                        case LIGHT_PURPLE:
-                            color = NamedTextColor.LIGHT_PURPLE;
-                            break;
-                        case RED:
-                            color = NamedTextColor.RED;
-                            break;
-                        case WHITE:
-                            color = NamedTextColor.WHITE;
-                            break;
-                        case YELLOW:
-                            color = NamedTextColor.YELLOW;
-                            break;
-                        default:
-                            break;
+                        case AQUA -> color = NamedTextColor.AQUA;
+                        case BLACK -> color = NamedTextColor.BLACK;
+                        case BLUE -> color = NamedTextColor.BLUE;
+                        case DARK_AQUA -> color = NamedTextColor.DARK_AQUA;
+                        case DARK_BLUE -> color = NamedTextColor.DARK_BLUE;
+                        case DARK_GRAY -> color = NamedTextColor.DARK_GRAY;
+                        case DARK_GREEN -> color = NamedTextColor.DARK_GREEN;
+                        case DARK_PURPLE -> color = NamedTextColor.DARK_PURPLE;
+                        case DARK_RED -> color = NamedTextColor.DARK_RED;
+                        case GOLD -> color = NamedTextColor.GOLD;
+                        case GRAY -> color = NamedTextColor.GRAY;
+                        case GREEN -> color = NamedTextColor.GREEN;
+                        case LIGHT_PURPLE -> color = NamedTextColor.LIGHT_PURPLE;
+                        case RED -> color = NamedTextColor.RED;
+                        case WHITE -> color = NamedTextColor.WHITE;
+                        case YELLOW -> color = NamedTextColor.YELLOW;
+                        default -> {
+                        }
                     }
                 }
             }

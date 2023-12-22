@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import javax.annotation.Nonnull;
-
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
+import javax.annotation.Nonnull;
 
 public final class DataEntityMove extends BaseEntityFeatureData<EntityMoveEvent> {
 

@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -12,6 +10,8 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityLostTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTarget;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public final class EntityTargetListener implements Listener {
     private static final Lazy<EntityTargetListener> inst = Lazy.create(EntityTargetListener::new);
@@ -44,7 +44,6 @@ public final class EntityTargetListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(event.getTarget(), event, FeatureEntityTarget.class,
                 FeatureEntityTarget::handleEntityBeTargeted, DataEntityBeTargeted::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -52,7 +51,6 @@ public final class EntityTargetListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTarget.class,
                 FeatureEntityTarget::handleEntityLostTarget, DataEntityLostTarget::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 }

@@ -1,15 +1,5 @@
 package org.ricetea.barleyteaapi.internal.chunk;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -17,6 +7,15 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ChunkStorage {
     @Nullable

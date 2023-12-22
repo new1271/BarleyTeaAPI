@@ -1,9 +1,5 @@
 package org.ricetea.barleyteaapi.api.block.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -14,6 +10,9 @@ import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataBlockPlaceByPlayer extends BaseBlockFeatureData<BlockPlaceEvent> {
 

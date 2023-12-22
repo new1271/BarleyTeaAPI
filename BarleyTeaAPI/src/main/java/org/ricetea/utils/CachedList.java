@@ -1,21 +1,14 @@
 package org.ricetea.utils;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public final class CachedList<T> implements List<T> {
     private T[] _array;
     private ArrayList<T> _list;
-    private Class<T> clazz;
+    private final Class<T> clazz;
 
     public CachedList(Class<T> clazz) {
         _list = new ArrayList<>();
@@ -69,14 +62,13 @@ public final class CachedList<T> implements List<T> {
         return false;
     }
 
-    @Nullable
     @Override
     public Iterator<T> iterator() {
         if (_list != null)
             return _list.iterator();
         if (_array != null)
-            return new Iterator<T>() {
-                T[] array = _array;
+            return new Iterator<>() {
+                final T[] array = _array;
                 int index = -1;
 
                 @Override
@@ -96,14 +88,15 @@ public final class CachedList<T> implements List<T> {
         return Collections.emptyIterator();
     }
 
-    @Nullable
     @Override
     public Object[] toArray() {
-        return listToArray();
+        Object[] result = listToArray();
+        return Objects.requireNonNullElseGet(result, () -> new Object[0]);
     }
 
+    @Nonnull
     @Override
-    public <L> L[] toArray(L[] a) {
+    public <L> L[] toArray(@Nonnull L[] a) {
         return arrayToList().toArray(a);
     }
 
@@ -132,15 +125,15 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@Nullable Collection<?> c) {
         if (c == null)
             return false;
         if (_list != null)
             return _list.containsAll(c);
         if (_array != null) {
             T[] array = _array;
-            for (var iterator = c.iterator(); iterator.hasNext();) {
-                Object comparedItem = iterator.next();
+            for (var iterator = c.iterator(); iterator.hasNext(); ) {
+                Object comparedItem;
                 boolean flag = false;
                 for (int i = 0, length = _array.length; i < length; i++) {
                     T item = array[i];
@@ -165,7 +158,9 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean addAll(Collection<? extends T> c) {
+    public boolean addAll(@Nullable Collection<? extends T> c) {
+        if (c == null)
+            return false;
         ArrayList<T> list = _list;
         if (list == null)
             list = arrayToList();
@@ -173,7 +168,9 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean addAll(int index, Collection<? extends T> c) {
+    public boolean addAll(int index,@Nullable  Collection<? extends T> c) {
+        if (c == null)
+            return false;
         ArrayList<T> list = _list;
         if (list == null)
             list = arrayToList();
@@ -181,7 +178,9 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@Nullable Collection<?> c) {
+        if (c == null)
+            return false;
         ArrayList<T> list = _list;
         if (list == null)
             list = arrayToList();
@@ -192,7 +191,9 @@ public final class CachedList<T> implements List<T> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@Nullable Collection<?> c) {
+        if (c == null)
+            return false;
         ArrayList<T> list = _list;
         if (list == null)
             list = arrayToList();
@@ -237,9 +238,7 @@ public final class CachedList<T> implements List<T> {
         ArrayList<T> list = _list;
         if (list == null)
             list = arrayToList();
-        if (list != null) {
-            list.add(index, element);
-        }
+        list.add(index, element);
     }
 
     @Nullable
@@ -292,7 +291,7 @@ public final class CachedList<T> implements List<T> {
         return -1;
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public ListIterator<T> listIterator() {
         ArrayList<T> list = _list;
@@ -301,7 +300,7 @@ public final class CachedList<T> implements List<T> {
         return list.listIterator();
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public ListIterator<T> listIterator(int index) {
         ArrayList<T> list = _list;
@@ -310,7 +309,7 @@ public final class CachedList<T> implements List<T> {
         return list.listIterator(index);
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
         ArrayList<T> list = _list;
@@ -340,9 +339,9 @@ public final class CachedList<T> implements List<T> {
         ArrayList<T> list = _list;
         if (list == null) {
             if (_array == null) {
-                list = new ArrayList<T>(0);
+                list = new ArrayList<>(0);
             } else {
-                list = new ArrayList<T>(Arrays.asList(_array));
+                list = new ArrayList<>(Arrays.asList(_array));
                 _array = null;
             }
         }

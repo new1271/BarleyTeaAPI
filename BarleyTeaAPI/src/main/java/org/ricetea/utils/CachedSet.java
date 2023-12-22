@@ -1,15 +1,9 @@
 package org.ricetea.utils;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public final class CachedSet<T> implements Set<T> {
     private T[] _array;
@@ -68,14 +62,14 @@ public final class CachedSet<T> implements Set<T> {
         return false;
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public Iterator<T> iterator() {
         if (_list != null)
             return _list.iterator();
         if (_array != null)
-            return new Iterator<T>() {
-                T[] array = _array;
+            return new Iterator<>() {
+                final T[] array = _array;
                 int index = -1;
 
                 @Override
@@ -95,14 +89,15 @@ public final class CachedSet<T> implements Set<T> {
         return Collections.emptyIterator();
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public Object[] toArray() {
-        return listToArray();
+        return ObjectUtil.letNonNull(listToArray(), () -> new Object[0]);
     }
 
+    @Nonnull
     @Override
-    public <L> L[] toArray(L[] a) {
+    public <L> L[] toArray(@Nonnull L[] a) {
         return arrayToSet().toArray(a);
     }
 
@@ -131,15 +126,15 @@ public final class CachedSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@Nullable Collection<?> c) {
         if (c == null)
             return false;
         if (_list != null)
             return _list.containsAll(c);
         if (_array != null) {
             T[] array = _array;
-            for (var iterator = c.iterator(); iterator.hasNext();) {
-                Object comparedItem = iterator.next();
+            for (var iterator = c.iterator(); iterator.hasNext(); ) {
+                Object comparedItem;
                 boolean flag = false;
                 for (int i = 0, length = _array.length; i < length; i++) {
                     T item = array[i];
@@ -164,7 +159,9 @@ public final class CachedSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean addAll(Collection<? extends T> c) {
+    public boolean addAll(@Nullable Collection<? extends T> c) {
+        if (c == null)
+            return false;
         HashSet<T> list = _list;
         if (list == null)
             list = arrayToSet();
@@ -172,7 +169,9 @@ public final class CachedSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@Nullable Collection<?> c) {
+        if (c == null)
+            return false;
         HashSet<T> list = _list;
         if (list == null)
             list = arrayToSet();
@@ -183,7 +182,9 @@ public final class CachedSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@Nullable Collection<?> c) {
+        if (c == null)
+            return false;
         HashSet<T> list = _list;
         if (list == null)
             list = arrayToSet();
@@ -223,9 +224,9 @@ public final class CachedSet<T> implements Set<T> {
         HashSet<T> list = _list;
         if (list == null) {
             if (_array == null) {
-                list = new HashSet<T>(0);
+                list = new HashSet<>(0);
             } else {
-                list = new HashSet<T>(Arrays.asList(_array));
+                list = new HashSet<>(Arrays.asList(_array));
                 _array = null;
             }
         }

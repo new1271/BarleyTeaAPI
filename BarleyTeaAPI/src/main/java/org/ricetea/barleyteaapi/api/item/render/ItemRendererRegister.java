@@ -1,20 +1,19 @@
 package org.ricetea.barleyteaapi.api.item.render;
 
+import org.bukkit.NamespacedKey;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.abstracts.IRegister;
+import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bukkit.NamespacedKey;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
-import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
 
 public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     @Nonnull
@@ -47,7 +46,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + renderer.getKey().toString() + " as item renderer!");
+                logger.info("registered " + renderer.getKey() + " as item renderer!");
             }
         }
     }
@@ -59,7 +58,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
         lookupTable.remove(renderer.getKey());
         Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
-            logger.info("unregistered " + renderer.getKey().toString());
+            logger.info("unregistered " + renderer.getKey());
         }
     }
 
@@ -70,7 +69,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
         Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey().toString());
+                logger.info("unregistered " + key.getKey());
             }
         }
     }
@@ -111,7 +110,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
 
     @Override
     public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
+        return !lookupTable.isEmpty();
     }
 
     @Override
@@ -126,7 +125,7 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     public Collection<ItemRenderer> listAll(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
+                        lookupTable.values().stream().filter(predicate).toList(),
                         Collections::emptySet);
     }
 
@@ -142,8 +141,10 @@ public final class ItemRendererRegister implements IRegister<ItemRenderer> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<ItemRenderer> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                                .collect(Collectors.toUnmodifiableList()),
+                        lookupTable.entrySet().stream()
+                                .filter(new Filter<>(predicate))
+                                .map(new Mapper<>())
+                                .toList(),
                         Collections::emptySet);
     }
 

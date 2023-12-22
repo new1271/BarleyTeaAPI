@@ -2,11 +2,11 @@ package org.ricetea.barleyteaapi.internal.nms;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class NMSHelperRegister {
 
-    private static final Hashtable<Class<? extends IHelper>, IHelper> helperMap = new Hashtable<>();
+    private static final ConcurrentHashMap<Class<? extends IHelper>, IHelper> helperMap = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     @Nullable
@@ -15,6 +15,9 @@ public final class NMSHelperRegister {
     }
 
     public static <T extends IHelper> void setHelper(@Nullable T helper, @Nonnull Class<T> clazz) {
-        helperMap.put(clazz, helper);
+        if (helper == null)
+            helperMap.remove(clazz);
+        else
+            helperMap.put(clazz, helper);
     }
 }

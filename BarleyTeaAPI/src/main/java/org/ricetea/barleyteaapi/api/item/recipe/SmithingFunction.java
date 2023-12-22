@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
+import org.bukkit.inventory.ItemStack;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.inventory.ItemStack;
 
 @FunctionalInterface
 public interface SmithingFunction {

@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -10,6 +8,8 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.function.NonnullFunction;
+
+import javax.annotation.Nonnull;
 
 public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFunction<ItemStack, ItemStack> {
 
@@ -52,10 +52,10 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFun
 
     @Nonnull
     public ItemStack apply(@Nonnull ItemStack source) {
-        return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right -> {
-            return ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                    itemGiveFeature -> itemGiveFeature.handleItemGive(1));
-        }), () -> new ItemStack(Material.AIR));
+        return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right ->
+            ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
+                    itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+        ), () -> new ItemStack(Material.AIR));
     }
 
 }

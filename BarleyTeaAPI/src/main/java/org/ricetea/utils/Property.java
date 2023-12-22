@@ -1,11 +1,10 @@
 package org.ricetea.utils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface Property<T> extends UnaryOperator<T>, Supplier<T>, Consumer<T> {
 
@@ -27,27 +26,27 @@ public interface Property<T> extends UnaryOperator<T>, Supplier<T>, Consumer<T> 
     }
 
     @Nonnull
-    public static <T> Property<T> create(@Nonnull Supplier<T> getMethod, @Nonnull Consumer<T> setMethod) {
+    static <T> Property<T> create(@Nonnull Supplier<T> getMethod, @Nonnull Consumer<T> setMethod) {
         return new DefaultPropertyImpl<>(getMethod, setMethod);
     }
 
     @Nonnull
-    public static <T> Property<T> readonly(@Nonnull Supplier<T> getMethod) {
+    static <T> Property<T> readonly(@Nonnull Supplier<T> getMethod) {
         return new DefaultPropertyImpl<>(getMethod, null);
     }
 
     @Nonnull
-    public static <T> Property<T> writeonly(@Nonnull Consumer<T> setMethod) {
+    static <T> Property<T> writeonly(@Nonnull Consumer<T> setMethod) {
         return new DefaultPropertyImpl<>(null, setMethod);
     }
 
-    public enum PropertyType {
+    enum PropertyType {
         ReadWrite,
         ReadOnly,
         WriteOnly
     }
 
-    static class DefaultPropertyImpl<T> implements Property<T> {
+    class DefaultPropertyImpl<T> implements Property<T> {
 
         @Nullable
         private final Supplier<T> getMethod;

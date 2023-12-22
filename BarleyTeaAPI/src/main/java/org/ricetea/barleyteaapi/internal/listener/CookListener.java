@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -18,11 +16,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
-import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
 
 public final class CookListener implements Listener {
     private static final Lazy<CookListener> inst = Lazy.create(CookListener::new);
@@ -47,7 +47,7 @@ public final class CookListener implements Listener {
                     DataItemType::empty);
             NamespacedKey recipeKey = keyedRecipe.getKey();
             Block block = event.getBlock();
-            if (block != null && (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight())) {
+            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
                 boolean allPassed = true;
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
@@ -96,19 +96,18 @@ public final class CookListener implements Listener {
             return;
         Block block = event.getBlock();
         Recipe furnaceRecipe = event.getRecipe();
-        if (furnaceRecipe instanceof Keyed keyedRecipe) {
-            DataItemType itemType = ObjectUtil.letNonNull(
-                    ObjectUtil.safeMap(event.getSource(), BaseItem::getItemType),
-                    DataItemType::empty);
-            NamespacedKey recipeKey = keyedRecipe.getKey();
-            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
-                CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegistered()) {
-                    for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
-                        if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
-                            event.setTotalCookTime(event.getSource().getAmount() * recipe.getCookingTime());
-                            break;
-                        }
+        Keyed keyedRecipe = (Keyed) furnaceRecipe;
+        DataItemType itemType = ObjectUtil.letNonNull(
+                ObjectUtil.safeMap(event.getSource(), BaseItem::getItemType),
+                DataItemType::empty);
+        NamespacedKey recipeKey = keyedRecipe.getKey();
+        if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isRight()) {
+            CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
+            if (register != null && register.hasAnyRegistered()) {
+                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                    if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
+                        event.setTotalCookTime(event.getSource().getAmount() * recipe.getCookingTime());
+                        break;
                     }
                 }
             }

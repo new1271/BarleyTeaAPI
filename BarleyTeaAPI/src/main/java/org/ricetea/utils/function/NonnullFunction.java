@@ -1,10 +1,8 @@
 package org.ricetea.utils.function;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Function;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @FunctionalInterface
 public interface NonnullFunction<T, R> {
@@ -57,7 +55,7 @@ public interface NonnullFunction<T, R> {
     default <V> NonnullFunction<V, R> compose(NonnullFunction<? super V, ? extends T> before) {
         Objects.requireNonNull(before);
         return (V v) -> {
-            v = Objects.requireNonNull(v);
+            Objects.requireNonNull(v);
             return apply(Objects.requireNonNull(before.apply(v)));
         };
     }
@@ -105,7 +103,7 @@ public interface NonnullFunction<T, R> {
         Objects.requireNonNull(after);
         return (T t) -> {
             var r = apply(Objects.requireNonNull(t));
-            r = Objects.requireNonNull(r);
+            Objects.requireNonNull(r);
             return after.apply(r);
         };
     }

@@ -1,11 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -22,21 +16,24 @@ import org.ricetea.barleyteaapi.internal.helper.MaterialHelper;
 import org.ricetea.barleyteaapi.internal.helper.SmithingHelper;
 import org.ricetea.utils.Lazy;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
-    private static final Lazy<Set<DataItemType>> templateSetLazy = Lazy.createInThreadSafe(() -> {
-        return Tag.ITEMS_TRIM_TEMPLATES.getValues()
-                .stream()
-                .map(DataItemType::get)
-                .collect(Collectors.toSet());
-    });
+    private static final Lazy<Set<DataItemType>> templateSetLazy = Lazy.createInThreadSafe(() ->
+            Tag.ITEMS_TRIM_TEMPLATES.getValues()
+                    .stream()
+                    .map(DataItemType::get)
+                    .collect(Collectors.toSet()));
 
-    private static final Lazy<Set<DataItemType>> additionSetLazy = Lazy.createInThreadSafe(() -> {
-        return Tag.ITEMS_TRIM_MATERIALS.getValues()
-                .stream()
-                .map(DataItemType::get)
-                .collect(Collectors.toSet());
-    });
+    private static final Lazy<Set<DataItemType>> additionSetLazy = Lazy.createInThreadSafe(() ->
+            Tag.ITEMS_TRIM_MATERIALS.getValues()
+                    .stream()
+                    .map(DataItemType::get)
+                    .collect(Collectors.toSet()));
 
     private final boolean copyNbt;
 
@@ -45,12 +42,12 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
     }
 
     public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-            @Nonnull DataItemType result) {
+                                   @Nonnull DataItemType result) {
         this(key, original, result, true);
     }
 
     public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-            @Nonnull DataItemType result, boolean copyNbt) {
+                                   @Nonnull DataItemType result, boolean copyNbt) {
         super(key, original, result);
         this.copyNbt = copyNbt;
     }

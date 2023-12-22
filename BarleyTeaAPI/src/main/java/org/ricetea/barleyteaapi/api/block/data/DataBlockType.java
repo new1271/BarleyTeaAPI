@@ -1,22 +1,22 @@
 package org.ricetea.barleyteaapi.api.block.data;
 
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Either;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class DataBlockType extends Either<Material, BaseBlock> implements Keyed {
 
@@ -24,7 +24,7 @@ public final class DataBlockType extends Either<Material, BaseBlock> implements 
     private static final DataBlockType EMPTY = create(Material.AIR);
 
     @Nonnull
-    private static final Hashtable<Material, DataBlockType> vanillaMaterialMap = new Hashtable<>();
+    private static final ConcurrentHashMap<Material, DataBlockType> vanillaMaterialMap = new ConcurrentHashMap<>();
 
     @Nonnull
     public static DataBlockType empty() {
@@ -65,10 +65,7 @@ public final class DataBlockType extends Either<Material, BaseBlock> implements 
             Optional<Material> materialOptional = Arrays.stream(Material.values())
                     .filter(material -> material.getKey().equals(key))
                     .findAny();
-            if (materialOptional.isPresent()) {
-                return get(materialOptional.get());
-            }
-            return empty();
+            return materialOptional.map(DataBlockType::get).orElseGet(DataBlockType::empty);
         }
     }
 
@@ -88,14 +85,14 @@ public final class DataBlockType extends Either<Material, BaseBlock> implements 
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     public static DataBlockType create(@Nonnull BaseBlock blockType) {
         return new DataBlockType(null, blockType);
     }
 
     //This method should be used internally
-    @Deprecated
+    @ApiStatus.Internal
     @Nonnull
     private static DataBlockType create(@Nonnull Material type) {
         return new DataBlockType(type, null);

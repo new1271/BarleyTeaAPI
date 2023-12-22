@@ -1,11 +1,5 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import java.util.Hashtable;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -18,9 +12,15 @@ import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public final class BlockTickTask extends AbstractTask {
 
-    private static record BlockLocation(int x, int y, int z) {
+    private record BlockLocation(int x, int y, int z) {
 
         public BlockLocation(@Nonnull Block block) {
             this(block.getX(), block.getY(), block.getZ());
@@ -69,11 +69,10 @@ public final class BlockTickTask extends AbstractTask {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {
+        if (api == null || register == null || !register.hasAnyRegistered()) {
             stop();
         } else {
-            for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext();) {
-                var entry = iterator.next();
+            for (Map.Entry<World, ConcurrentHashMap<BlockLocation, Integer>> entry : operationTable.entrySet()) {
                 World world = entry.getKey();
                 var table = entry.getValue();
                 var affectTable = tickingTable.computeIfAbsent(world, ignored -> new Hashtable<>());
@@ -85,9 +84,7 @@ public final class BlockTickTask extends AbstractTask {
                         if (op == null)
                             continue;
                         switch (op) {
-                            case 0 -> {
-                                affectTable.putIfAbsent(location, 0);
-                            }
+                            case 0 -> affectTable.putIfAbsent(location, 0);
                             case 1 -> {
                                 Integer id = affectTable.remove(location);
                                 if (id != null && id != 0)
@@ -125,7 +122,7 @@ public final class BlockTickTask extends AbstractTask {
     }
 
     public void addBlock(@Nullable Block block) {
-        if (block == null || !BaseBlock.isBarleyTeaBlock(block) || !BarleyTeaAPI.checkPluginUsable())
+        if (!BaseBlock.isBarleyTeaBlock(block) || !BarleyTeaAPI.checkPluginUsable())
             return;
         var table = operationTable.computeIfAbsent(block.getWorld(), ignored -> new ConcurrentHashMap<>());
         table.merge(new BlockLocation(block), 0, Math::max);
@@ -150,7 +147,7 @@ public final class BlockTickTask extends AbstractTask {
         @Nonnull
         private final Hashtable<BlockLocation, Integer> operationTable;
 
-        _Task(@Nonnull World world, BlockLocation location,
+        _Task(@Nonnull World world,@Nonnull BlockLocation location,
                 @Nonnull Hashtable<BlockLocation, Integer> blockOperationTable) {
             this.world = world;
             this.location = location;
@@ -168,7 +165,7 @@ public final class BlockTickTask extends AbstractTask {
             if (register == null)
                 return false;
             Block block = location.getBlock(world);
-            if (block == null || block.isEmpty())
+            if (block.isEmpty())
                 return false;
             NamespacedKey id = BaseBlock.getBlockID(block);
             if (id == null)

@@ -1,8 +1,6 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -34,7 +32,8 @@ import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-import net.kyori.adventure.text.TranslatableComponent;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class EntityDeathListener implements Listener {
     private static final Lazy<EntityDeathListener> inst = Lazy.create(EntityDeathListener::new);

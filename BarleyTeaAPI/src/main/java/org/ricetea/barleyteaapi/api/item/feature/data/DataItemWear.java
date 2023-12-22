@@ -1,10 +1,7 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.SlotType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
@@ -13,8 +10,9 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.SlotType;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 public final class DataItemWear extends BasePlayerFeatureData<PlayerArmorChangeEvent> {
 
@@ -29,18 +27,12 @@ public final class DataItemWear extends BasePlayerFeatureData<PlayerArmorChangeE
 
     @Nonnull
     public EquipmentSlot getEquipmentSlot() {
-        switch (getSlotType()) {
-            case CHEST:
-                return EquipmentSlot.CHEST;
-            case FEET:
-                return EquipmentSlot.FEET;
-            case HEAD:
-                return EquipmentSlot.HEAD;
-            case LEGS:
-                return EquipmentSlot.LEGS;
-            default:
-                return Objects.requireNonNull(null);
-        }
+        return switch (getSlotType()) {
+            case CHEST -> EquipmentSlot.CHEST;
+            case FEET -> EquipmentSlot.FEET;
+            case HEAD -> EquipmentSlot.HEAD;
+            case LEGS -> EquipmentSlot.LEGS;
+        };
     }
 
     @Nonnull
@@ -48,7 +40,7 @@ public final class DataItemWear extends BasePlayerFeatureData<PlayerArmorChangeE
         return Objects.requireNonNull(event.getSlotType());
     }
 
-    @Nullable
+    @Nonnull
     public ItemStack getOldItem() {
         return event.getOldItem();
     }

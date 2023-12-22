@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -13,13 +11,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityHit;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityHit;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShotBlock;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShotEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitBlock;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileHitEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
+import org.ricetea.barleyteaapi.api.entity.feature.data.*;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
@@ -27,6 +19,8 @@ import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
 
 public final class ProjectileListener implements Listener {
     private static final Lazy<ProjectileListener> inst = Lazy.create(ProjectileListener::new);

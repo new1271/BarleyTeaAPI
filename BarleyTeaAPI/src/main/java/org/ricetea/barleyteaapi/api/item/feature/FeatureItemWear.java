@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.item.feature;
 
-import javax.annotation.Nonnull;
-
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemWear;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemWearOff;
+
+import javax.annotation.Nonnull;
 
 public interface FeatureItemWear {
     void handleItemWear(@Nonnull DataItemWear data);

@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.template;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +13,9 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class RegularItem extends BaseItem
         implements FeatureCommandGive, FeatureItemGive {
@@ -100,9 +100,6 @@ public abstract class RegularItem extends BaseItem
 
     public boolean handleCommandGive(@Nonnull DataCommandGive data) {
         ItemStack itemStack = data.getItemStack();
-        if (handleItemGive(itemStack)) {
-            return true;
-        }
-        return false;
+        return handleItemGive(itemStack);
     }
 }

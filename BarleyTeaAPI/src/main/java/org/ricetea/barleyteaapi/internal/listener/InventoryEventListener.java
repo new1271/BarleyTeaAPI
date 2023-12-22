@@ -1,9 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
@@ -20,14 +16,13 @@ import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemAnvil;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemEnchant;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGrindstone;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemAnvilCombine;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemAnvilRename;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemAnvilRepair;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemEnchant;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGrindstone;
+import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import java.util.function.Consumer;
 
 public final class InventoryEventListener implements Listener {
     private static final Lazy<InventoryEventListener> inst = Lazy.create(InventoryEventListener::new);

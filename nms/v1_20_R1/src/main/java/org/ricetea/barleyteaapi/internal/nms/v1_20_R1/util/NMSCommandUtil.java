@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util;
 
-import javax.annotation.Nonnull;
-
 import com.mojang.brigadier.arguments.ArgumentType;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+
+import javax.annotation.Nonnull;
 
 public final class NMSCommandUtil {
 

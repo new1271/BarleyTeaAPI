@@ -1,13 +1,12 @@
 package org.ricetea.barleyteaapi.api.abstracts;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public abstract class BaseItemAnvilFeatureData extends BaseItemInventoryResultFeatureData<PrepareAnvilEvent> {
 

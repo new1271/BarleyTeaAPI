@@ -1,12 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -18,6 +11,12 @@ import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 public final class CraftingRecipeRegister extends RecipeRegister<BaseCraftingRecipe> {
 
@@ -69,11 +68,11 @@ public final class CraftingRecipeRegister extends RecipeRegister<BaseCraftingRec
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 if (recipe instanceof ShapedCraftingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as shaped crafting recipe!");
+                    logger.info("registered " + recipe.getKey() + " as shaped crafting recipe!");
                 } else if (recipe instanceof ShapelessCraftingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as shapeless crafting recipe!");
+                    logger.info("registered " + recipe.getKey() + " as shapeless crafting recipe!");
                 } else {
-                    logger.info("registered " + recipe.getKey().toString() + " as unknown-type crafting recipe!");
+                    logger.info("registered " + recipe.getKey() + " as unknown-type crafting recipe!");
                 }
             }
         }

@@ -1,9 +1,9 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+
+import javax.annotation.Nonnull;
 
 public final class DataSlimeSplit extends BaseEntityFeatureData<SlimeSplitEvent> {
     public DataSlimeSplit(@Nonnull SlimeSplitEvent event) {

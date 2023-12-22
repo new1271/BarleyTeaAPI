@@ -1,8 +1,8 @@
 package org.ricetea.barleyteaapi.api.task;
 
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.base.Stopwatch;
+
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractTask implements Runnable {
 
@@ -11,8 +11,8 @@ public abstract class AbstractTask implements Runnable {
     Stopwatch stopwatch;
 
     protected AbstractTask(int intervalMax, int intervalMin) {
-        this.intervalMax = intervalMax > 50 ? intervalMax : 50;
-        this.intervalMin = intervalMin > 0 ? intervalMin : 0;
+        this.intervalMax = Math.max(intervalMax, 50);
+        this.intervalMin = Math.max(intervalMin, 0);
         stopwatch = Stopwatch.createUnstarted();
     }
 

@@ -1,10 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -18,6 +13,10 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmithingRecipe;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.logging.Logger;
 
 public final class SmithingRecipeRegister extends RecipeRegister<BaseSmithingRecipe> {
 
@@ -75,11 +74,11 @@ public final class SmithingRecipeRegister extends RecipeRegister<BaseSmithingRec
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 if (recipe instanceof SmithingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as normal smithing recipe!");
+                    logger.info("registered " + recipe.getKey() + " as normal smithing recipe!");
                 } else if (recipe instanceof ArmorTrimSmithingRecipe) {
-                    logger.info("registered " + recipe.getKey().toString() + " as armor-trimming smithing recipe!");
+                    logger.info("registered " + recipe.getKey() + " as armor-trimming smithing recipe!");
                 } else {
-                    logger.info("registered " + recipe.getKey().toString() + " as unknown-type smithing recipe!");
+                    logger.info("registered " + recipe.getKey() + " as unknown-type smithing recipe!");
                 }
             }
         }

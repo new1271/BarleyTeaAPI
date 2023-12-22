@@ -1,39 +1,37 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 public final class ItemRegister implements IRegister<BaseItem> {
     @Nonnull
     private static final Lazy<ItemRegister> inst = Lazy.create(ItemRegister::new);
 
     @Nonnull
-    private AtomicInteger itemNeedTick = new AtomicInteger(0);
+    private final AtomicInteger itemNeedTick = new AtomicInteger(0);
 
     @Nonnull
-    private final Hashtable<NamespacedKey, BaseItem> lookupTable = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, BaseItem> lookupTable = new ConcurrentHashMap<>();
 
     private ItemRegister() {
     }
@@ -57,7 +55,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + item.getKey().toString() + " as item!");
+                logger.info("registered " + item.getKey() + " as item!");
                 if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
                     ItemTickTask.getInstance().start();
                 }
@@ -72,7 +70,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
-            logger.info("unregistered " + item.getKey().toString());
+            logger.info("unregistered " + item.getKey());
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();
             }
@@ -88,7 +86,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
         Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
         if (logger != null) {
             for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey().toString());
+                logger.info("unregistered " + key.getKey());
             }
             Bukkit.getPluginManager().callEvent(new ItemsRegisteredEvent(values));
         }
@@ -119,7 +117,7 @@ public final class ItemRegister implements IRegister<BaseItem> {
     }
 
     public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
+        return !lookupTable.isEmpty();
     }
 
     public boolean hasAnyRegisteredNeedTicking() {
@@ -138,7 +136,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public Collection<BaseItem> listAll(@Nullable Predicate<BaseItem> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
+                        lookupTable.values().stream()
+                                .filter(predicate)
+                                .toList(),
                         Collections::emptySet);
     }
 
@@ -154,8 +154,10 @@ public final class ItemRegister implements IRegister<BaseItem> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<BaseItem> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                                .collect(Collectors.toUnmodifiableList()),
+                        lookupTable.entrySet().stream()
+                                .filter(new Filter<>(predicate))
+                                .map(new Mapper<>())
+                                .toList(),
                         Collections::emptySet);
     }
 

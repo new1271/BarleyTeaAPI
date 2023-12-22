@@ -1,18 +1,17 @@
 package org.ricetea.barleyteaapi.api.entity.counter;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.CachedSet;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class TickingService {
 
@@ -79,7 +78,7 @@ public final class TickingService {
         }
 
         @Nonnull
-        public static final SyncGlobalTickingTask getInstance() {
+        public static SyncGlobalTickingTask getInstance() {
             return _inst.get();
         }
 
@@ -166,7 +165,7 @@ public final class TickingService {
         }
 
         @Nonnull
-        public static final AsyncGlobalTickingTask getInstance() {
+        public static AsyncGlobalTickingTask getInstance() {
             return _inst.get();
         }
 

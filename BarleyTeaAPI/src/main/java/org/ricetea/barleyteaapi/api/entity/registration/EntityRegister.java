@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class EntityRegister implements IRegister<BaseEntity> {
     @Nonnull
@@ -64,7 +63,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             if (inst != null) {
                 Logger logger = inst.getLogger();
                 for (BaseEntity entity : entities)
-                    logger.info("registered " + entity.getKey().toString() + " as entity!");
+                    logger.info("registered " + entity.getKey() + " as entity!");
                 Bukkit.getPluginManager().callEvent(new EntitiesRegisteredEvent(entities));
             }
         }
@@ -80,22 +79,22 @@ public final class EntityRegister implements IRegister<BaseEntity> {
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
-                logger.info("registered " + entity.getKey().toString() + " as entity!");
+                logger.info("registered " + entity.getKey() + " as entity!");
                 Class<? extends Entity> clazz = entity.getEntityTypeBasedOn().getEntityClass();
                 if (clazz != null) {
                     if (entity instanceof FeatureNaturalSpawn
                             && !Creature.class.isAssignableFrom(clazz)) {
-                        logger.warning(entity.getKey().toString()
+                        logger.warning(entity.getKey()
                                 + " isn't based on a creature that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
                     }
                     if (entity instanceof FeatureSlimeSplit
                             && !Slime.class.isAssignableFrom(clazz)) {
-                        logger.warning(entity.getKey().toString()
+                        logger.warning(entity.getKey()
                                 + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
                     }
                     if (entity instanceof FeatureProjectile
                             && !Projectile.class.isAssignableFrom(clazz)) {
-                        logger.warning(entity.getKey().toString()
+                        logger.warning(entity.getKey()
                                 + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");
                     }
                 }
@@ -114,14 +113,14 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
-            logger.info("unregistered " + entity.getKey().toString());
+            logger.info("unregistered " + entity.getKey());
             Bukkit.getPluginManager().callEvent(new EntitiesUnregisteredEvent(List.of(entity)));
         }
     }
 
     @Override
     public void unregisterAll() {
-        Bukkit.getWorlds().forEach(world -> {
+        Bukkit.getWorlds().forEach(world ->
             world.getEntities().forEach(iteratedEntity -> {
                 BaseEntity entity = DataEntityType.get(iteratedEntity).asCustomEntity();
                 if (entity instanceof FeatureEntityLoad feature)
@@ -132,8 +131,8 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                         task.removeEntity(iteratedEntity);
                     }
                 }
-            });
-        });
+            })
+        );
         var keySet = Collections.unmodifiableSet(lookupTable.keySet());
         var values = CollectionUtil.toUnmodifiableList(lookupTable.values());
         lookupTable.clear();
@@ -141,7 +140,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
         if (inst != null) {
             Logger logger = inst.getLogger();
             for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.toString());
+                logger.info("unregistered " + key);
             }
             Bukkit.getPluginManager().callEvent(new EntitiesUnregisteredEvent(values));
         }
@@ -170,7 +169,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                         collectingList.add(record);
                     collectingList2.add(entityType);
                     if (logger != null)
-                        logger.info("unregistered " + key.toString());
+                        logger.info("unregistered " + key);
                 }
             }
             refreshCustomEntities(collectingList);
@@ -277,7 +276,7 @@ public final class EntityRegister implements IRegister<BaseEntity> {
                     if (key == null)
                         continue;
                     records.stream()
-                            .filter(record -> record.key().equals(key))
+                            .filter(record -> key.equals(record.key()))
                             .findAny()
                             .ifPresent(record -> {
                                 BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();

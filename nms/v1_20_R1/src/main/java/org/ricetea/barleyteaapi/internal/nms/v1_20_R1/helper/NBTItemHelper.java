@@ -1,11 +1,10 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R1.helper;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class NBTItemHelper {
     @Nonnull

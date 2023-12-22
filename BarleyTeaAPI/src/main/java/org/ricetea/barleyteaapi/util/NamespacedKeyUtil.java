@@ -1,10 +1,9 @@
 package org.ricetea.barleyteaapi.util;
 
-import java.util.Objects;
+import org.bukkit.NamespacedKey;
 
 import javax.annotation.Nonnull;
-
-import org.bukkit.NamespacedKey;
+import java.util.Objects;
 
 public class NamespacedKeyUtil {
 

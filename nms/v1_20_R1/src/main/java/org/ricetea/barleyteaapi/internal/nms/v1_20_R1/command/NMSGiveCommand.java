@@ -15,7 +15,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.commands.GiveCommand;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -197,7 +196,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
 
         @Override
         public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> provider,
-                                                             SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
+                                                             SuggestionsBuilder suggestionsBuilder) {
             String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
             if (!lowerCasedRemaining.contains("/")) {
                 if (lowerCasedRemaining.isBlank() || lowerCasedRemaining.contains(":")) {

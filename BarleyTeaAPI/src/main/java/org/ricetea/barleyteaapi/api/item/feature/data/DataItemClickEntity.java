@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class DataItemClickEntity extends BasePlayerFeatureData<PlayerInteractEntityEvent> {
 

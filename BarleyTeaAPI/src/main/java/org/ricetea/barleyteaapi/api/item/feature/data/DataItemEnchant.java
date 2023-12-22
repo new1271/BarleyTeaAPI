@@ -1,18 +1,17 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.abstracts.BaseItemInventoryFeatureData;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class DataItemEnchant extends BaseItemInventoryFeatureData<EnchantItemEvent> {
 

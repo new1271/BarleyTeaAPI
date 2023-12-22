@@ -1,8 +1,5 @@
 package org.ricetea.barleyteaapi.api.entity.template;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -18,6 +15,9 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class SpawnableEntity extends BaseEntity
         implements FeatureCommandSummon, FeatureEntitySpawn {
@@ -36,7 +36,7 @@ public abstract class SpawnableEntity extends BaseEntity
             if (this instanceof FeatureEntityLoad feature) {
                 feature.handleEntityLoaded(entity);
             }
-            if (this instanceof FeatureEntityTick feature) {
+            if (this instanceof FeatureEntityTick) {
                 EntityTickTask.getInstance().addEntity(entity);
             }
             return entity;

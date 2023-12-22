@@ -6,16 +6,20 @@ import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 public abstract class CommandRegister<T> implements IRegister<Command<T>> {
 
-    private static final Hashtable<Class<?>, CommandRegister<?>> registerLookupTable = new Hashtable<>();
+    private static final ConcurrentHashMap<Class<?>, CommandRegister<?>> registerLookupTable = new ConcurrentHashMap<>();
 
     @Nonnull
-    private final Hashtable<NamespacedKey, Command<T>> lookupTable = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, Command<T>> lookupTable = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     @Nonnull
@@ -30,7 +34,10 @@ public abstract class CommandRegister<T> implements IRegister<Command<T>> {
     }
 
     public static <C, T extends CommandRegister<C>> void setInstance(@Nullable T register, @Nonnull Class<T> clazz) {
-        registerLookupTable.put(clazz, register);
+        if (register == null)
+            registerLookupTable.remove(clazz);
+        else
+            registerLookupTable.put(clazz, register);
     }
 
 

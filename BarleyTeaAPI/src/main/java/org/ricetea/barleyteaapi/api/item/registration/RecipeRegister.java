@@ -1,17 +1,8 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
@@ -21,20 +12,27 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseRecipe;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
 
     @Nonnull
-    private final Hashtable<NamespacedKey, T> lookupTable = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, T> lookupTable = new ConcurrentHashMap<>();
 
     @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Objects
-            .requireNonNull(LinkedHashMultimap.create());
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
 
     @Nonnull
-    private final Hashtable<NamespacedKey, NamespacedKey> collidingTable_revert = new Hashtable<>();
+    private final ConcurrentHashMap<NamespacedKey, NamespacedKey> collidingTable_revert = new ConcurrentHashMap<>();
 
     @Nonnull
     private final AtomicInteger flowNumber = new AtomicInteger(0);
@@ -123,7 +121,7 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
     }
 
     public boolean hasAnyRegistered() {
-        return lookupTable.size() > 0;
+        return !lookupTable.isEmpty();
     }
 
     @Override
@@ -138,14 +136,17 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
     public Collection<T> listAll(@Nullable Predicate<T> predicate) {
         return predicate == null ? listAll()
                 : ObjectUtil.letNonNull(
-                        lookupTable.values().stream().filter(predicate).collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
+                lookupTable.values().stream().filter(predicate).toList(),
+                Collections::emptySet);
     }
 
     @Nonnull
     public Collection<T> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
         return ObjectUtil.letNonNull(
-                collidingTable.get(key).stream().map(this::lookup).collect(Collectors.toUnmodifiableSet()),
+                collidingTable.get(key).stream()
+                        .map(this::lookup)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toUnmodifiableSet()),
                 Collections::emptySet);
     }
 
@@ -161,9 +162,11 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
     public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<T> predicate) {
         return predicate == null ? listAllKeys()
                 : ObjectUtil.letNonNull(
-                        lookupTable.entrySet().stream().filter(new Filter<>(predicate)).map(new Mapper<>())
-                                .collect(Collectors.toUnmodifiableList()),
-                        Collections::emptySet);
+                lookupTable.entrySet().stream()
+                        .filter(new Filter<>(predicate))
+                        .map(new Mapper<>())
+                        .toList(),
+                Collections::emptySet);
     }
 
     @Override
@@ -228,10 +231,10 @@ abstract class RecipeRegister<T extends BaseRecipe> implements IRegister<T> {
     }
 
     private void afterRegisterRecipe(Logger logger, @Nonnull NamespacedKey key) {
-        logger.info("registered " + key.toString());
+        logger.info("registered " + key);
     }
 
     private void afterUnregisterRecipe(Logger logger, @Nonnull NamespacedKey key) {
-        logger.info("unregistered " + key.toString());
+        logger.info("unregistered " + key);
     }
 }

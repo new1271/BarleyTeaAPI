@@ -1,15 +1,15 @@
 package org.ricetea.barleyteaapi.api.task;
 
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.utils.Lazy;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.utils.Lazy;
-
 public class TaskService {
 
-    private static Lazy<TaskService> lazyInst = Lazy.create(TaskService::new);
+    private static final Lazy<TaskService> lazyInst = Lazy.create(TaskService::new);
 
     ScheduledExecutorService executorService;
 

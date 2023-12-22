@@ -1,12 +1,11 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R1.helper;
 
-import java.util.Objects;
+import net.minecraft.nbt.CompoundTag;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import net.minecraft.nbt.CompoundTag;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
+import java.util.Objects;
 
 public final class NBTEntityHelper {
     @Nonnull

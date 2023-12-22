@@ -1,24 +1,22 @@
 package org.ricetea.barleyteaapi.internal.bridge;
 
-import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.Map.Entry;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.translation.TranslationRegistry;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
-
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.translation.TranslationRegistry;
 import su.nightexpress.excellentenchants.enchantment.EnchantRegistry;
 import su.nightexpress.excellentenchants.enchantment.impl.ExcellentEnchant;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.Map.Entry;
 
 public class ExcellentEnchantsBridge {
 
@@ -38,7 +36,7 @@ public class ExcellentEnchantsBridge {
     @Nullable
     public static TextColor getEnchantmentTierColorUnsafe(@Nonnull Enchantment enchantment) {
         return ObjectUtil.safeMap(
-                (Style) ChatColorHelper.toKyoriStyle(((ExcellentEnchant) enchantment).getTier().getColor()),
+                ChatColorHelper.toKyoriStyle(((ExcellentEnchant) enchantment).getTier().getColor()),
                 Style::color);
     }
 

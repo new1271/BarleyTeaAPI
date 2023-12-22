@@ -2,50 +2,34 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.SoftReference;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-public abstract class Cache<T> implements Property<T> {
+public abstract class SoftCache<T> extends Cache<T> {
 
     @Nullable
-    protected T realObj;
+    protected SoftReference<T> realObj;
 
-    public static <T> Cache<T> create(@Nonnull Supplier<T> supplier) {
+    public static <T> SoftCache<T> create(@Nonnull Supplier<T> supplier) {
         return new Impl<>(supplier);
     }
 
-    public static <T> Cache<T> createInThreadSafe(@Nonnull Supplier<T> supplier) {
+    public static <T> SoftCache<T> createInThreadSafe(@Nonnull Supplier<T> supplier) {
         return new ThreadSafeImpl<>(supplier);
     }
 
+    @Override
     @Nonnull
     public T get() {
-        T obj = realObj;
+        T obj = ObjectUtil.safeMap(realObj, SoftReference::get);
         if (obj == null) {
-            return realObj = get0();
+            return Objects.requireNonNull((realObj = new SoftReference<>(get0())).get());
         }
         return obj;
     }
 
-    @Nonnull
-    protected abstract T get0();
-
-    public void reset() {
-        realObj = null;
-    }
-
-    @Override
-    @Nullable
-    public T set(T obj) {
-        throw new UnsupportedOperationException("this property is read-only!");
-    }
-
-    @Override
-    @Nonnull
-    public PropertyType getPropertyType() {
-        return PropertyType.ReadOnly;
-    }
-
-    private static class Impl<T> extends Cache<T> {
+    private static class Impl<T> extends SoftCache<T> {
 
         @Nonnull
         protected final Supplier<T> supplier;
@@ -73,7 +57,7 @@ public abstract class Cache<T> implements Property<T> {
         @Override
         @Nonnull
         public T get() {
-            T obj = realObj;
+            T obj = ObjectUtil.safeMap(realObj, SoftReference::get);
             if (obj == null) {
                 synchronized (syncRoot) {
                     obj = super.get();

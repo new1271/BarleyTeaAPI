@@ -1,13 +1,7 @@
 package org.ricetea.barleyteaapi.api.item;
 
-import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.Translatable;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,8 +16,13 @@ import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.translation.Translatable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class BaseItem implements Keyed, Translatable {
     @Nonnull
@@ -40,7 +39,6 @@ public abstract class BaseItem implements Keyed, Translatable {
     private final Lazy<DataItemType> lazyType;
     private final boolean isTool;
 
-    @SuppressWarnings("deprecation")
     public BaseItem(@Nonnull NamespacedKey key, @Nonnull Material materialBasedOn, @Nonnull DataItemRarity rarity) {
         this.key = key;
         this.materialBasedOn = materialBasedOn;
@@ -144,10 +142,7 @@ public abstract class BaseItem implements Keyed, Translatable {
                 meta.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING,
                         key.toString());
                 itemStack.setItemMeta(meta);
-                if (afterItemStackRegistered != null && !afterItemStackRegistered.test(itemStack)) {
-                    return false;
-                }
-                return true;
+                return afterItemStackRegistered == null || afterItemStackRegistered.test(itemStack);
             }
         }
         return false;
@@ -192,8 +187,7 @@ public abstract class BaseItem implements Keyed, Translatable {
         if (namespacedKeyString == null) {
             result = null;
             if (!FallbackNamespacedKeys.isEmpty()) {
-                for (var iterator = FallbackNamespacedKeys.entrySet().iterator(); iterator.hasNext();) {
-                    var entry = iterator.next();
+                for (Map.Entry<NamespacedKey, Function<String, NamespacedKey>> entry : FallbackNamespacedKeys.entrySet()) {
                     NamespacedKey key = entry.getKey();
                     if (key != null) {
                         namespacedKeyString = container.get(key, PersistentDataType.STRING);

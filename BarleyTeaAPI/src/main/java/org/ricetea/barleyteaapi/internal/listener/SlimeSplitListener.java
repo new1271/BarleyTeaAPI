@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -10,6 +8,8 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
 import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.utils.Lazy;
+
+import javax.annotation.Nonnull;
 
 public final class SlimeSplitListener implements Listener {
     private static final Lazy<SlimeSplitListener> inst = Lazy.create(SlimeSplitListener::new);
@@ -29,7 +29,6 @@ public final class SlimeSplitListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureSlimeSplit.class,
                 FeatureSlimeSplit::handleSlimeSplit, DataSlimeSplit::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 }

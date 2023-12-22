@@ -1,9 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import java.util.Arrays;
-
-import javax.annotation.Nonnull;
-
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
@@ -22,6 +18,9 @@ import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+
+import javax.annotation.Nonnull;
+import java.util.Arrays;
 
 public final class CraftListener implements Listener {
 
@@ -77,11 +76,11 @@ public final class CraftListener implements Listener {
                         }
                     }
                 }
-                if (allPassed && craftingRecipe instanceof ComplexRecipe complexRecipe) {
+                if (allPassed && craftingRecipe instanceof ComplexRecipe) {
                     switch (recipeKey.getNamespace()) {
-                        case NamespacedKey.MINECRAFT:
+                        case NamespacedKey.MINECRAFT -> {
                             switch (recipeKey.getKey()) {
-                                case "repair_item": { //Item Repair
+                                case "repair_item" -> { //Item Repair
                                     if (availableItemCount == 2) {
                                         ItemStack[] stacks = new ItemStack[2];
                                         BaseItem type = null;
@@ -112,9 +111,8 @@ public final class CraftListener implements Listener {
                                         }
                                     }
                                 }
-                                    break;
                             }
-                            break;
+                        }
                     }
                 }
                 if (allPassed) {

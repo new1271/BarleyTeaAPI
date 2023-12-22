@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -14,6 +12,8 @@ import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
+
+import javax.annotation.Nonnull;
 
 public final class EntityMountListener implements Listener {
     private static final Lazy<EntityMountListener> inst = Lazy.create(EntityMountListener::new);
@@ -38,13 +38,12 @@ public final class EntityMountListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(event.getMount(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityBeMounted, DataEntityBeMounted::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityDismount(@Nonnull EntityDismountEvent event) {
-        if (event == null || event.isCancelled())
+        if (event.isCancelled())
             return;
         if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityDismount, DataEntityDismount::new)) {
@@ -54,7 +53,6 @@ public final class EntityMountListener implements Listener {
         if (!EntityFeatureHelper.doFeatureCancellable(event.getDismounted(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityBeDismounted, DataEntityBeDismounted::new)) {
             event.setCancelled(true);
-            return;
         }
     }
 }

@@ -1,7 +1,6 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import javax.annotation.Nonnull;
-
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
@@ -12,7 +11,7 @@ import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
 import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.utils.Lazy;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
+import javax.annotation.Nonnull;
 
 public final class EntityMoveListener implements Listener {
     private static final Lazy<EntityMoveListener> inst = Lazy.create(EntityMoveListener::new);
