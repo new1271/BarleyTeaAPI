@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
@@ -84,22 +85,30 @@ public final class NMSGiveCommand extends NMSRegularCommand {
             String namespace = itemKey.getNamespace();
             String key = itemKey.getPath();
             NamespacedKey alterItemKey = new NamespacedKey(namespace, key);
-            Item nmsItemType;
-            BaseItem barleyTeaItemType;
+            Item nmsItemType = null;
+            BaseItem barleyTeaItemType = null;
             if (namespace.equalsIgnoreCase(ResourceLocation.DEFAULT_NAMESPACE)) {
                 try {
                     nmsItemType = BuiltInRegistries.ITEM.get(itemKey);
-                } catch (Exception e) {
-                    nmsItemType = null;
+                } catch (Exception ignored) {
                 }
-                barleyTeaItemType = null;
+            }
+            boolean fuzzySearching;
+            if (nmsItemType != null && nmsItemType.equals(Items.AIR)) {
+                fuzzySearching = true;
+                nmsItemType = null;
             } else {
+                fuzzySearching = false;
+            }
+            if (nmsItemType == null) {
                 ItemRegister register = ItemRegister.getInstanceUnsafe();
-                if (register == null) {
-                    barleyTeaItemType = null;
-                    nmsItemType = null;
-                } else {
-                    barleyTeaItemType = ItemRegister.getInstance().lookup(alterItemKey);
+                if (register != null) {
+                    if (fuzzySearching) {
+                        String fuzzyKey = itemKey.getPath();
+                        barleyTeaItemType = register.findFirst(itemType ->
+                                itemType.getKey().getKey().equalsIgnoreCase(fuzzyKey));
+                    } else
+                        barleyTeaItemType = register.lookup(alterItemKey);
                     nmsItemType = ObjectUtil.safeMap(barleyTeaItemType,
                             type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
                 }

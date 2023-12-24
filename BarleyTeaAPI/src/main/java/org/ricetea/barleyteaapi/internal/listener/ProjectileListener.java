@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityHit;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
@@ -21,6 +22,7 @@ import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class ProjectileListener implements Listener {
     private static final Lazy<ProjectileListener> inst = Lazy.create(ProjectileListener::new);
@@ -31,30 +33,6 @@ public final class ProjectileListener implements Listener {
     @Nonnull
     public static ProjectileListener getInstance() {
         return inst.get();
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void listenProjectileLaunch(ProjectileLaunchEvent event) {
-        if (event == null || event.isCancelled())
-            return;
-        Projectile entity = event.getEntity();
-        Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!ItemFeatureHelper.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
-                FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
-                DataItemHoldEntityShoot::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
-                FeatureEntityShoot::handleEntityShoot, DataEntityShoot::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
-                FeatureProjectile::handleProjectileLaunch, DataProjectileLaunch::new)) {
-            event.setCancelled(true);
-            return;
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

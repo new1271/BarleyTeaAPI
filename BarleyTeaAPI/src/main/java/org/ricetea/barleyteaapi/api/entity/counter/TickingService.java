@@ -158,6 +158,8 @@ public final class TickingService {
         @Nonnull
         private final ConcurrentHashMap<Entity, CachedSet<AbstractTickCounter>> entityMap = new ConcurrentHashMap<>();
 
+        private int tickCount;
+
         private AsyncGlobalTickingTask() {
             super(50, 0);
         }
@@ -176,6 +178,12 @@ public final class TickingService {
 
         @Override
         public void runInternal() {
+            int newTickCount = Bukkit.getCurrentTick();
+            if (newTickCount == tickCount) {
+                return;
+            } else {
+                this.tickCount = newTickCount;
+            }
             for (Iterator<Entry<Entity, CachedSet<AbstractTickCounter>>> iterator = entityMap.entrySet()
                     .iterator(); iterator.hasNext(); ) {
                 Entry<Entity, CachedSet<AbstractTickCounter>> entry = iterator.next();

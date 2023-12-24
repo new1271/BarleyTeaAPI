@@ -40,7 +40,7 @@ public final class DataItemClickBlock extends BasePlayerFeatureData<PlayerIntera
         Block block = event.getClickedBlock();
         if (block != null) {
             Material type = block.getType();
-            return !Tag.STAIRS.isTagged(type) && !Tag.FENCES.isTagged(type);
+            return type.isInteractable() && !Tag.STAIRS.isTagged(type) && !Tag.FENCES.isTagged(type);
         }
         return false;
     }

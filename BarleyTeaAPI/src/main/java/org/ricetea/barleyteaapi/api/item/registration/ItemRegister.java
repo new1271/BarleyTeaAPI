@@ -6,6 +6,7 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.abstracts.IRegister;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.utils.CollectionUtil;
@@ -28,6 +29,8 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     @Nonnull
     private final AtomicInteger itemNeedTick = new AtomicInteger(0);
+    @Nonnull
+    private final AtomicInteger itemNeedMovingFeature = new AtomicInteger(0);
 
     @Nonnull
     private final ConcurrentHashMap<NamespacedKey, BaseItem> lookupTable = new ConcurrentHashMap<>();
@@ -58,6 +61,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
                 if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
                     ItemTickTask.getInstance().start();
                 }
+                if (item instanceof FeatureItemHoldEntityMove) {
+                    itemNeedMovingFeature.getAndIncrement();
+                }
                 Bukkit.getPluginManager().callEvent(new ItemsRegisteredEvent(List.of(item)));
             }
         }
@@ -72,6 +78,9 @@ public final class ItemRegister implements IRegister<BaseItem> {
             logger.info("unregistered " + item.getKey());
             if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
                 ItemTickTask.getInstance().stop();
+            }
+            if (item instanceof FeatureItemHoldEntityMove) {
+                itemNeedMovingFeature.getAndDecrement();
             }
             Bukkit.getPluginManager().callEvent(new ItemsRegisteredEvent(List.of(item)));
         }
@@ -121,6 +130,10 @@ public final class ItemRegister implements IRegister<BaseItem> {
 
     public boolean hasAnyRegisteredNeedTicking() {
         return itemNeedTick.get() > 0;
+    }
+
+    public boolean hasAnyRegisteredNeedMovingFeature() {
+        return itemNeedMovingFeature.get() > 0;
     }
 
     @Override

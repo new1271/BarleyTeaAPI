@@ -2,21 +2,31 @@ package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.*;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
+import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
@@ -40,6 +50,10 @@ public final class EntitySpawnListener implements Listener {
         Entity entity = event.getEntity();
         if (event instanceof CreatureSpawnEvent creatureSpawnEvent) {
             onCreatureSpawn(creatureSpawnEvent);
+        } else if (event instanceof ProjectileLaunchEvent projectileLaunchEvent) {
+            onProjectileLaunch(projectileLaunchEvent);
+        } else {
+            return;
         }
         if (!event.isCancelled()) {
             NamespacedKey id = BaseEntity.getEntityID(entity);
@@ -84,6 +98,28 @@ public final class EntitySpawnListener implements Listener {
                     }
                 }
             }
+        }
+    }
+
+
+    private void onProjectileLaunch(@Nonnull ProjectileLaunchEvent event) {
+        Projectile entity = event.getEntity();
+        Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
+        if (!ItemFeatureHelper.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
+                FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
+                DataItemHoldEntityShoot::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
+                FeatureEntityShoot::handleEntityShoot, DataEntityShoot::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
+                FeatureProjectile::handleProjectileLaunch, DataProjectileLaunch::new)) {
+            event.setCancelled(true);
+            return;
         }
     }
 }

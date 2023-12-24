@@ -89,36 +89,6 @@ public final class EntityDeathListener implements Listener {
     }
 
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
-        if (event.deathMessage() instanceof TranslatableComponent deathMessage && lastDamageEvent != null) {
-            String key = deathMessage.key().toLowerCase();
-            if (key.startsWith("death.attack.") && key.endsWith(".item")) {
-                Entity damager = lastDamageEvent.getDamager();
-                if (damager instanceof Projectile projectile) {
-                    ProjectileSource source = projectile.getShooter();
-                    if (source instanceof Entity sourceEntity) {
-                        damager = sourceEntity;
-                    }
-                }
-                if (damager instanceof LivingEntity livingDamager) {
-                    EntityEquipment equipment = livingDamager.getEquipment();
-                    if (equipment != null) {
-                        ItemStack weapon = equipment.getItemInMainHand();
-                        if (!weapon.getType().isAir()) {
-                            BaseItem itemType = DataItemType.get(weapon).asCustomItem();
-                            if (itemType != null) {
-                                ItemMeta meta = weapon.getItemMeta();
-                                if (meta != null && meta.displayName() instanceof TranslatableComponent displayName &&
-                                        displayName.key().equalsIgnoreCase(itemType.getNameInTranslateKey())) {
-                                    key = key.substring(0, key.length() - 5);
-                                    event.deathMessage(deathMessage.key(key).args(deathMessage.args().subList(0, 2)));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureHelper.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
                 lastDamageEvent, FeatureItemHoldEntityKill.class,
