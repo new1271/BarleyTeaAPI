@@ -1,7 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import org.bukkit.entity.Entity;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;

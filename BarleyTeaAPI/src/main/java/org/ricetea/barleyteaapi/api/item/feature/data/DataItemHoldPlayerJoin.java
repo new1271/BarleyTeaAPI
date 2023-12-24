@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

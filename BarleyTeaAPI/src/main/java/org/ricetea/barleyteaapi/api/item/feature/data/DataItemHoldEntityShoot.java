@@ -5,7 +5,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;

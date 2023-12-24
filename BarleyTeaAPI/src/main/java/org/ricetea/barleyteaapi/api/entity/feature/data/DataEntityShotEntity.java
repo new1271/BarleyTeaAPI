@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityShotFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityShotFeatureData;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.utils.Lazy;

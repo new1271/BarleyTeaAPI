@@ -1,7 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import org.bukkit.event.entity.SlimeSplitEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 
 import javax.annotation.Nonnull;
 

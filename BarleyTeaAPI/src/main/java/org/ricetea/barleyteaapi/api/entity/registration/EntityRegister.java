@@ -9,7 +9,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
 import org.ricetea.barleyteaapi.api.entity.feature.*;

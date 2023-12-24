@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.block.feature.data;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockExplodeEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseBlockFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;

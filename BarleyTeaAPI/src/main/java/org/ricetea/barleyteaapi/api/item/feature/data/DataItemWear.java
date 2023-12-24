@@ -4,7 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.SlotType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.utils.Lazy;

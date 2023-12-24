@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.entity.feature.data;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;
 

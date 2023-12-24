@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

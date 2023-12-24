@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.utils.ObjectUtil;

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.abstracts;
+package org.ricetea.barleyteaapi.api.base.registration;
 
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;

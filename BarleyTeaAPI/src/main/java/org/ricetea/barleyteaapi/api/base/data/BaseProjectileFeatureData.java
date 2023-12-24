@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.api.abstracts;
+package org.ricetea.barleyteaapi.api.base.data;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;

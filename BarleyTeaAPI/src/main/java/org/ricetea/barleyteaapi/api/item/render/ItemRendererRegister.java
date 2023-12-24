@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.item.render;
 
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 

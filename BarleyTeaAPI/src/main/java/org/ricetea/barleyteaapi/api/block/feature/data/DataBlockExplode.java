@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.block.feature.data;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.BlockExplodeEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseBlockFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseBlockFeatureData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

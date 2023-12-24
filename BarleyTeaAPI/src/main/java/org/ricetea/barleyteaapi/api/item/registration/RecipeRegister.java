@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseRecipe;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;

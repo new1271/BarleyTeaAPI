@@ -6,7 +6,7 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
