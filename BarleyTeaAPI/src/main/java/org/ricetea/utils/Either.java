@@ -1,7 +1,5 @@
 package org.ricetea.utils;
 
-import org.ricetea.utils.function.NonnullFunction;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -10,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Either<L, R> {
+public class Either<L, R> implements EitherOperation<L, R> {
 
     @Nullable
     final L left;
@@ -98,8 +96,8 @@ public class Either<L, R> {
     }
 
     @Nonnull
-    public <T> T nonNullMap(@Nonnull NonnullFunction<L, T> mapFunctionForLeft,
-                            @Nonnull NonnullFunction<R, T> mapFunctionForRight) {
+    public <T> T nonNullMap(@Nonnull Function<L, T> mapFunctionForLeft,
+                            @Nonnull Function<R, T> mapFunctionForRight) {
         L left = this.left;
         R right = this.right;
         if (left != null)

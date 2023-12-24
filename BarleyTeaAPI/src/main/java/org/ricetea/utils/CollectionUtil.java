@@ -1,13 +1,12 @@
 package org.ricetea.utils;
 
-import org.ricetea.utils.function.NonnullSupplier;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class CollectionUtil {
     private CollectionUtil() {
@@ -26,7 +25,7 @@ public class CollectionUtil {
     }
 
     @Nonnull
-    public static <T> T firstOrDefault(@Nullable Collection<T> collection, @Nonnull NonnullSupplier<T> supplier) {
+    public static <T> T firstOrDefault(@Nullable Collection<T> collection, @Nonnull Supplier<T> supplier) {
         return ObjectUtil.letNonNull(first(collection), supplier);
     }
 
@@ -52,7 +51,7 @@ public class CollectionUtil {
     }
 
     @Nonnull
-    public static <T> T lastOrDefault(@Nullable Collection<T> collection, @Nonnull NonnullSupplier<T> supplier) {
+    public static <T> T lastOrDefault(@Nullable Collection<T> collection, @Nonnull Supplier<T> supplier) {
         return ObjectUtil.letNonNull(last(collection), supplier);
     }
 

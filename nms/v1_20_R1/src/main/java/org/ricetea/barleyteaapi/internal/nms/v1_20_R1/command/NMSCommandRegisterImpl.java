@@ -5,14 +5,14 @@ import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.ricetea.barleyteaapi.api.command.Command;
-import org.ricetea.barleyteaapi.api.command.CommandRegister;
 import org.ricetea.barleyteaapi.api.command.CommandRegistrationContext;
+import org.ricetea.barleyteaapi.internal.command.CommandRegisterBase;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public final class CommandRegisterImpl extends CommandRegister<CommandDispatcher<CommandSourceStack>> {
+public final class NMSCommandRegisterImpl extends CommandRegisterBase<CommandDispatcher<CommandSourceStack>> {
 
     private final @Nonnull CommandRegistrationContextImpl registrationContext = new CommandRegistrationContextImpl();
 
@@ -27,7 +27,7 @@ public final class CommandRegisterImpl extends CommandRegister<CommandDispatcher
     }
 
     private static class CommandRegistrationContextImpl
-            extends CommandRegistrationContext<CommandDispatcher<CommandSourceStack>> {
+            implements CommandRegistrationContext<CommandDispatcher<CommandSourceStack>> {
 
         private final Lazy<CommandDispatcher<CommandSourceStack>> contextLazy =
                 Lazy.createInThreadSafe(() ->

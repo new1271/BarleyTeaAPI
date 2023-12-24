@@ -13,20 +13,21 @@ import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
+import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.*;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByEntityExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByEntity;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockEntityChange;
+import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.entity.BarleyFallingBlock;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.utils.Lazy;
 
@@ -38,7 +39,7 @@ import java.util.Objects;
 public final class EntityChangeEnvironmentListener implements Listener {
     private static final Lazy<EntityChangeEnvironmentListener> inst = Lazy.create(
             EntityChangeEnvironmentListener::new);
-    private final HashMap<Entity, ArrayList<BaseBlock>> PrepareToDrops = new HashMap<>();
+    private final HashMap<Entity, ArrayList<CustomBlock>> PrepareToDrops = new HashMap<>();
 
     private EntityChangeEnvironmentListener() {
     }
@@ -50,57 +51,48 @@ public final class EntityChangeEnvironmentListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityExplode(EntityExplodeEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
             return;
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (register != null) {
-            if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityExplode.class,
-                    FeatureEntityExplode::handleEntityExplode, DataEntityExplode::new)) {
-                event.setCancelled(true);
-                return;
-            }
-            for (var iterator = event.blockList().iterator(); iterator.hasNext(); ) {
-                Block block = iterator.next();
-                if (block != null) {
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id != null) {
-                        BaseBlock baseBlock = register.lookup(id);
-                        if (baseBlock != null) {
-                            if (baseBlock instanceof FeatureBlockBreak blockBreakFeature) {
-                                try {
-                                    if (!blockBreakFeature
-                                            .handleBlockBreakByEntityExplode(
-                                                    new DataBlockBreakByEntityExplode(event, block))) {
-                                        iterator.remove();
-                                        continue;
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                if (event.isCancelled()) {
-                                    return;
-                                }
-                            }
-                            if (baseBlock instanceof FeatureBlockTick) {
-                                BlockTickTask.getInstance().removeBlock(block);
-                            }
-                            ChunkStorage.removeBlockDataContainer(block);
-                            if (baseBlock instanceof FeatureBlockBreak) {
-                                var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
-                                list.add(baseBlock);
-                            }
-                        }
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityExplode.class,
+                FeatureEntityExplode::handleEntityExplode, DataEntityExplode::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        for (var iterator = event.blockList().iterator(); iterator.hasNext(); ) {
+            Block block = iterator.next();
+            CustomBlock blockType = CustomBlock.get(block);
+            if (blockType == null)
+                continue;
+            if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
+                try {
+                    if (!blockBreakFeature
+                            .handleBlockBreakByEntityExplode(
+                                    new DataBlockBreakByEntityExplode(event, block))) {
+                        iterator.remove();
+                        continue;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                if (event.isCancelled()) {
+                    return;
+                }
+            }
+            if (blockType instanceof FeatureBlockTick) {
+                BlockTickTask.getInstance().removeBlock(block);
+            }
+            ChunkStorage.removeBlockDataContainer(block);
+            if (blockType instanceof FeatureBlockBreak) {
+                var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
+                list.add(blockType);
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
             return;
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
         Block block = event.getBlock();
         Entity entity = event.getEntity();
         EntityType entityType = event.getEntityType();
@@ -108,74 +100,66 @@ public final class EntityChangeEnvironmentListener implements Listener {
             case FALLING_BLOCK -> {
                 NamespacedKey key = BaseEntity.getEntityID(entity);
                 if (key == null) {
-                    if (register != null) {
-                        NamespacedKey blockKey = BaseBlock.getBlockID(block);
-                        if (blockKey != null) {
-                            BaseBlock baseBlock = register.lookup(blockKey);
-                            if (baseBlock != null) {
-                                try {
-                                    if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
-                                            && !blockFallingFeature.handleBlockStartFall(block)) {
-                                        event.setCancelled(true);
-                                        return;
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                BaseEntity.registerEntity(entity, BarleyFallingBlock.getInstance());
-                                PersistentDataContainer container = ChunkStorage.getBlockDataContainer(block,
-                                        false);
-                                if (container != null)
-                                    BarleyFallingBlock.setBlockDataContainer(entity, container);
-                                if (baseBlock instanceof FeatureBlockTick) {
-                                    BlockTickTask.getInstance().removeBlock(block);
-                                }
-                                if (baseBlock instanceof FeatureBlockLoad feature) {
-                                    try {
-                                        feature.handleBlockUnloaded(block);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                ChunkStorage.removeBlockDataContainer(block);
+                    CustomBlock blockType = CustomBlock.get(block);
+                    if (blockType == null)
+                        return;
+                    if (blockType instanceof FeatureBlockFalling blockFallingFeature) {
+                        try {
+                            if (!blockFallingFeature.handleBlockStartFall(block)) {
+                                event.setCancelled(true);
+                                return;
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
+                    BaseEntity.registerEntity(entity, BarleyFallingBlock.getInstance());
+                    PersistentDataContainer container = ChunkStorage.getBlockDataContainer(block,
+                            false);
+                    if (container != null)
+                        BarleyFallingBlock.setBlockDataContainer(entity, container);
+                    if (blockType instanceof FeatureBlockTick) {
+                        BlockTickTask.getInstance().removeBlock(block);
+                    }
+                    if (blockType instanceof FeatureBlockLoad feature) {
+                        try {
+                            feature.handleBlockUnloaded(block);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    ChunkStorage.removeBlockDataContainer(block);
                 } else {
                     EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
                     if (entityRegister != null
                             && BarleyFallingBlock.getInstance().equals(entityRegister.lookup(key))) {
                         PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
                         if (container != null) {
-                            String rawId = container.get(BaseBlock.DefaultNamespacedKey,
-                                    PersistentDataType.STRING);
-                            if (rawId != null) {
-                                NamespacedKey id = NamespacedKey.fromString(rawId);
-                                if (register != null && id != null) {
-                                    BaseBlock baseBlock = register.lookup(id);
-                                    PersistentDataContainer previousDataContainer = ChunkStorage
-                                            .getBlockDataContainer(block,
-                                                    false);
-                                    ChunkStorage.setBlockDataContainer(block, container);
+                            NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
+                            if (id != null) {
+                                CustomBlock baseBlock = BlockRegister.getInstance().lookup(id);
+                                PersistentDataContainer previousDataContainer = ChunkStorage
+                                        .getBlockDataContainer(block,
+                                                false);
+                                ChunkStorage.setBlockDataContainer(block, container);
+                                try {
+                                    if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
+                                            && !blockFallingFeature.handleBlockFallToGround(block)) {
+                                        event.setCancelled(true);
+                                        ChunkStorage.setBlockDataContainer(block, previousDataContainer);
+                                        return;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                if (baseBlock instanceof FeatureBlockTick) {
+                                    BlockTickTask.getInstance().addBlock(block);
+                                }
+                                if (baseBlock instanceof FeatureBlockLoad feature) {
                                     try {
-                                        if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
-                                                && !blockFallingFeature.handleBlockFallToGround(block)) {
-                                            event.setCancelled(true);
-                                            ChunkStorage.setBlockDataContainer(block, previousDataContainer);
-                                            return;
-                                        }
+                                        feature.handleBlockLoaded(block);
                                     } catch (Exception e) {
                                         e.printStackTrace();
-                                    }
-                                    if (baseBlock instanceof FeatureBlockTick) {
-                                        BlockTickTask.getInstance().addBlock(block);
-                                    }
-                                    if (baseBlock instanceof FeatureBlockLoad feature) {
-                                        try {
-                                            feature.handleBlockLoaded(block);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
                                     }
                                 }
                             }
@@ -184,40 +168,32 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 }
             }
             default -> {
-                if (register != null) {
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id != null) {
-                        BaseBlock baseBlock = register.lookup(id);
-                        if (baseBlock != null) {
-                            try {
-                                if (baseBlock instanceof FeatureBlockEntityChange entityChangeBlockFeature) {
-                                    if (!entityChangeBlockFeature
-                                            .handleBlockEntityChange(
-                                                    new DataBlockEntityChange(event))
-                                            || event.isCancelled()) {
-                                        return;
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            if (baseBlock instanceof FeatureBlockTick) {
-                                BlockTickTask.getInstance().removeBlock(block);
-                            }
-                            if (baseBlock instanceof FeatureBlockLoad feature) {
-                                try {
-                                    feature.handleBlockUnloaded(block);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            ChunkStorage.removeBlockDataContainer(block);
-                            if (baseBlock instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
-                                var list = PrepareToDrops.computeIfAbsent(event.getEntity(), k -> new ArrayList<>());
-                                list.add(baseBlock);
-                            }
+                CustomBlock blockType = CustomBlock.get(block);
+                if (blockType == null)
+                    return;
+                if (blockType instanceof FeatureBlockEntityChange feature) {
+                    try {
+                        if (!feature.handleBlockEntityChange(new DataBlockEntityChange(event)) || event.isCancelled()) {
+                            return;
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                }
+                if (blockType instanceof FeatureBlockTick) {
+                    BlockTickTask.getInstance().removeBlock(block);
+                }
+                if (blockType instanceof FeatureBlockLoad feature) {
+                    try {
+                        feature.handleBlockUnloaded(block);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                ChunkStorage.removeBlockDataContainer(block);
+                if (blockType instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
+                    var list = PrepareToDrops.computeIfAbsent(event.getEntity(), k -> new ArrayList<>());
+                    list.add(blockType);
                 }
             }
         }
@@ -225,9 +201,8 @@ public final class EntityChangeEnvironmentListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityDropItem(EntityDropItemEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
             return;
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
         Entity entity = event.getEntity();
         EntityType entityType = event.getEntityType();
         switch (entityType) {
@@ -239,17 +214,12 @@ public final class EntityChangeEnvironmentListener implements Listener {
                             && BarleyFallingBlock.getInstance().equals(entityRegister.lookup(key))) {
                         PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
                         if (container != null) {
-                            String rawId = container.get(BaseBlock.DefaultNamespacedKey,
-                                    PersistentDataType.STRING);
-                            if (rawId != null) {
-                                NamespacedKey id = NamespacedKey.fromString(rawId);
-                                if (register != null && id != null) {
-                                    BaseBlock baseBlock = register.lookup(id);
+                            NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
+                            if (id != null) {
+                                CustomBlock baseBlock = BlockRegister.getInstance().lookup(id);
+                                if (baseBlock instanceof FeatureBlockFalling feature) {
                                     try {
-                                        if (baseBlock instanceof FeatureBlockFalling blockFallingFeature
-                                                &&
-                                                !blockFallingFeature.handleBlockFallDropItem(container,
-                                                        Objects.requireNonNull(event.getItemDrop()))
+                                        if (!feature.handleBlockFallDropItem(container, Objects.requireNonNull(event.getItemDrop()))
                                                 || event.isCancelled()) {
                                             event.setCancelled(true);
                                         }
@@ -268,8 +238,8 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 var list = PrepareToDrops.get(event.getEntity());
                 if (list != null) {
                     for (var iterator = list.iterator(); iterator.hasNext(); ) {
-                        BaseBlock baseBlock = iterator.next();
-                        if (baseBlock.getBlockTypeBasedOn().equals(itemStack.getType())
+                        CustomBlock baseBlock = iterator.next();
+                        if (baseBlock.getOriginalType().equals(itemStack.getType())
                                 && baseBlock instanceof FeatureBlockBreak blockBreakFeature) {
                             iterator.remove();
                             try {

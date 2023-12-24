@@ -1,8 +1,11 @@
 package org.ricetea.barleyteaapi.api.command;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import javax.annotation.Nonnull;
 
-public abstract class CommandRegistrationContext<T> {
+@ApiStatus.Experimental
+public interface CommandRegistrationContext<T> {
 
-    public abstract @Nonnull T getContext();
+    @Nonnull T getContext();
 }

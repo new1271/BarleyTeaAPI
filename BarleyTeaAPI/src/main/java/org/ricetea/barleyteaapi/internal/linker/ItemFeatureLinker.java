@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.helper;
+package org.ricetea.barleyteaapi.internal.linker;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
-public final class ItemFeatureHelper {
+public final class ItemFeatureLinker {
     private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
     private static final EquipmentSlot[] SLOTS_JustHands = new EquipmentSlot[]{EquipmentSlot.HAND,
             EquipmentSlot.OFF_HAND};

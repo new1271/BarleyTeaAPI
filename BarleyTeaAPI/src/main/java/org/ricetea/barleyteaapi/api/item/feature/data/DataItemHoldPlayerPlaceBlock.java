@@ -5,7 +5,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;
 

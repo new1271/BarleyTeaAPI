@@ -8,7 +8,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeDismounted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeMounted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDismount;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMount;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
@@ -30,12 +30,12 @@ public final class EntityMountListener implements Listener {
     public void listenEntityMount(EntityMountEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityMount.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityMount, DataEntityMount::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getMount(), event, FeatureEntityMount.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getMount(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityBeMounted, DataEntityBeMounted::new)) {
             event.setCancelled(true);
         }
@@ -45,12 +45,12 @@ public final class EntityMountListener implements Listener {
     public void listenEntityDismount(@Nonnull EntityDismountEvent event) {
         if (event.isCancelled())
             return;
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityMount.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityDismount, DataEntityDismount::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getDismounted(), event, FeatureEntityMount.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getDismounted(), event, FeatureEntityMount.class,
                 FeatureEntityMount::handleEntityBeDismounted, DataEntityBeDismounted::new)) {
             event.setCancelled(true);
         }

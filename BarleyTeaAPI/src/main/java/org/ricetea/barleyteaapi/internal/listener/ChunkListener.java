@@ -10,9 +10,10 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
+import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
+import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
@@ -93,25 +94,22 @@ public final class ChunkListener implements Listener {
     public void listenChunkLoad(ChunkLoadEvent event) {
         if (event == null)
             return;
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
+        BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
         if (register != null && register.hasAnyRegistered()) {
             for (var entry : ChunkStorage.getBlockDataContainersFromChunk(Objects.requireNonNull(event.getChunk()))) {
                 Block block = entry.getKey();
-                if (block != null) {
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id != null) {
-                        BaseBlock blockType = register.lookup(id);
-                        try {
-                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad blockChunkLoad) {
-                                blockChunkLoad.handleBlockLoaded(block);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        if (blockType instanceof FeatureBlockTick) {
-                            BlockTickTask.getInstance().addBlock(block);
-                        }
+                if (block == null)
+                    continue;
+                CustomBlock blockType = CustomBlock.get(block);
+                if (blockType instanceof FeatureBlockLoad feature) {
+                    try {
+                        feature.handleBlockLoaded(block);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                }
+                if (blockType instanceof FeatureBlockTick) {
+                    BlockTickTask.getInstance().addBlock(block);
                 }
             }
         }
@@ -121,7 +119,7 @@ public final class ChunkListener implements Listener {
     public void listenChunkUnload(ChunkUnloadEvent event) {
         if (event == null)
             return;
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
+        BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
         if (register != null && register.hasAnyRegistered()) {
             for (var entry : ChunkStorage.getBlockDataContainersFromChunk(Objects.requireNonNull(event.getChunk()))) {
                 Block block = entry.getKey();

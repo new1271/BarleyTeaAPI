@@ -11,7 +11,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
@@ -22,8 +21,8 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -105,18 +104,18 @@ public final class EntitySpawnListener implements Listener {
     private void onProjectileLaunch(@Nonnull ProjectileLaunchEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!ItemFeatureHelper.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
                 FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
                 DataItemHoldEntityShoot::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
                 FeatureEntityShoot::handleEntityShoot, DataEntityShoot::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(entity, event, FeatureProjectile.class,
                 FeatureProjectile::handleProjectileLaunch, DataProjectileLaunch::new)) {
             event.setCancelled(true);
             return;

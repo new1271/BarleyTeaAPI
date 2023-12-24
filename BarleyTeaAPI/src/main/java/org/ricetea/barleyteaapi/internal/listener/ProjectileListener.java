@@ -1,28 +1,20 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityHit;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.data.*;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class ProjectileListener implements Listener {
     private static final Lazy<ProjectileListener> inst = Lazy.create(ProjectileListener::new);
@@ -52,17 +44,17 @@ public final class ProjectileListener implements Listener {
     private void onProjectileHitEntity(@Nonnull ProjectileHitEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
                 FeatureEntityShoot::handleShotEntity, DataEntityShotEntity::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(entity, event, FeatureProjectile.class,
                 FeatureProjectile::handleProjectileHitEntity, DataProjectileHitEntity::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getHitEntity(), event, FeatureEntityHit.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getHitEntity(), event, FeatureEntityHit.class,
                 FeatureEntityHit::handleEntityHit, DataEntityHit::new)) {
             event.setCancelled(true);
             return;
@@ -72,12 +64,12 @@ public final class ProjectileListener implements Listener {
     private void onProjectileHitBlock(@Nonnull ProjectileHitEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
                 FeatureEntityShoot::handleShotBlock, DataEntityShotBlock::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(entity, event, FeatureProjectile.class,
                 FeatureProjectile::handleProjectileHitBlock, DataProjectileHitBlock::new)) {
             event.setCancelled(true);
             return;

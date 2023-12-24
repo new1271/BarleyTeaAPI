@@ -6,9 +6,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
+import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
 
@@ -52,7 +51,7 @@ public final class BlockTickTask extends AbstractTask {
     protected void runInternal() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        BlockRegister register = BlockRegister.getInstanceUnsafe();
+        BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
         if (api == null || register == null || !register.hasAnyRegistered()) {
             stop();
         } else {
@@ -158,7 +157,7 @@ public final class BlockTickTask extends AbstractTask {
         }
 
         private boolean doJob() {
-            BlockRegister register = BlockRegister.getInstanceUnsafe();
+            BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
             if (register == null)
                 return false;
             Block block = location.getBlock(world);

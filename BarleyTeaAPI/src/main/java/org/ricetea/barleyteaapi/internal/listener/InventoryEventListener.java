@@ -1,13 +1,11 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.inventory.*;
@@ -18,12 +16,10 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemEnchant;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGrindstone;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.function.Consumer;
 
 public final class InventoryEventListener implements Listener {
@@ -85,7 +81,7 @@ public final class InventoryEventListener implements Listener {
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(lowerItem)) {
-                        resultItem = ItemFeatureHelper.doItemRepair(upperItem, lowerItem, resultItem);
+                        resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
                         if (baseItem instanceof FeatureItemGrindstone itemGrindstoneFeature) {
                             if (itemGrindstoneFeature.handleItemGrindstone(new DataItemGrindstone(event))) {
                                 resultItem = event.getResult();
@@ -124,7 +120,7 @@ public final class InventoryEventListener implements Listener {
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(secondItem)) { //Repair mode
-                        resultItem = ItemFeatureHelper.doItemRepair(firstItem, secondItem, resultItem);
+                        resultItem = ItemFeatureLinker.doItemRepair(firstItem, secondItem, resultItem);
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (itemAnvilFeature.handleItemAnvilRepair(new DataItemAnvilRepair(event))) {
                                 resultItem = event.getResult();
