@@ -10,7 +10,7 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -35,28 +35,32 @@ public class ChunkStorage {
     }
 
     @Nonnull
-    public static Collection<SimpleEntry<Block, PersistentDataContainer>> getBlockDataContainersFromChunk(
+    public static Collection<SimpleImmutableEntry<Block, PersistentDataContainer>> getBlockDataContainersFromChunk(
             @Nonnull Chunk chunk) {
         PersistentDataContainer container = chunk.getPersistentDataContainer();
         if (!container.isEmpty()) {
-            return ObjectUtil.letNonNull(container.getKeys().stream().filter(_Predicate.Instance).map(key -> {
-                String coordString = key.getKey().substring(6);
-                String[] coord = coordString.split("\\.");
-                if (coord.length == 3) {
-                    PersistentDataContainer container2 = container.get(key, PersistentDataType.TAG_CONTAINER);
-                    if (container2 != null) {
-                        int x = Integer.parseInt(coord[0]);
-                        if (x < 0)
-                            x += 16;
-                        int y = Integer.parseInt(coord[1]);
-                        int z = Integer.parseInt(coord[2]);
-                        if (z < 0)
-                            z += 16;
-                        return new SimpleEntry<>(chunk.getBlock(x, y, z), container2);
-                    }
-                }
-                return null;
-            }).filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()), Collections::emptySet);
+            return ObjectUtil.letNonNull(container.getKeys().stream()
+                    .filter(_Predicate.Instance)
+                    .map(key -> {
+                        String coordString = key.getKey().substring(6);
+                        String[] coord = coordString.split("\\.");
+                        if (coord.length == 3) {
+                            PersistentDataContainer container2 = container.get(key, PersistentDataType.TAG_CONTAINER);
+                            if (container2 != null) {
+                                int x = Integer.parseInt(coord[0]);
+                                if (x < 0)
+                                    x += 16;
+                                int y = Integer.parseInt(coord[1]);
+                                int z = Integer.parseInt(coord[2]);
+                                if (z < 0)
+                                    z += 16;
+                                return new SimpleImmutableEntry<>(chunk.getBlock(x, y, z), container2);
+                            }
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet()), Collections::emptySet);
         }
         return Objects.requireNonNull(Collections.emptySet());
     }

@@ -1,11 +1,10 @@
 package org.ricetea.barleyteaapi.internal.linker;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.utils.ObjectUtil;
 
@@ -21,25 +20,18 @@ public final class EntityFeatureLinker {
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (entity != null && event != null && register != null) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        boolean result = featureFunc.test(feature, dataConstructor.apply(event));
-                        if (event instanceof Cancellable cancellable) {
-                            result &= !cancellable.isCancelled();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (entity == null || event == null || !EntityRegister.hasRegistered())
+            return true;
+        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        if (feature == null)
+            return true;
+        return ObjectUtil.tryMap(() -> {
+            boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+            if (event instanceof Cancellable cancellable) {
+                result &= !cancellable.isCancelled();
             }
-        }
-        return true;
+            return result;
+        }, true);
     }
 
     public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(
@@ -47,25 +39,18 @@ public final class EntityFeatureLinker {
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (entity != null && event != null && register != null) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        boolean result = featureFunc.test(feature, dataConstructor.apply(event, event2));
-                        if (event instanceof Cancellable cancellable) {
-                            result &= !cancellable.isCancelled();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (entity == null || event == null || !EntityRegister.hasRegistered())
+            return true;
+        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        if (feature == null)
+            return true;
+        return ObjectUtil.tryMap(() -> {
+            boolean result = featureFunc.test(feature, dataConstructor.apply(event, event2));
+            if (event instanceof Cancellable cancellable) {
+                result &= !cancellable.isCancelled();
             }
-        }
-        return true;
+            return result;
+        }, true);
     }
 
     public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>, TFeature> void doFeature(
@@ -73,58 +58,34 @@ public final class EntityFeatureLinker {
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (entity != null && event != null && register != null) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                try {
-                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                    if (feature != null) {
-                        featureFunc.accept(feature, dataConstructor.apply(event, event2));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        if (entity == null || event == null || !EntityRegister.hasRegistered())
+            return;
+        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        if (feature == null)
+            return;
+        ObjectUtil.tryCall(()-> featureFunc.accept(feature, dataConstructor.apply(event, event2)));
     }
 
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> void doFeature(
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (entity != null && event != null && register != null) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                try {
-                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                    if (feature != null) {
-                        featureFunc.accept(feature, dataConstructor.apply(event));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        if (entity == null || event == null || !EntityRegister.hasRegistered())
+            return;
+        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        if (feature == null)
+            return;
+        ObjectUtil.tryCall(()-> featureFunc.accept(feature, dataConstructor.apply(event)));
     }
 
     public static <TFeature> void doFeature(
             @Nullable Entity entity, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, Entity> featureFunc) {
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (entity != null && register != null) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id != null) {
-                try {
-                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                    if (feature != null) {
-                        featureFunc.accept(feature, entity);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        if (entity == null || !EntityRegister.hasRegistered())
+            return;
+        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        if (feature == null)
+            return;
+        ObjectUtil.tryCall(()-> featureFunc.accept(feature, entity));
     }
 }

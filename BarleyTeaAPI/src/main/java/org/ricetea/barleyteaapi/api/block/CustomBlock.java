@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.ricetea.barleyteaapi.api.base.CustomObject;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
-import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
+import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,7 +16,7 @@ public interface CustomBlock extends CustomObject {
         if (block == null || block.isEmpty())
             return null;
         else {
-            BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
+            BlockRegister register = BlockRegister.getInstanceUnsafe();
             if (register == null)
                 return null;
             return register.lookup(BlockHelper.getBlockID(block));

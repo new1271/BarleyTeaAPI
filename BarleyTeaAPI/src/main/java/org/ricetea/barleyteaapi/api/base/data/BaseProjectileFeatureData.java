@@ -3,8 +3,7 @@ package org.ricetea.barleyteaapi.api.base.data;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityEvent;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -18,7 +17,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
     private final Entity shooter;
 
     @Nullable
-    private final Lazy<DataEntityType> shooterType;
+    private final Lazy<CustomEntityType> shooterType;
 
     @Nonnull
     private final Projectile entity;
@@ -32,7 +31,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
         this.entity = Objects.requireNonNull(entity);
         shooter = ObjectUtil.tryCast(entity.getShooter(), Entity.class);
         shooterType = ObjectUtil.safeMap(shooter,
-                shooter -> Lazy.create(() -> BaseEntity.getEntityType(shooter)));
+                shooter -> Lazy.create(() -> CustomEntityType.get(shooter)));
     }
 
     @Nonnull
@@ -50,10 +49,7 @@ public abstract class BaseProjectileFeatureData<T extends EntityEvent> extends B
     }
 
     @Nullable
-    public DataEntityType getShooterEntityType() {
-        Lazy<DataEntityType> shooterType = this.shooterType;
-        if (shooterType == null)
-            return null;
-        return shooterType.get();
+    public CustomEntityType getShooterEntityType() {
+        return ObjectUtil.safeMap(shooterType, Lazy::get);
     }
 }

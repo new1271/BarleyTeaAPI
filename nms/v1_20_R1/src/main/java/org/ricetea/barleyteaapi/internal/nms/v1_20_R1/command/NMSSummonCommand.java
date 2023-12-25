@@ -24,11 +24,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.MinecraftKeyCombinedIterator;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.NMSCommandArgument;
@@ -113,10 +114,10 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
                     NamespacedKey key = new NamespacedKey(namespace, entityKey.getPath());
-                    BaseEntity baseEntity = register.lookup(key);
-                    if (baseEntity instanceof FeatureCommandSummon feature) {
+                    CustomEntity entityType = register.lookup(key);
+                    if (entityType instanceof FeatureCommandSummon feature) {
                         CompoundTag CompoundTag1 = nbt.copy();
-                        CompoundTag1.putString("id", baseEntity.getEntityTypeBasedOn().getKey().toString());
+                        CompoundTag1.putString("id", entityType.getOriginalType().getKey().toString());
                         Entity entity = EntityType.loadEntityRecursive(CompoundTag1, worldserver, loadedEntity -> {
                             loadedEntity.moveTo(pos.x, pos.y, pos.z, loadedEntity.getYRot(), loadedEntity.getXRot());
                             loadedEntity.spawnReason = CreatureSpawnEvent.SpawnReason.COMMAND;
@@ -131,14 +132,14 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                                 CreatureSpawnEvent.SpawnReason.COMMAND))
                             throw summonFailedMessage.create();
                         org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-                        if (baseEntity.tryRegister(bukkitEntity,
+                        if (EntityHelper.tryRegister(entityType, bukkitEntity,
                                 _entity -> _entity != null
                                         && feature.handleCommandSummon(
                                         new DataCommandSummon(_entity, nbt.toString())))) {
-                            if (baseEntity instanceof FeatureEntityLoad feature2 && !bukkitEntity.isDead()) {
+                            if (entityType instanceof FeatureEntityLoad feature2 && !bukkitEntity.isDead()) {
                                 feature2.handleEntityLoaded(bukkitEntity);
                             }
-                            if (baseEntity instanceof FeatureEntityTick) {
+                            if (entityType instanceof FeatureEntityTick) {
                                 EntityTickTask.getInstance().addEntity(bukkitEntity);
                             }
                         } else {
@@ -147,8 +148,8 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                         }
                         source.sendSuccess(() -> Component.translatable("commands.summon.success",
                                         bukkitEntity.customName() == null
-                                                ? Component.translatable(baseEntity.getNameInTranslateKey(),
-                                                baseEntity.getDefaultName())
+                                                ? Component.translatable(entityType.getTranslationKey(),
+                                                entityType.getDefaultName())
                                                 : entity.getDisplayName()),
                                 true);
                         return 1;
@@ -187,7 +188,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
 
         @Override
         public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> provider,
-                                                             SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
+                                                             SuggestionsBuilder suggestionsBuilder) {
             String lowerCasedRemaining = suggestionsBuilder.getRemainingLowerCase();
             if (!lowerCasedRemaining.contains("/")) {
                 if (lowerCasedRemaining.isBlank() || lowerCasedRemaining.contains(":")) {

@@ -4,8 +4,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -16,7 +15,7 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
     private final LivingEntity holderEntity;
 
     @Nonnull
-    private final Lazy<DataEntityType> holderEntityType;
+    private final Lazy<CustomEntityType> holderEntityType;
 
     @Nonnull
     private final ItemStack itemStack;
@@ -29,7 +28,7 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
                                          @Nonnull EquipmentSlot equipmentSlot) {
         super(event);
         this.holderEntity = holderEntity;
-        this.holderEntityType = Lazy.create(() -> BaseEntity.getEntityType(this.holderEntity));
+        this.holderEntityType = Lazy.create(() -> CustomEntityType.get(this.holderEntity));
         this.itemStack = itemStack;
         this.equipmentSlot = equipmentSlot;
     }
@@ -40,7 +39,7 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
     }
 
     @Nonnull
-    public final DataEntityType getHolderEntityType() {
+    public final CustomEntityType getHolderEntityType() {
         return holderEntityType.get();
     }
 

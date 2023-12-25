@@ -20,9 +20,10 @@ import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByEntity;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockEntityChange;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityExplode;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
@@ -51,7 +52,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityExplode(EntityExplodeEvent event) {
-        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
+        if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
         if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityExplode.class,
                 FeatureEntityExplode::handleEntityExplode, DataEntityExplode::new)) {
@@ -91,14 +92,14 @@ public final class EntityChangeEnvironmentListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
+        if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
         Block block = event.getBlock();
         Entity entity = event.getEntity();
         EntityType entityType = event.getEntityType();
         switch (entityType) {
             case FALLING_BLOCK -> {
-                NamespacedKey key = BaseEntity.getEntityID(entity);
+                NamespacedKey key = EntityHelper.getEntityID(entity);
                 if (key == null) {
                     CustomBlock blockType = CustomBlock.get(block);
                     if (blockType == null)
@@ -113,7 +114,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                             e.printStackTrace();
                         }
                     }
-                    BaseEntity.registerEntity(entity, BarleyFallingBlock.getInstance());
+                    EntityHelper.register(BarleyFallingBlock.getInstance(), entity);
                     PersistentDataContainer container = ChunkStorage.getBlockDataContainer(block,
                             false);
                     if (container != null)
@@ -201,31 +202,26 @@ public final class EntityChangeEnvironmentListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityDropItem(EntityDropItemEvent event) {
-        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
+        if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
         Entity entity = event.getEntity();
         EntityType entityType = event.getEntityType();
         switch (entityType) {
             case FALLING_BLOCK -> {
-                NamespacedKey key = BaseEntity.getEntityID(entity);
-                if (key != null) {
-                    EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
-                    if (entityRegister != null
-                            && BarleyFallingBlock.getInstance().equals(entityRegister.lookup(key))) {
-                        PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
-                        if (container != null) {
-                            NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
-                            if (id != null) {
-                                CustomBlock baseBlock = BlockRegister.getInstance().lookup(id);
-                                if (baseBlock instanceof FeatureBlockFalling feature) {
-                                    try {
-                                        if (!feature.handleBlockFallDropItem(container, Objects.requireNonNull(event.getItemDrop()))
-                                                || event.isCancelled()) {
-                                            event.setCancelled(true);
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                if (CustomEntity.get(entity) instanceof BarleyFallingBlock) {
+                    PersistentDataContainer container = BarleyFallingBlock.getBlockDataContainer(entity);
+                    if (container != null) {
+                        NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
+                        if (id != null) {
+                            CustomBlock baseBlock = BlockRegister.getInstance().lookup(id);
+                            if (baseBlock instanceof FeatureBlockFalling feature) {
+                                try {
+                                    if (!feature.handleBlockFallDropItem(container, Objects.requireNonNull(event.getItemDrop()))
+                                            || event.isCancelled()) {
+                                        event.setCancelled(true);
                                     }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             }
                         }

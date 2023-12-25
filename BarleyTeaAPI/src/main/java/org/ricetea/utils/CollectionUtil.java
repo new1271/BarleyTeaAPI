@@ -2,10 +2,8 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class CollectionUtil {
@@ -64,5 +62,13 @@ public class CollectionUtil {
             return (List<T>) Collections.unmodifiableList(entityList);
         } else
             return collection.stream().toList();
+    }
+
+    public static <K, V, T extends Map.Entry<K, V>> void forEach(
+            @Nullable Collection<T> collection, @Nonnull BiConsumer<K, V> forEachConsumer) {
+        if (collection == null)
+            return;
+        for (T entry : collection)
+            forEachConsumer.accept(entry.getKey(), entry.getValue());
     }
 }

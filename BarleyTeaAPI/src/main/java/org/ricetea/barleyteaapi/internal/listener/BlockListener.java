@@ -108,7 +108,7 @@ public final class BlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockDrop(BlockDropItemEvent event) {
-        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
+        if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
         Block block = event.getBlock();
         NamespacedKey id = PrepareToDrops.remove(block.getLocation());
@@ -120,7 +120,7 @@ public final class BlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockExplode(BlockExplodeEvent event) {
-        if (event == null || event.isCancelled() || !BlockRegister.hasInstance())
+        if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
         if (!BlockFeatureLinker.doFeatureCancellable(event.getBlock(), event, FeatureBlockExplode.class,
                 FeatureBlockExplode::handleBlockExplode, DataBlockExplode::new)) {

@@ -8,9 +8,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.entity.template.DefaultEntity;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
@@ -18,7 +19,7 @@ import org.ricetea.utils.Lazy;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class BarleyFallingBlock extends BaseEntity implements FeatureEntitySpawn {
+public final class BarleyFallingBlock extends DefaultEntity implements FeatureEntitySpawn {
     @Nonnull
     private static final NamespacedKey blockDataKey = NamespacedKeyUtil.BarleyTeaAPI("block_data");
 
@@ -48,15 +49,15 @@ public final class BarleyFallingBlock extends BaseEntity implements FeatureEntit
     @Override
     @Nonnull
     public Entity handleEntitySpawn(@Nonnull Location location) {
-        Entity entity = location.getWorld().spawnEntity(location, getEntityTypeBasedOn());
-        register(entity);
+        Entity entity = location.getWorld().spawnEntity(location, getOriginalType());
+        EntityHelper.register(this, entity);
         return entity;
     }
 
     @Nonnull
     public Entity handleEntitySpawn(@Nonnull Location location, @Nonnull Block block) {
         FallingBlock entity = location.getWorld().spawnFallingBlock(location, block.getBlockData());
-        register(entity);
+        EntityHelper.register(this, entity);
         PersistentDataContainer blockDataContainer = ChunkStorage.getBlockDataContainer(block, false);
         if (blockDataContainer != null && !blockDataContainer.isEmpty()) {
             entity.getPersistentDataContainer().set(blockDataKey, PersistentDataType.TAG_CONTAINER, blockDataContainer);

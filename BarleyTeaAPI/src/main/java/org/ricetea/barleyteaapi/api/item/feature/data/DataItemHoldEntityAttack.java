@@ -7,8 +7,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -16,12 +15,12 @@ import javax.annotation.Nonnull;
 public final class DataItemHoldEntityAttack extends BaseItemHoldEntityFeatureData<EntityDamageByEntityEvent> {
 
     @Nonnull
-    private final Lazy<DataEntityType> damageeType;
+    private final Lazy<CustomEntityType> damageeType;
 
     public DataItemHoldEntityAttack(@Nonnull EntityDamageByEntityEvent event, @Nonnull ItemStack itemStack,
                                     @Nonnull EquipmentSlot equipmentSlot) {
         super(event, (LivingEntity) event.getDamager(), itemStack, equipmentSlot);
-        damageeType = Lazy.create(() -> BaseEntity.getEntityType(getDamagee()));
+        damageeType = Lazy.create(() -> CustomEntityType.get(getDamagee()));
     }
 
     @Nonnull
@@ -30,7 +29,7 @@ public final class DataItemHoldEntityAttack extends BaseItemHoldEntityFeatureDat
     }
 
     @Nonnull
-    public DataEntityType getDamageeType() {
+    public CustomEntityType getDamageeType() {
         return damageeType.get();
     }
 

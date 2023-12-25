@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -11,7 +10,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
@@ -55,14 +54,9 @@ public final class EntitySpawnListener implements Listener {
             return;
         }
         if (!event.isCancelled()) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            EntityRegister register = EntityRegister.getInstanceUnsafe();
-            if (register != null && id != null) {
-                BaseEntity baseEntity = register.lookup(id);
-                if (baseEntity instanceof FeatureEntityTick) {
-                    EntityTickTask.getInstance().addEntity(entity);
-                }
-            }
+            CustomEntity entityType = CustomEntity.get(entity);
+            if (entityType instanceof FeatureEntityTick)
+                EntityTickTask.getInstance().addEntity(entity);
         }
     }
 
@@ -72,8 +66,8 @@ public final class EntitySpawnListener implements Listener {
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
-        for (BaseEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
-                && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
+        for (CustomEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
+                && e.getOriginalType().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
                 double posibility = spawnEntityType.getSpawnPosibility(reason);
