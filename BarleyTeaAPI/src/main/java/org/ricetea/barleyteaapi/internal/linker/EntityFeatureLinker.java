@@ -63,7 +63,7 @@ public final class EntityFeatureLinker {
         TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
         if (feature == null)
             return;
-        ObjectUtil.tryCall(()-> featureFunc.accept(feature, dataConstructor.apply(event, event2)));
+        ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event, event2)));
     }
 
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> void doFeature(
@@ -75,7 +75,7 @@ public final class EntityFeatureLinker {
         TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
         if (feature == null)
             return;
-        ObjectUtil.tryCall(()-> featureFunc.accept(feature, dataConstructor.apply(event)));
+        ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event)));
     }
 
     public static <TFeature> void doFeature(
@@ -86,6 +86,6 @@ public final class EntityFeatureLinker {
         TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
         if (feature == null)
             return;
-        ObjectUtil.tryCall(()-> featureFunc.accept(feature, entity));
+        ObjectUtil.tryCall(() -> featureFunc.accept(feature, entity));
     }
 }

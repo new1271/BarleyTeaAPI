@@ -1,14 +1,16 @@
 package org.ricetea.barleyteaapi.internal.task;
 
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
-import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
+import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
+import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.task.AbstractTask;
+import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -105,7 +107,7 @@ public final class BlockTickTask extends AbstractTask {
     }
 
     public void addBlock(@Nullable Block block) {
-        if (!BaseBlock.isBarleyTeaBlock(block) || !BarleyTeaAPI.checkPluginUsable())
+        if (!BlockHelper.isCustomBlock(block) || !BarleyTeaAPI.checkPluginUsable())
             return;
         var table = operationTable.computeIfAbsent(block.getWorld(), ignored -> new ConcurrentHashMap<>());
         table.merge(new BlockLocation(block), 0, Math::max);
@@ -157,17 +159,15 @@ public final class BlockTickTask extends AbstractTask {
         }
 
         private boolean doJob() {
-            BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
-            if (register == null)
+            if (!BlockRegister.hasRegistered())
                 return false;
             Block block = location.getBlock(world);
             if (block.isEmpty())
                 return false;
-            NamespacedKey id = BaseBlock.getBlockID(block);
-            if (id == null)
-                return false;
-            BaseBlock baseBlock = register.lookup(id);
-            if (baseBlock instanceof FeatureBlockTick feature) {
+            CustomBlock blockType = CustomBlock.get(block);
+            if (blockType == null)
+                return true;
+            if (blockType instanceof FeatureBlockTick feature) {
                 try {
                     feature.handleTick(block);
                 } catch (Exception e) {
@@ -175,7 +175,7 @@ public final class BlockTickTask extends AbstractTask {
                 }
                 return true;
             }
-            return baseBlock == null;
+            return false;
         }
     }
 }

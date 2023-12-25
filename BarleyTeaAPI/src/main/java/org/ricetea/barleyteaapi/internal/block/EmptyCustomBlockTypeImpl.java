@@ -19,12 +19,12 @@ public class EmptyCustomBlockTypeImpl implements CustomBlockType {
     @Nonnull
     private static final Lazy<EmptyCustomBlockTypeImpl> _inst = Lazy.createInThreadSafe(EmptyCustomBlockTypeImpl::new);
 
-    @Nonnull
-    public static EmptyCustomBlockTypeImpl getInstance(){
-        return _inst.get();
+    private EmptyCustomBlockTypeImpl() {
     }
 
-    private EmptyCustomBlockTypeImpl() {
+    @Nonnull
+    public static EmptyCustomBlockTypeImpl getInstance() {
+        return _inst.get();
     }
 
     @Nonnull

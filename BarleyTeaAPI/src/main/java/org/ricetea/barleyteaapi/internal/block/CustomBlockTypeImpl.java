@@ -33,18 +33,6 @@ public class CustomBlockTypeImpl extends Either<Material, CustomBlock> implement
         super(null, right);
     }
 
-    @Nullable
-    @Override
-    public Material asMaterial() {
-        return left();
-    }
-
-    @Nullable
-    @Override
-    public CustomBlock asCustomBlock() {
-        return right();
-    }
-
     @Nonnull
     public static CustomBlockType get(@Nonnull Material material) {
         return vanillaMaterialMap.computeIfAbsent(material, CustomBlockTypeImpl::new);
@@ -78,5 +66,17 @@ public class CustomBlockTypeImpl extends Either<Material, CustomBlock> implement
     @ApiStatus.Internal
     public static void removeInstances(@Nonnull Collection<CustomBlock> blocks) {
         blocks.forEach(customBlockMap::remove);
+    }
+
+    @Nullable
+    @Override
+    public Material asMaterial() {
+        return left();
+    }
+
+    @Nullable
+    @Override
+    public CustomBlock asCustomBlock() {
+        return right();
     }
 }

@@ -19,12 +19,12 @@ public class UnknownCustomEntityTypeImpl implements CustomEntityType {
     @Nonnull
     private static final Lazy<UnknownCustomEntityTypeImpl> _inst = Lazy.createInThreadSafe(UnknownCustomEntityTypeImpl::new);
 
-    @Nonnull
-    public static UnknownCustomEntityTypeImpl getInstance(){
-        return _inst.get();
+    private UnknownCustomEntityTypeImpl() {
     }
 
-    private UnknownCustomEntityTypeImpl() {
+    @Nonnull
+    public static UnknownCustomEntityTypeImpl getInstance() {
+        return _inst.get();
     }
 
     @Nonnull

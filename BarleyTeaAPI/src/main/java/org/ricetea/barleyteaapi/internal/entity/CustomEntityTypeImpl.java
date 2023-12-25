@@ -33,18 +33,6 @@ public class CustomEntityTypeImpl extends Either<EntityType, CustomEntity> imple
         super(null, right);
     }
 
-    @Nullable
-    @Override
-    public EntityType asEntityType() {
-        return left();
-    }
-
-    @Nullable
-    @Override
-    public CustomEntity asCustomEntity() {
-        return right();
-    }
-
     @Nonnull
     public static CustomEntityType get(@Nonnull EntityType entityType) {
         return vanillaEntityTypeMap.computeIfAbsent(entityType, CustomEntityTypeImpl::new);
@@ -78,5 +66,17 @@ public class CustomEntityTypeImpl extends Either<EntityType, CustomEntity> imple
     @ApiStatus.Internal
     public static void removeInstances(@Nonnull Collection<CustomEntity> entities) {
         entities.forEach(customEntityMap::remove);
+    }
+
+    @Nullable
+    @Override
+    public EntityType asEntityType() {
+        return left();
+    }
+
+    @Nullable
+    @Override
+    public CustomEntity asCustomEntity() {
+        return right();
     }
 }

@@ -8,7 +8,6 @@ import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;

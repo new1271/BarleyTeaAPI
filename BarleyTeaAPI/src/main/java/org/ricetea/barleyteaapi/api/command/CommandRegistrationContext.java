@@ -7,5 +7,6 @@ import javax.annotation.Nonnull;
 @ApiStatus.Experimental
 public interface CommandRegistrationContext<T> {
 
-    @Nonnull T getContext();
+    @Nonnull
+    T getContext();
 }
