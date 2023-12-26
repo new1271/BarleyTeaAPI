@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.api.entity.registration;
 
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.internal.entity.registration.EntityRegisterImpl;
@@ -7,16 +8,17 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public interface EntityRegister extends IRegister<CustomEntity> {
     @Nonnull
     static EntityRegister getInstance() {
-        return Objects.requireNonNull(getInstanceUnsafe());
+        BarleyTeaAPI.checkPluginUsable();
+        return EntityRegisterImpl.getInstance();
     }
 
     @Nullable
     static EntityRegister getInstanceUnsafe() {
+        BarleyTeaAPI.checkPluginUsable();
         return EntityRegisterImpl.getInstanceUnsafe();
     }
 

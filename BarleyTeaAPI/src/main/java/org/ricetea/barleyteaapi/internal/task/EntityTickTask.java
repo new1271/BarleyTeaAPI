@@ -8,7 +8,6 @@ import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class EntityTickTask extends AbstractTask {
+public final class EntityTickTask extends LoopTaskBase {
 
     @Nonnull
     private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
@@ -36,7 +35,7 @@ public final class EntityTickTask extends AbstractTask {
     private int lastTick;
 
     private EntityTickTask() {
-        super(50, 0);
+        super(50);
     }
 
     @Nullable
@@ -50,7 +49,7 @@ public final class EntityTickTask extends AbstractTask {
     }
 
     @Override
-    protected void runInternal() {
+    public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         if (api == null || !EntityRegister.hasRegistered()) {
             stop();
@@ -100,16 +99,14 @@ public final class EntityTickTask extends AbstractTask {
         if (!EntityHelper.isCustomEntity(entity) || !BarleyTeaAPI.checkPluginUsable())
             return;
         operationTable.merge(entity.getUniqueId(), 0, Math::max);
-        if (!isRunning)
-            start();
+        start();
     }
 
     public void removeEntity(@Nullable Entity entity) {
         if (entity == null || !BarleyTeaAPI.checkPluginUsable())
             return;
         operationTable.merge(entity.getUniqueId(), 1, Math::max);
-        if (!isRunning)
-            start();
+        start();
     }
 
     private static class _Task implements Runnable {

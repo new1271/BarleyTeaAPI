@@ -6,5 +6,5 @@ import javax.annotation.Nonnull;
 
 @FunctionalInterface
 public interface TickCounterTrigger {
-    boolean triggerAndReturnNeedClean(@Nonnull Entity affectedEntity, int count);
+    boolean trigger(@Nonnull TickCounter counter, @Nonnull Entity affectedEntity, int count);
 }

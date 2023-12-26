@@ -1,5 +1,7 @@
 package org.ricetea.utils;
 
+import sun.misc.Unsafe;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -76,7 +78,11 @@ public abstract class Cache<T> implements Property<T> {
             T obj = realObj;
             if (obj == null) {
                 synchronized (syncRoot) {
-                    obj = super.get();
+                    Unsafe.getUnsafe().fullFence();
+                    obj = realObj;
+                    if (obj == null) {
+                        obj = realObj = super.get();
+                    }
                 }
             }
             return obj;

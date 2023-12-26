@@ -40,6 +40,11 @@ public final class BlockRegisterImpl implements BlockRegister {
     private BlockRegisterImpl() {
     }
 
+    @Nonnull
+    public static BlockRegisterImpl getInstance() {
+        return inst.get();
+    }
+
     @Nullable
     public static BlockRegisterImpl getInstanceUnsafe() {
         return inst.getUnsafe();

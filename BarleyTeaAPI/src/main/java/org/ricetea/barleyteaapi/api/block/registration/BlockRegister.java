@@ -8,12 +8,12 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public interface BlockRegister extends IRegister<CustomBlock> {
     @Nonnull
     static BlockRegister getInstance() {
-        return Objects.requireNonNull(getInstanceUnsafe());
+        BarleyTeaAPI.checkPluginUsable();
+        return BlockRegisterImpl.getInstance();
     }
 
     @Nullable

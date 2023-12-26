@@ -1,5 +1,7 @@
 package org.ricetea.utils;
 
+import sun.misc.Unsafe;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -68,6 +70,7 @@ public class Lazy<T> implements Property<T> {
             T obj = realObj;
             if (obj == null) {
                 synchronized (syncRoot) {
+                    Unsafe.getUnsafe().fullFence();
                     obj = realObj;
                     if (obj == null) {
                         obj = realObj = Objects.requireNonNull(supplier.get());

@@ -1,58 +1,24 @@
 package org.ricetea.barleyteaapi.api.task;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.utils.Lazy;
+import org.ricetea.barleyteaapi.internal.task.TaskServiceImpl;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
+import java.util.concurrent.Future;
 
-public class TaskService {
-
-    private static final Lazy<TaskService> lazyInst = Lazy.create(TaskService::new);
-
-    ScheduledExecutorService executorService;
-
-    private TaskService() {
-        executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+public interface TaskService {
+    @Nonnull
+    static TaskService getInstance() {
+        return TaskServiceImpl.getInstance();
     }
 
-    public static void run(Runnable task) {
-        if (BarleyTeaAPI.checkPluginUsable())
-            lazyInst.get().doRun(task);
-        else
-            shutdown();
-    }
+    @Nonnull
+    Future<?> runTask(@Nonnull Runnable runnable);
 
-    public static void run(Runnable task, long delay) {
-        if (BarleyTeaAPI.checkPluginUsable())
-            lazyInst.get().doRun(task, delay);
-        else
-            shutdown();
-    }
+    @Nonnull
+    Future<?> runTaskLater(@Nonnull Runnable runnable, long delay);
 
-    public static void shutdown() {
-        TaskService inst = lazyInst.getUnsafe();
-        if (inst != null) {
-            inst.doShutdown();
-        }
-    }
+    @Nonnull
+    Future<?> runTaskTimer(@Nonnull Runnable runnable, long initialDelay, long interval);
 
-    void doRun(Runnable task) {
-        if (!executorService.isShutdown() && !executorService.isTerminated()) {
-            executorService.execute(task);
-        }
-    }
-
-    void doRun(Runnable task, long delay) {
-        if (!executorService.isShutdown() && !executorService.isTerminated()) {
-            executorService.schedule(task, delay, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    void doShutdown() {
-        if (!executorService.isShutdown() && !executorService.isTerminated()) {
-            executorService.shutdownNow();
-        }
-    }
+    void shutdown();
 }

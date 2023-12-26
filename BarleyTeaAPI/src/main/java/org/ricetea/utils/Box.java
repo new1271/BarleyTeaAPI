@@ -2,6 +2,7 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class Box<T> implements Property<T> {
     protected T obj;
@@ -12,12 +13,12 @@ public class Box<T> implements Property<T> {
 
     @Nonnull
     public static <T> Box<T> box(@Nullable T obj) {
-        return new Box<T>(obj);
+        return new Box<>(obj);
     }
 
     @Nonnull
     public static <T> Box<T> boxInThreadSafe(@Nullable T obj) {
-        return new ThreadSafeImpl<T>(obj);
+        return new ThreadSafeImpl<>(obj);
     }
 
     @Nullable
@@ -69,7 +70,7 @@ public class Box<T> implements Property<T> {
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj) || this.obj == obj || (this.obj == null ? obj.equals(this.obj) : this.obj.equals(obj));
+        return super.equals(obj) || Objects.equals(this.obj, obj);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class Box<T> implements Property<T> {
         @Nonnull
         private final Object syncRoot = new Object();
 
-        protected ThreadSafeImpl(@Nullable T obj) {
+        private ThreadSafeImpl(@Nullable T obj) {
             super(obj);
         }
 

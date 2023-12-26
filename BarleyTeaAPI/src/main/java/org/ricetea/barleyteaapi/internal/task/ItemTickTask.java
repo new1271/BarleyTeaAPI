@@ -11,13 +11,12 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class ItemTickTask extends AbstractTask {
+public final class ItemTickTask extends LoopTaskBase {
 
     @Nonnull
     public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
@@ -26,7 +25,7 @@ public final class ItemTickTask extends AbstractTask {
     private int lastTick;
 
     private ItemTickTask() {
-        super(50, 0);
+        super(50);
     }
 
     @Nullable
@@ -40,7 +39,7 @@ public final class ItemTickTask extends AbstractTask {
     }
 
     @Override
-    protected void runInternal() {
+    public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         ItemRegister register = ItemRegister.getInstanceUnsafe();

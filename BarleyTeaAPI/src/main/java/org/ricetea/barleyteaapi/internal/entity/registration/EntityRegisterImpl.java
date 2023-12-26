@@ -38,6 +38,11 @@ public final class EntityRegisterImpl implements EntityRegister {
     private EntityRegisterImpl() {
     }
 
+    @Nonnull
+    public static EntityRegisterImpl getInstance() {
+        return inst.get();
+    }
+
     @Nullable
     public static EntityRegisterImpl getInstanceUnsafe() {
         return inst.getUnsafe();
