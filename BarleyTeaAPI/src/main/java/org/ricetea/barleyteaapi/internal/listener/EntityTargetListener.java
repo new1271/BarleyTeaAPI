@@ -8,7 +8,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityBeTargeted;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityLostTarget;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTarget;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -36,19 +36,19 @@ public final class EntityTargetListener implements Listener {
     }
 
     private void onEntityTarget(@Nonnull EntityTargetEvent event) {
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTarget.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityTarget.class,
                 FeatureEntityTarget::handleEntityTarget, DataEntityTarget::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getTarget(), event, FeatureEntityTarget.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getTarget(), event, FeatureEntityTarget.class,
                 FeatureEntityTarget::handleEntityBeTargeted, DataEntityBeTargeted::new)) {
             event.setCancelled(true);
         }
     }
 
     private void onEntityLostTarget(@Nonnull EntityTargetEvent event) {
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTarget.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityTarget.class,
                 FeatureEntityTarget::handleEntityLostTarget, DataEntityLostTarget::new)) {
             event.setCancelled(true);
         }

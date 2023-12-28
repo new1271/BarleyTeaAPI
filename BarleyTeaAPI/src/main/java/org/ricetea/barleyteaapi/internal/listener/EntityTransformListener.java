@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTransform;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTransform;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -26,7 +26,7 @@ public final class EntityTransformListener implements Listener {
     public void listenEntityTransform(EntityTransformEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureEntityTransform.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityTransform.class,
                 FeatureEntityTransform::handleEntityTransform, DataEntityTransform::new)) {
             event.setCancelled(true);
         }

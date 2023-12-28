@@ -8,9 +8,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemHoldEntityFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -24,18 +23,18 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     private final Entity killer;
 
     @Nullable
-    private final Lazy<DataEntityType> killerType;
+    private final Lazy<CustomEntityType> killerType;
 
     @Nonnull
-    private final Lazy<DataEntityType> decedentType;
+    private final Lazy<CustomEntityType> decedentType;
 
     public DataItemHoldEntityDeath(@Nonnull EntityDeathEvent event,
                                    @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
                                    @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getEntity(), itemStack, equipmentSlot);
-        decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
+        decedentType = Lazy.create(() -> CustomEntityType.get(getDecedent()));
         killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
-        killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> BaseEntity.getEntityType(killer)));
+        killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> CustomEntityType.get(killer)));
     }
 
     @Nonnull
@@ -44,7 +43,7 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     }
 
     @Nonnull
-    public DataEntityType getDecedentType() {
+    public CustomEntityType getDecedentType() {
         return decedentType.get();
     }
 
@@ -54,8 +53,8 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     }
 
     @Nullable
-    public DataEntityType getKillerType() {
-        Lazy<DataEntityType> killerType = this.killerType;
+    public CustomEntityType getKillerType() {
+        Lazy<CustomEntityType> killerType = this.killerType;
         if (killerType == null)
             return null;
         else

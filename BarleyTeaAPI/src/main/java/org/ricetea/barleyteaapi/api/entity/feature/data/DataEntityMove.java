@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.entity.feature.data;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 
 import javax.annotation.Nonnull;
 

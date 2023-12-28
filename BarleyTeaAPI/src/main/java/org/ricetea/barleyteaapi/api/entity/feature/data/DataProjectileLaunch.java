@@ -1,7 +1,7 @@
 package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseProjectileFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseProjectileFeatureData;
 
 import javax.annotation.Nonnull;
 

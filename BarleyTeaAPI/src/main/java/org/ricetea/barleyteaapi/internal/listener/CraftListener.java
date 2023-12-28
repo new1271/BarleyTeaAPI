@@ -15,7 +15,7 @@ import org.ricetea.barleyteaapi.api.item.data.DataItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -106,7 +106,7 @@ public final class CraftListener implements Listener {
                                         if (type == null || stacks[1] == null) {
                                             result = null;
                                         } else {
-                                            result = ItemFeatureHelper.doItemRepair(stacks[0], stacks[1], null);
+                                            result = ItemFeatureLinker.doItemRepair(stacks[0], stacks[1], null);
                                             allPassed = false;
                                         }
                                     }

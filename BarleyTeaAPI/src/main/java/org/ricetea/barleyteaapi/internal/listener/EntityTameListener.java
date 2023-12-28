@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTame;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityTame;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -26,7 +26,7 @@ public final class EntityTameListener implements Listener {
     public void listenEntityTame(EntityTameEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event,
                 FeatureEntityTame.class, FeatureEntityTame::handleEntityTame, DataEntityTame::new)) {
             event.setCancelled(true);
         }

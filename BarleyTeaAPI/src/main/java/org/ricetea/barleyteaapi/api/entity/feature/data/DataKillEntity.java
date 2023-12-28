@@ -6,9 +6,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -18,12 +17,12 @@ import java.util.Objects;
 
 public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> decedentType;
+    private final Lazy<CustomEntityType> decedentType;
 
     public DataKillEntity(@Nonnull EntityDeathEvent event,
                           @Nonnull EntityDamageByEntityEvent lastDamageCauseByEntityEvent) {
         super(event, lastDamageCauseByEntityEvent.getDamager());
-        decedentType = Lazy.create(() -> BaseEntity.getEntityType(getDecedent()));
+        decedentType = Lazy.create(() -> CustomEntityType.get(getDecedent()));
     }
 
     @Nonnull
@@ -32,7 +31,7 @@ public final class DataKillEntity extends BaseEntityFeatureData<EntityDeathEvent
     }
 
     @Nonnull
-    public DataEntityType getDecedentType() {
+    public CustomEntityType getDecedentType() {
         return decedentType.get();
     }
 

@@ -8,8 +8,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BasePlayerFeatureData;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
+import org.ricetea.barleyteaapi.api.base.data.BasePlayerFeatureData;
 import org.ricetea.barleyteaapi.api.block.data.DataBlockType;
 import org.ricetea.utils.Lazy;
 

@@ -1,7 +1,6 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,19 +9,22 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
-import org.ricetea.barleyteaapi.api.block.BaseBlock;
+import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
+import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public final class ChunkListener implements Listener {
     private static final Lazy<ChunkListener> inst = Lazy.create(ChunkListener::new);
@@ -37,54 +39,44 @@ public final class ChunkListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntitiesLoad(EntitiesLoadEvent event) {
-        if (event == null)
+        if (event == null || !EntityRegister.hasRegistered())
             return;
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegistered()) {
-            for (Entity entity : event.getEntities()) {
-                if (entity != null) {
-                    NamespacedKey id = BaseEntity.getEntityID(entity);
-                    if (id != null) {
-                        BaseEntity entityType = register.lookup(id);
-                        try {
-                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad entityChunkLoad) {
-                                entityChunkLoad.handleEntityLoaded(entity);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        if (entityType instanceof FeatureEntityTick) {
-                            EntityTickTask.getInstance().addEntity(entity);
-                        }
-                    }
+        EntityTickTask task = EntityTickTask.getInstance();
+        for (Entity entity : event.getEntities()) {
+            CustomEntity entityType = CustomEntity.get(entity);
+            if (entityType == null)
+                return;
+            if (entityType instanceof FeatureEntityLoad feature) {
+                try {
+                    feature.handleEntityLoaded(entity);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            }
+            if (entityType instanceof FeatureEntityTick) {
+                task.addEntity(entity);
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntitiesUnload(EntitiesUnloadEvent event) {
-        if (event == null)
+        if (event == null || !EntityRegister.hasRegistered())
             return;
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegistered()) {
-            for (Entity entity : event.getEntities()) {
-                if (entity != null) {
-                    NamespacedKey id = BaseEntity.getEntityID(entity);
-                    if (id != null) {
-                        BaseEntity entityType = register.lookup(id);
-                        try {
-                            if (entityType instanceof org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad entityChunkLoad) {
-                                entityChunkLoad.handleEntityUnloaded(entity);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        if (entityType instanceof FeatureEntityTick) {
-                            EntityTickTask.getInstance().removeEntity(entity);
-                        }
-                    }
+        EntityTickTask task = EntityTickTask.getInstanceUnsafe();
+        for (Entity entity : event.getEntities()) {
+            CustomEntity entityType = CustomEntity.get(entity);
+            if (entityType == null)
+                return;
+            if (entityType instanceof FeatureEntityLoad feature) {
+                try {
+                    feature.handleEntityUnloaded(entity);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            }
+            if (entityType instanceof FeatureEntityTick && task != null) {
+                task.removeEntity(entity);
             }
         }
     }
@@ -94,54 +86,54 @@ public final class ChunkListener implements Listener {
         if (event == null)
             return;
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegistered()) {
-            for (var entry : ChunkStorage.getBlockDataContainersFromChunk(Objects.requireNonNull(event.getChunk()))) {
-                Block block = entry.getKey();
-                if (block != null) {
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id != null) {
-                        BaseBlock blockType = register.lookup(id);
+        if (register == null || !register.hasAnyRegistered())
+            return;
+        BlockTickTask task = BlockTickTask.getInstance();
+        CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),
+                (block, container) -> {
+                    if (block == null)
+                        return;
+                    NamespacedKey id = BlockHelper.getBlockID(container);
+                    CustomBlock blockType = register.lookup(id);
+                    if (blockType == null)
+                        return;
+                    if (blockType instanceof FeatureBlockLoad feature) {
                         try {
-                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad blockChunkLoad) {
-                                blockChunkLoad.handleBlockLoaded(block);
-                            }
+                            feature.handleBlockLoaded(block);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        if (blockType instanceof FeatureBlockTick) {
-                            BlockTickTask.getInstance().addBlock(block);
-                        }
                     }
-                }
-            }
-        }
+                    if (blockType instanceof FeatureBlockTick) {
+                        task.addBlock(block);
+                    }
+                });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenChunkUnload(ChunkUnloadEvent event) {
-        if (event == null)
-            return;
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (register != null && register.hasAnyRegistered()) {
-            for (var entry : ChunkStorage.getBlockDataContainersFromChunk(Objects.requireNonNull(event.getChunk()))) {
-                Block block = entry.getKey();
-                if (block != null) {
-                    NamespacedKey id = BaseBlock.getBlockID(block);
-                    if (id != null) {
-                        BaseBlock blockType = register.lookup(id);
+        if (register == null || !register.hasAnyRegistered())
+            return;
+        BlockTickTask task = BlockTickTask.getInstanceUnsafe();
+        CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),
+                (block, container) -> {
+                    if (block == null)
+                        return;
+                    NamespacedKey id = BlockHelper.getBlockID(container);
+                    CustomBlock blockType = register.lookup(id);
+                    if (blockType == null)
+                        return;
+                    if (blockType instanceof FeatureBlockLoad feature) {
                         try {
-                            if (blockType instanceof org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad blockChunkLoad) {
-                                blockChunkLoad.handleBlockUnloaded(block);
-                            }
+                            feature.handleBlockUnloaded(block);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        if (blockType instanceof FeatureBlockTick) {
-                            BlockTickTask.getInstance().removeBlock(block);
-                        }
                     }
-                }
-            }
-        }
+                    if (blockType instanceof FeatureBlockTick && task != null) {
+                        task.removeBlock(block);
+                    }
+                });
     }
 }

@@ -1,14 +1,13 @@
 package org.ricetea.barleyteaapi.internal.task;
 
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.api.task.AbstractTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class EntityTickTask extends AbstractTask {
+public final class EntityTickTask extends LoopTaskBase {
 
     @Nonnull
     private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
@@ -36,7 +35,7 @@ public final class EntityTickTask extends AbstractTask {
     private int lastTick;
 
     private EntityTickTask() {
-        super(50, 0);
+        super(50);
     }
 
     @Nullable
@@ -50,13 +49,12 @@ public final class EntityTickTask extends AbstractTask {
     }
 
     @Override
-    protected void runInternal() {
+    public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
-        BukkitScheduler scheduler = Bukkit.getScheduler();
-        EntityRegister register = EntityRegister.getInstanceUnsafe();
-        if (api == null || scheduler == null || register == null || !register.hasAnyRegistered()) {
+        if (api == null || !EntityRegister.hasRegistered()) {
             stop();
         } else {
+            BukkitScheduler scheduler = Bukkit.getScheduler();
             for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
                 var entry = iterator.next();
                 UUID uuid = entry.getKey();
@@ -64,9 +62,7 @@ public final class EntityTickTask extends AbstractTask {
                 if (op == null)
                     continue;
                 switch (op) {
-                    case 0 -> {
-                        tickingTable.putIfAbsent(uuid, 0);
-                    }
+                    case 0 -> tickingTable.putIfAbsent(uuid, 0);
                     case 1 -> {
                         Integer id = tickingTable.remove(uuid);
                         if (id != null && id != 0)
@@ -100,19 +96,17 @@ public final class EntityTickTask extends AbstractTask {
     }
 
     public void addEntity(@Nullable Entity entity) {
-        if (entity == null || !BaseEntity.isBarleyTeaEntity(entity) || !BarleyTeaAPI.checkPluginUsable())
+        if (!EntityHelper.isCustomEntity(entity) || !BarleyTeaAPI.checkPluginUsable())
             return;
         operationTable.merge(entity.getUniqueId(), 0, Math::max);
-        if (!isRunning)
-            start();
+        start();
     }
 
     public void removeEntity(@Nullable Entity entity) {
         if (entity == null || !BarleyTeaAPI.checkPluginUsable())
             return;
         operationTable.merge(entity.getUniqueId(), 1, Math::max);
-        if (!isRunning)
-            start();
+        start();
     }
 
     private static class _Task implements Runnable {
@@ -133,17 +127,15 @@ public final class EntityTickTask extends AbstractTask {
         }
 
         private boolean doJob() {
-            EntityRegister register = EntityRegister.getInstanceUnsafe();
-            if (register == null)
+            if (!EntityRegister.hasRegistered())
                 return false;
             Entity entity = Bukkit.getEntity(uuid);
             if (entity == null || entity.isDead())
                 return false;
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            if (id == null)
-                return false;
-            BaseEntity baseEntity = register.lookup(id);
-            if (baseEntity instanceof FeatureEntityTick feature) {
+            CustomEntity entityType = CustomEntity.get(entity);
+            if (entityType == null)
+                return true;
+            if (entityType instanceof FeatureEntityTick feature) {
                 try {
                     feature.handleTick(entity);
                 } catch (Exception e) {
@@ -151,7 +143,7 @@ public final class EntityTickTask extends AbstractTask {
                 }
                 return true;
             }
-            return baseEntity == null;
+            return false;
         }
     }
 }

@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryMerchant;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +18,7 @@ import org.ricetea.barleyteaapi.internal.nms.INBTItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.INMSEntityHelper;
 import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.CommandRegisterImpl;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSCommandRegisterImpl;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSRegularCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSSummonCommand;
@@ -54,8 +53,8 @@ public final class PluginEntryPoint extends JavaPlugin implements Listener {
         _inst = this;
         Logger logger = getLogger();
         logger.info("registering command register...");
-        CommandRegisterImpl commandRegister = new CommandRegisterImpl();
-        CommandRegister.setInstance(commandRegister, CommandRegisterImpl.class);
+        NMSCommandRegisterImpl commandRegister = new NMSCommandRegisterImpl();
+        CommandRegister.setInstance(commandRegister, NMSCommandRegisterImpl.class);
         logger.info("registering '/givebarley' command...");
         commandRegister.register(giveCommand = new NMSGiveCommand());
         logger.info("registering '/summonbarley' command...");
@@ -91,10 +90,10 @@ public final class PluginEntryPoint extends JavaPlugin implements Listener {
     public void onDisable() {
         Logger logger = getLogger();
         logger.info("unregistering command register...");
-        CommandRegisterImpl commandRegister = CommandRegister.getInstanceUnsafe(CommandRegisterImpl.class);
+        NMSCommandRegisterImpl commandRegister = CommandRegister.getInstanceUnsafe(NMSCommandRegisterImpl.class);
         if (commandRegister != null) {
             commandRegister.unregisterAll();
-            CommandRegister.setInstance(null, CommandRegisterImpl.class);
+            CommandRegister.setInstance(null, NMSCommandRegisterImpl.class);
         }
         logger.info("unregistering nms function...");
         NMSHelperRegister.setHelper(null, INMSEntityHelper.class);

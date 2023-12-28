@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.inventory.TradeSelectEvent;
@@ -63,27 +62,25 @@ public final class InventoryEventListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         ItemStack itemStack = event.getItem();
-        if (itemStack != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            ItemRegister register = ItemRegister.getInstanceUnsafe();
-            if (register != null && id != null) {
-                BaseItem baseItem = register.lookup(id);
-                if (baseItem != null) {
-                    Consumer<ItemStack> job = null;
-                    if (baseItem instanceof FeatureItemEnchant itemEnchantFeature) {
-                        DataItemEnchant data = new DataItemEnchant(event);
-                        itemEnchantFeature.handleItemEnchant(data);
-                        job = data.getJobAfterItemEnchant();
-                    }
-                    final Consumer<ItemStack> finalJob = job;
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
-                            () -> {
-                                ItemStack _itemStack = event.getItem();
-                                if (finalJob != null) {
-                                    finalJob.accept(_itemStack);
-                                }
-                            });
+        NamespacedKey id = BaseItem.getItemID(itemStack);
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
+        if (register != null && id != null) {
+            BaseItem baseItem = register.lookup(id);
+            if (baseItem != null) {
+                Consumer<ItemStack> job = null;
+                if (baseItem instanceof FeatureItemEnchant itemEnchantFeature) {
+                    DataItemEnchant data = new DataItemEnchant(event);
+                    itemEnchantFeature.handleItemEnchant(data);
+                    job = data.getJobAfterItemEnchant();
                 }
+                final Consumer<ItemStack> finalJob = job;
+                Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
+                        () -> {
+                            ItemStack _itemStack = event.getItem();
+                            if (finalJob != null) {
+                                finalJob.accept(_itemStack);
+                            }
+                        });
             }
         }
     }
@@ -106,7 +103,7 @@ public final class InventoryEventListener implements Listener {
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(lowerItem)) {
-                        resultItem = ItemFeatureHelper.doItemRepair(upperItem, lowerItem, resultItem);
+                        resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
                         if (baseItem instanceof FeatureItemGrindstone itemGrindstoneFeature) {
                             if (itemGrindstoneFeature.handleItemGrindstone(new DataItemGrindstone(event))) {
                                 resultItem = event.getResult();
@@ -145,7 +142,7 @@ public final class InventoryEventListener implements Listener {
                 if (baseItem != null) {
                     final ItemStack oldResultItem = resultItem;
                     if (baseItem.isCertainItem(secondItem)) { //Repair mode
-                        resultItem = ItemFeatureHelper.doItemRepair(firstItem, secondItem, resultItem);
+                        resultItem = ItemFeatureLinker.doItemRepair(firstItem, secondItem, resultItem);
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (itemAnvilFeature.handleItemAnvilRepair(new DataItemAnvilRepair(event))) {
                                 resultItem = event.getResult();
@@ -153,7 +150,7 @@ public final class InventoryEventListener implements Listener {
                                 resultItem = null;
                             }
                         }
-                    } else if (resultItem != null && BaseItem.isBarleyTeaItem(resultItem)) {
+                    } else if (BaseItem.isBarleyTeaItem(resultItem)) {
                         if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
                             if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
                                 if (itemAnvilFeature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {

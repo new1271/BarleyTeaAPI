@@ -5,7 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemInventoryFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemInventoryFeatureData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

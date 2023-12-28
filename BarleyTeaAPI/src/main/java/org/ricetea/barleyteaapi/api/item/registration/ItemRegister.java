@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.item.registration;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.abstracts.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.item.BaseItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;

@@ -23,8 +23,8 @@ import org.ricetea.barleyteaapi.api.item.feature.*;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.internal.helper.BlockFeatureHelper;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -129,12 +129,12 @@ public final class PlayerEventListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         PlayerInventory playerInventory = event.getPlayer().getInventory();
-        if (!ItemFeatureHelper.doFeatureCancellable(playerInventory.getItem(event.getPreviousSlot()),
+        if (!ItemFeatureLinker.doFeatureCancellable(playerInventory.getItem(event.getPreviousSlot()),
                 event, FeatureItemFocus.class, FeatureItemFocus::handleItemLostFocus, DataItemLostFocus::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!ItemFeatureHelper.doFeatureCancellable(playerInventory.getItem(event.getNewSlot()),
+        if (!ItemFeatureLinker.doFeatureCancellable(playerInventory.getItem(event.getNewSlot()),
                 event, FeatureItemFocus.class, FeatureItemFocus::handleItemGotFocus, DataItemGotFocus::new)) {
             event.setCancelled(true);
             return;
@@ -145,7 +145,7 @@ public final class PlayerEventListener implements Listener {
     public void listenItemBreak(PlayerItemBreakEvent event) {
         if (event == null)
             return;
-        ItemFeatureHelper.doFeature(event.getBrokenItem(), event, FeatureItemDamage.class,
+        ItemFeatureLinker.doFeature(event.getBrokenItem(), event, FeatureItemDamage.class,
                 FeatureItemDamage::handleItemBroken, DataItemBroken::new);
     }
 
@@ -153,7 +153,7 @@ public final class PlayerEventListener implements Listener {
     public void listenItemConsume(PlayerItemConsumeEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!ItemFeatureHelper.doFeatureCancellable(event.getItem(), event, FeatureItemConsume.class,
+        if (!ItemFeatureLinker.doFeatureCancellable(event.getItem(), event, FeatureItemConsume.class,
                 FeatureItemConsume::handleItemConsume, DataItemConsume::new)) {
             event.setCancelled(true);
             return;
@@ -170,13 +170,13 @@ public final class PlayerEventListener implements Listener {
         Block clickedBlock = event.getClickedBlock();
         boolean isNothing = clickedBlock == null || clickedBlock.isEmpty();
         if (isNothing) {
-            if (!ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+            if (!ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickNothing, DataItemClickNothing::new, true)) {
                 event.setUseInteractedBlock(Result.DENY);
                 event.setUseItemInHand(Result.DENY);
             }
         } else {
-            switch (BlockFeatureHelper.doFeatureAndReturn(event.getClickedBlock(), event, FeatureBlockClick.class,
+            switch (BlockFeatureLinker.doFeatureAndReturn(event.getClickedBlock(), event, FeatureBlockClick.class,
                     FeatureBlockClick::handleBlockClicked, DataBlockClicked::new, StateBlockClicked.Skipped)) {
                 case Cancelled -> {
                     event.setUseInteractedBlock(Result.DENY);
@@ -187,7 +187,7 @@ public final class PlayerEventListener implements Listener {
                 case Skipped -> {
                 }
             }
-            switch (ItemFeatureHelper.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+            switch (ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickBlock, DataItemClickBlock::new, StateItemClickBlock.Skipped)) {
                 case Cancelled -> {
                     event.setUseInteractedBlock(Result.DENY);
@@ -206,7 +206,7 @@ public final class PlayerEventListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         ItemStack itemStack = event.getPlayer().getInventory().getItem(Objects.requireNonNull(event.getHand()));
-        if (!ItemFeatureHelper.doFeatureCancellable(itemStack, event, FeatureItemClick.class,
+        if (!ItemFeatureLinker.doFeatureCancellable(itemStack, event, FeatureItemClick.class,
                 FeatureItemClick::handleItemClickEntity, DataItemClickEntity::new)) {
             event.setCancelled(true);
             return;
@@ -217,9 +217,9 @@ public final class PlayerEventListener implements Listener {
     public void listenItemWear(PlayerArmorChangeEvent event) {
         if (event == null)
             return;
-        ItemFeatureHelper.doFeature(event.getOldItem(), event, FeatureItemWear.class,
+        ItemFeatureLinker.doFeature(event.getOldItem(), event, FeatureItemWear.class,
                 FeatureItemWear::handleItemWearOff, DataItemWearOff::new);
-        ItemFeatureHelper.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear,
+        ItemFeatureLinker.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear,
                 DataItemWear::new);
     }
 
@@ -230,7 +230,7 @@ public final class PlayerEventListener implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(), () -> {
             if (player.isOnline()) {
-                ItemFeatureHelper.forEachEquipment(player, event, FeatureItemHoldPlayerJoinOrQuit.class,
+                ItemFeatureLinker.forEachEquipment(player, event, FeatureItemHoldPlayerJoinOrQuit.class,
                         FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
             }
         });
@@ -240,7 +240,7 @@ public final class PlayerEventListener implements Listener {
     public void listenPlayerQuit(PlayerQuitEvent event) {
         if (event == null)
             return;
-        ItemFeatureHelper.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
+        ItemFeatureLinker.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
                 FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
     }
 }

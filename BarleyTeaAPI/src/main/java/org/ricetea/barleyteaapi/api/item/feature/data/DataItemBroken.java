@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.item.feature.data;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.abstracts.BaseFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

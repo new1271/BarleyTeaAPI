@@ -9,16 +9,16 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class BaseProjectile extends BaseEntity
+public abstract class BaseProjectile extends DefaultEntity
         implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
 
     public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
@@ -47,9 +47,9 @@ public abstract class BaseProjectile extends BaseEntity
         World world = location.getWorld();
         if (world == null)
             return null;
-        Projectile entity = (Projectile) world.spawnEntity(location, getEntityTypeBasedOn(), SpawnReason.CUSTOM);
+        Projectile entity = (Projectile) world.spawnEntity(location, getOriginalType(), SpawnReason.CUSTOM);
         entity.setShooter(shooter);
-        if (tryRegister(entity, this::handleEntitySpawn)) {
+        if (EntityHelper.tryRegister(this, entity, this::handleEntitySpawn)) {
             if (this instanceof FeatureEntityLoad feature) {
                 feature.handleEntityLoaded(entity);
             }
@@ -68,13 +68,13 @@ public abstract class BaseProjectile extends BaseEntity
     @Override
     public boolean handleCommandSummon(@Nonnull DataCommandSummon data) {
         if (data.getEntity() instanceof Projectile projectile) {
-            return tryRegister(projectile, this::handleEntitySpawn);
+            return EntityHelper.tryRegister(this, projectile, this::handleEntitySpawn);
         }
         return false;
     }
 
     @Override
     public boolean handleProjectileLaunch(@Nonnull DataProjectileLaunch data) {
-        return tryRegister(data.getEntity(), this::handleEntitySpawn);
+        return EntityHelper.tryRegister(this, data.getEntity(), this::handleEntitySpawn);
     }
 }

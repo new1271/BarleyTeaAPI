@@ -1,30 +1,31 @@
 package org.ricetea.utils;
 
-import org.ricetea.utils.function.NonnullSupplier;
+import sun.misc.Unsafe;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class Lazy<T> implements Property<T> {
 
     @Nonnull
-    protected final NonnullSupplier<T> supplier;
+    protected final Supplier<T> supplier;
 
     @Nullable
     protected T realObj;
 
-    protected Lazy(@Nonnull NonnullSupplier<T> supplier) {
+    protected Lazy(@Nonnull Supplier<T> supplier) {
         this.supplier = supplier;
     }
 
     @Nonnull
-    public static <T> Lazy<T> create(@Nonnull NonnullSupplier<T> supplier) {
+    public static <T> Lazy<T> create(@Nonnull Supplier<T> supplier) {
         return new Lazy<>(supplier);
     }
 
     @Nonnull
-    public static <T> Lazy<T> createInThreadSafe(@Nonnull NonnullSupplier<T> supplier) {
+    public static <T> Lazy<T> createInThreadSafe(@Nonnull Supplier<T> supplier) {
         return new ThreadSafeImpl<>(supplier);
     }
 
@@ -59,7 +60,7 @@ public class Lazy<T> implements Property<T> {
         @Nonnull
         private final Object syncRoot = new Object();
 
-        private ThreadSafeImpl(@Nonnull NonnullSupplier<T> supplier) {
+        private ThreadSafeImpl(@Nonnull Supplier<T> supplier) {
             super(supplier);
         }
 
@@ -69,6 +70,7 @@ public class Lazy<T> implements Property<T> {
             T obj = realObj;
             if (obj == null) {
                 synchronized (syncRoot) {
+                    Unsafe.getUnsafe().fullFence();
                     obj = realObj;
                     if (obj == null) {
                         obj = realObj = Objects.requireNonNull(supplier.get());

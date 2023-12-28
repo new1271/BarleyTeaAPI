@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -26,7 +26,7 @@ public final class SlimeSplitListener implements Listener {
     public void listenSlimeSplit(SlimeSplitEvent event) {
         if (event == null || event.isCancelled())
             return;
-        if (!EntityFeatureHelper.doFeatureCancellable(event.getEntity(), event, FeatureSlimeSplit.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureSlimeSplit.class,
                 FeatureSlimeSplit::handleSlimeSplit, DataSlimeSplit::new)) {
             event.setCancelled(true);
         }

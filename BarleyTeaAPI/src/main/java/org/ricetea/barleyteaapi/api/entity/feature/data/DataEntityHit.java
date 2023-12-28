@@ -3,9 +3,8 @@ package org.ricetea.barleyteaapi.api.entity.feature.data;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -17,18 +16,18 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
     private final Entity shooter;
 
     @Nonnull
-    private final Lazy<DataEntityType> projectileType;
+    private final Lazy<CustomEntityType> projectileType;
 
     @Nullable
-    private final Lazy<DataEntityType> shooterType;
+    private final Lazy<CustomEntityType> shooterType;
 
     public DataEntityHit(@Nonnull ProjectileHitEvent event) {
         super(event, event.getHitEntity());
-        projectileType = Lazy.create(() -> BaseEntity.getEntityType(getProjectile()));
+        projectileType = Lazy.create(() -> CustomEntityType.get(getProjectile()));
         shooter = ObjectUtil.tryCast(event.getEntity().getShooter(), Entity.class);
         shooterType = ObjectUtil.safeMap(shooter,
                 shooter -> Lazy.create(
-                        () -> BaseEntity.getEntityType(shooter)));
+                        () -> CustomEntityType.get(shooter)));
     }
 
     @Nonnull
@@ -37,7 +36,7 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
     }
 
     @Nonnull
-    public DataEntityType getProjectileType() {
+    public CustomEntityType getProjectileType() {
         return projectileType.get();
     }
 
@@ -51,8 +50,8 @@ public final class DataEntityHit extends BaseEntityFeatureData<ProjectileHitEven
     }
 
     @Nullable
-    public DataEntityType getShooterEntityType() {
-        Lazy<DataEntityType> shooterType = this.shooterType;
+    public CustomEntityType getShooterEntityType() {
+        Lazy<CustomEntityType> shooterType = this.shooterType;
         if (shooterType == null)
             return null;
         return shooterType.get();

@@ -2,9 +2,8 @@ package org.ricetea.barleyteaapi.api.entity.feature.data;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.ricetea.barleyteaapi.api.abstracts.BaseEntityFeatureData;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
-import org.ricetea.barleyteaapi.api.entity.data.DataEntityType;
+import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
+import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -12,11 +11,11 @@ import java.util.Objects;
 
 public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEvent> {
     @Nonnull
-    private final Lazy<DataEntityType> targetType;
+    private final Lazy<CustomEntityType> targetType;
 
     public DataEntityTarget(@Nonnull EntityTargetEvent event) {
         super(event);
-        targetType = Lazy.create(() -> BaseEntity.getEntityType(getTarget()));
+        targetType = Lazy.create(() -> CustomEntityType.get(getTarget()));
     }
 
     @Nonnull
@@ -25,7 +24,7 @@ public final class DataEntityTarget extends BaseEntityFeatureData<EntityTargetEv
     }
 
     @Nonnull
-    public DataEntityType getTargetType() {
+    public CustomEntityType getTargetType() {
         return targetType.get();
     }
 

@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.item.feature.data;
 
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.inventory.GrindstoneInventory;
-import org.ricetea.barleyteaapi.api.abstracts.BaseItemInventoryResultFeatureData;
+import org.ricetea.barleyteaapi.api.base.data.BaseItemInventoryResultFeatureData;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

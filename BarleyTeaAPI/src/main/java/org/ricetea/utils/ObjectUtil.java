@@ -1,17 +1,16 @@
 package org.ricetea.utils;
 
-import org.ricetea.utils.function.NonnullConsumer;
-import org.ricetea.utils.function.NonnullFunction;
-import org.ricetea.utils.function.NonnullSupplier;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class ObjectUtil {
 
     @Nonnull
-    public static <T> T letNonNull(@Nullable T obj, @Nonnull NonnullSupplier<T> supplierWhenNull) {
+    public static <T> T letNonNull(@Nullable T obj, @Nonnull Supplier<T> supplierWhenNull) {
         return obj == null ? Objects.requireNonNull(Objects.requireNonNull(supplierWhenNull).get()) : obj;
     }
 
@@ -45,7 +44,7 @@ public final class ObjectUtil {
     }
 
     @Nullable
-    public static <T, R> R safeMap(@Nullable T obj, @Nullable NonnullFunction<T, R> mapFunction) {
+    public static <T, R> R safeMap(@Nullable T obj, @Nullable Function<T, R> mapFunction) {
         if (obj == null || mapFunction == null) {
             return null;
         } else {
@@ -53,9 +52,27 @@ public final class ObjectUtil {
         }
     }
 
-    public static <T> void safeCall(@Nullable T obj, @Nullable NonnullConsumer<T> callFunction) {
+    public static <T> void safeCall(@Nullable T obj, @Nullable Consumer<T> callFunction) {
         if (obj != null && callFunction != null) {
             callFunction.accept(obj);
+        }
+    }
+
+    @Nonnull
+    public static <R> R tryMap(@Nonnull Supplier<R> supplier, @Nonnull R defaultValue) {
+        try {
+            return ObjectUtil.letNonNull(supplier.get(), defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    public static void tryCall(@Nonnull Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

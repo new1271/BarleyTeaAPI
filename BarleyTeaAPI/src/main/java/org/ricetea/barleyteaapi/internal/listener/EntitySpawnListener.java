@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -11,8 +10,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.entity.BaseEntity;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
@@ -22,8 +20,8 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
-import org.ricetea.barleyteaapi.internal.helper.EntityFeatureHelper;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -56,14 +54,9 @@ public final class EntitySpawnListener implements Listener {
             return;
         }
         if (!event.isCancelled()) {
-            NamespacedKey id = BaseEntity.getEntityID(entity);
-            EntityRegister register = EntityRegister.getInstanceUnsafe();
-            if (register != null && id != null) {
-                BaseEntity baseEntity = register.lookup(id);
-                if (baseEntity instanceof FeatureEntityTick) {
-                    EntityTickTask.getInstance().addEntity(entity);
-                }
-            }
+            CustomEntity entityType = CustomEntity.get(entity);
+            if (entityType instanceof FeatureEntityTick)
+                EntityTickTask.getInstance().addEntity(entity);
         }
     }
 
@@ -73,8 +66,8 @@ public final class EntitySpawnListener implements Listener {
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
-        for (BaseEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
-                && e.getEntityTypeBasedOn().equals(event.getEntityType()))) {
+        for (CustomEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
+                && e.getOriginalType().equals(event.getEntityType()))) {
             if (entityType != null) {
                 FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
                 double posibility = spawnEntityType.getSpawnPosibility(reason);
@@ -105,18 +98,18 @@ public final class EntitySpawnListener implements Listener {
     private void onProjectileLaunch(@Nonnull ProjectileLaunchEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!ItemFeatureHelper.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
                 FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
                 DataItemHoldEntityShoot::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
                 FeatureEntityShoot::handleEntityShoot, DataEntityShoot::new)) {
             event.setCancelled(true);
             return;
         }
-        if (!EntityFeatureHelper.doFeatureCancellable(entity, event, FeatureProjectile.class,
+        if (!EntityFeatureLinker.doFeatureCancellable(entity, event, FeatureProjectile.class,
                 FeatureProjectile::handleProjectileLaunch, DataProjectileLaunch::new)) {
             event.setCancelled(true);
             return;
