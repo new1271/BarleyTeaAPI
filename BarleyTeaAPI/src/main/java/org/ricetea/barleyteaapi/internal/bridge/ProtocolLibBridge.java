@@ -72,13 +72,12 @@ public final class ProtocolLibBridge {
         public ItemStackPrerenderingInjector() {
             super(BarleyTeaAPI.getInstance(), ListenerPriority.LOWEST,
                     PacketType.Play.Server.WINDOW_ITEMS,
-                    //PacketType.Play.Server.OPEN_WINDOW_MERCHANT,
+                    PacketType.Play.Server.OPEN_WINDOW_MERCHANT,
                     PacketType.Play.Server.SET_SLOT,
                     PacketType.Play.Server.ENTITY_EQUIPMENT,
                     PacketType.Play.Server.SYSTEM_CHAT,
                     PacketType.Play.Server.DISGUISED_CHAT,
-                    PacketType.Play.Client.SET_CREATIVE_SLOT,
-                    PacketType.Play.Client.WINDOW_CLICK);
+                    PacketType.Play.Client.SET_CREATIVE_SLOT);
         }
 
         @Nullable
@@ -311,7 +310,7 @@ public final class ProtocolLibBridge {
             super(BarleyTeaAPI.getInstance(), ListenerPriority.HIGHEST,
                     PacketType.Play.Server.OPEN_WINDOW,
                     PacketType.Play.Server.WINDOW_ITEMS,
-                    //PacketType.Play.Server.OPEN_WINDOW_MERCHANT,
+                    PacketType.Play.Server.OPEN_WINDOW_MERCHANT,
                     PacketType.Play.Server.SET_SLOT,
                     PacketType.Play.Server.ENTITY_EQUIPMENT,
                     PacketType.Play.Server.SYSTEM_CHAT,
