@@ -10,8 +10,7 @@ import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.internal.helper.MaterialHelper;
 import org.ricetea.barleyteaapi.internal.helper.SmithingHelper;
 import org.ricetea.utils.Lazy;
@@ -23,44 +22,44 @@ import java.util.stream.Collectors;
 
 public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
-    private static final Lazy<Set<DataItemType>> templateSetLazy = Lazy.createInThreadSafe(() ->
+    private static final Lazy<Set<CustomItemType>> templateSetLazy = Lazy.createInThreadSafe(() ->
             Tag.ITEMS_TRIM_TEMPLATES.getValues()
                     .stream()
-                    .map(DataItemType::get)
+                    .map(CustomItemType::get)
                     .collect(Collectors.toSet()));
 
-    private static final Lazy<Set<DataItemType>> additionSetLazy = Lazy.createInThreadSafe(() ->
+    private static final Lazy<Set<CustomItemType>> additionSetLazy = Lazy.createInThreadSafe(() ->
             Tag.ITEMS_TRIM_MATERIALS.getValues()
                     .stream()
-                    .map(DataItemType::get)
+                    .map(CustomItemType::get)
                     .collect(Collectors.toSet()));
 
     private final boolean copyNbt;
 
-    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original) {
+    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original) {
         this(key, original, original);
     }
 
-    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-                                   @Nonnull DataItemType result) {
+    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original,
+                                   @Nonnull CustomItemType result) {
         this(key, original, result, true);
     }
 
-    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-                                   @Nonnull DataItemType result, boolean copyNbt) {
+    public ArmorTrimSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original,
+                                   @Nonnull CustomItemType result, boolean copyNbt) {
         super(key, original, result);
         this.copyNbt = copyNbt;
     }
 
     @Nonnull
     @Override
-    public Set<DataItemType> getTemplates() {
+    public Set<CustomItemType> getTemplates() {
         return templateSetLazy.get();
     }
 
     @Nonnull
     @Override
-    public Set<DataItemType> getAdditions() {
+    public Set<CustomItemType> getAdditions() {
         return additionSetLazy.get();
     }
 
@@ -77,13 +76,13 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
             result = super.apply(original, template, material);
         }
         if (result != null && result.getItemMeta() instanceof ArmorMeta armorMeta) {
-            armorMeta.setTrim(getArmorTrim(BaseItem.getItemType(template), BaseItem.getItemType(material)));
+            armorMeta.setTrim(getArmorTrim(CustomItemType.get(template), CustomItemType.get(material)));
             result.setItemMeta(armorMeta);
         }
         return result;
     }
 
-    private ArmorTrim getArmorTrim(@Nonnull DataItemType templateType, @Nonnull DataItemType materialType) {
+    private ArmorTrim getArmorTrim(@Nonnull CustomItemType templateType, @Nonnull CustomItemType materialType) {
         TrimMaterial trimMaterial = getTrimMaterial(materialType);
         if (trimMaterial != null) {
             TrimPattern trimPattern = getTrimPattern(templateType);
@@ -95,7 +94,7 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nullable
-    protected TrimMaterial getTrimMaterial(@Nullable DataItemType itemType) {
+    protected TrimMaterial getTrimMaterial(@Nullable CustomItemType itemType) {
         if (itemType == null)
             return null;
         Material material = itemType.asMaterial();
@@ -119,7 +118,7 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nullable
-    protected TrimPattern getTrimPattern(@Nullable DataItemType itemType) {
+    protected TrimPattern getTrimPattern(@Nullable CustomItemType itemType) {
         if (itemType == null)
             return null;
         Material material = itemType.asMaterial();
@@ -150,8 +149,8 @@ public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
     @Nonnull
     public SmithingTransformRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
-        return new SmithingTransformRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
-                new MaterialChoice(Tag.ITEMS_TRIM_TEMPLATES), new MaterialChoice(getOriginal().getMaterialBasedOn()),
+        return new SmithingTransformRecipe(key, new ItemStack(getResult().getOriginalType()),
+                new MaterialChoice(Tag.ITEMS_TRIM_TEMPLATES), new MaterialChoice(getOriginal().getOriginalType()),
                 new MaterialChoice(Tag.ITEMS_TRIM_MATERIALS), true);
     }
 }

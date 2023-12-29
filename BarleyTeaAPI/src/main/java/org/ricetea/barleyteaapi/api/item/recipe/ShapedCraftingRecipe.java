@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 
@@ -14,11 +14,11 @@ import java.util.*;
 public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
     @Nonnull
-    private final DataItemType[] ingredientMatrix;
+    private final CustomItemType[] ingredientMatrix;
     private final int colCount, rowCount;
 
-    public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredientMatrix,
-                                int colCount, @Nonnull DataItemType result) {
+    public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType[] ingredientMatrix,
+                                int colCount, @Nonnull CustomItemType result) {
         super(key, result);
         if (colCount < 1 || colCount > 3) {
             throw new UnsupportedOperationException("'colCount' can't lower than 1 or greater then 3!");
@@ -43,13 +43,13 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     }
 
     @Nonnull
-    public List<DataItemType> getIngredientMatrix() {
+    public List<CustomItemType> getIngredientMatrix() {
         return ObjectUtil.letNonNull(Collections.unmodifiableList(Arrays.asList(getIngredientMatrix0())),
                 Collections::emptyList);
     }
 
     @Nonnull
-    protected DataItemType[] getIngredientMatrix0() {
+    protected CustomItemType[] getIngredientMatrix0() {
         return ingredientMatrix;
     }
 
@@ -62,8 +62,8 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     }
 
     @Override
-    public boolean checkMatrixOfTypes(@Nonnull DataItemType[] matrix) {
-        DataItemType[] ingredientMatrix = getIngredientMatrix0();
+    public boolean checkMatrixOfTypes(@Nonnull CustomItemType[] matrix) {
+        CustomItemType[] ingredientMatrix = getIngredientMatrix0();
         int length = matrix.length;
         int lengthForSide;
         if (length == 9) {
@@ -88,12 +88,12 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
                         for (int row = 0; row < rowCount; row++) {
                             int colIndex = lengthForSide - i + col;
                             int rowIndex = lengthForSide - j + row;
-                            DataItemType predictedIngredient = ObjectUtil.letNonNull(
+                            CustomItemType predictedIngredient = ObjectUtil.letNonNull(
                                     ingredientMatrix[row * colCount + col],
-                                    DataItemType::empty);
-                            DataItemType actualIngredient = ObjectUtil.letNonNull(
+                                    CustomItemType::empty);
+                            CustomItemType actualIngredient = ObjectUtil.letNonNull(
                                     matrix[rowIndex * lengthForSide + colIndex],
-                                    DataItemType::empty);
+                                    CustomItemType::empty);
                             if (!predictedIngredient.equals(actualIngredient)) {
                                 found = false;
                                 break;
@@ -122,14 +122,14 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapedRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         ShapedRecipe result = new ShapedRecipe(key,
-                new ItemStack(getResult().getMaterialBasedOn()));
+                new ItemStack(getResult().getOriginalType()));
         HashMap<Material, Character> collectMap = new HashMap<>();
         char c = 'a';
         int colCount = getColumnCount();
         String[] shape = new String[getRowCount()];
         int currentIndex = 0;
-        for (DataItemType type : getIngredientMatrix()) {
-            Material material = type.getMaterialBasedOn();
+        for (CustomItemType type : getIngredientMatrix()) {
+            Material material = type.getOriginalType();
             Character ct = collectMap.get(material);
             if (ct == null) {
                 collectMap.put(material, ct = c++);

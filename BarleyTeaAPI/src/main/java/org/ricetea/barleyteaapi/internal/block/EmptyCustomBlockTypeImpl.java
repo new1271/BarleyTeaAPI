@@ -49,4 +49,9 @@ public class EmptyCustomBlockTypeImpl implements CustomBlockType {
     public void call(@Nonnull Consumer<Material> materialConsumer, @Nonnull Consumer<CustomBlock> customBlockConsumer) {
         materialConsumer.accept(Material.AIR);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
 }

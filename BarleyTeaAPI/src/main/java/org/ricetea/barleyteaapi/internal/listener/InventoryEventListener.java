@@ -1,24 +1,25 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.inventory.*;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemAnvil;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemEnchant;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGrindstone;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.internal.helper.ItemFeatureHelper;
 import org.ricetea.barleyteaapi.internal.item.renderer.util.AlternativeItemState;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.WithFlag;
@@ -57,37 +58,56 @@ public final class InventoryEventListener implements Listener {
         return inst.get();
     }
 
+    @Nonnull
+    private static MerchantRecipe translateRecipe(@Nonnull MerchantRecipe recipe) {
+        var ingredients = recipe.getIngredients().stream()
+                .map(InventoryEventListener::restoreItem)
+                .toList();
+        var oldResult = recipe.getResult();
+        var newResult = ObjectUtil.safeMap(restoreItem(oldResult), WithFlag::obj);
+        if (newResult != null && newResult != oldResult)
+            recipe = new MerchantRecipe(newResult, recipe.getUses(), recipe.getMaxUses(),
+                    recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
+                    recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
+        if (ingredients.stream().anyMatch(flag -> flag != null && flag.flag())) {
+            recipe.setIngredients(ingredients.stream()
+                    .map(flag -> flag == null ? null : flag.obj())
+                    .toList());
+        }
+        return recipe;
+    }
+
+    @Nullable
+    private static WithFlag<ItemStack> restoreItem(@Nullable ItemStack itemStack) {
+        if (itemStack == null)
+            return null;
+        if (!ItemHelper.isCustomItem(itemStack))
+            return new WithFlag<>(itemStack);
+        return new WithFlag<>(AlternativeItemState.restore(itemStack), true);
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemEnchanting(EnchantItemEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
         ItemStack itemStack = event.getItem();
-        NamespacedKey id = BaseItem.getItemID(itemStack);
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && id != null) {
-            BaseItem baseItem = register.lookup(id);
-            if (baseItem != null) {
-                Consumer<ItemStack> job = null;
-                if (baseItem instanceof FeatureItemEnchant itemEnchantFeature) {
-                    DataItemEnchant data = new DataItemEnchant(event);
-                    itemEnchantFeature.handleItemEnchant(data);
-                    job = data.getJobAfterItemEnchant();
-                }
-                final Consumer<ItemStack> finalJob = job;
+        CustomItem itemType = CustomItem.get(itemStack);
+        if (itemType == null)
+            return;
+        if (itemType instanceof FeatureItemEnchant feature) {
+            DataItemEnchant data = new DataItemEnchant(event);
+            feature.handleItemEnchant(data);
+            Consumer<ItemStack> job = data.getJobAfterItemEnchant();
+            if (job != null) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
-                        () -> {
-                            ItemStack _itemStack = event.getItem();
-                            if (finalJob != null) {
-                                finalJob.accept(_itemStack);
-                            }
-                        });
+                        () -> job.accept(event.getItem()));
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemGrinding(PrepareGrindstoneEvent event) {
-        if (event == null)
+        if (event == null || !ItemRegister.hasRegistered())
             return;
         ItemStack resultItem = event.getResult();
         if (resultItem == null || resultItem.getType().isAir())
@@ -95,38 +115,59 @@ public final class InventoryEventListener implements Listener {
         final GrindstoneInventory inventory = event.getInventory();
         final ItemStack upperItem = inventory.getUpperItem();
         final ItemStack lowerItem = inventory.getLowerItem();
-        if (upperItem != null) {
-            NamespacedKey id = BaseItem.getItemID(upperItem);
-            ItemRegister register = ItemRegister.getInstanceUnsafe();
-            if (register != null && id != null) {
-                BaseItem baseItem = register.lookup(id);
-                if (baseItem != null) {
-                    final ItemStack oldResultItem = resultItem;
-                    if (baseItem.isCertainItem(lowerItem)) {
-                        resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
-                        if (baseItem instanceof FeatureItemGrindstone itemGrindstoneFeature) {
-                            if (itemGrindstoneFeature.handleItemGrindstone(new DataItemGrindstone(event))) {
-                                resultItem = event.getResult();
-                            } else {
-                                resultItem = null;
-                            }
-                        }
-                    }
-                    if (oldResultItem != resultItem) {
-                        event.setResult(resultItem);
-                    }
+        if (upperItem != null && lowerItem != null) {
+            CustomItem itemType = CustomItem.get(upperItem);
+            if (itemType == null) {
+                if (ItemHelper.isCustomItem(lowerItem)) {
+                    event.setResult(null);
                     return;
                 }
+            } else {
+                final ItemStack oldResultItem = resultItem;
+                if (ItemHelper.isCertainItem(itemType, lowerItem)) {
+                    resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
+                    if (itemType instanceof FeatureItemGrindstone feature) {
+                        if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
+                            resultItem = event.getResult();
+                        } else {
+                            resultItem = null;
+                        }
+                    }
+                } else {
+                    resultItem = null;
+                }
+                if (oldResultItem != resultItem) {
+                    event.setResult(resultItem);
+                }
+                return;
             }
-        }
-        if (BaseItem.isBarleyTeaItem(lowerItem)) {
-            event.setResult(null);
+        } else {
+            ItemStack item = upperItem;
+            if (item == null)
+                item = lowerItem;
+            if (item == null)
+                return;
+            CustomItem itemType = CustomItem.get(item);
+            if (itemType != null) {
+                final ItemStack oldResultItem = resultItem;
+                if (CustomItem.get(item) instanceof FeatureItemGrindstone feature) {
+                    if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
+                        resultItem = event.getResult();
+                    } else {
+                        resultItem = null;
+                    }
+                }
+                if (oldResultItem != resultItem) {
+                    event.setResult(resultItem);
+                }
+                return;
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemAnviled(PrepareAnvilEvent event) {
-        if (event == null)
+        if (event == null || !ItemRegister.hasRegistered())
             return;
         ItemStack resultItem = event.getResult();
         if (resultItem == null || resultItem.getType().isAir())
@@ -135,49 +176,46 @@ public final class InventoryEventListener implements Listener {
         final ItemStack firstItem = inventory.getFirstItem();
         final ItemStack secondItem = inventory.getSecondItem();
         if (firstItem != null) {
-            NamespacedKey id = BaseItem.getItemID(firstItem);
-            ItemRegister register = ItemRegister.getInstanceUnsafe();
-            if (register != null && id != null) {
-                BaseItem baseItem = register.lookup(id);
-                if (baseItem != null) {
-                    final ItemStack oldResultItem = resultItem;
-                    if (baseItem.isCertainItem(secondItem)) { //Repair mode
-                        resultItem = ItemFeatureLinker.doItemRepair(firstItem, secondItem, resultItem);
-                        if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
-                            if (itemAnvilFeature.handleItemAnvilRepair(new DataItemAnvilRepair(event))) {
+            CustomItem itemType = CustomItem.get(firstItem);
+            if (itemType == null) {
+                if (ItemHelper.isCustomItem(secondItem)) {
+                    event.setResult(null);
+                    return;
+                }
+            } else {
+                final ItemStack oldResultItem = resultItem;
+                if (ItemHelper.isCertainItem(itemType, secondItem)) {
+                    if (itemType instanceof FeatureItemAnvil feature) {
+                        if (feature.handleItemAnvilRepair(new DataItemAnvilRepair(event))) {
+                            resultItem = event.getResult();
+                        } else {
+                            resultItem = null;
+                        }
+                    }
+                } else if (ItemHelper.isCertainItem(itemType, resultItem)) {
+                    if (itemType instanceof FeatureItemAnvil feature) {
+                        if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
+                            if (feature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {
+                                resultItem = event.getResult();
+                            } else {
+                                resultItem = null;
+                            }
+                        } else { //Rename Mode
+                            if (feature.handleItemAnvilRename(new DataItemAnvilRename(event))) {
                                 resultItem = event.getResult();
                             } else {
                                 resultItem = null;
                             }
                         }
-                    } else if (BaseItem.isBarleyTeaItem(resultItem)) {
-                        if (baseItem instanceof FeatureItemAnvil itemAnvilFeature) {
-                            if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
-                                if (itemAnvilFeature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {
-                                    resultItem = event.getResult();
-                                } else {
-                                    resultItem = null;
-                                }
-                            } else { //Rename Mode
-                                if (itemAnvilFeature.handleItemAnvilRename(new DataItemAnvilRename(event))) {
-                                    resultItem = event.getResult();
-                                } else {
-                                    resultItem = null;
-                                }
-                            }
-                        } else if (secondItem != null && firstItem.getType().equals(secondItem.getType())) {
-                            resultItem = null;
-                        }
+                    } else if (secondItem != null && firstItem.getType().equals(secondItem.getType())) {
+                        resultItem = null;
                     }
-                    if (oldResultItem != resultItem) {
-                        event.setResult(resultItem);
-                    }
-                    return;
                 }
+                if (oldResultItem != resultItem) {
+                    event.setResult(resultItem);
+                }
+                return;
             }
-        }
-        if (BaseItem.isBarleyTeaItem(secondItem)) {
-            event.setResult(null);
         }
     }
 
@@ -203,34 +241,6 @@ public final class InventoryEventListener implements Listener {
         merchant.setRecipes(merchant.getRecipes()
                 .stream().map(InventoryEventListener::translateRecipe)
                 .toList());
-    }
-
-    @Nonnull
-    private static MerchantRecipe translateRecipe(@Nonnull MerchantRecipe recipe) {
-        var ingredients = recipe.getIngredients().stream()
-                .map(InventoryEventListener::restoreItem)
-                .toList();
-        var oldResult = recipe.getResult();
-        var newResult = ObjectUtil.safeMap(restoreItem(oldResult), WithFlag::obj);
-        if (newResult != null && newResult != oldResult)
-            recipe = new MerchantRecipe(newResult, recipe.getUses(), recipe.getMaxUses(),
-                    recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
-                    recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
-        if (ingredients.stream().anyMatch(flag -> flag != null && flag.flag())) {
-            recipe.setIngredients(ingredients.stream()
-                    .map(flag -> flag == null ? null : flag.obj())
-                    .toList());
-        }
-        return recipe;
-    }
-
-    @Nullable
-    private static WithFlag<ItemStack> restoreItem(@Nullable ItemStack itemStack) {
-        if (itemStack == null)
-            return null;
-        if (!BaseItem.isBarleyTeaItem(itemStack))
-            return new WithFlag<>(itemStack);
-        return new WithFlag<>(AlternativeItemState.restore(itemStack), true);
     }
 
 

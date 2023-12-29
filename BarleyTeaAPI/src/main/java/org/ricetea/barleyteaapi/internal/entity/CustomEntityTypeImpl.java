@@ -79,4 +79,9 @@ public class CustomEntityTypeImpl extends Either<EntityType, CustomEntity> imple
     public CustomEntity asCustomEntity() {
         return right();
     }
+
+    @Override
+    public boolean isUnknown() {
+        return false;
+    }
 }

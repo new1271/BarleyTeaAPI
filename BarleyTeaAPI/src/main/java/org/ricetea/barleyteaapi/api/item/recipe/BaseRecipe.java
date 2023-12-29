@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 
 import javax.annotation.Nonnull;
@@ -12,9 +12,9 @@ public abstract class BaseRecipe implements Keyed {
     @Nonnull
     private final NamespacedKey key;
     @Nonnull
-    private final DataItemType result;
+    private final CustomItemType result;
 
-    public BaseRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType result) throws UnsupportedOperationException {
+    public BaseRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType result) throws UnsupportedOperationException {
         this.key = key;
         result.call(left -> {
             if (left.isAir()) {
@@ -36,7 +36,7 @@ public abstract class BaseRecipe implements Keyed {
     }
 
     @Nonnull
-    public DataItemType getResult() {
+    public CustomItemType getResult() {
         return result;
     }
 

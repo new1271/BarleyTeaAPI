@@ -1,9 +1,7 @@
 package org.ricetea.barleyteaapi.api.base.data;
 
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.utils.ObjectUtil;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,7 +11,7 @@ public abstract class BaseItemInventoryResultFeatureData<T extends org.bukkit.ev
         extends BaseItemInventoryFeatureData<T> {
 
     @Nullable
-    private DataItemType resultType = null;
+    private CustomItemType resultType = null;
 
     public BaseItemInventoryResultFeatureData(@Nonnull T event) {
         super(event);
@@ -30,11 +28,10 @@ public abstract class BaseItemInventoryResultFeatureData<T extends org.bukkit.ev
     }
 
     @Nonnull
-    public DataItemType getResultType() {
-        DataItemType resultType = this.resultType;
+    public CustomItemType getResultType() {
+        CustomItemType resultType = this.resultType;
         if (resultType == null)
-            this.resultType = resultType = ObjectUtil
-                    .letNonNull(ObjectUtil.safeMap(getResult(), BaseItem::getItemType), DataItemType.empty());
+            this.resultType = resultType = CustomItemType.get(getResult());
         return resultType;
     }
 }

@@ -79,4 +79,9 @@ public class CustomBlockTypeImpl extends Either<Material, CustomBlock> implement
     public CustomBlock asCustomBlock() {
         return right();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

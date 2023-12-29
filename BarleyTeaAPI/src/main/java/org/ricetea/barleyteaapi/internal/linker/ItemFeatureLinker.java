@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.linker;
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -11,11 +9,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.utils.MathHelper;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -25,199 +24,144 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
 public final class ItemFeatureLinker {
-    private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
-    private static final EquipmentSlot[] SLOTS_JustHands = new EquipmentSlot[]{EquipmentSlot.HAND,
-            EquipmentSlot.OFF_HAND};
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
-            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
+            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull EquipmentSlot[] slots,
+            @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity == null || event == null)
+        if (entity == null || event == null || !ItemRegister.hasRegistered())
             return true;
         EntityEquipment equipment = entity.getEquipment();
         if (equipment == null)
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
-        for (EquipmentSlot slot : SLOTS) {
+        for (EquipmentSlot slot : slots) {
             if (slot != null) {
-                try {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                            dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot,
-                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                    if (isCancelled)
-                        return false;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return true;
-    }
-
-    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachHandsCancellable(
-            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
-            @Nonnull BiPredicate<TFeature, TData> featureFunc,
-            @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity == null || event == null)
-            return true;
-        EntityEquipment equipment = entity.getEquipment();
-        if (equipment == null)
-            return true;
-        boolean isCopy = !(equipment instanceof PlayerInventory);
-        for (EquipmentSlot slot : SLOTS_JustHands) {
-            try {
                 ItemStack itemStack = equipment.getItem(slot);
-                boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
-                        dataConstructor);
-                if (isCopy)
-                    equipment.setItem(slot,
-                            itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                            true);
-                if (isCancelled)
+                boolean result = ObjectUtil.tryMap(() ->
+                        doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                                dataConstructor), true);
+                if (result) {
+                    if (isCopy) {
+                        equipment.setItem(slot, itemStack, true);
+                    }
+                } else {
                     return false;
-            } catch (Exception e) {
-                e.printStackTrace();
+                }
             }
         }
         return true;
     }
 
     public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
-            @Nullable LivingEntity entity, @Nullable TEvent event, @Nullable TEvent2 event2,
+            @Nullable LivingEntity entity, @Nullable TEvent event,
+            @Nullable TEvent2 event2, @Nonnull EquipmentSlot[] slots,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
-        if (entity == null || event == null)
+        if (entity == null || event == null || !ItemRegister.hasRegistered())
             return true;
         EntityEquipment equipment = entity.getEquipment();
         if (equipment == null)
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
-        for (EquipmentSlot slot : SLOTS_JustHands) {
-            try {
+        for (EquipmentSlot slot : slots) {
+            if (slot != null) {
                 ItemStack itemStack = equipment.getItem(slot);
-                boolean isCancelled = !doFeatureCancellable(itemStack, slot, event, event2, featureClass,
-                        featureFunc,
-                        dataConstructor);
-                if (isCopy)
-                    equipment.setItem(slot,
-                            itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                            true);
-                if (isCancelled)
+                boolean result = ObjectUtil.tryMap(() ->
+                        doFeatureCancellable(itemStack, slot, event, event2, featureClass, featureFunc,
+                                dataConstructor), true);
+                if (result) {
+                    if (isCopy) {
+                        equipment.setItem(slot, itemStack, true);
+                    }
+                } else {
                     return false;
-            } catch (Exception e) {
-                e.printStackTrace();
+                }
             }
         }
         return true;
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void forEachEquipment(
-            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
-            @Nonnull BiConsumer<TFeature, TData> featureFunc,
+            @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull EquipmentSlot[] slots,
+            @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        if (entity == null || event == null)
+        if (entity == null || event == null || !ItemRegister.hasRegistered())
             return;
         EntityEquipment equipment = entity.getEquipment();
         if (equipment == null)
             return;
         boolean isCopy = !(equipment instanceof PlayerInventory);
-        for (EquipmentSlot slot : SLOTS) {
+        for (EquipmentSlot slot : slots) {
             if (slot != null) {
-                try {
-                    ItemStack itemStack = equipment.getItem(slot);
-                    doFeature(itemStack, slot, event, featureClass, featureFunc, dataConstructor);
-                    if (isCopy)
-                        equipment.setItem(slot,
-                                itemStack.getType().isAir() ? new ItemStack(Material.AIR) : itemStack,
-                                true);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                ItemStack itemStack = equipment.getItem(slot);
+                ObjectUtil.tryCall(() ->
+                        doFeature(itemStack, slot, event, featureClass, featureFunc,
+                                dataConstructor));
+                if (isCopy) {
+                    equipment.setItem(slot, itemStack, true);
                 }
             }
         }
     }
 
-    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
+    public static <TFeature, TEvent extends Event, TEvent2 extends Event,
+            TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nullable TEvent2 event2, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        boolean result = featureFunc.test(feature,
-                                dataConstructor.apply(event, event2, itemStack, equipmentSlot));
-                        if (event instanceof Cancellable cancellable) {
-                            result &= !cancellable.isCancelled();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
+            return false;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return false;
+        return ObjectUtil.tryMap(() -> {
+            boolean result = featureFunc.test(feature,
+                    dataConstructor.apply(event, event2, itemStack, equipmentSlot));
+            if (event instanceof Cancellable cancellable) {
+                result &= !cancellable.isCancelled();
             }
-        }
-        return true;
+            return result;
+        }, true);
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        boolean result = featureFunc.test(feature,
-                                dataConstructor.apply(event, itemStack, equipmentSlot));
-                        if (event instanceof Cancellable cancellable) {
-                            result &= !cancellable.isCancelled();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
+            return false;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return false;
+        return ObjectUtil.tryMap(() -> {
+            boolean result = featureFunc.test(feature,
+                    dataConstructor.apply(event, itemStack, equipmentSlot));
+            if (event instanceof Cancellable cancellable) {
+                result &= !cancellable.isCancelled();
             }
-        }
-        return true;
+            return result;
+        }, true);
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        boolean result = featureFunc.test(feature, dataConstructor.apply(event));
-                        if (event instanceof Cancellable cancellable) {
-                            result &= !cancellable.isCancelled();
-                        }
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (itemStack == null || event == null || !ItemRegister.hasRegistered())
+            return false;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return false;
+        return ObjectUtil.tryMap(() -> {
+            boolean result = featureFunc.test(feature, dataConstructor.apply(event));
+            if (event instanceof Cancellable cancellable) {
+                result &= !cancellable.isCancelled();
             }
-        }
-        return true;
+            return result;
+        }, true);
     }
 
     @Nonnull
@@ -225,77 +169,49 @@ public final class ItemFeatureLinker {
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiFunction<TFeature, TData, TReturn> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor, @Nonnull TReturn defaultValue) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                if (feature != null) {
-                    try {
-                        return ObjectUtil.letNonNull(featureFunc.apply(feature, dataConstructor.apply(event)),
-                                defaultValue);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        return defaultValue;
+        if (itemStack == null || event == null || !ItemRegister.hasRegistered())
+            return defaultValue;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return defaultValue;
+        return ObjectUtil.tryMap(() -> featureFunc.apply(feature, dataConstructor.apply(event)), defaultValue);
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> void doFeature(
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                try {
-                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                    if (feature != null) {
-                        featureFunc.accept(feature, dataConstructor.apply(event));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        if (itemStack == null || event == null || !ItemRegister.hasRegistered())
+            return;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return;
+        ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event)));
     }
 
     public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void doFeature(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && itemStack != null && event != null && equipmentSlot != null) {
-            NamespacedKey id = BaseItem.getItemID(itemStack);
-            if (id != null) {
-                try {
-                    TFeature feature = ObjectUtil.tryCast(register.lookup(id), featureClass);
-                    if (feature != null) {
-                        featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
+            return;
+        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        if (feature == null)
+            return;
+        ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot)));
     }
 
     public static ItemStack doItemRepair(@Nullable ItemStack itemStackA, @Nullable ItemStack itemStackB,
                                          @Nullable ItemStack itemStackResult) {
-        BaseItem itemType = ObjectUtil
-                .letNonNull(ObjectUtil.safeMap(itemStackA, BaseItem::getItemType), DataItemType::empty)
-                .asCustomItem();
+        CustomItem itemType = CustomItem.get(itemStackA);
         if (itemType == null) {
-            if (BaseItem.isBarleyTeaItem(itemStackB)) {
+            if (ItemHelper.isCustomItem(itemStackB)) {
                 return null;
             } else {
                 return itemStackResult;
             }
         } else {
-            if (itemStackA != null && itemType.isCertainItem(itemStackB)) {
+            if (ItemHelper.isCertainItem(itemType, itemStackB)) {
                 if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
                     try {
                         itemStackResult = itemGiveFeature.handleItemGive(1);
@@ -304,15 +220,15 @@ public final class ItemFeatureLinker {
                     }
                 }
                 if (itemStackResult != null && !itemStackResult.getType().isAir()) {
-                    if (itemType instanceof FeatureItemCustomDurability customDurabilityFeature) {
+                    if (itemType instanceof FeatureItemCustomDurability feature) {
                         try {
-                            int maxDura = customDurabilityFeature.getMaxDurability(itemStackA);
-                            int upperItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackA);
-                            int lowerItemDamage = customDurabilityFeature.getDurabilityDamage(itemStackB);
-                            int newDamage = Math
-                                    .max(Math.min(upperItemDamage + lowerItemDamage - maxDura - maxDura / 20, maxDura),
-                                            0);
-                            customDurabilityFeature.setDurabilityDamage(itemStackResult, newDamage);
+                            int maxDura = feature.getMaxDurability(itemStackA);
+                            int upperItemDamage = feature.getDurabilityDamage(itemStackA);
+                            int lowerItemDamage = feature.getDurabilityDamage(itemStackB);
+                            int newDamage = MathHelper.between(
+                                    upperItemDamage + lowerItemDamage - maxDura - maxDura / 20
+                                    , 0, maxDura);
+                            feature.setDurabilityDamage(itemStackResult, newDamage);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

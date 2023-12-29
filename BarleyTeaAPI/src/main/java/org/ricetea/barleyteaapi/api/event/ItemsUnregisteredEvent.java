@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
 
@@ -14,9 +14,9 @@ public final class ItemsUnregisteredEvent extends Event {
 
     private static final @Nonnull Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
-    private final @Nonnull List<BaseItem> items;
+    private final @Nonnull List<CustomItem> items;
 
-    public ItemsUnregisteredEvent(@Nonnull Collection<BaseItem> items) {
+    public ItemsUnregisteredEvent(@Nonnull Collection<CustomItem> items) {
         this.items = CollectionUtil.toUnmodifiableList(items);
     }
 
@@ -26,7 +26,7 @@ public final class ItemsUnregisteredEvent extends Event {
     }
 
     @Nonnull
-    public List<BaseItem> getItems() {
+    public List<CustomItem> getItems() {
         return items;
     }
 

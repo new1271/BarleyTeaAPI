@@ -6,25 +6,24 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
+import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class RegularItem extends BaseItem
-        implements FeatureCommandGive, FeatureItemGive {
+public abstract class RegularItem extends DefaultItem implements FeatureCommandGive, FeatureItemGive {
     @Nonnull
     private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtil
             .BarleyTeaAPI("item_damage");
 
-    public RegularItem(@Nonnull NamespacedKey key, @Nonnull Material materialBasedOn, @Nonnull DataItemRarity rarity) {
-        super(key, materialBasedOn, rarity);
+    public RegularItem(@Nonnull NamespacedKey key, @Nonnull Material originalType, @Nonnull CustomItemRarity rarity) {
+        super(key, originalType, rarity);
     }
 
     public int getDurabilityDamage(@Nonnull ItemStack itemStack) {
@@ -88,8 +87,8 @@ public abstract class RegularItem extends BaseItem
     @Nullable
     public ItemStack handleItemGive(int count) {
         if (count > 0) {
-            ItemStack itemStack = new ItemStack(getMaterialBasedOn(), count);
-            if (tryRegister(itemStack, this::handleItemGive)) {
+            ItemStack itemStack = new ItemStack(getOriginalType(), count);
+            if (ItemHelper.tryRegister(this, itemStack, this::handleItemGive)) {
                 return itemStack;
             }
         }

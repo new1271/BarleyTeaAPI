@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 
@@ -14,10 +14,10 @@ import java.util.*;
 public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
 
     @Nonnull
-    private final DataItemType[] ingredients;
+    private final CustomItemType[] ingredients;
 
-    public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType[] ingredients,
-                                   @Nonnull DataItemType result) {
+    public ShapelessCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType[] ingredients,
+                                   @Nonnull CustomItemType result) {
         super(key, result);
         int length = ingredients.length;
         if (length <= 0) {
@@ -29,27 +29,27 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     }
 
     @Nonnull
-    public List<DataItemType> getIngredients() {
+    public List<CustomItemType> getIngredients() {
         return ObjectUtil.letNonNull(Collections.unmodifiableList(Arrays.asList(getIngredients0())),
                 Collections::emptyList);
     }
 
     @Nonnull
-    protected DataItemType[] getIngredients0() {
+    protected CustomItemType[] getIngredients0() {
         return ingredients;
     }
 
     @Override
-    public boolean checkMatrixOfTypes(@Nonnull DataItemType[] matrix) {
-        DataItemType[] ingredients = getIngredients0();
+    public boolean checkMatrixOfTypes(@Nonnull CustomItemType[] matrix) {
+        CustomItemType[] ingredients = getIngredients0();
         if (matrix.length == 0 || matrix.length < ingredients.length)
             return false;
-        ArrayList<DataItemType> matrixClone = new ArrayList<>(Arrays.asList(matrix));
+        ArrayList<CustomItemType> matrixClone = new ArrayList<>(Arrays.asList(matrix));
         int selectedCount = 0;
-        for (DataItemType ingredient : ingredients) {
-            DataItemType predictedIngredient = ObjectUtil.letNonNull(ingredient, DataItemType::empty);
+        for (CustomItemType ingredient : ingredients) {
+            CustomItemType predictedIngredient = ObjectUtil.letNonNull(ingredient, CustomItemType::empty);
             for (var iterator = matrixClone.iterator(); iterator.hasNext(); ) {
-                DataItemType actualIngredient = ObjectUtil.letNonNull(iterator.next(), DataItemType::empty);
+                CustomItemType actualIngredient = ObjectUtil.letNonNull(iterator.next(), CustomItemType::empty);
                 if (predictedIngredient.equals(actualIngredient)) {
                     selectedCount++;
                     iterator.remove();
@@ -57,7 +57,7 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
                 }
             }
         }
-        return selectedCount >= ingredients.length && matrixClone.stream().allMatch(DataItemType::isEmpty);
+        return selectedCount >= ingredients.length && matrixClone.stream().allMatch(CustomItemType::isEmpty);
     }
 
     @Override
@@ -71,9 +71,9 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
     @Nonnull
     public ShapelessRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         ShapelessRecipe result = new ShapelessRecipe(key,
-                new ItemStack(getResult().getMaterialBasedOn()));
-        for (DataItemType type : getIngredients()) {
-            Material material = type.getMaterialBasedOn();
+                new ItemStack(getResult().getOriginalType()));
+        for (CustomItemType type : getIngredients()) {
+            Material material = type.getOriginalType();
             result.addIngredient(material);
         }
         return Objects.requireNonNull(result);

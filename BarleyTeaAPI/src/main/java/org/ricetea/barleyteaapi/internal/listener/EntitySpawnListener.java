@@ -23,6 +23,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -98,7 +99,8 @@ public final class EntitySpawnListener implements Listener {
     private void onProjectileLaunch(@Nonnull ProjectileLaunchEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
-        if (!ItemFeatureLinker.forEachHandsCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(shooter, LivingEntity.class),
+                event, Constants.HAND_SLOTS,
                 FeatureItemHoldEntityShoot.class, FeatureItemHoldEntityShoot::handleItemHoldEntityShoot,
                 DataItemHoldEntityShoot::new)) {
             event.setCancelled(true);

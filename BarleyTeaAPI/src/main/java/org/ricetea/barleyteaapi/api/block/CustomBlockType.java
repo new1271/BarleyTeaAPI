@@ -60,6 +60,16 @@ public interface CustomBlockType extends EitherOperation<Material, CustomBlock>,
     @Nullable
     CustomBlock asCustomBlock();
 
+    boolean isEmpty();
+
+    default boolean isMaterial() {
+        return asMaterial() != null;
+    }
+
+    default boolean isCustomBlock() {
+        return asCustomBlock() != null;
+    }
+
     @Nonnull
     default Material getOriginalType() {
         return nonNullMap(Function.identity(), CustomBlock::getOriginalType);

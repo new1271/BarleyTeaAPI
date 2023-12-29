@@ -21,6 +21,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillEnti
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlayer;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -52,11 +53,12 @@ public final class EntityDeathListener implements Listener {
         }
     }
 
+    @SuppressWarnings("all")
     private void onEntityDeath(@Nonnull EntityDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity entity = event.getEntity();
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
-                lastDamageEvent, FeatureItemHoldEntityKill.class,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
+                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityKill.class,
                 FeatureItemHoldEntityKill::handleItemHoldEntityKillEntity, DataItemHoldEntityKillEntity::new)) {
             event.setCancelled(true);
             return;
@@ -66,8 +68,8 @@ public final class EntityDeathListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(entity, LivingEntity.class), event,
-                lastDamageEvent, FeatureItemHoldEntityDeath.class,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(entity, LivingEntity.class),
+                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityDeath.class,
                 FeatureItemHoldEntityDeath::handleItemHoldEntityDeath, DataItemHoldEntityDeath::new)) {
             event.setCancelled(true);
             return;
@@ -80,10 +82,11 @@ public final class EntityDeathListener implements Listener {
         EntityFeatureLinker.doFeature(entity, FeatureEntityLoad.class, FeatureEntityLoad::handleEntityUnloaded);
     }
 
+    @SuppressWarnings("all")
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
-                lastDamageEvent, FeatureItemHoldEntityKill.class,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
+                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityKill.class,
                 FeatureItemHoldEntityKill::handleItemHoldEntityKillPlayer, DataItemHoldEntityKillPlayer::new)) {
             event.setCancelled(true);
             return;

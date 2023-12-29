@@ -11,6 +11,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -33,9 +34,10 @@ public final class EntityMoveListener implements Listener {
         if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityMove.class,
                 FeatureEntityMove::handleEntityMove, DataEntityMove::new))
             event.setCancelled(true);
-        if (!(event.getEntity() instanceof Player) || ItemRegister.getInstance().hasAnyRegisteredNeedMovingFeature())
+        if (!(event.getEntity() instanceof Player) || !ItemRegister.hasRegisteredNeedMovingFeature())
             return;
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(event.getEntity(), event, FeatureItemHoldEntityMove.class,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(event.getEntity(), event,
+                Constants.ALL_SLOTS, FeatureItemHoldEntityMove.class,
                 FeatureItemHoldEntityMove::handleItemHoldEntityEntityMove, DataItemHoldEntityMove::new))
             event.setCancelled(true);
     }

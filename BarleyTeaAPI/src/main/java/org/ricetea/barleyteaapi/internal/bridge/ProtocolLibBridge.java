@@ -26,9 +26,9 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
-import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderUtil;
+import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.internal.item.renderer.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
@@ -85,8 +85,8 @@ public final class ProtocolLibBridge {
             if (itemStack == null)
                 return null;
             boolean modified = false;
-            ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
-            if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
+            ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
+            if (renderer == null && ItemHelper.isCustomItem(itemStack)) {
                 renderer = ItemRenderer.getDefault();
             }
             if (renderer != null) {
@@ -121,12 +121,13 @@ public final class ProtocolLibBridge {
         private static ItemStack restoreItem(@Nullable ItemStack itemStack) {
             if (itemStack == null)
                 return null;
-            ItemRenderer renderer = ItemRenderUtil.getLastRenderer(itemStack);
-            if (renderer == null && BaseItem.isBarleyTeaItem(itemStack)) {
+            ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
+            if (renderer == null && ItemHelper.isCustomItem(itemStack)) {
                 renderer = ItemRenderer.getDefault();
             }
-            if (renderer != null)
-                itemStack = AlternativeItemState.restore(itemStack);
+            if (renderer != null) {
+                AlternativeItemState.restore(itemStack);
+            }
             if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta && blockMeta.hasBlockState()) {
                 if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
                     var inventory = shulkerBox.getInventory();

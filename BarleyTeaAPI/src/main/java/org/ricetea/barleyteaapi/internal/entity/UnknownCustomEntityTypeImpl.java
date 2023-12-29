@@ -39,6 +39,11 @@ public class UnknownCustomEntityTypeImpl implements CustomEntityType {
         return null;
     }
 
+    @Override
+    public boolean isUnknown() {
+        return true;
+    }
+
     @Nullable
     @Override
     public <T> T map(@Nonnull Function<EntityType, T> materialFunction, @Nonnull Function<CustomEntity, T> customBlockFunction) {

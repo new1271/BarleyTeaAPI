@@ -4,9 +4,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.base.data.BasePlayerFeatureData;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.utils.ObjectUtil;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,7 +12,7 @@ import java.util.Objects;
 
 public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsumeEvent> {
     @Nullable
-    private DataItemType replacementType = null;
+    private CustomItemType replacementType = null;
 
     public DataItemConsume(@Nonnull PlayerItemConsumeEvent event) {
         super(event);
@@ -49,12 +47,10 @@ public final class DataItemConsume extends BasePlayerFeatureData<PlayerItemConsu
         replacementType = null;
     }
 
-    public @Nonnull DataItemType getReplacementType() {
-        DataItemType replacementType = this.replacementType;
+    public @Nonnull CustomItemType getReplacementType() {
+        CustomItemType replacementType = this.replacementType;
         if (replacementType == null)
-            this.replacementType = replacementType = ObjectUtil
-                    .letNonNull(ObjectUtil.safeMap(getReplacement(), BaseItem::getItemType),
-                            DataItemType.empty());
+            this.replacementType = replacementType = CustomItemType.get(getReplacement());
         return replacementType;
     }
 }

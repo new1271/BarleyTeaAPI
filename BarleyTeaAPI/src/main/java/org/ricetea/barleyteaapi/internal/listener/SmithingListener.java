@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingInventory;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
@@ -44,14 +44,14 @@ public final class SmithingListener implements Listener {
             ItemStack addition = inventory.getInputMineral();
             if (original == null || template == null || addition == null)
                 return;
-            DataItemType originalType = DataItemType.get(original);
-            DataItemType templateType = DataItemType.get(template);
-            DataItemType additionType = DataItemType.get(addition);
+            CustomItemType originalType = CustomItemType.get(original);
+            CustomItemType templateType = CustomItemType.get(template);
+            CustomItemType additionType = CustomItemType.get(addition);
             original = ItemHelper.getSingletonClone(original);
             template = ItemHelper.getSingletonClone(template);
             addition = ItemHelper.getSingletonClone(addition);
-            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || originalType.isCustom()
-                    || templateType.isCustom() || additionType.isCustom()) {
+            if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || originalType.isCustomItem()
+                    || templateType.isCustomItem() || additionType.isCustomItem()) {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 boolean allPassed = true;

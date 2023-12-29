@@ -1,25 +1,22 @@
 package org.ricetea.barleyteaapi.internal.task;
 
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public final class ItemTickTask extends LoopTaskBase {
-
-    @Nonnull
-    public static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
     @Nonnull
     private static final Lazy<ItemTickTask> _inst = Lazy.create(ItemTickTask::new);
     private int lastTick;
@@ -42,8 +39,7 @@ public final class ItemTickTask extends LoopTaskBase {
     public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (api == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
+        if (api == null || !ItemRegister.hasRegisteredNeedTicking()) {
             stop();
         } else {
             int currentTick = Bukkit.getCurrentTick();
@@ -54,14 +50,13 @@ public final class ItemTickTask extends LoopTaskBase {
                     for (Player player : players) {
                         if (player != null && !player.isDead()) {
                             PlayerInventory inv = player.getInventory();
-                            for (EquipmentSlot slot : SLOTS) {
+                            for (EquipmentSlot slot : Constants.ALL_SLOTS) {
                                 if (slot != null) {
                                     ItemStack itemStack = inv.getItem(slot);
-                                    NamespacedKey id = BaseItem.getItemID(itemStack);
-                                    if (id != null
-                                            && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
+                                    CustomItem itemType = CustomItem.get(itemStack);
+                                    if (itemType instanceof FeatureItemTick feature) {
                                         scheduler.scheduleSyncDelayedTask(api,
-                                                () -> itemTickFeature.handleTickOnEquipment(player, inv,
+                                                () -> feature.handleTickOnEquipment(player, inv,
                                                         itemStack, slot));
                                     }
                                 }
@@ -69,14 +64,11 @@ public final class ItemTickTask extends LoopTaskBase {
                             for (int i = 0, count = inv.getSize(); i < count; i++) {
                                 final int slot = i;
                                 ItemStack itemStack = inv.getItem(slot);
-                                if (itemStack != null) {
-                                    NamespacedKey id = BaseItem.getItemID(itemStack);
-                                    if (id != null
-                                            && register.lookup(id) instanceof FeatureItemTick itemTickFeature) {
-                                        scheduler.scheduleSyncDelayedTask(api,
-                                                () -> itemTickFeature.handleTickOnInventory(player, inv,
-                                                        itemStack, slot));
-                                    }
+                                CustomItem itemType = CustomItem.get(itemStack);
+                                if (itemType instanceof FeatureItemTick feature) {
+                                    scheduler.scheduleSyncDelayedTask(api,
+                                            () -> feature.handleTickOnInventory(player, inv,
+                                                    itemStack, slot));
                                 }
                             }
                         }

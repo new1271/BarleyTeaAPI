@@ -18,9 +18,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemRarity;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
+import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurabilityExtra;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDisplay;
@@ -99,9 +99,9 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         List<SoftCache<Deque<Component>>> renderLoreStackList = reusableRenderLoreStack.get();
         Deque<Component> renderLoreStack = renderLoreStackList.get(0).get();
 
-        DataItemType itemType = DataItemType.get(itemStack);
+        CustomItemType itemType = CustomItemType.get(itemStack);
 
-        boolean isTool = itemType.nonNullMap(ItemHelper::materialIsTool, BaseItem::isTool);
+        boolean isTool = itemType.nonNullMap(ItemHelper::materialIsTool, CustomItem::isTool);
 
         double toolDamage = 0, toolSpeed = 0;
 
@@ -304,18 +304,18 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         }
 
         Component displayName = meta.displayName();
-        BaseItem customItem = itemType.asCustomItem();
+        CustomItem customItem = itemType.asCustomItem();
         List<Component> output = null;
         if (customItem != null) {
             boolean isRenamed;
             if (displayName == null) {
-                displayName = customItem.getDefaultNameComponent();
+                displayName = ItemHelper.getDefaultNameComponent(itemType);
                 isRenamed = false;
             } else {
                 isRenamed = true;
             }
 
-            DataItemRarity rarity = customItem.getRarity();
+            CustomItemRarity rarity = customItem.getRarity();
             if (customItem.isRarityUpgraded(itemStack)) {
                 rarity = rarity.upgrade();
             }

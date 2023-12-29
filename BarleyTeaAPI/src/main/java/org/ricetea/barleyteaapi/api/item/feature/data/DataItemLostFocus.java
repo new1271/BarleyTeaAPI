@@ -3,9 +3,7 @@ package org.ricetea.barleyteaapi.api.item.feature.data;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.base.data.BasePlayerFeatureData;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
-import org.ricetea.utils.ObjectUtil;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,7 +11,7 @@ import javax.annotation.Nullable;
 public final class DataItemLostFocus extends BasePlayerFeatureData<PlayerItemHeldEvent> {
 
     @Nullable
-    private DataItemType itemGotFocusType = null;
+    private CustomItemType itemGotFocusType = null;
 
     @Nullable
     private ItemStack itemStackGotFocus;
@@ -50,13 +48,11 @@ public final class DataItemLostFocus extends BasePlayerFeatureData<PlayerItemHel
     }
 
     @Nonnull
-    public DataItemType getItemStackGotFocusType() {
-        DataItemType itemGotFocusType = this.itemGotFocusType;
+    public CustomItemType getItemStackGotFocusType() {
+        CustomItemType itemGotFocusType = this.itemGotFocusType;
         ItemStack itemStackGotFocus = getItemStackGotFocus();
         if (itemGotFocusType == null || this.itemStackGotFocus != itemStackGotFocus) {
-            this.itemGotFocusType = itemGotFocusType = ObjectUtil
-                    .letNonNull(ObjectUtil.safeMap(itemStackGotFocus, BaseItem::getItemType),
-                            DataItemType.empty());
+            this.itemGotFocusType = itemGotFocusType = CustomItemType.get(itemStackGotFocus);
             this.itemStackGotFocus = itemStackGotFocus;
         }
         return itemGotFocusType;

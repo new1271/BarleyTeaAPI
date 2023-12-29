@@ -3,8 +3,7 @@ package org.ricetea.barleyteaapi.api.item.feature.data;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemAnvilFeatureData;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -13,11 +12,11 @@ import java.util.Objects;
 public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
 
     @Nonnull
-    private final Lazy<DataItemType> combinedType;
+    private final Lazy<CustomItemType> combinedType;
 
     public DataItemAnvilCombine(@Nonnull PrepareAnvilEvent event) {
         super(event);
-        combinedType = Lazy.create(() -> BaseItem.getItemType(getItemStackCombined()));
+        combinedType = Lazy.create(() -> CustomItemType.get(getItemStackCombined()));
     }
 
     @Nonnull
@@ -26,7 +25,7 @@ public final class DataItemAnvilCombine extends BaseItemAnvilFeatureData {
     }
 
     @Nonnull
-    public DataItemType getItemStackCombinedType() {
+    public CustomItemType getItemStackCombinedType() {
         return combinedType.get();
     }
 }

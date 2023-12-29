@@ -2,7 +2,7 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 
@@ -13,30 +13,30 @@ import java.util.Set;
 public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingFunction {
 
     @Nonnull
-    private final DataItemType original;
+    private final CustomItemType original;
 
-    public BaseSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original,
-                              @Nonnull DataItemType result) {
+    public BaseSmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original,
+                              @Nonnull CustomItemType result) {
         super(key, result);
         this.original = original;
     }
 
     @Nonnull
-    public DataItemType getOriginal() {
+    public CustomItemType getOriginal() {
         return original;
     }
 
     @Nonnull
-    public abstract Set<DataItemType> getTemplates();
+    public abstract Set<CustomItemType> getTemplates();
 
     @Nonnull
-    public abstract Set<DataItemType> getAdditions();
+    public abstract Set<CustomItemType> getAdditions();
 
-    public boolean filterTemplateType(@Nonnull DataItemType templateType) {
+    public boolean filterTemplateType(@Nonnull CustomItemType templateType) {
         return getTemplates().contains(templateType);
     }
 
-    public boolean filterAdditionType(@Nonnull DataItemType additionType) {
+    public boolean filterAdditionType(@Nonnull CustomItemType additionType) {
         return getAdditions().contains(additionType);
     }
 

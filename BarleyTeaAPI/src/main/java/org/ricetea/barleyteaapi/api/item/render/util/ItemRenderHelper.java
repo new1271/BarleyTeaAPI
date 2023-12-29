@@ -13,7 +13,7 @@ import org.ricetea.utils.ObjectUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class ItemRenderUtil {
+public final class ItemRenderHelper {
 
     private static final @Nonnull NamespacedKey lastRenderingKey = NamespacedKeyUtil.BarleyTeaAPI("last_renderer");
 

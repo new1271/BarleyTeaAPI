@@ -4,30 +4,30 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
-import org.ricetea.utils.function.NonnullFunction;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 
-public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFunction<ItemStack, ItemStack> {
+public abstract class BaseCookingRecipe extends BaseRecipe implements Function<ItemStack, ItemStack> {
 
     public static final int DefaultCookingTime = 200;
     public static final float DefaultExperience = 0.0f;
 
     @Nonnull
-    private final DataItemType original;
+    private final CustomItemType original;
 
     private final float experience;
     private final int cookingTime;
 
-    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result)
+    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original, @Nonnull CustomItemType result)
             throws UnsupportedOperationException {
         this(key, original, result, 0.0f, DefaultCookingTime);
     }
 
-    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType result,
+    public BaseCookingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original, @Nonnull CustomItemType result,
                              float experience, int cookingTime) {
         super(key, result);
         this.original = original;
@@ -36,7 +36,7 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements NonnullFun
     }
 
     @Nonnull
-    public DataItemType getOriginal() {
+    public CustomItemType getOriginal() {
         return original;
     }
 

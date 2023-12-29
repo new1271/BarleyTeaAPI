@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice.MaterialChoice;
 import org.bukkit.inventory.SmithingTransformRecipe;
-import org.ricetea.barleyteaapi.api.item.data.DataItemType;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.internal.helper.SmithingHelper;
 import org.ricetea.utils.CollectionUtil;
 
@@ -19,15 +19,15 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     private final boolean copyNbt;
 
     @Nonnull
-    private final DataItemType template, addition;
+    private final CustomItemType template, addition;
 
-    public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType template,
-                          @Nonnull DataItemType addition, @Nonnull DataItemType result) {
+    public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original, @Nonnull CustomItemType template,
+                          @Nonnull CustomItemType addition, @Nonnull CustomItemType result) {
         this(key, original, template, addition, result, true);
     }
 
-    public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull DataItemType original, @Nonnull DataItemType template,
-                          @Nonnull DataItemType addition, @Nonnull DataItemType result, boolean copyNbt) {
+    public SmithingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType original, @Nonnull CustomItemType template,
+                          @Nonnull CustomItemType addition, @Nonnull CustomItemType result, boolean copyNbt) {
         super(key, original, result);
         this.template = template;
         this.addition = addition;
@@ -35,23 +35,23 @@ public class SmithingRecipe extends BaseSmithingRecipe {
     }
 
     @Nonnull
-    public Set<DataItemType> getTemplates() {
+    public Set<CustomItemType> getTemplates() {
         return Objects.requireNonNull(Collections.singleton(template));
     }
 
     @Nonnull
-    public Set<DataItemType> getAdditions() {
+    public Set<CustomItemType> getAdditions() {
         return Objects.requireNonNull(Collections.singleton(addition));
     }
 
     @Nonnull
     public SmithingTransformRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
-        return new SmithingTransformRecipe(key, new ItemStack(getResult().getMaterialBasedOn()),
-                new MaterialChoice(CollectionUtil.firstOrDefault(getTemplates(), DataItemType.empty())
-                        .getMaterialBasedOn()),
-                new MaterialChoice(getOriginal().getMaterialBasedOn()),
-                new MaterialChoice(CollectionUtil.firstOrDefault(getAdditions(), DataItemType.empty())
-                        .getMaterialBasedOn()),
+        return new SmithingTransformRecipe(key, new ItemStack(getResult().getOriginalType()),
+                new MaterialChoice(CollectionUtil.firstOrDefault(getTemplates(), CustomItemType.empty())
+                        .getOriginalType()),
+                new MaterialChoice(getOriginal().getOriginalType()),
+                new MaterialChoice(CollectionUtil.firstOrDefault(getAdditions(), CustomItemType.empty())
+                        .getOriginalType()),
                 copyNbt);
     }
 

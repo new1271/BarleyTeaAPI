@@ -59,6 +59,16 @@ public interface CustomEntityType extends EitherOperation<EntityType, CustomEnti
     @Nullable
     CustomEntity asCustomEntity();
 
+    boolean isUnknown();
+
+    default boolean isEntityType() {
+        return asEntityType() != null;
+    }
+
+    default boolean isCustomEntity() {
+        return asCustomEntity() != null;
+    }
+
     @Nonnull
     default EntityType getOriginalType() {
         return nonNullMap(Function.identity(), CustomEntity::getOriginalType);

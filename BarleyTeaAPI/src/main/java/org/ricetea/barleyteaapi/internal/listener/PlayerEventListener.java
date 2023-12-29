@@ -2,7 +2,6 @@ package org.ricetea.barleyteaapi.internal.listener;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -18,13 +17,14 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockClick;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockClicked;
 import org.ricetea.barleyteaapi.api.block.feature.state.StateBlockClicked;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.*;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -43,49 +43,55 @@ public final class PlayerEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemDamaged(PlayerItemDamageEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
         ItemStack itemStack = event.getItem();
-        NamespacedKey id = BaseItem.getItemID(itemStack);
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && id != null) {
-            BaseItem baseItem = register.lookup(id);
-            if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
-                if (!itemDamageFeature.handleItemDamage(new DataItemDamage(event))) {
+        CustomItem itemType = CustomItem.get(itemStack);
+        if (itemType == null)
+            return;
+        if (itemType instanceof FeatureItemDamage feature) {
+            try {
+                if (!feature.handleItemDamage(new DataItemDamage(event))) {
                     event.setCancelled(true);
                     return;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
-                int newDamage = customDurabilityFeature.getDurabilityDamage(itemStack) + event.getDamage();
-                if (newDamage < customDurabilityFeature.getMaxDurability(itemStack)) {
-                    customDurabilityFeature.setDurabilityDamage(itemStack, newDamage);
+        }
+        if (itemType instanceof FeatureItemCustomDurability feature) {
+            try {
+                int newDamage = feature.getDurabilityDamage(itemStack) + event.getDamage();
+                if (newDamage < feature.getMaxDurability(itemStack)) {
+                    feature.setDurabilityDamage(itemStack, newDamage);
                     event.setDamage(0);
                 } else {
                     event.setDamage(itemStack.getType().getMaxDurability()
                             - ((Damageable) itemStack.getItemMeta()).getDamage());
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemMending(PlayerItemMendEvent event) {
-        if (event == null || event.isCancelled())
+        if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
         ItemStack itemStack = event.getItem();
-        NamespacedKey id = BaseItem.getItemID(itemStack);
-        ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register != null && id != null) {
-            BaseItem baseItem = register.lookup(id);
-            if (baseItem instanceof FeatureItemCustomDurability customDurabilityFeature) {
-                int damage = customDurabilityFeature.getDurabilityDamage(itemStack);
-                int repairAmount = event.getExperienceOrb().getExperience() * 2;
+        CustomItem itemType = CustomItem.get(itemStack);
+        if (itemType == null)
+            return;
+        if (itemType instanceof FeatureItemCustomDurability feature) {
+            int repairAmount = event.getExperienceOrb().getExperience() * 2;
+            try {
+                int damage = feature.getDurabilityDamage(itemStack);
                 int newDamage = Math.max(damage - repairAmount, 0);
                 repairAmount = damage - newDamage;
-                if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
+                if (itemType instanceof FeatureItemDamage feature2) {
                     event.setRepairAmount(repairAmount);
-                    if (itemDamageFeature.handleItemMend(new DataItemMend(event))) {
+                    if (feature2.handleItemMend(new DataItemMend(event))) {
                         if (event.isCancelled()) {
                             return;
                         }
@@ -101,24 +107,30 @@ public final class PlayerEventListener implements Listener {
                     }
                 }
                 event.setRepairAmount(repairAmount);
-                customDurabilityFeature.setDurabilityDamage(itemStack, newDamage);
-                if (itemStack.getItemMeta() instanceof Damageable damageable) {
-                    int visualDamage = damageable.getDamage();
-                    damageable.setDamage(repairAmount);
-                    itemStack.setItemMeta(damageable);
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
-                            () -> {
-                                Damageable _damageable = (Damageable) itemStack.getItemMeta();
-                                _damageable.setDamage(visualDamage);
-                                itemStack.setItemMeta(_damageable);
-                            });
-                }
-            } else {
-                if (baseItem instanceof FeatureItemDamage itemDamageFeature) {
-                    if (!itemDamageFeature.handleItemMend(new DataItemMend(event))) {
+                feature.setDurabilityDamage(itemStack, newDamage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (itemStack.getItemMeta() instanceof Damageable damageable) {
+                int visualDamage = damageable.getDamage();
+                damageable.setDamage(repairAmount);
+                itemStack.setItemMeta(damageable);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(),
+                        () -> {
+                            Damageable _damageable = (Damageable) itemStack.getItemMeta();
+                            _damageable.setDamage(visualDamage);
+                            itemStack.setItemMeta(_damageable);
+                        });
+            }
+        } else {
+            if (itemType instanceof FeatureItemDamage feature) {
+                try {
+                    if (!feature.handleItemMend(new DataItemMend(event))) {
                         event.setCancelled(true);
                         return;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -230,7 +242,8 @@ public final class PlayerEventListener implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(), () -> {
             if (player.isOnline()) {
-                ItemFeatureLinker.forEachEquipment(player, event, FeatureItemHoldPlayerJoinOrQuit.class,
+                ItemFeatureLinker.forEachEquipment(player, event,
+                        Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
                         FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
             }
         });
@@ -240,7 +253,8 @@ public final class PlayerEventListener implements Listener {
     public void listenPlayerQuit(PlayerQuitEvent event) {
         if (event == null)
             return;
-        ItemFeatureLinker.forEachEquipment(event.getPlayer(), event, FeatureItemHoldPlayerJoinOrQuit.class,
+        ItemFeatureLinker.forEachEquipment(event.getPlayer(), event,
+                Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
                 FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
     }
 }

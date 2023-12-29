@@ -20,6 +20,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedB
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedByNothing;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
@@ -53,7 +54,8 @@ public final class EntityDamageListener implements Listener {
     public void onEntityDamageByEntity(@Nonnull EntityDamageByEntityEvent event) {
         Entity damagee = event.getEntity();
         Entity damager = event.getDamager();
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
+                event, Constants.ALL_SLOTS,
                 FeatureItemHoldEntityDamage.class, FeatureItemHoldEntityDamage::handleItemHoldEntityAttack,
                 DataItemHoldEntityAttack::new)) {
             event.setCancelled(true);
@@ -64,7 +66,8 @@ public final class EntityDamageListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class),
+                event, Constants.ALL_SLOTS,
                 FeatureItemHoldEntityDamage.class, FeatureItemHoldEntityDamage::handleItemHoldEntityDamagedByEntity,
                 DataItemHoldEntityDamagedByEntity::new)) {
             event.setCancelled(true);
@@ -78,7 +81,8 @@ public final class EntityDamageListener implements Listener {
 
     public void onEntityDamageByBlock(@Nonnull EntityDamageByBlockEvent event) {
         Entity damagee = event.getEntity();
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class),
+                event, Constants.ALL_SLOTS,
                 FeatureItemHoldEntityDamage.class, FeatureItemHoldEntityDamage::handleItemHoldEntityDamagedByBlock,
                 DataItemHoldEntityDamagedByBlock::new)) {
             event.setCancelled(true);
@@ -92,7 +96,8 @@ public final class EntityDamageListener implements Listener {
 
     public void onEntityDamageByNothing(@Nonnull EntityDamageEvent event) {
         Entity damagee = event.getEntity();
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class), event,
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class),
+                event, Constants.ALL_SLOTS,
                 FeatureItemHoldEntityDamage.class, FeatureItemHoldEntityDamage::handleItemHoldEntityDamagedByNothing,
                 DataItemHoldEntityDamagedByNothing::new)) {
             event.setCancelled(true);
