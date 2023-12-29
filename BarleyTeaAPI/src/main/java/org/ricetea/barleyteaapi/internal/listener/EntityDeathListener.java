@@ -53,7 +53,7 @@ public final class EntityDeathListener implements Listener {
         }
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("DataFlowIssue")
     private void onEntityDeath(@Nonnull EntityDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity entity = event.getEntity();
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
@@ -82,7 +82,7 @@ public final class EntityDeathListener implements Listener {
         EntityFeatureLinker.doFeature(entity, FeatureEntityLoad.class, FeatureEntityLoad::handleEntityUnloaded);
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("DataFlowIssue")
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),

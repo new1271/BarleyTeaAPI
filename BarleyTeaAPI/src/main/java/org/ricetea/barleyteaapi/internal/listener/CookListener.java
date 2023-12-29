@@ -85,7 +85,7 @@ public final class CookListener implements Listener {
         }
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("UnstableApiUsage")
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
         if (event == null)
@@ -109,7 +109,7 @@ public final class CookListener implements Listener {
         }
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("UnstableApiUsage")
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenCampfireStartCook(CampfireStartEvent event) {
         if (event == null)
