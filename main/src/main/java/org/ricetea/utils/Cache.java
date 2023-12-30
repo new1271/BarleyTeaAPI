@@ -5,6 +5,7 @@ import sun.misc.Unsafe;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public abstract class Cache<T> implements Property<T> {
@@ -22,6 +23,11 @@ public abstract class Cache<T> implements Property<T> {
 
     @Nonnull
     public T get() {
+        return Objects.requireNonNull(getUnsafe());
+    }
+
+    @Nullable
+    public T getUnsafe() {
         T obj = realObj;
         if (obj == null) {
             return realObj = get0();
@@ -29,7 +35,7 @@ public abstract class Cache<T> implements Property<T> {
         return obj;
     }
 
-    @Nonnull
+    @Nullable
     protected abstract T get0();
 
     public void reset() {
@@ -57,7 +63,7 @@ public abstract class Cache<T> implements Property<T> {
             this.supplier = supplier;
         }
 
-        @Nonnull
+        @Nullable
         @Override
         protected T get0() {
             return supplier.get();
@@ -75,15 +81,15 @@ public abstract class Cache<T> implements Property<T> {
         }
 
         @Override
-        @Nonnull
-        public T get() {
+        @Nullable
+        public T getUnsafe() {
             T obj = realObj;
             if (obj == null) {
                 synchronized (syncRoot) {
                     Unsafe.getUnsafe().fullFence();
                     obj = realObj;
                     if (obj == null) {
-                        obj = realObj = super.get();
+                        obj = realObj = super.getUnsafe();
                     }
                 }
             }
