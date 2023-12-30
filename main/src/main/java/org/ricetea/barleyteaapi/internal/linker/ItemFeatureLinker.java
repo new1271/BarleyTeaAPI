@@ -115,10 +115,10 @@ public final class ItemFeatureLinker {
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
         if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
-            return false;
+            return true;
         TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
         if (feature == null)
-            return false;
+            return true;
         return ObjectUtil.tryMap(() -> {
             boolean result = featureFunc.test(feature,
                     dataConstructor.apply(event, event2, itemStack, equipmentSlot));
@@ -134,10 +134,10 @@ public final class ItemFeatureLinker {
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
-            return false;
+            return true;
         TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
         if (feature == null)
-            return false;
+            return true;
         return ObjectUtil.tryMap(() -> {
             boolean result = featureFunc.test(feature,
                     dataConstructor.apply(event, itemStack, equipmentSlot));
@@ -153,10 +153,10 @@ public final class ItemFeatureLinker {
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || !ItemRegister.hasRegistered())
-            return false;
+            return true;
         TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
         if (feature == null)
-            return false;
+            return true;
         return ObjectUtil.tryMap(() -> {
             boolean result = featureFunc.test(feature, dataConstructor.apply(event));
             if (event instanceof Cancellable cancellable) {

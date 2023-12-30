@@ -8,7 +8,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
@@ -272,15 +271,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 }
             }
             if (toolAttributeLoreStack != null) {
-                if (player == null) {
-                    toolDamage += DEFAULT_TOOL_DAMAGE;
-                    toolSpeed += DEFAULT_TOOL_SPEED;
-                } else {
-                    AttributeInstance attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
-                    toolDamage += attributeInstance == null ? DEFAULT_TOOL_DAMAGE : attributeInstance.getBaseValue();
-                    attributeInstance = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
-                    toolSpeed += attributeInstance == null ? DEFAULT_TOOL_SPEED : attributeInstance.getBaseValue();
-                }
+                toolDamage += DEFAULT_TOOL_DAMAGE;
+                toolSpeed += DEFAULT_TOOL_SPEED;
                 toolDamage = Math.round(toolDamage * 100.0) / 100.0;
                 String toolDamageString = Double.toString(toolDamage);
                 if (toolDamageString.endsWith(".0"))
