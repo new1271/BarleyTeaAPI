@@ -329,12 +329,12 @@ public final class ProtocolLibBridge {
             ItemMeta meta = itemStack.getItemMeta();
             boolean isDirty = false;
             if (meta != null) {
-                Component displayName = meta.displayName();
+                Component displayName = ObjectUtil.tryMapSilently(meta::displayName);
                 if (displayName != null) {
                     meta.displayName(applyTranslateFallbacks(translator, displayName, locale));
                     isDirty = true;
                 }
-                List<Component> lore = meta.lore();
+                List<Component> lore = ObjectUtil.tryMapSilently(meta::lore);
                 if (lore != null) {
                     meta.lore(lore.stream()
                             .map(loreLine -> applyTranslateFallbacks(translator, loreLine, locale))

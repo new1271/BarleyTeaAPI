@@ -58,6 +58,16 @@ public final class ObjectUtil {
         }
     }
 
+    @Nullable
+    public static <R> R tryMap(@Nonnull Supplier<R> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @Nonnull
     public static <R> R tryMap(@Nonnull Supplier<R> supplier, @Nonnull R defaultValue) {
         try {
@@ -68,11 +78,36 @@ public final class ObjectUtil {
         }
     }
 
+    @Nullable
+    public static <R> R tryMapSilently(@Nonnull Supplier<R> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    @Nonnull
+    public static <R> R tryMapSilently(@Nonnull Supplier<R> supplier, @Nonnull R defaultValue) {
+        try {
+            return ObjectUtil.letNonNull(supplier.get(), defaultValue);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
+    }
+
     public static void tryCall(@Nonnull Runnable runnable) {
         try {
             runnable.run();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void tryCallSilently(@Nonnull Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception ignored) {
         }
     }
 }
