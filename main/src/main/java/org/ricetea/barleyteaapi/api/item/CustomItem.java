@@ -32,4 +32,9 @@ public interface CustomItem extends CustomObject {
     boolean isTool();
 
     boolean isRarityUpgraded(@Nonnull ItemStack itemStack);
+
+    @Nonnull
+    default CustomItemType getType() {
+        return CustomItemType.get(this);
+    }
 }
