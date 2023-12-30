@@ -16,7 +16,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -28,13 +31,13 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     private static final Lazy<AsyncTickingServiceImpl> _inst = Lazy.create(AsyncTickingServiceImpl::new);
 
     @Nonnull
-    private final Set<UUID> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
+    private final Set<Entity> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
 
     @Nonnull
-    private final ConcurrentHashMap<Map.Entry<UUID, TickCounter>, Integer> operationTable = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Map.Entry<Entity, TickCounter>, Integer> operationTable = new ConcurrentHashMap<>();
 
     @Nonnull
-    private final HashMap<UUID, HashMap<TickCounter, Integer>> tickingTable = new HashMap<>();
+    private final HashMap<Entity, HashMap<TickCounter, Integer>> tickingTable = new HashMap<>();
 
     @Nonnull
     private final Object syncRoot = new Object();
@@ -57,20 +60,20 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     }
 
     @Override
-    public void addCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter) {
-        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(uuid, counter), 0, Math::max);
+    public void addCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
+        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(entity, counter), 0, Math::max);
         start();
     }
 
     @Override
-    public void removeCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter) {
-        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(uuid, counter), 1, Math::max);
+    public void removeCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
+        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(entity, counter), 1, Math::max);
         start();
     }
 
     @Override
-    public void clearCounter(@Nonnull UUID uuid) {
-        entitiesPrepareToRemove.add(uuid);
+    public void clearCounter(@Nonnull Entity entity) {
+        entitiesPrepareToRemove.add(entity);
         start();
     }
 
@@ -95,8 +98,8 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     public void runLoop() {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
-            Map.Entry<Map.Entry<UUID, TickCounter>, Integer> entry = iterator.next();
-            Map.Entry<UUID, TickCounter> entityEntry = entry.getKey();
+            Map.Entry<Map.Entry<Entity, TickCounter>, Integer> entry = iterator.next();
+            Map.Entry<Entity, TickCounter> entityEntry = entry.getKey();
             Integer op = entry.getValue();
             if (op == null)
                 continue;
@@ -118,10 +121,11 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
             shutdown();
             return;
         }
-        tickingTable.forEach((uuid, counterMap) -> {
-            Entity entity = Bukkit.getEntity(uuid);
-            if (entity == null || entity.isDead()) {
-                clearCounter(uuid);
+        tickingTable.forEach((entity, counterMap) -> {
+            if (entity == null)
+                return;
+            if (entity.isDead()) {
+                clearCounter(entity);
                 return;
             }
             counterMap.replaceAll((counter, taskId) -> {

@@ -6,7 +6,6 @@ import org.ricetea.barleyteaapi.internal.entity.counter.SyncTickingServiceImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 public interface TickingService {
 
@@ -30,23 +29,11 @@ public interface TickingService {
         return AsyncTickingServiceImpl.getInstanceUnsafe();
     }
 
-    default void addCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
-        addCounter(entity.getUniqueId(), counter);
-    }
+    void addCounter(@Nonnull Entity entity, @Nonnull TickCounter counter);
 
-    void addCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter);
+    void removeCounter(@Nonnull Entity entity, @Nonnull TickCounter counter);
 
-    default void removeCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
-        removeCounter(entity.getUniqueId(), counter);
-    }
-
-    void removeCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter);
-
-    default void clearCounter(@Nonnull Entity entity) {
-        clearCounter(entity.getUniqueId());
-    }
-
-    void clearCounter(@Nonnull UUID uuid);
+    void clearCounter(@Nonnull Entity entity);
 
     void shutdown();
 }

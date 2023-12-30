@@ -18,7 +18,6 @@ import javax.inject.Singleton;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -30,13 +29,13 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
     private static final Lazy<SyncTickingServiceImpl> _inst = Lazy.create(SyncTickingServiceImpl::new);
 
     @Nonnull
-    private final Set<UUID> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
+    private final Set<Entity> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
 
     @Nonnull
-    private final ConcurrentHashMap<Map.Entry<UUID, TickCounter>, Integer> operationTable = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Map.Entry<Entity, TickCounter>, Integer> operationTable = new ConcurrentHashMap<>();
 
     @Nonnull
-    private final HashMultimap<UUID, TickCounter> tickingTable = HashMultimap.create();
+    private final HashMultimap<Entity, TickCounter> tickingTable = HashMultimap.create();
 
     @Nonnull
     private final Object syncRoot = new Object();
@@ -74,20 +73,20 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
     }
 
     @Override
-    public void addCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter) {
-        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(uuid, counter), 0, Math::max);
+    public void addCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
+        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(entity, counter), 0, Math::max);
         startIfRequired();
     }
 
     @Override
-    public void removeCounter(@Nonnull UUID uuid, @Nonnull TickCounter counter) {
-        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(uuid, counter), 1, Math::max);
+    public void removeCounter(@Nonnull Entity entity, @Nonnull TickCounter counter) {
+        operationTable.merge(new AbstractMap.SimpleImmutableEntry<>(entity, counter), 1, Math::max);
         startIfRequired();
     }
 
     @Override
-    public void clearCounter(@Nonnull UUID uuid) {
-        entitiesPrepareToRemove.add(uuid);
+    public void clearCounter(@Nonnull Entity entity) {
+        entitiesPrepareToRemove.add(entity);
         startIfRequired();
     }
 
@@ -111,8 +110,8 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
     @Override
     public void run() {
         for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
-            Map.Entry<Map.Entry<UUID, TickCounter>, Integer> entry = iterator.next();
-            Map.Entry<UUID, TickCounter> entityEntry = entry.getKey();
+            Map.Entry<Map.Entry<Entity, TickCounter>, Integer> entry = iterator.next();
+            Map.Entry<Entity, TickCounter> entityEntry = entry.getKey();
             Integer op = entry.getValue();
             if (op == null)
                 continue;
@@ -124,10 +123,11 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
         for (var iterator = entitiesPrepareToRemove.iterator(); iterator.hasNext(); iterator.remove()) {
             iterator.next();
         }
-        tickingTable.asMap().forEach((uuid, counters) -> {
-            Entity entity = Bukkit.getEntity(uuid);
-            if (entity == null || entity.isDead()) {
-                clearCounter(uuid);
+        tickingTable.asMap().forEach((entity, counters) -> {
+            if (entity == null)
+                return;
+            if (entity.isDead()) {
+                clearCounter(entity);
                 return;
             }
             counters.forEach(counter -> counter.tick(entity));
