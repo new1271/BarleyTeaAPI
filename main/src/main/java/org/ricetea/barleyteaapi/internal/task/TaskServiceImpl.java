@@ -3,7 +3,7 @@ package org.ricetea.barleyteaapi.internal.task;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.utils.Lazy;
-import sun.misc.Unsafe;
+import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
@@ -37,7 +37,7 @@ public final class TaskServiceImpl implements TaskService {
         ScheduledExecutorService executorService = this.executorService;
         if (executorService == null) {
             synchronized (syncRoot) {
-                Unsafe.getUnsafe().fullFence();
+                UnsafeHelper.getUnsafe().fullFence();
                 executorService = this.executorService;
                 if (executorService == null)
                     executorService = this.executorService =

@@ -1,7 +1,5 @@
 package org.ricetea.utils;
 
-import sun.misc.Unsafe;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -86,7 +84,7 @@ public abstract class Cache<T> implements Property<T> {
             T obj = realObj;
             if (obj == null) {
                 synchronized (syncRoot) {
-                    Unsafe.getUnsafe().fullFence();
+                    UnsafeHelper.getUnsafe().fullFence();
                     obj = realObj;
                     if (obj == null) {
                         obj = realObj = super.getUnsafe();

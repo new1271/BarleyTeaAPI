@@ -9,7 +9,7 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.utils.Lazy;
-import sun.misc.Unsafe;
+import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +62,7 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
         if (BarleyTeaAPI.checkPluginUsable()) {
             if (task == null) {
                 synchronized (syncRoot) {
-                    Unsafe.getUnsafe().fullFence();
+                    UnsafeHelper.getUnsafe().fullFence();
                     if (task == null) {
                         task = Bukkit.getScheduler().runTaskTimer(BarleyTeaAPI.getInstance(), this, 1, 1);
                     }
@@ -95,7 +95,7 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
     public void shutdown() {
         if (task != null) {
             synchronized (syncRoot) {
-                Unsafe.getUnsafe().fullFence();
+                UnsafeHelper.getUnsafe().fullFence();
                 BukkitTask task = this.task;
                 if (task != null) {
                     task.cancel();

@@ -10,7 +10,7 @@ import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.barleyteaapi.internal.task.LoopTaskBase;
 import org.ricetea.utils.Lazy;
-import sun.misc.Unsafe;
+import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -78,7 +78,7 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     public void shutdown() {
         if (task != null) {
             synchronized (syncRoot) {
-                Unsafe.getUnsafe().fullFence();
+                UnsafeHelper.getUnsafe().fullFence();
                 BukkitTask task = this.task;
                 if (task != null) {
                     task.cancel();
