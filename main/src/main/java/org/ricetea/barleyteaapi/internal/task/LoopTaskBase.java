@@ -35,7 +35,7 @@ public abstract class LoopTaskBase implements LoopTask {
     }
 
     @Override
-    public Stopwatch getStopwatch() {
+    public @Nonnull Stopwatch getStopwatch() {
         return stopwatchLazy.get();
     }
 }

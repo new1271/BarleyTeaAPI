@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 public interface LoopTask extends Runnable {
@@ -14,6 +15,7 @@ public interface LoopTask extends Runnable {
 
     void setStarted(boolean started);
 
+    @Nonnull
     default Stopwatch getStopwatch() {
         return Stopwatch.createUnstarted();
     }
