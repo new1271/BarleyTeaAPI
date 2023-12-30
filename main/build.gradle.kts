@@ -22,6 +22,9 @@ java {
 }
 
 tasks {
+    assemble {
+    }
+
     compileJava {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
 
