@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
+import org.ricetea.barleyteaapi.api.item.VanillaItemRarity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
@@ -21,6 +22,10 @@ public abstract class RegularItem extends DefaultItem implements FeatureCommandG
     @Nonnull
     private static final NamespacedKey ItemAlternateDamageNamespacedKey = NamespacedKeyUtil
             .BarleyTeaAPI("item_damage");
+
+    public RegularItem(@Nonnull NamespacedKey key, @Nonnull Material originalType, @Nonnull VanillaItemRarity rarity) {
+        super(key, originalType, rarity.getRarity());
+    }
 
     public RegularItem(@Nonnull NamespacedKey key, @Nonnull Material originalType, @Nonnull CustomItemRarity rarity) {
         super(key, originalType, rarity);
