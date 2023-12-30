@@ -24,9 +24,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
-import org.ricetea.barleyteaapi.api.item.BaseItem;
+import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.helper.NMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.MinecraftKeyCombinedIterator;
@@ -86,7 +87,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
             String key = itemKey.getPath();
             NamespacedKey alterItemKey = new NamespacedKey(namespace, key);
             Item nmsItemType = null;
-            BaseItem barleyTeaItemType = null;
+            CustomItem customItemType = null;
             if (namespace.equalsIgnoreCase(ResourceLocation.DEFAULT_NAMESPACE)) {
                 try {
                     nmsItemType = BuiltInRegistries.ITEM.get(itemKey);
@@ -105,12 +106,12 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                 if (register != null) {
                     if (fuzzySearching) {
                         String fuzzyKey = itemKey.getPath();
-                        barleyTeaItemType = register.findFirst(itemType ->
+                        customItemType = register.findFirst(itemType ->
                                 itemType.getKey().getKey().equalsIgnoreCase(fuzzyKey));
                     } else
-                        barleyTeaItemType = register.lookup(alterItemKey);
-                    nmsItemType = ObjectUtil.safeMap(barleyTeaItemType,
-                            type -> CraftMagicNumbers.getItem(type.getMaterialBasedOn()));
+                        customItemType = register.lookup(alterItemKey);
+                    nmsItemType = ObjectUtil.safeMap(customItemType,
+                            type -> CraftMagicNumbers.getItem(type.getOriginalType()));
                 }
             }
             if (nmsItemType == null)
@@ -121,9 +122,9 @@ public final class NMSGiveCommand extends NMSRegularCommand {
             ItemStack itemstack = new ItemStack(nmsItemType, count);
             //void setTag(net.minecraft.nbt.CompoundTag) -> c
             itemstack.setTag(nbt);
-            if (barleyTeaItemType instanceof FeatureCommandGive commandGiveType) {
+            if (customItemType instanceof FeatureCommandGive commandGiveType) {
                 org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
-                if (barleyTeaItemType.tryRegister(bukkitStack,
+                if (ItemHelper.tryRegister(customItemType, bukkitStack,
                         _itemStack -> _itemStack != null && commandGiveType
                                 .handleCommandGive(
                                         new DataCommandGive(_itemStack, nbt.toString())))) {

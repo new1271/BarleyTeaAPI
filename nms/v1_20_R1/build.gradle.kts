@@ -54,4 +54,4 @@ tasks {
     }
 }
 
-tasks.register("prepareKotlinBuildScriptModel", {})
+tasks.register("prepareKotlinBuildScriptModel") {}
