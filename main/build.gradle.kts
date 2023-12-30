@@ -1,34 +1,27 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.5.11"
 }
 
 group = "org.ricetea"
-version = "1.0-NMS-1.20-R1"
-
-
-java {
-    // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.dmulloy2.net/repository/public/")
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
-    // paperweight.foliaDevBundle("1.20.4-R0.1-SNAPSHOT")
-    // paperweight.devBundle("com.example.paperfork", "1.20.4-R0.1-SNAPSHOT")
-    implementation(project(":BarleyTeaAPI"))
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.2.0-SNAPSHOT")
+    implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks {
-    // Configure reobfJar to run when invoking the build task
-    assemble {
-        dependsOn(reobfJar)
-    }
-
     compileJava {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
 
