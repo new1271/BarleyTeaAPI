@@ -240,8 +240,17 @@ public class ItemHelper {
 
     @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomItemType itemType) {
-        return itemType.nonNullMap(material -> Component.translatable(material.translationKey()),
-                type -> Component.translatable(type.getTranslationKey(), type.getDefaultName()));
+        return itemType.nonNullMap(ItemHelper::getDefaultNameComponent, ItemHelper::getDefaultNameComponent);
+    }
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull CustomItem itemType) {
+        return Component.translatable(itemType.getTranslationKey(), itemType.getDefaultName());
+    }
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull Material itemType) {
+        return Component.translatable(Objects.requireNonNull(itemType.getItemTranslationKey()));
     }
 
     public static void register(@Nullable CustomItem itemType, @Nullable ItemStack itemStack) {

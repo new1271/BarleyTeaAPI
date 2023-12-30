@@ -147,8 +147,18 @@ public class EntityHelper {
     }
 
     @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull CustomEntityType entityType) {
+        return entityType.nonNullMap(EntityHelper::getDefaultNameComponent, EntityHelper::getDefaultNameComponent);
+    }
+
+    @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomEntity entityType) {
         return Component.translatable(entityType.getTranslationKey(), entityType.getDefaultName());
+    }
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull EntityType entityType) {
+        return Component.translatable(entityType.translationKey());
     }
 
     @Deprecated

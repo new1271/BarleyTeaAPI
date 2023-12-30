@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.api.block.helper;
 
+import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -7,6 +9,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Consumer;
 import org.jetbrains.annotations.Unmodifiable;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.CustomBlockType;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
@@ -136,5 +139,21 @@ public class BlockHelper {
             }
         }
         return false;
+    }
+
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull CustomBlockType blockType) {
+        return blockType.nonNullMap(BlockHelper::getDefaultNameComponent, BlockHelper::getDefaultNameComponent);
+    }
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull CustomBlock blockType) {
+        return Component.translatable(blockType.getTranslationKey(), blockType.getDefaultName());
+    }
+
+    @Nonnull
+    public static Component getDefaultNameComponent(@Nonnull Material blockType) {
+        return Component.translatable(Objects.requireNonNull(blockType.getItemTranslationKey()));
     }
 }
