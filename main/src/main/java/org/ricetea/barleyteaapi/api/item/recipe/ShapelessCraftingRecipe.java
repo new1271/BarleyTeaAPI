@@ -9,7 +9,11 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
 
@@ -25,13 +29,15 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
         } else if (length > 9) {
             throw new UnsupportedOperationException("'ingredientMatrix' too large!");
         }
-        this.ingredients = ingredients;
+        this.ingredients = Arrays.stream(ingredients)
+                .filter(Objects::nonNull)
+                .filter(Predicate.not(CustomItemType::isEmpty))
+                .toArray(CustomItemType[]::new);
     }
 
     @Nonnull
     public List<CustomItemType> getIngredients() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableList(Arrays.asList(getIngredients0())),
-                Collections::emptyList);
+        return Arrays.stream(getIngredients0()).toList();
     }
 
     @Nonnull
@@ -41,23 +47,28 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
 
     @Override
     public boolean checkMatrixOfTypes(@Nonnull CustomItemType[] matrix) {
-        CustomItemType[] ingredients = getIngredients0();
-        if (matrix.length == 0 || matrix.length < ingredients.length)
-            return false;
-        ArrayList<CustomItemType> matrixClone = new ArrayList<>(Arrays.asList(matrix));
-        int selectedCount = 0;
-        for (CustomItemType ingredient : ingredients) {
-            CustomItemType predictedIngredient = ObjectUtil.letNonNull(ingredient, CustomItemType::empty);
-            for (var iterator = matrixClone.iterator(); iterator.hasNext(); ) {
-                CustomItemType actualIngredient = ObjectUtil.letNonNull(iterator.next(), CustomItemType::empty);
-                if (predictedIngredient.equals(actualIngredient)) {
-                    selectedCount++;
-                    iterator.remove();
-                    break;
+        List<CustomItemType> ingredientList = getIngredients();
+        ArrayList<CustomItemType> matrixList = new ArrayList<>(
+                Arrays.stream(matrix)
+                        .filter(Objects::nonNull)
+                        .filter(Predicate.not(CustomItemType::isEmpty))
+                        .toList());
+        if (matrixList.size() == ingredientList.size()) {
+            ingredientList = new ArrayList<>(ingredientList);
+            for (var iterator = ingredientList.iterator(); iterator.hasNext(); ) {
+                CustomItemType ingredient = iterator.next();
+                for (var iterator2 = matrixList.iterator(); iterator2.hasNext(); ) {
+                    CustomItemType matrixType = iterator2.next();
+                    if (Objects.equals(ingredient, matrixType)) {
+                        iterator.remove();
+                        iterator2.remove();
+                        break;
+                    }
                 }
             }
+            return ingredientList.isEmpty() && matrixList.isEmpty();
         }
-        return selectedCount >= ingredients.length && matrixClone.stream().allMatch(CustomItemType::isEmpty);
+        return false;
     }
 
     @Override
