@@ -3,14 +3,12 @@ package org.ricetea.barleyteaapi.internal.entity.counter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.barleyteaapi.internal.task.LoopTaskBase;
 import org.ricetea.utils.Lazy;
-import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,12 +36,6 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
 
     @Nonnull
     private final HashMap<Entity, HashMap<TickCounter, Integer>> tickingTable = new HashMap<>();
-
-    @Nonnull
-    private final Object syncRoot = new Object();
-
-    @Nullable
-    private BukkitTask task;
 
     private AsyncTickingServiceImpl() {
         super(50);
@@ -79,19 +71,7 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
 
     @Override
     public void shutdown() {
-        if (task != null) {
-            synchronized (syncRoot) {
-                UnsafeHelper.getUnsafe().fullFence();
-                BukkitTask task = this.task;
-                if (task != null) {
-                    task.cancel();
-                    this.task = null;
-                    entitiesPrepareToRemove.clear();
-                    operationTable.clear();
-                    tickingTable.clear();
-                }
-            }
-        }
+        stop();
     }
 
     @Override
