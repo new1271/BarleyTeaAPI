@@ -9,6 +9,8 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.SoftCache;
 import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Singleton;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +39,10 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
 
     @Nonnull
     private final HashMultimap<Entity, TickCounter> tickingTable = HashMultimap.create();
+
+    @Nonnull
+    private final SoftCache<Map<Entity, Collection<TickCounter>>> tickingTable_flatCache =
+            SoftCache.create(tickingTable::asMap);
 
     @Nonnull
     private final Object syncRoot = new Object();
@@ -63,7 +70,7 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
                 synchronized (syncRoot) {
                     UnsafeHelper.getUnsafe().fullFence();
                     if (task == null) {
-                        task = Bukkit.getScheduler().runTaskTimer(BarleyTeaAPI.getInstance(), this, 1, 1);
+                        task = Bukkit.getScheduler().runTaskTimer(BarleyTeaAPI.getInstance(), this, 0, 1);
                     }
                 }
             }
@@ -102,6 +109,7 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
                     entitiesPrepareToRemove.clear();
                     operationTable.clear();
                     tickingTable.clear();
+                    tickingTable_flatCache.reset();
                 }
             }
         }
@@ -109,28 +117,36 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
 
     @Override
     public void run() {
-        for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
-            Map.Entry<Map.Entry<Entity, TickCounter>, Integer> entry = iterator.next();
-            Map.Entry<Entity, TickCounter> entityEntry = entry.getKey();
-            Integer op = entry.getValue();
-            if (op == null)
-                continue;
-            switch (op) {
-                case 0 -> tickingTable.put(entityEntry.getKey(), entityEntry.getValue());
-                case 1 -> tickingTable.remove(entityEntry.getKey(), entityEntry.getValue());
+        if (!operationTable.isEmpty()) {
+            for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
+                Map.Entry<Map.Entry<Entity, TickCounter>, Integer> entry = iterator.next();
+                Map.Entry<Entity, TickCounter> entityEntry = entry.getKey();
+                Integer op = entry.getValue();
+                if (op == null)
+                    continue;
+                switch (op) {
+                    case 0 -> tickingTable.put(entityEntry.getKey(), entityEntry.getValue());
+                    case 1 -> tickingTable.remove(entityEntry.getKey(), entityEntry.getValue());
+                }
             }
         }
-        for (var iterator = entitiesPrepareToRemove.iterator(); iterator.hasNext(); iterator.remove()) {
-            iterator.next();
+        if (!entitiesPrepareToRemove.isEmpty()) {
+            for (var iterator = entitiesPrepareToRemove.iterator(); iterator.hasNext(); iterator.remove()) {
+                tickingTable.removeAll(iterator.next());
+            }
         }
-        tickingTable.asMap().forEach((entity, counters) -> {
+        if (tickingTable.isEmpty()) {
+            shutdown();
+            return;
+        }
+        tickingTable_flatCache.get().forEach((entity, counters) -> {
             if (entity == null)
                 return;
             if (entity.isDead()) {
                 clearCounter(entity);
                 return;
             }
-            counters.forEach(counter -> counter.tick(entity));
+            counters.forEach(counter -> ObjectUtil.safeCall(entity, counter::tick));
         });
     }
 }

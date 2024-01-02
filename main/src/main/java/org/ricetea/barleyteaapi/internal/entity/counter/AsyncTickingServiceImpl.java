@@ -37,6 +37,9 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     @Nonnull
     private final HashMap<Entity, HashMap<TickCounter, Integer>> tickingTable = new HashMap<>();
 
+    @Nonnull
+    private final Object syncRoot = new Object();
+
     private AsyncTickingServiceImpl() {
         super(50);
     }
@@ -72,6 +75,11 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     @Override
     public void shutdown() {
         stop();
+        synchronized (syncRoot) {
+            entitiesPrepareToRemove.clear();
+            operationTable.clear();
+            tickingTable.clear();
+        }
     }
 
     @Override
