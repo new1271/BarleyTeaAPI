@@ -149,20 +149,27 @@ public final class ProtocolLibBridge {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
                 BinaryTagHolder nbtHolder = showItem.nbt();
-                String rawNbt;
                 if (nbtHolder == null)
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":\"" + showItem.count() + "\"}";
-                else {
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
-                            + nbtHolder.string() + "}";
-                }
+                    return component;
+                String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
+                        + nbtHolder.string() + "}";
                 INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
-                        itemStack = ObjectUtil.safeMap(renderItem(itemStack, player), WithFlag::obj);
-                        if (itemStack != null)
-                            return itemStack.displayName().hoverEvent(itemStack.asHoverEvent());
+                        var flag = renderItem(itemStack, player);
+                        if (flag != null && flag.flag()) {
+                            itemStack = flag.obj();
+                            if (component instanceof TranslatableComponent translatable) {
+                                if (Objects.equals(translatable.key(), itemStack.getType().translationKey())) {
+                                    return itemStack.displayName()
+                                            .hoverEvent(itemStack.asHoverEvent())
+                                            .children(component.children());
+                                } else {
+                                    return component.hoverEvent(itemStack.asHoverEvent());
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -439,20 +446,26 @@ public final class ProtocolLibBridge {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
                 BinaryTagHolder nbtHolder = showItem.nbt();
-                String rawNbt;
                 if (nbtHolder == null)
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":\"" + showItem.count() + "\"}";
-                else {
-                    rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
-                            + nbtHolder.string() + "}";
-                }
+                    return component;
+                String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
+                        + nbtHolder.string() + "}";
                 INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
-                        itemStack = ObjectUtil.safeMap(applyTranslateFallbacks(translator, itemStack, locale), WithFlag::obj);
-                        if (itemStack != null) {
-                            return component.hoverEvent(itemStack.asHoverEvent());
+                        var flag = applyTranslateFallbacks(translator, itemStack, locale);
+                        if (flag != null && flag.flag()) {
+                            itemStack = flag.obj();
+                            if (component instanceof TranslatableComponent translatable) {
+                                if (Objects.equals(translatable.key(), itemStack.getType().translationKey())) {
+                                    return itemStack.displayName()
+                                            .hoverEvent(itemStack.asHoverEvent())
+                                            .children(component.children());
+                                } else {
+                                    return component.hoverEvent(itemStack.asHoverEvent());
+                                }
+                            }
                         }
                     }
                 }
