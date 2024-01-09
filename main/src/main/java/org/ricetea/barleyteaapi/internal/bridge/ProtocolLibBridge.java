@@ -96,6 +96,7 @@ public final class ProtocolLibBridge {
                 modified = true;
             }
             if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta) {
+                boolean modified2 = false;
                 if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
                     var inventory = shulkerBox.getInventory();
                     Box<Boolean> flag = Box.box(false);
@@ -106,15 +107,15 @@ public final class ProtocolLibBridge {
                             iterator.set(result.obj());
                         }
                     }
-                    if (!modified)
-                        modified = ObjectUtil.letNonNull(flag.get(), false);
-                    if (modified) {
+                    modified2 = ObjectUtil.letNonNull(flag.get(), false);
+                    if (modified2) {
                         blockMeta.setBlockState(shulkerBox);
                     }
                 }
-                if (modified) {
+                if (modified2) {
                     itemStack.setItemMeta(blockMeta);
                 }
+                modified |= modified2;
             }
             return new WithFlag<>(itemStack, modified);
         }
@@ -160,15 +161,9 @@ public final class ProtocolLibBridge {
                         var flag = renderItem(itemStack, player);
                         if (flag != null && flag.flag()) {
                             itemStack = flag.obj();
-                            if (component instanceof TranslatableComponent translatable) {
-                                if (Objects.equals(translatable.key(), itemStack.getType().translationKey())) {
-                                    return itemStack.displayName()
-                                            .hoverEvent(itemStack.asHoverEvent())
-                                            .children(component.children());
-                                } else {
-                                    return component.hoverEvent(itemStack.asHoverEvent());
-                                }
-                            }
+                            return itemStack.displayName()
+                                    .hoverEvent(itemStack.asHoverEvent())
+                                    .children(component.children());
                         }
                     }
                 }
@@ -457,15 +452,9 @@ public final class ProtocolLibBridge {
                         var flag = applyTranslateFallbacks(translator, itemStack, locale);
                         if (flag != null && flag.flag()) {
                             itemStack = flag.obj();
-                            if (component instanceof TranslatableComponent translatable) {
-                                if (Objects.equals(translatable.key(), itemStack.getType().translationKey())) {
-                                    return itemStack.displayName()
-                                            .hoverEvent(itemStack.asHoverEvent())
-                                            .children(component.children());
-                                } else {
-                                    return component.hoverEvent(itemStack.asHoverEvent());
-                                }
-                            }
+                            return itemStack.displayName()
+                                    .hoverEvent(itemStack.asHoverEvent())
+                                    .children(component.children());
                         }
                     }
                 }

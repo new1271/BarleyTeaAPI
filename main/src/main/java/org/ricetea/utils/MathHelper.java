@@ -16,4 +16,12 @@ public class MathHelper {
     public static double between(double value, double min, double max) {
         return Math.min(Math.max(value, min), max);
     }
+
+    public static int ceilDiv(int x, int y) {
+        return -Math.floorDiv(-x, y);
+    }
+
+    public static long ceilDiv(long x, long y) {
+        return -Math.floorDiv(-x, y);
+    }
 }

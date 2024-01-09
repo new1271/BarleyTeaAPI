@@ -153,7 +153,7 @@ public class EntityHelper {
 
     @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomEntity entityType) {
-        return Component.translatable(entityType.getTranslationKey(), entityType.getDefaultName());
+        return Component.translatable(entityType.getTranslationKey());
     }
 
     @Nonnull

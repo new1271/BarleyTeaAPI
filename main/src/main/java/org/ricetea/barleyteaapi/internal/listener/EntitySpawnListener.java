@@ -15,6 +15,7 @@ import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.*;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawnPosibility;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
@@ -71,19 +72,24 @@ public final class EntitySpawnListener implements Listener {
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Random rnd = ThreadLocalRandom.current();
+        Lazy<DataNaturalSpawnPosibility> dataLazy = Lazy.create(() ->
+                new DataNaturalSpawnPosibility(event.getLocation(), event.getSpawnReason()));
         for (CustomEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
                 && e.getOriginalType().equals(event.getEntityType()))) {
-            if (entityType != null) {
-                FeatureNaturalSpawn spawnEntityType = (FeatureNaturalSpawn) entityType;
-                double posibility = spawnEntityType.getSpawnPosibility(reason);
+            if (entityType instanceof FeatureNaturalSpawn feature) {
+                double posibility = ObjectUtil.tryMap(() ->
+                        feature.getSpawnPosibility(dataLazy.get()), 0.0);
                 if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
-                    StateNaturalSpawn result = spawnEntityType.handleNaturalSpawn(new DataNaturalSpawn(event));
+                    StateNaturalSpawn result = ObjectUtil.tryMap(() ->
+                            feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateNaturalSpawn.Skipped);
+                    if (event.isCancelled())
+                        return;
                     switch (result) {
                         case Handled -> {
-                            if (entityType instanceof FeatureEntityLoad feature) {
+                            if (entityType instanceof FeatureEntityLoad feature2) {
                                 Entity entity = event.getEntity();
                                 if (!entity.isDead())
-                                    feature.handleEntityLoaded(entity);
+                                    feature2.handleEntityLoaded(entity);
                             }
                             return;
                         }

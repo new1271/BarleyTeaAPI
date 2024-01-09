@@ -141,7 +141,6 @@ public class BlockHelper {
         return false;
     }
 
-
     @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomBlockType blockType) {
         return blockType.nonNullMap(BlockHelper::getDefaultNameComponent, BlockHelper::getDefaultNameComponent);
@@ -149,7 +148,7 @@ public class BlockHelper {
 
     @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomBlock blockType) {
-        return Component.translatable(blockType.getTranslationKey(), blockType.getDefaultName());
+        return Component.translatable(blockType.getTranslationKey());
     }
 
     @Nonnull

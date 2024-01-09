@@ -30,6 +30,12 @@ public abstract class SoftCache<T> extends Cache<T> {
         return obj;
     }
 
+    @Override
+    @Nullable
+    public T getUnsafe() {
+        return ObjectUtil.safeMap(realObj, SoftReference::get);
+    }
+
     private static class Impl<T> extends SoftCache<T> {
 
         @Nonnull

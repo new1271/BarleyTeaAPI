@@ -245,7 +245,7 @@ public class ItemHelper {
 
     @Nonnull
     public static Component getDefaultNameComponent(@Nonnull CustomItem itemType) {
-        return Component.translatable(itemType.getTranslationKey(), itemType.getDefaultName());
+        return Component.translatable(itemType.getTranslationKey());
     }
 
     @Nonnull
