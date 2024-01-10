@@ -4,7 +4,7 @@ import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -29,8 +29,10 @@ import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRendererRegister;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
-import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
+import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
+import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -53,6 +55,12 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         String keyB = b.getKey().getKey();
         return keyA.compareTo(keyB);
     };
+    private static final @Nonnull Lazy<Style> defaultEnchantTextStyleLazy =
+            Lazy.createInThreadSafe(() -> Style.style(NamedTextColor.GRAY)
+                    .decoration(TextDecoration.ITALIC, false));
+    private static final @Nonnull Lazy<Style> cursedEnchantTextStyleLazy =
+            Lazy.createInThreadSafe(() -> Style.style(NamedTextColor.RED)
+                    .decoration(TextDecoration.ITALIC, false));
     private static final double DEFAULT_TOOL_DAMAGE = 1.0;
     private static final double DEFAULT_TOOL_SPEED = 4.0;
     private static final int[] DequeCapacities = new int[]{64, 16, 32, 8};
@@ -109,10 +117,11 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         double toolDamage = 0, toolSpeed = 0;
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
-            boolean hasExcellentEnchants = apiInstance.hasExcellentEnchants;
             final Map<Enchantment, Integer> enchantmentMap = meta.getEnchants();
             final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
+            final SoftDependConnector excellentEnchantsConnector = apiInstance.getSoftDependRegister()
+                    .getIfActived(BulitInSoftDepend.ExcellentEnchants);
             enchantmentMap.forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
                     return;
@@ -126,27 +135,24 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                         toolDamageIncreaseBox.set(value);
                     }
                 }
-                boolean isExcellentEnchant = hasExcellentEnchants
-                        && ExcellentEnchantsBridge.isExcellentEnchant(enchantment);
-                TranslatableComponent component;
-                TextColor color;
-                if (isExcellentEnchant) {
-                    component = Component.translatable(enchantName,
-                            ExcellentEnchantsBridge.getEnchantmentNameUnsafe(enchantment));
-                    color = ObjectUtil.letNonNull(
-                            ExcellentEnchantsBridge.getEnchantmentTierColorUnsafe(enchantment),
-                            NamedTextColor.GRAY);
+                TranslatableComponent component = Component.translatable(enchantName);
+                Style style;
+                if (excellentEnchantsConnector instanceof ExcellentEnchantsConnector connector &&
+                        connector.isExcellentEnchant(enchantment)) {
+                    component = component.fallback(connector.getEnchantmentName(enchantment));
+                    style = connector.getEnchantmentTierStyleUnsafe(enchantment, defaultEnchantTextStyleLazy);
                 } else {
-                    component = Component.translatable(enchantName);
-                    color = enchantment.isCursed() ? NamedTextColor.RED : NamedTextColor.GRAY;
+                    style = (enchantment.isCursed() ? cursedEnchantTextStyleLazy : defaultEnchantTextStyleLazy).get();
                 }
-                component = component.color(color).decoration(TextDecoration.ITALIC, false);
+                component = component.style(style);
                 if (level != 1 || enchantment.getMaxLevel() != 1) {
                     Component levelComponent;
                     levelComponent = Component.translatable("enchantment.level." + level,
                             Integer.toString(level));
-                    component = component.append(Component.text(" ").append(levelComponent)
-                            .color(color).decoration(TextDecoration.ITALIC, false));
+                    component = component
+                            .append(Component.space())
+                            .append(levelComponent)
+                            .style(style);
                 }
                 enchantLoreStack.offer(component);
             });

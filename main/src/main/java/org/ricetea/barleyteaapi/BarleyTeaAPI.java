@@ -1,7 +1,6 @@
 package org.ricetea.barleyteaapi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.ApiStatus;
@@ -10,13 +9,14 @@ import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.api.task.TaskService;
-import org.ricetea.barleyteaapi.internal.bridge.ExcellentEnchantsBridge;
-import org.ricetea.barleyteaapi.internal.bridge.ProtocolLibBridge;
+import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
+import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
+import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,8 @@ import java.util.logging.Logger;
 @ApiStatus.Internal
 public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
-    public boolean hasExcellentEnchants;
+    @Nullable
+    private SoftDependRegister<BarleyTeaAPI> softDependRegister;
 
     @Nonnull
     public static BarleyTeaAPI getInstance() {
@@ -39,6 +40,17 @@ public final class BarleyTeaAPI extends JavaPlugin {
     @Nullable
     public static BarleyTeaAPI getInstanceUnsafe() {
         return _inst;
+    }
+
+    @Nullable
+    public static BarleyTeaAPI getInstanceUnsafeAndCheck() {
+        BarleyTeaAPI inst = _inst;
+        if (inst == null) {
+            Bukkit.getLogger().warning("BarleyTeaAPI isn't loaded, all of the features won't worked!");
+        } else if (!inst.isEnabled()) {
+            Bukkit.getLogger().warning("BarleyTeaAPI isn't enabled, all of the features won't worked!");
+        }
+        return inst;
     }
 
     public static boolean checkPluginUsable() {
@@ -60,27 +72,26 @@ public final class BarleyTeaAPI extends JavaPlugin {
         }
     }
 
+    @Nonnull
+    public SoftDependRegister<BarleyTeaAPI> getSoftDependRegister() {
+        return Objects.requireNonNull(softDependRegister);
+    }
+
     @Override
     public void onEnable() {
         _inst = this;
+        SoftDependRegister<BarleyTeaAPI> softDependRegister = new SoftDependRegister<>(this);
+        softDependRegister.register(ObjectUtil.getSupplierOfConstructor(ExcellentEnchantsConnector.class));
+        softDependRegister.register(ObjectUtil.getSupplierOfConstructor(ProtocolLibConnector.class));
+        this.softDependRegister = softDependRegister;
+        softDependRegister.reloadAll();
         Logger logger = getLogger();
-        logger.info("checking soft depends");
-        try {
-            if (checkSoftDepend("ExcellentEnchants")) {
-                hasExcellentEnchants = true;
-                ExcellentEnchantsBridge.registerTranslations();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExcellentEnchants = false;
-        }
         logger.info("registering listeners");
         registerEventListeners();
         logger.info("initializing API...");
         DefaultItemRendererImpl.getInstance().checkIsRegistered();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
-        ProtocolLibBridge.enable();
     }
 
     private void registerEventListeners() {
@@ -105,35 +116,12 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(SmithingListener.getInstance(), this);
     }
 
-    private boolean checkSoftDepend(String pluginName) {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
-        Logger logger = getLogger();
-        if (plugin == null) {
-            logger.info(pluginName + ": not found.");
-            return false;
-        }
-        if (plugin.isEnabled()) {
-            logger.info(pluginName + ": found, and it is enabled.");
-            return true;
-        } else {
-            logger.warning(pluginName + ": found, but it is disabled.");
-            return false;
-        }
-    }
-
     @Override
     public void onDisable() {
-        ProtocolLibBridge.disable();
         Logger logger = getLogger();
         logger.info("uninitializing API...");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
-        try {
-            if (hasExcellentEnchants) {
-                ExcellentEnchantsBridge.unregisterTranslations();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ObjectUtil.safeCall(softDependRegister, SoftDependRegister::unregisterAll);
         ObjectUtil.safeCall(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
         ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
         ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);

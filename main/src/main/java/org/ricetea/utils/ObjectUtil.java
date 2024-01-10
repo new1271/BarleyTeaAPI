@@ -2,6 +2,7 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -109,5 +110,44 @@ public final class ObjectUtil {
             runnable.run();
         } catch (Exception ignored) {
         }
+    }
+
+    @Nonnull
+    public static <T> Supplier<T> getSupplierOfConstructor(@Nonnull Constructor<T> constructor, Object... initArgs) {
+        return () -> {
+            try {
+                return constructor.newInstance(initArgs);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
+    }
+
+    @Nullable
+    public static <T> Supplier<T> getSupplierOfConstructor(@Nonnull Class<T> clazz) {
+        Constructor<T> constructor;
+        try {
+            constructor = clazz.getConstructor();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return getSupplierOfConstructor(constructor);
+    }
+
+    @Nullable
+    public static <T> Supplier<T> getSupplierOfConstructor(@Nonnull Class<T> clazz, boolean setAccessableIfRequired) {
+        Constructor<T> constructor;
+        try {
+            constructor = clazz.getDeclaredConstructor();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (!constructor.canAccess(null)) {
+            constructor.setAccessible(true);
+        }
+        return getSupplierOfConstructor(constructor);
     }
 }

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.bridge;
+package org.ricetea.barleyteaapi.internal.connector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
@@ -33,6 +34,7 @@ import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
+import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
 import org.ricetea.utils.ObjectUtil;
@@ -46,13 +48,20 @@ import java.util.Locale;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public final class ProtocolLibBridge {
+public final class ProtocolLibConnector implements SoftDependConnector {
 
-    private static ProtocolManager protocolManager;
-    private static ComponentFallbackInjector fallbackInjector;
-    private static ItemStackPrerenderingInjector prerenderingInjector;
+    private ProtocolManager protocolManager;
+    private ComponentFallbackInjector fallbackInjector;
+    private ItemStackPrerenderingInjector prerenderingInjector;
 
-    public static void enable() {
+    @Nonnull
+    @Override
+    public String getPluginName() {
+        return BulitInSoftDepend.ProtocolLib.getPluginName();
+    }
+
+    @Override
+    public void onEnable(@Nonnull Plugin plugin) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         ObjectUtil.safeCall(fallbackInjector, protocolManager::removePacketListener);
         ObjectUtil.safeCall(prerenderingInjector, protocolManager::removePacketListener);
@@ -60,10 +69,11 @@ public final class ProtocolLibBridge {
         prerenderingInjector = new ItemStackPrerenderingInjector();
         ObjectUtil.safeCall(prerenderingInjector, protocolManager::addPacketListener);
         ObjectUtil.safeCall(fallbackInjector, protocolManager::addPacketListener);
-        ProtocolLibBridge.protocolManager = protocolManager;
+        this.protocolManager = protocolManager;
     }
 
-    public static void disable() {
+    @Override
+    public void onDisable() {
         ObjectUtil.safeCall(fallbackInjector, protocolManager::removePacketListener);
         ObjectUtil.safeCall(prerenderingInjector, protocolManager::removePacketListener);
         fallbackInjector = null;

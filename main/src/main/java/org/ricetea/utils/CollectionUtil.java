@@ -1,9 +1,12 @@
 package org.ricetea.utils;
 
+import org.checkerframework.checker.units.qual.K;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CollectionUtil {
@@ -64,11 +67,28 @@ public class CollectionUtil {
             return collection.stream().toList();
     }
 
-    public static <K, V, T extends Map.Entry<K, V>> void forEach(
-            @Nullable Collection<T> collection, @Nonnull BiConsumer<K, V> forEachConsumer) {
-        if (collection == null)
+    public static <T> void forEach(
+            @Nullable Iterable<T> iterable, @Nonnull Consumer<T> forEachConsumer) {
+        if (iterable == null)
             return;
-        for (T entry : collection)
+        for (T iteration : iterable)
+            forEachConsumer.accept(iteration);
+    }
+
+    public static <K, V, T extends Map.Entry<K, V>> void forEach(
+            @Nullable Iterable<T> iterable, @Nonnull BiConsumer<K, V> forEachConsumer) {
+        if (iterable == null)
+            return;
+        for (T entry : iterable)
             forEachConsumer.accept(entry.getKey(), entry.getValue());
+    }
+
+    public static <T> void forEachAndRemoveAll(
+            @Nullable Iterable<T> iterable, @Nonnull Consumer<T> forEachConsumer) {
+        if (iterable == null)
+            return;
+        for (Iterator<T> iterator = iterable.iterator(); iterator.hasNext(); iterator.remove()) {
+            forEachConsumer.accept(iterator.next());
+        }
     }
 }
