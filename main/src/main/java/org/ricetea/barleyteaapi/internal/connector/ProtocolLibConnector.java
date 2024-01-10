@@ -54,12 +54,6 @@ public final class ProtocolLibConnector implements SoftDependConnector {
     private ComponentFallbackInjector fallbackInjector;
     private ItemStackPrerenderingInjector prerenderingInjector;
 
-    @Nonnull
-    @Override
-    public String getPluginName() {
-        return BulitInSoftDepend.ProtocolLib.getPluginName();
-    }
-
     @Override
     public void onEnable(@Nonnull Plugin plugin) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();

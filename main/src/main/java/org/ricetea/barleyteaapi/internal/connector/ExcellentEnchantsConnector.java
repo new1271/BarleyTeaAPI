@@ -31,12 +31,6 @@ public final class ExcellentEnchantsConnector implements SoftDependConnector {
 
     private final Map<String, Style> colorPrefixDictionary = new HashMap<>();
 
-    @Nonnull
-    @Override
-    public String getPluginName() {
-        return BulitInSoftDepend.ExcellentEnchants.getPluginName();
-    }
-
     @Override
     public void onEnable(@Nonnull Plugin plugin) {
         reg = TranslationRegistry

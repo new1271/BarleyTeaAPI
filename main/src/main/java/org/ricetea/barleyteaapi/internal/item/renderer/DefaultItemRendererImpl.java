@@ -121,7 +121,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
             final SoftDependConnector excellentEnchantsConnector = apiInstance.getSoftDependRegister()
-                    .getIfActived(BulitInSoftDepend.ExcellentEnchants);
+                    .get(BulitInSoftDepend.ExcellentEnchants);
             enchantmentMap.forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
                     return;

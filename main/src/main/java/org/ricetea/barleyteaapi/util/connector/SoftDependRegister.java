@@ -10,7 +10,6 @@ import org.ricetea.utils.ObjectUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -19,10 +18,10 @@ import java.util.logging.Logger;
 public final class SoftDependRegister<T extends Plugin> {
 
     @Nonnull
-    private final Map<String, SoftDependConnector> connectorMap = new ConcurrentHashMap<>();
+    private final Map<String, Supplier<? extends SoftDependConnector>> connectorMap = new ConcurrentHashMap<>();
 
     @Nonnull
-    private final Set<SoftDependConnector> activeConnectors = ConcurrentHashMap.newKeySet();
+    private final Map<String, SoftDependConnector> activeConnectorMap = new ConcurrentHashMap<>();
 
     @Nonnull
     private final T plugin;
@@ -36,50 +35,39 @@ public final class SoftDependRegister<T extends Plugin> {
         return plugin;
     }
 
-    public void register(@Nullable Supplier<? extends SoftDependConnector> connectorSupplier) {
-        if (connectorSupplier == null)
+    public void register(@Nullable Supplier<String> pluginNameSupplier, @Nullable Supplier<? extends SoftDependConnector> connectorSupplier) {
+        if (pluginNameSupplier == null)
             return;
-        register(connectorSupplier.get());
+        register(pluginNameSupplier.get(), connectorSupplier);
     }
 
-    public void register(@Nullable SoftDependConnector connector) {
-        if (connector == null)
+    public void register(@Nullable String pluginName, @Nullable Supplier<? extends SoftDependConnector> connectorSupplier) {
+        if (pluginName == null || connectorSupplier == null)
             return;
-        SoftDependConnector oldConnector = connectorMap.put(connector.getPluginName(), connector);
-        if (oldConnector != null && activeConnectors.remove(oldConnector)) {
-            oldConnector.onDisable();
-        }
-    }
-
-    public void unregister(@Nullable SoftDependConnector connector) {
-        if (connector == null)
-            return;
-        if (connectorMap.remove(connector.getPluginName(), connector) && activeConnectors.remove(connector)) {
-            connector.onDisable();
+        if (connectorMap.put(pluginName, connectorSupplier) != null) {
+            ObjectUtil.safeCall(activeConnectorMap.remove(pluginName), connector ->
+                    ObjectUtil.tryCall(connector::onDisable));
         }
     }
 
     public void unregister(@Nullable String pluginName) {
         if (pluginName == null)
             return;
-        SoftDependConnector oldConnector = connectorMap.remove(pluginName);
-        if (oldConnector != null && activeConnectors.remove(oldConnector)) {
-            oldConnector.onDisable();
+        if (connectorMap.remove(pluginName) != null) {
+            ObjectUtil.safeCall(activeConnectorMap.remove(pluginName), connector ->
+                    ObjectUtil.tryCall(connector::onDisable));
         }
     }
 
     public void unregister(@Nullable Supplier<String> pluginNameSupplier) {
         if (pluginNameSupplier == null)
             return;
-        SoftDependConnector oldConnector = connectorMap.remove(pluginNameSupplier.get());
-        if (oldConnector != null && activeConnectors.remove(oldConnector)) {
-            oldConnector.onDisable();
-        }
+        unregister(pluginNameSupplier.get());
     }
 
     public void unregisterAll() {
         connectorMap.clear();
-        CollectionUtil.forEachAndRemoveAll(activeConnectors, connector ->
+        CollectionUtil.forEachAndRemoveAll(activeConnectorMap.values(), connector ->
                 ObjectUtil.safeCall(connector, SoftDependConnector::onDisable));
     }
 
@@ -87,7 +75,7 @@ public final class SoftDependRegister<T extends Plugin> {
     public SoftDependConnector get(@Nullable String pluginName) {
         if (pluginName == null)
             return null;
-        return connectorMap.get(pluginName);
+        return activeConnectorMap.get(pluginName);
     }
 
     @Nullable
@@ -97,35 +85,15 @@ public final class SoftDependRegister<T extends Plugin> {
         return get(pluginNameSupplier.get());
     }
 
-    @Nullable
-    public SoftDependConnector getIfActived(@Nullable String pluginName) {
-        if (pluginName == null)
-            return null;
-        SoftDependConnector result = get(pluginName);
-        if (result != null) {
-            return activeConnectors.contains(result) ? result : null;
-        }
-        return null;
-    }
-
-    @Nullable
-    public SoftDependConnector getIfActived(@Nullable Supplier<String> pluginNameSupplier) {
-        if (pluginNameSupplier == null)
-            return null;
-        return getIfActived(pluginNameSupplier.get());
-    }
-
     public void reloadAll() {
-        CollectionUtil.forEachAndRemoveAll(activeConnectors, connector ->
+        CollectionUtil.forEachAndRemoveAll(activeConnectorMap.values(), connector ->
                 ObjectUtil.safeCall(connector, SoftDependConnector::onDisable));
-        BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafeAndCheck();
-        if (api == null)
-            return;
-        Logger logger = api.getLogger();
+        Logger logger = plugin.getLogger();
         PluginManager pluginManager = Bukkit.getPluginManager();
-        connectorMap.forEach((pluginName, connector) -> {
+        connectorMap.forEach((pluginName, connectorSupplier) -> {
             Plugin plugin = pluginManager.getPlugin(pluginName);
             if (plugin != null && plugin.isEnabled()) {
+                SoftDependConnector connector = connectorSupplier.get();
                 try {
                     connector.onEnable(plugin);
                 } catch (Exception exception) {
@@ -134,7 +102,7 @@ public final class SoftDependRegister<T extends Plugin> {
                             exception);
                     return;
                 }
-                activeConnectors.add(connector);
+                activeConnectorMap.put(pluginName, connector);
                 logger.info("Loaded " + connector.getClass().getName() + " for " + pluginName);
             }
         });
