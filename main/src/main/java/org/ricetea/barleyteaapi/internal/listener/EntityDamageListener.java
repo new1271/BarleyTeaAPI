@@ -42,7 +42,7 @@ public final class EntityDamageListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntityDamage(EntityDamageEvent event) {
         if (event == null || event.isCancelled())
             return;

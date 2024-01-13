@@ -41,7 +41,7 @@ public final class BlockListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockPlace(BlockPlaceEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -75,7 +75,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockBreak(BlockBreakEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -110,7 +110,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockDrop(BlockDropItemEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
@@ -122,7 +122,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockExplode(BlockExplodeEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
@@ -168,7 +168,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockFromTo(BlockFromToEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -193,7 +193,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenPistonExtend(BlockPistonExtendEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -203,7 +203,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenPistonRetract(BlockPistonRetractEvent event) {
         if (event == null || event.isCancelled())
             return;

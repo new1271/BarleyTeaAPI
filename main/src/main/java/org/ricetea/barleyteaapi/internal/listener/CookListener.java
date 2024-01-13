@@ -39,7 +39,7 @@ public final class CookListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenBlockCook(BlockCookEvent event) {
         if (event == null)
             return;
@@ -73,7 +73,7 @@ public final class CookListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenFurnaceBurn(FurnaceBurnEvent event) {
         if (event == null)
             return;
@@ -91,7 +91,7 @@ public final class CookListener implements Listener {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
         if (event == null)
             return;
@@ -115,7 +115,7 @@ public final class CookListener implements Listener {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenCampfireStartCook(CampfireStartEvent event) {
         if (event == null)
             return;

@@ -13,8 +13,20 @@ public interface TickCounter extends Keyed {
 
     @Nonnull
     static TickCounter persistentCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
+                                         @Nonnull SimpleTickCounterTrigger trigger) {
+        return persistentCounter(key, operator, (TickCounterTrigger) trigger);
+    }
+
+    @Nonnull
+    static TickCounter persistentCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
                                          @Nonnull TickCounterTrigger trigger) {
         return persistentCounter(key, operator, trigger, 0);
+    }
+
+    @Nonnull
+    static TickCounter persistentCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
+                                         @Nonnull SimpleTickCounterTrigger trigger, int startValue) {
+        return persistentCounter(key, operator, (TickCounterTrigger) trigger, startValue);
     }
 
     @Nonnull
@@ -25,8 +37,20 @@ public interface TickCounter extends Keyed {
 
     @Nonnull
     static TickCounter transientCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
+                                        @Nonnull SimpleTickCounterTrigger trigger) {
+        return transientCounter(key, operator, (TickCounterTrigger) trigger);
+    }
+
+    @Nonnull
+    static TickCounter transientCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
                                         @Nonnull TickCounterTrigger trigger) {
         return transientCounter(key, operator, trigger, 0);
+    }
+
+    @Nonnull
+    static TickCounter transientCounter(@Nonnull NamespacedKey key, @Nonnull IntUnaryOperator operator,
+                                        @Nonnull SimpleTickCounterTrigger trigger, int startValue) {
+        return transientCounter(key, operator, (TickCounterTrigger) trigger, startValue);
     }
 
     @Nonnull

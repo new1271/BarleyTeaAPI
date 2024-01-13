@@ -41,7 +41,7 @@ public final class ChunkListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntitiesLoad(EntitiesLoadEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
@@ -63,7 +63,7 @@ public final class ChunkListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntitiesUnload(EntitiesUnloadEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
@@ -85,7 +85,7 @@ public final class ChunkListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenChunkLoad(ChunkLoadEvent event) {
         if (event == null)
             return;
@@ -114,8 +114,10 @@ public final class ChunkListener implements Listener {
                 });
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenChunkUnload(ChunkUnloadEvent event) {
+        if (event == null)
+            return;
         BlockRegister register = BlockRegister.getInstanceUnsafe();
         if (register == null || !register.hasAnyRegistered())
             return;

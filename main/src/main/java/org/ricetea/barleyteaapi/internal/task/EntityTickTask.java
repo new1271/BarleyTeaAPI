@@ -113,7 +113,7 @@ public final class EntityTickTask extends LoopTaskBase {
         start();
     }
 
-    private static class _Task implements Runnable {
+    private class _Task implements Runnable {
         @Nonnull
         private final UUID uuid;
         @Nonnull
@@ -126,8 +126,10 @@ public final class EntityTickTask extends LoopTaskBase {
 
         @Override
         public void run() {
-            if (!doJob())
-                operationTable.merge(uuid, 1, Math::max);
+            if (!doJob()) {
+                operationTable.merge(uuid, 2, Math::max);
+                start();
+            }
         }
 
         private boolean doJob() {

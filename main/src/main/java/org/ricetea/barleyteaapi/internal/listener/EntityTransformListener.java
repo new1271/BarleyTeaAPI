@@ -26,7 +26,7 @@ public final class EntityTransformListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntityTransform(EntityTransformEvent event) {
         if (event == null || event.isCancelled())
             return;

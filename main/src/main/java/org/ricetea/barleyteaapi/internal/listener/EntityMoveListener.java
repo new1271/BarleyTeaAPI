@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.internal.listener;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
@@ -31,7 +32,7 @@ public final class EntityMoveListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntityMove(EntityMoveEvent event) {
         if (event == null)
             return;

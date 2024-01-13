@@ -33,7 +33,7 @@ public final class SmithingListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenItemSmithing(PrepareSmithingEvent event) {
         if (event == null)
             return;

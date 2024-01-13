@@ -26,7 +26,7 @@ public final class SlimeSplitListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenSlimeSplit(SlimeSplitEvent event) {
         if (event == null || event.isCancelled())
             return;

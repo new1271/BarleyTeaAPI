@@ -30,7 +30,7 @@ public final class EntityMountListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntityMount(EntityMountEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -45,7 +45,7 @@ public final class EntityMountListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenEntityDismount(@Nonnull EntityDismountEvent event) {
         if (event.isCancelled())
             return;

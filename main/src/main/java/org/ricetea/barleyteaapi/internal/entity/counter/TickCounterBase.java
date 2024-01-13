@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounterTrigger;
+import org.ricetea.barleyteaapi.api.entity.counter.TickCounterTriggerData;
 
 import javax.annotation.Nonnull;
 import java.util.function.IntUnaryOperator;
@@ -55,11 +56,12 @@ public abstract class TickCounterBase implements TickCounter {
     }
 
     public final void tick(@Nonnull Entity entity) {
-        int count = operator.applyAsInt(getCounter(entity));
-        if (trigger.trigger(this, entity, count)) {
-            resetCounter(entity);
-        } else {
-            setCounter(entity, count);
+        int count = getCounter(entity);
+        TickCounterTriggerData data = new TickCounterTriggerData(this, entity, count);
+        trigger.trigger(data);
+        int newCount = data.getTickCount();
+        if (count != newCount) {
+            setCounter(entity, newCount);
         }
     }
 }

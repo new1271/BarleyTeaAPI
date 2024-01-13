@@ -139,7 +139,7 @@ public final class BlockTickTask extends LoopTaskBase {
 
     }
 
-    private static class _Task implements Runnable {
+    private class _Task implements Runnable {
         @Nonnull
         private final NamespacedKey worldKey;
         @Nonnull
@@ -156,8 +156,10 @@ public final class BlockTickTask extends LoopTaskBase {
 
         @Override
         public void run() {
-            if (!doJob())
+            if (!doJob()) {
                 operationTable.merge(location, 1, Math::max);
+                start();
+            }
         }
 
         private boolean doJob() {

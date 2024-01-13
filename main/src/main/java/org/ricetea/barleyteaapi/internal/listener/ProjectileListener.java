@@ -31,7 +31,7 @@ public final class ProjectileListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void listenProjectileHit(ProjectileHitEvent event) {
         if (event == null || event.isCancelled())
             return;
