@@ -2,7 +2,6 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;

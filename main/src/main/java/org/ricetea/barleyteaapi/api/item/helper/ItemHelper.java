@@ -48,7 +48,7 @@ public class ItemHelper {
 
     @Nonnull
     private static final Cache<Set<NamespacedKey>> FallbackNamespacedKeyCache =
-            Cache.createInThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys.keySet()));
+            Cache.createThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys.keySet()));
 
     @Nonnull
     public static Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material) {

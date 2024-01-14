@@ -56,10 +56,10 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         return keyA.compareTo(keyB);
     };
     private static final @Nonnull Lazy<Style> defaultEnchantTextStyleLazy =
-            Lazy.createInThreadSafe(() -> Style.style(NamedTextColor.GRAY)
+            Lazy.createThreadSafe(() -> Style.style(NamedTextColor.GRAY)
                     .decoration(TextDecoration.ITALIC, false));
     private static final @Nonnull Lazy<Style> cursedEnchantTextStyleLazy =
-            Lazy.createInThreadSafe(() -> Style.style(NamedTextColor.RED)
+            Lazy.createThreadSafe(() -> Style.style(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, false));
     private static final double DEFAULT_TOOL_DAMAGE = 1.0;
     private static final double DEFAULT_TOOL_SPEED = 4.0;

@@ -71,6 +71,7 @@ public final class EntitySpawnListener implements Listener {
         EntityRegister register = EntityRegister.getInstanceUnsafe();
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
+        Entity entity = event.getEntity();
         Random rnd = ThreadLocalRandom.current();
         Lazy<DataNaturalSpawnPosibility> dataLazy = Lazy.create(() ->
                 new DataNaturalSpawnPosibility(event.getLocation(), event.getSpawnReason()));
@@ -87,7 +88,6 @@ public final class EntitySpawnListener implements Listener {
                     switch (result) {
                         case Handled -> {
                             if (entityType instanceof FeatureEntityLoad feature2) {
-                                Entity entity = event.getEntity();
                                 if (!entity.isDead())
                                     feature2.handleEntityLoaded(entity);
                             }

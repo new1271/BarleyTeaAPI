@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class UnknownCustomEntityTypeImpl implements CustomEntityType {
 
     @Nonnull
-    private static final Lazy<UnknownCustomEntityTypeImpl> _inst = Lazy.createInThreadSafe(UnknownCustomEntityTypeImpl::new);
+    private static final Lazy<UnknownCustomEntityTypeImpl> _inst = Lazy.createThreadSafe(UnknownCustomEntityTypeImpl::new);
 
     private UnknownCustomEntityTypeImpl() {
     }

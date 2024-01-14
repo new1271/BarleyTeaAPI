@@ -3,7 +3,6 @@ package org.ricetea.barleyteaapi.util.connector;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.ObjectUtil;
 

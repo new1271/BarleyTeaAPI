@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 
 public class ArmorTrimSmithingRecipe extends BaseSmithingRecipe {
 
-    private static final Lazy<Set<CustomItemType>> templateSetLazy = Lazy.createInThreadSafe(() ->
+    private static final Lazy<Set<CustomItemType>> templateSetLazy = Lazy.createThreadSafe(() ->
             Tag.ITEMS_TRIM_TEMPLATES.getValues()
                     .stream()
                     .map(CustomItemType::get)
                     .collect(Collectors.toSet()));
 
-    private static final Lazy<Set<CustomItemType>> additionSetLazy = Lazy.createInThreadSafe(() ->
+    private static final Lazy<Set<CustomItemType>> additionSetLazy = Lazy.createThreadSafe(() ->
             Tag.ITEMS_TRIM_MATERIALS.getValues()
                     .stream()
                     .map(CustomItemType::get)

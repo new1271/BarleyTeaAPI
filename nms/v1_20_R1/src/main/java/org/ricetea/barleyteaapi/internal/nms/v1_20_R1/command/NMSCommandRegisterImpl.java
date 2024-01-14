@@ -30,7 +30,7 @@ public final class NMSCommandRegisterImpl extends CommandRegisterBase<CommandDis
             implements CommandRegistrationContext<CommandDispatcher<CommandSourceStack>> {
 
         private final Lazy<CommandDispatcher<CommandSourceStack>> contextLazy =
-                Lazy.createInThreadSafe(() ->
+                Lazy.createThreadSafe(() ->
                         Objects.requireNonNull(
                                 ((CraftServer) Bukkit.getServer()).getServer().
                                         vanillaCommandDispatcher.getDispatcher()));

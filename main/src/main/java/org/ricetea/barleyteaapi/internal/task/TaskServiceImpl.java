@@ -67,6 +67,6 @@ public final class TaskServiceImpl implements TaskService {
 
     @Override
     public void shutdown() {
-
+        getExecutorService().shutdown();
     }
 }

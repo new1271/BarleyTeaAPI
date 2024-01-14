@@ -31,7 +31,7 @@ public final class VanillaCustomItemRarityImpl extends CustomItemRarityBase {
     private final CustomItemRarity nextLevelRarity;
 
     @Nonnull
-    private final Lazy<Style> styleLazy = Lazy.createInThreadSafe(() -> Style.style(getRarity().getColor()));
+    private final Lazy<Style> styleLazy = Lazy.createThreadSafe(() -> Style.style(getRarity().getColor()));
 
     private VanillaCustomItemRarityImpl(@Nonnull ItemRarity rarity) {
         this(rarity, null);

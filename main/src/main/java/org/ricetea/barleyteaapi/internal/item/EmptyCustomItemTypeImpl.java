@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class EmptyCustomItemTypeImpl implements CustomItemType {
 
     @Nonnull
-    private static final Lazy<EmptyCustomItemTypeImpl> _inst = Lazy.createInThreadSafe(EmptyCustomItemTypeImpl::new);
+    private static final Lazy<EmptyCustomItemTypeImpl> _inst = Lazy.createThreadSafe(EmptyCustomItemTypeImpl::new);
 
     private EmptyCustomItemTypeImpl() {
     }

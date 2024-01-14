@@ -2,118 +2,54 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.Objects;
 
-public class Box<T> implements Property<T> {
-    protected T obj;
+public interface Box<T> extends Property<T> {
 
-    protected Box(@Nullable T obj) {
-        this.obj = obj;
+    @Nonnull
+    static <T> Box<T> box(@Nullable T obj) {
+        return new BoxImpl<>(obj);
     }
 
     @Nonnull
-    public static <T> Box<T> box(@Nullable T obj) {
-        return new Box<>(obj);
-    }
-
-    @Nonnull
-    public static <T> Box<T> boxInThreadSafe(@Nullable T obj) {
-        return new ThreadSafeImpl<>(obj);
+    static <T> Box<T> boxThreadSafe(@Nullable T obj) {
+        return new BoxThreadSafeImpl<>(obj);
     }
 
     @Nullable
-    public static <T> T unbox(@Nullable Box<T> box) {
-        return box == null ? null : box.unbox();
-    }
-
-    public static <T> boolean isNull(@Nullable Box<T> box) {
-        return box == null || box.isNull();
-    }
-
-    public static <T> boolean isNotNull(@Nullable Box<T> box) {
-        return box != null && box.isNotNull();
-    }
+    T unbox();
 
     @Nullable
-    public T unbox() {
-        return exchange(null);
+    T exchange(@Nullable T obj);
+
+    @Override
+    @Nullable
+    default T get() {
+        return unbox();
     }
 
+    @Override
     @Nullable
-    public T exchange(@Nullable T obj) {
-        T oldObj = this.obj;
-        this.obj = obj;
-        return oldObj;
-    }
-
-    @Nullable
-    public T get() {
+    default T set(@Nullable T obj) {
+        exchange(obj);
         return obj;
     }
 
-    @Override
-    public T set(@Nullable T obj) {
-        return this.obj = obj;
+    default boolean contains(@Nullable T obj) {
+        return Objects.equals(unbox(), obj);
     }
 
-    public boolean contains(@Nullable T obj) {
-        return this.obj == obj;
+    default boolean isNull() {
+        return unbox() == null;
     }
 
-    public boolean isNull() {
-        return this.obj == null;
-    }
-
-    public boolean isNotNull() {
-        return this.obj != null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj) || Objects.equals(this.obj, obj);
+    default boolean isNotNull() {
+        return unbox() != null;
     }
 
     @Override
     @Nonnull
-    public PropertyType getPropertyType() {
+    default PropertyType getPropertyType() {
         return PropertyType.ReadWrite;
-    }
-    
-    @ThreadSafe
-    private static final class ThreadSafeImpl<T> extends Box<T> {
-
-        @Nonnull
-        private final Object syncRoot = new Object();
-
-        private ThreadSafeImpl(@Nullable T obj) {
-            super(obj);
-        }
-
-        @Override
-        @Nullable
-        public T get() {
-            synchronized (syncRoot) {
-                return obj;
-            }
-        }
-
-        @Override
-        @Nullable
-        public T set(@Nullable T value) {
-            synchronized (syncRoot) {
-                return obj = value;
-            }
-        }
-
-        @Override
-        @Nullable
-        public T exchange(@Nullable T obj) {
-            synchronized (syncRoot) {
-                T oldObj = this.obj;
-                this.obj = obj;
-                return oldObj;
-            }
-        }
     }
 }

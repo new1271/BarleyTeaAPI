@@ -31,7 +31,7 @@ public class BlockHelper {
     private static final Set<NamespacedKey> FallbackNamespacedKeys = ConcurrentHashMap.newKeySet();
     @Nonnull
     private static final Cache<Set<NamespacedKey>> FallbackNamespacedKeyCache =
-            Cache.createInThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys));
+            Cache.createThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys));
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
         if (key != null) {

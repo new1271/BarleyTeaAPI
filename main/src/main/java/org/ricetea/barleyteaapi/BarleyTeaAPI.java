@@ -18,8 +18,8 @@ import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
-import org.ricetea.utils.SupplierUtil;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.SupplierUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

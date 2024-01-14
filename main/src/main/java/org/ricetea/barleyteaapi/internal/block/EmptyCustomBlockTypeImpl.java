@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class EmptyCustomBlockTypeImpl implements CustomBlockType {
 
     @Nonnull
-    private static final Lazy<EmptyCustomBlockTypeImpl> _inst = Lazy.createInThreadSafe(EmptyCustomBlockTypeImpl::new);
+    private static final Lazy<EmptyCustomBlockTypeImpl> _inst = Lazy.createThreadSafe(EmptyCustomBlockTypeImpl::new);
 
     private EmptyCustomBlockTypeImpl() {
     }

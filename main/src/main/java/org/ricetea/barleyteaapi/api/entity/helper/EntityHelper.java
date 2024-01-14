@@ -45,7 +45,7 @@ public class EntityHelper {
     private static final ConcurrentHashMap<NamespacedKey, Function<String, NamespacedKey>> FallbackNamespacedKeys = new ConcurrentHashMap<>();
     @Nonnull
     private static final Cache<Set<NamespacedKey>> FallbackNamespacedKeyCache =
-            Cache.createInThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys.keySet()));
+            Cache.createThreadSafe(() -> Collections.unmodifiableSet(FallbackNamespacedKeys.keySet()));
 
 
     public static void addFallbackNamespacedKey(@Nullable NamespacedKey key) {
