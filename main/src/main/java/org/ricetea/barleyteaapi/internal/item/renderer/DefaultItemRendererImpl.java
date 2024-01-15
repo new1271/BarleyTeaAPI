@@ -28,6 +28,9 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDisplay;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRendererRegister;
+import org.ricetea.barleyteaapi.api.item.registration.ItemSubRendererRegister;
+import org.ricetea.barleyteaapi.api.item.render.ItemSubRenderer;
+import org.ricetea.barleyteaapi.api.item.render.ItemSubRendererSupportingState;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
@@ -90,6 +93,12 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             ItemRendererRegister.getInstance().register(this);
     }
 
+    @Nonnull
+    @Override
+    public ItemSubRendererSupportingState getSubRendererSupportingState() {
+        return ItemSubRendererSupportingState.SelfHandled;
+    }
+
     @Override
     @Nonnull
     public ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player) {
@@ -104,8 +113,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         if (meta == null)
             return itemStack;
 
-        AlternativeItemState.restore(meta);
-        AlternativeItemState.store(meta);
+        meta = AlternativeItemState.store(AlternativeItemState.restore(meta));
 
         List<SoftCache<Deque<Component>>> renderLoreStackList = reusableRenderLoreStack.get();
         Deque<Component> renderLoreStack = renderLoreStackList.get(0).get();
@@ -307,7 +315,6 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         Component displayName = meta.displayName();
         CustomItem customItem = itemType.asCustomItem();
-        List<Component> output = null;
         if (customItem != null) {
             boolean isRenamed;
             if (displayName == null) {
@@ -336,26 +343,37 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             }
             renderLoreStack.offer(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
+        }
 
-            if (customItem instanceof FeatureItemDisplay feature) {
-                output = new ArrayList<>(renderLoreStack);
-                DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, output);
+        List<Component> output = new ArrayList<>(renderLoreStack);
+
+        DataItemDisplay data = null;
+
+        if (customItem instanceof FeatureItemDisplay feature) {
+            data = new DataItemDisplay(player, itemStack, displayName, output);
+            try {
+                feature.handleItemDisplay(data);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        ItemSubRendererRegister subRendererRegister = ItemSubRendererRegister.getInstanceUnsafe();
+        if (subRendererRegister != null) {
+            if (data == null)
+                data = new DataItemDisplay(player, itemStack, displayName, output);
+            for (ItemSubRenderer subRenderer : subRendererRegister.listAll()) {
                 try {
-                    feature.handleItemDisplay(data);
-                    displayName = data.getDisplayName();
+                    subRenderer.render(data);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    output = null;
                 }
             }
         }
 
-        if (output == null)
-            output = new ArrayList<>(renderLoreStack);
-
         renderLoreStack.clear();
 
-        meta.displayName(displayName);
+        meta.displayName(data != null ? data.getDisplayName() : displayName);
         meta.lore(output);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(meta);

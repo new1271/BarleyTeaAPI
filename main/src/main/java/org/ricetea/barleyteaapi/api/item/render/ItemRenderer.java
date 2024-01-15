@@ -18,6 +18,9 @@ public interface ItemRenderer extends Keyed {
     boolean isRegistered();
 
     @Nonnull
+    ItemSubRendererSupportingState getSubRendererSupportingState();
+
+    @Nonnull
     default ItemStack render(@Nonnull ItemStack itemStack) {
         return render(itemStack, null);
     }

@@ -4,6 +4,10 @@ description: A multi-functional api for Paper-based server software
 author: new1271 (RiceTeaInMC)
 main: org.ricetea.barleyteaapi.BarleyTeaAPI
 api-version: 1.20
+loadbefore:
+  - "EliteMobs"
+  - "InfernalMobs"
+  - "MythicMobs"
 depend:
   - "ProtocolLib"
 softdepend:

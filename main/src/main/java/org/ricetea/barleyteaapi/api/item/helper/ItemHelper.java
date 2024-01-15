@@ -8,8 +8,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.block.ShulkerBox;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -18,12 +21,21 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDisplay;
+import org.ricetea.barleyteaapi.api.item.registration.ItemSubRendererRegister;
+import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
+import org.ricetea.barleyteaapi.api.item.render.ItemSubRenderer;
+import org.ricetea.barleyteaapi.api.item.render.ItemSubRendererSupportingState;
+import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
+import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Box;
 import org.ricetea.utils.Cache;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.WithFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -298,5 +310,87 @@ public class ItemHelper {
             }
         }
         return false;
+    }
+
+    @Nullable
+    public static WithFlag<ItemStack> renderUnsafe(@Nullable ItemStack itemStack) {
+        if (itemStack == null)
+            return null;
+        return render(itemStack, null);
+    }
+
+    @Nullable
+    public static WithFlag<ItemStack> renderUnsafe(@Nullable ItemStack itemStack, @Nullable Player player) {
+        if (itemStack == null)
+            return null;
+        return render(itemStack, player);
+    }
+
+    @Nonnull
+    public static WithFlag<ItemStack> render(@Nonnull ItemStack itemStack) {
+        return render(itemStack, null);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Nonnull
+    public static WithFlag<ItemStack> render(@Nonnull ItemStack itemStack, @Nullable Player player) {
+        boolean modified = false;
+        ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
+        if (renderer == null && ItemHelper.isCustomItem(itemStack)) {
+            renderer = ItemRenderer.getDefault();
+        }
+        if (renderer != null) {
+            itemStack = renderer.render(itemStack, player);
+            if (ItemSubRendererSupportingState.APIHandled.equals(renderer.getSubRendererSupportingState())) {
+                ItemSubRendererRegister subRendererRegister = ItemSubRendererRegister.getInstanceUnsafe();
+                if (subRendererRegister != null) {
+                    ItemMeta meta = itemStack.getItemMeta();
+                    if (meta != null) {
+                        Component displayName = meta.displayName();
+                        List<Component> lore = meta.lore();
+                        lore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
+                        itemStack = AlternativeItemState.store(AlternativeItemState.restore(itemStack));
+                        DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, lore);
+                        for (ItemSubRenderer subRenderer : subRendererRegister.listAll()) {
+                            try {
+                                subRenderer.render(data);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        meta.displayName(data.getDisplayName());
+                        meta.lore(data.getLore());
+                        itemStack.setItemMeta(meta);
+                    }
+                }
+            }
+            modified = true;
+        }
+        if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta) {
+            boolean modified2 = false;
+            if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
+                var inventory = shulkerBox.getInventory();
+                Box<Boolean> flag = Box.box(false);
+                for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
+                    ItemStack iteratingItemStack = iterator.next();
+                    if (iteratingItemStack == null || iteratingItemStack.getType().isEmpty())
+                        continue;
+                    WithFlag<ItemStack> result = render(iteratingItemStack, player);
+                    if (result.flag()) {
+                        flag.set(true);
+                        iterator.set(result.obj());
+                    }
+                }
+                modified2 = ObjectUtil.letNonNull(flag.get(), false);
+                if (modified2) {
+                    blockMeta.setBlockState(shulkerBox);
+                }
+            }
+            if (modified2) {
+                itemStack.setItemMeta(blockMeta);
+            }
+            modified |= modified2;
+        }
+        return new WithFlag<>(itemStack, modified);
     }
 }

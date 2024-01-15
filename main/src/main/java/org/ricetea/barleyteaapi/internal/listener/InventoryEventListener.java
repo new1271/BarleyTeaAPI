@@ -169,7 +169,7 @@ public final class InventoryEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST) //because needed covering ExcellentEnchants' PrepareAnvilEvent, so priority must HIGH or above
     public void listenItemAnviled(PrepareAnvilEvent event) {
         if (event == null || !ItemRegister.hasRegistered())
             return;

@@ -87,44 +87,6 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nullable
-        private static WithFlag<ItemStack> renderItem(@Nullable ItemStack itemStack, @Nonnull Player player) {
-            if (itemStack == null)
-                return null;
-            boolean modified = false;
-            ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
-            if (renderer == null && ItemHelper.isCustomItem(itemStack)) {
-                renderer = ItemRenderer.getDefault();
-            }
-            if (renderer != null) {
-                itemStack = renderer.render(itemStack, player);
-                modified = true;
-            }
-            if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta) {
-                boolean modified2 = false;
-                if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
-                    var inventory = shulkerBox.getInventory();
-                    Box<Boolean> flag = Box.box(false);
-                    for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
-                        WithFlag<ItemStack> result = renderItem(iterator.next(), player);
-                        if (result != null && result.flag()) {
-                            flag.set(true);
-                            iterator.set(result.obj());
-                        }
-                    }
-                    modified2 = ObjectUtil.letNonNull(flag.get(), false);
-                    if (modified2) {
-                        blockMeta.setBlockState(shulkerBox);
-                    }
-                }
-                if (modified2) {
-                    itemStack.setItemMeta(blockMeta);
-                }
-                modified |= modified2;
-            }
-            return new WithFlag<>(itemStack, modified);
-        }
-
-        @Nullable
         private static ItemStack restoreItem(@Nullable ItemStack itemStack) {
             if (itemStack == null)
                 return null;
@@ -162,8 +124,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
-                        var flag = renderItem(itemStack, player);
-                        if (flag != null && flag.flag()) {
+                        WithFlag<ItemStack> flag = ItemHelper.render(itemStack, player);
+                        if (flag.flag()) {
                             itemStack = flag.obj();
                             return itemStack.displayName()
                                     .hoverEvent(itemStack.asHoverEvent())
@@ -231,7 +193,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             {
                 StructureModifier<ItemStack> modifier = container.getItemModifier();
                 for (int i = 0, size = modifier.size(); i < size; i++) {
-                    modifier.modify(i, itemStack -> ObjectUtil.safeMap(renderItem(itemStack, player), WithFlag::obj));
+                    modifier.modify(i, itemStack -> ObjectUtil.safeMap(ItemHelper.renderUnsafe(itemStack, player), WithFlag::obj));
                 }
             }
             if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
@@ -239,7 +201,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList.forEach(pair -> pair.setSecond(
-                                ObjectUtil.safeMap(renderItem(pair.getSecond(), player), WithFlag::obj)));
+                                ObjectUtil.safeMap(ItemHelper.renderUnsafe(pair.getSecond(), player), WithFlag::obj)));
                         return itemStackList;
                     });
                 }
@@ -253,16 +215,18 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                                     List<ItemStack> newIngredients = recipe.getIngredients()
                                             .stream()
                                             .map(itemStack -> {
-                                                WithFlag<ItemStack> newItem = renderItem(itemStack, player);
-                                                if (newItem != null && newItem.flag()) {
+                                                if (itemStack == null)
+                                                    return null;
+                                                WithFlag<ItemStack> newItem = ItemHelper.render(itemStack, player);
+                                                if (newItem.flag()) {
                                                     flagBox.set(true);
                                                 }
-                                                return ObjectUtil.safeMap(newItem, WithFlag::obj);
+                                                return newItem.obj();
                                             })
                                             .toList();
                                     ItemStack oldResult = recipe.getResult();
-                                    WithFlag<ItemStack> newResult = renderItem(oldResult, player);
-                                    if (newResult != null && newResult.flag()) {
+                                    WithFlag<ItemStack> newResult = ItemHelper.render(oldResult, player);
+                                    if (newResult.flag()) {
                                         MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
                                                 recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
                                                 recipe.getDemand(), recipe.getSpecialPrice(), recipe.shouldIgnoreDiscounts());
@@ -283,7 +247,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {
                         itemStackList.replaceAll(itemStack ->
-                                ObjectUtil.safeMap(renderItem(itemStack, player), WithFlag::obj));
+                                ObjectUtil.safeMap(ItemHelper.renderUnsafe(itemStack, player), WithFlag::obj));
                         return itemStackList;
                     });
                 }

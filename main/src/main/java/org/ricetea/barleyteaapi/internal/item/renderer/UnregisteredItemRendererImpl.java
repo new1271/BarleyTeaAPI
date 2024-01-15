@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.item.render.ItemSubRendererSupportingState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,6 +20,12 @@ public final class UnregisteredItemRendererImpl extends AbstractItemRendererImpl
     @Override
     public boolean isRegistered() {
         return false;
+    }
+
+    @Nonnull
+    @Override
+    public ItemSubRendererSupportingState getSubRendererSupportingState() {
+        return ItemSubRendererSupportingState.APIHandled;
     }
 
     @Override
