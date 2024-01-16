@@ -28,13 +28,13 @@ public abstract class BaseItemHoldEntityFeatureData<T extends Event> extends Bas
                                          @Nonnull EquipmentSlot equipmentSlot) {
         super(event);
         this.holderEntity = holderEntity;
-        this.holderEntityType = Lazy.create(() -> CustomEntityType.get(this.holderEntity));
+        this.holderEntityType = Lazy.create(() -> CustomEntityType.get(getHolderEntity()));
         this.itemStack = itemStack;
         this.equipmentSlot = equipmentSlot;
     }
 
     @Nonnull
-    public final LivingEntity getHolderEntity() {
+    public LivingEntity getHolderEntity() {
         return holderEntity;
     }
 

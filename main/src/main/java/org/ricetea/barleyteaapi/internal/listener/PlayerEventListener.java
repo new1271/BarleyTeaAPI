@@ -233,10 +233,16 @@ public final class PlayerEventListener implements Listener {
     public void listenItemWear(PlayerArmorChangeEvent event) {
         if (event == null)
             return;
-        ItemFeatureLinker.doFeature(event.getOldItem(), event, FeatureItemWear.class,
-                FeatureItemWear::handleItemWearOff, DataItemWearOff::new);
-        ItemFeatureLinker.doFeature(event.getNewItem(), event, FeatureItemWear.class, FeatureItemWear::handleItemWear,
-                DataItemWear::new);
+        ItemStack oldItem = event.getOldItem();
+        ItemStack newItem = event.getNewItem();
+        CustomItem oldItemType = CustomItem.get(oldItem);
+        CustomItem newItemType = CustomItem.get(newItem);
+        if (Objects.equals(oldItemType, newItemType))
+            return;
+        if (oldItemType instanceof FeatureItemWear feature)
+            feature.handleItemWearOff(new DataItemWearOff(event));
+        if (newItemType instanceof FeatureItemWear feature)
+            feature.handleItemWear(new DataItemWear(event));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

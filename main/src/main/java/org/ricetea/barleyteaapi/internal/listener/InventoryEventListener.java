@@ -223,7 +223,7 @@ public final class InventoryEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenInventoryClick(InventoryClickEvent event) {
         if (event == null)
             return;
@@ -236,7 +236,7 @@ public final class InventoryEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenTradeSelect(TradeSelectEvent event) {
         if (event == null)
             return;

@@ -25,26 +25,18 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
     @Nullable
     private final Lazy<CustomEntityType> killerType;
 
-    @Nonnull
-    private final Lazy<CustomEntityType> decedentType;
-
     public DataItemHoldEntityDeath(@Nonnull EntityDeathEvent event,
                                    @Nullable EntityDamageByEntityEvent lastDamageCauseByEntityEvent, @Nonnull ItemStack itemStack,
                                    @Nonnull EquipmentSlot equipmentSlot) {
         super(event, event.getEntity(), itemStack, equipmentSlot);
-        decedentType = Lazy.create(() -> CustomEntityType.get(getDecedent()));
         killer = ObjectUtil.safeMap(lastDamageCauseByEntityEvent, EntityDamageByEntityEvent::getDamager);
         killerType = ObjectUtil.safeMap(killer, killer -> Lazy.create(() -> CustomEntityType.get(killer)));
     }
 
+    @Override
     @Nonnull
-    public LivingEntity getDecedent() {
+    public LivingEntity getHolderEntity() {
         return Objects.requireNonNull(event.getEntity());
-    }
-
-    @Nonnull
-    public CustomEntityType getDecedentType() {
-        return decedentType.get();
     }
 
     @Nullable
@@ -73,55 +65,55 @@ public final class DataItemHoldEntityDeath extends BaseItemHoldEntityFeatureData
         event.setDroppedExp(exp);
     }
 
-    public @Nonnull List<ItemStack> getDecedentDrops() {
+    public @Nonnull List<ItemStack> getDrops() {
         return Objects.requireNonNull(event.getDrops());
     }
 
-    public double getDecedentReviveHealth() {
+    public double getReviveHealth() {
         return event.getReviveHealth();
     }
 
-    public void setDecedentReviveHealth(double reviveHealth) throws IllegalArgumentException {
+    public void setReviveHealth(double reviveHealth) throws IllegalArgumentException {
         event.setReviveHealth(reviveHealth);
     }
 
-    public boolean getDecedentShouldPlayDeathSound() {
+    public boolean getShouldPlayDeathSound() {
         return event.shouldPlayDeathSound();
     }
 
-    public void setDecedentShouldPlayDeathSound(boolean playDeathSound) {
+    public void setShouldPlayDeathSound(boolean playDeathSound) {
         event.setShouldPlayDeathSound(playDeathSound);
     }
 
-    public @Nullable Sound getDecedentDeathSound() {
+    public @Nullable Sound getDeathSound() {
         return event.getDeathSound();
     }
 
-    public void setDecedentDeathSound(@Nullable Sound sound) {
+    public void setDeathSound(@Nullable Sound sound) {
         event.setDeathSound(sound);
     }
 
-    public @Nullable SoundCategory getDecedentDeathSoundCategory() {
+    public @Nullable SoundCategory getDeathSoundCategory() {
         return event.getDeathSoundCategory();
     }
 
-    public void setDecedentDeathSoundCategory(@Nullable SoundCategory soundCategory) {
+    public void setDeathSoundCategory(@Nullable SoundCategory soundCategory) {
         event.setDeathSoundCategory(soundCategory);
     }
 
-    public float getDecedentDeathSoundVolume() {
+    public float getDeathSoundVolume() {
         return event.getDeathSoundVolume();
     }
 
-    public void setDecedentDeathSoundVolume(float volume) {
+    public void setDeathSoundVolume(float volume) {
         event.setDeathSoundVolume(volume);
     }
 
-    public float getDecedentDeathSoundPitch() {
+    public float getDeathSoundPitch() {
         return event.getDeathSoundPitch();
     }
 
-    public void setDecedentDeathSoundPitch(float pitch) {
+    public void setDeathSoundPitch(float pitch) {
         event.setDeathSoundPitch(pitch);
     }
 }
