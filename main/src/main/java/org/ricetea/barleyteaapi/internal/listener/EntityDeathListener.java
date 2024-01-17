@@ -2,6 +2,7 @@ package org.ricetea.barleyteaapi.internal.listener;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -18,6 +19,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDeath;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityKill;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDeath;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerDeath;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillEntity;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlayer;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
@@ -88,6 +90,7 @@ public final class EntityDeathListener implements Listener {
 
     @SuppressWarnings("DataFlowIssue")
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
+        Player player = event.getPlayer();
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
         if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
                 event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityKill.class,
@@ -97,6 +100,12 @@ public final class EntityDeathListener implements Listener {
         }
         if (!EntityFeatureLinker.doFeatureCancellable(damager, event, lastDamageEvent, FeatureKillEntity.class,
                 FeatureKillEntity::handleKillPlayer, DataKillPlayer::new)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(player,
+                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityDeath.class,
+                FeatureItemHoldEntityDeath::handleItemHoldPlayerDeath, DataItemHoldPlayerDeath::new)) {
             event.setCancelled(true);
             return;
         }

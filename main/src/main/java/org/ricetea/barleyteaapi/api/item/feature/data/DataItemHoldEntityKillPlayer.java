@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.LivingEntity;
@@ -78,5 +79,67 @@ public final class DataItemHoldEntityKillPlayer extends BaseItemHoldEntityFeatur
 
     public void setDecedentDeathSoundPitch(float pitch) {
         event.setDeathSoundPitch(pitch);
+    }
+
+    @Nonnull
+    public List<ItemStack> getDecedentItemsToKeep() {
+        return event.getItemsToKeep();
+    }
+
+    @Nullable
+    public Component getDecedentDeathMessage() {
+        return event.deathMessage();
+    }
+
+    public void setDecedentDeathMessage(@Nullable Component deathMessage) {
+        event.deathMessage(deathMessage);
+    }
+
+    public boolean getDecedentShouldDropExperience() {
+        return event.shouldDropExperience();
+    }
+
+    public void setDecedentShouldDropExperience(boolean doExpDrop) {
+        event.setShouldDropExperience(doExpDrop);
+    }
+
+    public int getDecedentNewExp() {
+        return event.getNewExp();
+    }
+
+    public void setDecedentNewExp(int exp) {
+        event.setNewExp(exp);
+    }
+
+    public int getDecedentNewLevel() {
+        return event.getNewLevel();
+    }
+
+    public void setDecedentNewLevel(int level) {
+        event.setNewLevel(level);
+    }
+
+    public int getDecedentNewTotalExp() {
+        return event.getNewTotalExp();
+    }
+
+    public void setDecedentNewTotalExp(int totalExp) {
+        event.setNewTotalExp(totalExp);
+    }
+
+    public boolean getDecedentKeepLevel() {
+        return event.getKeepLevel();
+    }
+
+    public void setDecedentKeepLevel(boolean keepLevel) {
+        event.setKeepLevel(keepLevel);
+    }
+
+    public boolean getDecedentKeepInventory() {
+        return event.getKeepInventory();
+    }
+
+    public void setDecedentKeepInventory(boolean keepInventory) {
+        event.setKeepInventory(keepInventory);
     }
 }

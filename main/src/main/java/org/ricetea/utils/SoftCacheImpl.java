@@ -34,7 +34,11 @@ class SoftCacheImpl<T> implements SoftCache<T> {
             obj = Objects.requireNonNull(supplier.get());
             this.reference = new SoftReference<>(obj);
         } else {
-            obj = Objects.requireNonNull(reference.get());
+            obj = reference.get();
+            if (obj == null) {
+                obj = Objects.requireNonNull(supplier.get());
+                this.reference = new SoftReference<>(obj);
+            }
         }
         return obj;
     }

@@ -25,15 +25,6 @@ public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent
         return event.getEntity();
     }
 
-    @Nullable
-    public Component deathMessage() {
-        return event.deathMessage();
-    }
-
-    public void deathMessage(@Nullable Component component) {
-        event.deathMessage(component);
-    }
-
     public @Nonnull List<ItemStack> getDecedentDrops() {
         return Objects.requireNonNull(event.getDrops());
     }
@@ -84,5 +75,67 @@ public final class DataKillPlayer extends BaseEntityFeatureData<PlayerDeathEvent
 
     public void setDecedentDeathSoundPitch(float pitch) {
         event.setDeathSoundPitch(pitch);
+    }
+
+    @Nonnull
+    public List<ItemStack> getDecedentItemsToKeep() {
+        return event.getItemsToKeep();
+    }
+
+    @Nullable
+    public Component getDecedentDeathMessage() {
+        return event.deathMessage();
+    }
+
+    public void setDecedentDeathMessage(@Nullable Component deathMessage) {
+        event.deathMessage(deathMessage);
+    }
+
+    public boolean getDecedentShouldDropExperience() {
+        return event.shouldDropExperience();
+    }
+
+    public void setDecedentShouldDropExperience(boolean doExpDrop) {
+        event.setShouldDropExperience(doExpDrop);
+    }
+
+    public int getDecedentNewExp() {
+        return event.getNewExp();
+    }
+
+    public void setDecedentNewExp(int exp) {
+        event.setNewExp(exp);
+    }
+
+    public int getDecedentNewLevel() {
+        return event.getNewLevel();
+    }
+
+    public void setDecedentNewLevel(int level) {
+        event.setNewLevel(level);
+    }
+
+    public int getDecedentNewTotalExp() {
+        return event.getNewTotalExp();
+    }
+
+    public void setDecedentNewTotalExp(int totalExp) {
+        event.setNewTotalExp(totalExp);
+    }
+
+    public boolean getDecedentKeepLevel() {
+        return event.getKeepLevel();
+    }
+
+    public void setDecedentKeepLevel(boolean keepLevel) {
+        event.setKeepLevel(keepLevel);
+    }
+
+    public boolean getDecedentKeepInventory() {
+        return event.getKeepInventory();
+    }
+
+    public void setDecedentKeepInventory(boolean keepInventory) {
+        event.setKeepInventory(keepInventory);
     }
 }
