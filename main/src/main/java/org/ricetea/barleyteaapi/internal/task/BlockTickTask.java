@@ -5,6 +5,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
@@ -12,13 +13,16 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
+import org.ricetea.barleyteaapi.util.EnumUtil;
+import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -28,16 +32,15 @@ public final class BlockTickTask extends LoopTaskBase {
     @Nonnull
     private static final Lazy<BlockTickTask> _inst = Lazy.create(BlockTickTask::new);
     @Nonnull
-    private final Hashtable<NamespacedKey, Hashtable<BlockLocation, Integer>> tickingTable = new Hashtable<>();
+    private final Map<NamespacedKey, Map<BlockLocation, Optional<BukkitTask>>> tickingTable = new HashMap<>();
     @Nonnull
-    private final ConcurrentHashMap<NamespacedKey, ConcurrentHashMap<BlockLocation, Integer>> operationTable = new ConcurrentHashMap<>();
+    private final Map<NamespacedKey, Map<BlockLocation, Operation>> operationTable = new ConcurrentHashMap<>();
     private int lastTick;
 
-    /*
-     * Operations
-     * 0 = Add
-     * 1 = Remove
-     */
+    private enum Operation {
+        ADD,
+        REMOVE
+    }
 
     private BlockTickTask() {
         super(50);
@@ -60,70 +63,105 @@ public final class BlockTickTask extends LoopTaskBase {
         BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
         if (api == null || register == null || !register.hasAnyRegistered()) {
             stop();
-        } else {
-            for (Map.Entry<NamespacedKey, ConcurrentHashMap<BlockLocation, Integer>> entry : operationTable.entrySet()) {
-                NamespacedKey worldKey = entry.getKey();
-                var table = entry.getValue();
-                var affectTable = tickingTable.computeIfAbsent(worldKey, ignored -> new Hashtable<>());
-                synchronized (table) {
-                    for (var iterator2 = table.entrySet().iterator(); iterator2.hasNext(); iterator2.remove()) {
-                        var entry2 = iterator2.next();
-                        BlockLocation location = entry2.getKey();
-                        Integer op = entry2.getValue();
-                        if (op == null)
-                            continue;
-                        switch (op) {
-                            case 0 -> affectTable.putIfAbsent(location, 0);
-                            case 1 -> {
-                                Integer id = affectTable.remove(location);
-                                if (id != null && id != 0)
-                                    scheduler.cancelTask(id);
-                            }
+            return;
+        }
+        operationTable.forEach((worldKey, map) -> {
+            Map<BlockLocation, Optional<BukkitTask>> tickingMap = tickingTable.computeIfAbsent(worldKey, (ignored) -> new HashMap<>());
+            synchronized (map) {
+                CollectionUtil.forEachAndRemoveAll(map.entrySet(), (location, operation) -> {
+                    if (operation == null)
+                        return;
+                    switch (operation) {
+                        case ADD -> tickingMap.putIfAbsent(location, Optional.empty());
+                        case REMOVE -> {
+                            Optional<BukkitTask> taskOptional = tickingMap.remove(location);
+                            if (taskOptional == null)
+                                return;
+                            taskOptional.ifPresent((task) -> {
+                                if (scheduler.isQueued(task.getTaskId())) {
+                                    task.cancel();
+                                }
+                            });
                         }
                     }
+                });
+            }
+        });
+        if (tickingTable.isEmpty() || tickingTable.values().stream().allMatch(Map::isEmpty)) {
+            for (Map<BlockLocation, Operation> map : operationTable.values()) {
+                synchronized (map) {
+                    if (!map.isEmpty())
+                        return;
                 }
             }
-            if (tickingTable.isEmpty() || tickingTable.values().stream().allMatch(Hashtable::isEmpty)) {
-                stop();
-            } else {
-                int currentTick = Bukkit.getCurrentTick();
-                if (currentTick != lastTick) {
-                    lastTick = currentTick;
-                    for (var entry : tickingTable.entrySet()) {
-                        NamespacedKey worldKey = entry.getKey();
-                        var table = entry.getValue();
-                        table.replaceAll((location, taskId) -> {
-                            if (taskId != 0 && (scheduler.isCurrentlyRunning(taskId) || scheduler.isQueued(taskId)))
-                                return taskId;
-                            return scheduler.scheduleSyncDelayedTask(api, new _Task(worldKey, location, table));
-                        });
-                    }
-                }
-            }
+            stop();
+            return;
         }
+        int currentTick = Bukkit.getCurrentTick();
+        if (currentTick == lastTick)
+            return;
+        lastTick = currentTick;
+        tickingTable.forEach((worldKey, map) ->
+                map.replaceAll((location, taskOptional) -> {
+                    if (taskOptional.isPresent()) {
+                        BukkitTask task = taskOptional.get();
+                        if (scheduler.isQueued(task.getTaskId())) {
+                            return taskOptional;
+                        }
+                    }
+                    return Optional.of(scheduler.runTask(api, new _Task(worldKey, location)));
+                }));
     }
 
     @Override
     public void stop() {
         super.stop();
         tickingTable.clear();
-        operationTable.clear();
+        CollectionUtil.forEachAndRemoveAll(operationTable.values(), (map) -> {
+            synchronized (map) {
+                map.clear();
+            }
+        });
     }
 
     public void addBlock(@Nullable Block block) {
         if (!BlockHelper.isCustomBlock(block) || !BarleyTeaAPI.checkPluginUsable())
             return;
-        var table = operationTable.computeIfAbsent(block.getWorld().getKey(), ignored -> new ConcurrentHashMap<>());
-        table.merge(new BlockLocation(block), 0, Math::max);
-        start();
+        addBlock(block.getWorld().getKey(), new BlockLocation(block));
+    }
+
+    private void addBlock(@Nullable NamespacedKey worldKey, @Nullable BlockLocation location) {
+        if (worldKey == null || location == null || !BarleyTeaAPI.checkPluginUsable())
+            return;
+        queueOperation(worldKey, location, Operation.ADD);
     }
 
     public void removeBlock(@Nullable Block block) {
-        if (block == null || !BarleyTeaAPI.checkPluginUsable())
+        if (block == null)
             return;
-        var table = operationTable.computeIfAbsent(block.getWorld().getKey(), ignored -> new ConcurrentHashMap<>());
-        table.merge(new BlockLocation(block), 1, Math::max);
-        start();
+        removeBlock(block.getWorld().getKey(), new BlockLocation(block));
+    }
+
+    private void removeBlock(@Nullable NamespacedKey worldKey, @Nullable BlockLocation location) {
+        if (worldKey == null || location == null || !BarleyTeaAPI.checkPluginUsable())
+            return;
+        queueOperation(worldKey, location, Operation.REMOVE);
+    }
+
+    private void queueOperation(@Nonnull NamespacedKey worldKey, @Nonnull BlockLocation location, Operation operation) {
+        Map<BlockLocation, Operation> map = operationTable.computeIfAbsent(worldKey, ignored -> new HashMap<>());
+        synchronized (map) {
+            boolean needStart;
+            if (map.isEmpty()) {
+                needStart = true;
+                map.put(location, operation);
+            } else {
+                needStart = !isStarted();
+                map.merge(location, operation, EnumUtil::maxOrdinal);
+            }
+            if (needStart)
+                start();
+        }
     }
 
     private record BlockLocation(int x, int y, int z) {
@@ -139,27 +177,16 @@ public final class BlockTickTask extends LoopTaskBase {
 
     }
 
-    private class _Task implements Runnable {
-        @Nonnull
-        private final NamespacedKey worldKey;
-        @Nonnull
-        private final BlockLocation location;
-        @Nonnull
-        private final Hashtable<BlockLocation, Integer> operationTable;
-
-        _Task(@Nonnull NamespacedKey worldKey, @Nonnull BlockLocation location,
-              @Nonnull Hashtable<BlockLocation, Integer> blockOperationTable) {
-            this.worldKey = worldKey;
-            this.location = location;
-            this.operationTable = blockOperationTable;
-        }
+    private record _Task(@Nonnull NamespacedKey worldKey, @Nonnull BlockLocation location) implements Runnable {
 
         @Override
         public void run() {
-            if (!doJob()) {
-                operationTable.merge(location, 1, Math::max);
-                start();
-            }
+            if (doJob())
+                return;
+            BlockTickTask task = BlockTickTask.getInstanceUnsafe();
+            if (task == null)
+                return;
+            task.removeBlock(worldKey, location);
         }
 
         private boolean doJob() {

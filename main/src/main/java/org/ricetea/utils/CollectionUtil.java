@@ -89,4 +89,14 @@ public class CollectionUtil {
             forEachConsumer.accept(iterator.next());
         }
     }
+
+    public static <K, V, T extends Map.Entry<K, V>> void forEachAndRemoveAll(
+            @Nullable Iterable<T> iterable, @Nonnull BiConsumer<K, V> forEachConsumer) {
+        if (iterable == null)
+            return;
+        for (Iterator<T> iterator = iterable.iterator(); iterator.hasNext(); iterator.remove()) {
+            Map.Entry<K, V> entry = iterator.next();
+            forEachConsumer.accept(entry.getKey(), entry.getValue());
+        }
+    }
 }

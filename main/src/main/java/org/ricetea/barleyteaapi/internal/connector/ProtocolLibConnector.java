@@ -288,7 +288,6 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     PacketType.Play.Server.ENTITY_EQUIPMENT,
                     PacketType.Play.Server.SYSTEM_CHAT,
                     PacketType.Play.Server.DISGUISED_CHAT,
-                    PacketType.Play.Server.SCOREBOARD_OBJECTIVE,
                     PacketType.Play.Client.SET_CREATIVE_SLOT);
         }
 

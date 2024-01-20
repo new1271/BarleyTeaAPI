@@ -3,21 +3,24 @@ package org.ricetea.barleyteaapi.internal.task;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.util.EnumUtil;
+import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 @ApiStatus.Internal
@@ -27,15 +30,15 @@ public final class EntityTickTask extends LoopTaskBase {
     private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
 
     @Nonnull
-    private final Hashtable<UUID, Integer> tickingTable = new Hashtable<>();
+    private final Map<UUID, Optional<BukkitTask>> tickingTable = new HashMap<>();
     @Nonnull
-    private final ConcurrentHashMap<UUID, Integer> operationTable = new ConcurrentHashMap<>();
+    private final Map<UUID, Operation> operationTable = new HashMap<>();
 
-    /*
-     * Operations
-     * 0 = Add
-     * 1 = Remove
-     */
+    private enum Operation {
+        ADD,
+        REMOVE
+    }
+
     private int lastTick;
 
     private EntityTickTask() {
@@ -57,79 +60,109 @@ public final class EntityTickTask extends LoopTaskBase {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         if (api == null || !EntityRegister.hasRegistered()) {
             stop();
-        } else {
-            BukkitScheduler scheduler = Bukkit.getScheduler();
-            for (var iterator = operationTable.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
-                var entry = iterator.next();
-                UUID uuid = entry.getKey();
-                Integer op = entry.getValue();
-                if (op == null)
-                    continue;
-                switch (op) {
-                    case 0 -> tickingTable.putIfAbsent(uuid, 0);
-                    case 1 -> {
-                        Integer id = tickingTable.remove(uuid);
-                        if (id != null && id != 0)
-                            scheduler.cancelTask(id);
+            return;
+        }
+        BukkitScheduler scheduler = Bukkit.getScheduler();
+        synchronized (operationTable) {
+            CollectionUtil.forEachAndRemoveAll(operationTable.entrySet(), (uuid, operation) -> {
+                if (operation == null)
+                    return;
+                switch (operation) {
+                    case ADD -> tickingTable.putIfAbsent(uuid, Optional.empty());
+                    case REMOVE -> {
+                        Optional<BukkitTask> taskOptional = tickingTable.remove(uuid);
+                        if (taskOptional == null)
+                            return;
+                        taskOptional.ifPresent((task) -> {
+                            if (scheduler.isQueued(task.getTaskId())) {
+                                task.cancel();
+                            }
+                        });
                     }
                 }
+            });
+        }
+        if (tickingTable.isEmpty()) {
+            synchronized (operationTable) {
+                if (!operationTable.isEmpty())
+                    return;
             }
-            if (tickingTable.isEmpty()) {
-                stop();
-            } else {
-                int currentTick = Bukkit.getCurrentTick();
-                if (currentTick != lastTick) {
-                    lastTick = currentTick;
-                    tickingTable.replaceAll((uuid, taskId) -> {
-                        if (taskId != null && taskId != 0
-                                && (scheduler.isCurrentlyRunning(taskId) || scheduler.isQueued(taskId)))
-                            return taskId;
-                        return scheduler.scheduleSyncDelayedTask(api, new _Task(uuid, operationTable));
-                    });
+            stop();
+            return;
+        }
+        int currentTick = Bukkit.getCurrentTick();
+        if (currentTick == lastTick)
+            return;
+        lastTick = currentTick;
+        tickingTable.replaceAll((uuid, taskOptional) -> {
+            if (taskOptional.isPresent()) {
+                BukkitTask task = taskOptional.get();
+                if (scheduler.isQueued(task.getTaskId())) {
+                    return taskOptional;
                 }
             }
-        }
-
+            return Optional.of(scheduler.runTask(api, new _Task(uuid)));
+        });
     }
 
     @Override
     public void stop() {
         super.stop();
         tickingTable.clear();
-        operationTable.clear();
+        synchronized (operationTable) {
+            operationTable.clear();
+        }
     }
 
     public void addEntity(@Nullable Entity entity) {
-        if (!EntityHelper.isCustomEntity(entity) || !BarleyTeaAPI.checkPluginUsable())
+        if (!EntityHelper.isCustomEntity(entity))
             return;
-        operationTable.merge(entity.getUniqueId(), 0, Math::max);
-        start();
+        addEntity(entity.getUniqueId());
+    }
+
+    private void addEntity(@Nullable UUID uuid) {
+        if (uuid == null || !BarleyTeaAPI.checkPluginUsable())
+            return;
+        queueOperation(uuid, Operation.ADD);
     }
 
     public void removeEntity(@Nullable Entity entity) {
-        if (entity == null || !BarleyTeaAPI.checkPluginUsable())
+        if (entity == null)
             return;
-        operationTable.merge(entity.getUniqueId(), 1, Math::max);
-        start();
+        removeEntity(entity.getUniqueId());
     }
 
-    private class _Task implements Runnable {
-        @Nonnull
-        private final UUID uuid;
-        @Nonnull
-        private final Map<UUID, Integer> operationTable;
+    private void removeEntity(@Nullable UUID uuid) {
+        if (uuid == null || !BarleyTeaAPI.checkPluginUsable())
+            return;
+        queueOperation(uuid, Operation.REMOVE);
+    }
 
-        _Task(@Nonnull UUID uuid, @Nonnull Map<UUID, Integer> entityOperationTable) {
-            this.uuid = uuid;
-            this.operationTable = entityOperationTable;
+    private void queueOperation(@Nonnull UUID uuid, Operation operation) {
+        synchronized (operationTable) {
+            boolean needStart;
+            if (operationTable.isEmpty()) {
+                needStart = true;
+                operationTable.put(uuid, operation);
+            } else {
+                needStart = !isStarted();
+                operationTable.merge(uuid, operation, EnumUtil::maxOrdinal);
+            }
+            if (needStart)
+                start();
         }
+    }
+
+    private record _Task(@Nonnull UUID uuid) implements Runnable {
 
         @Override
         public void run() {
-            if (!doJob()) {
-                operationTable.merge(uuid, 2, Math::max);
-                start();
-            }
+            if (doJob())
+                return;
+            EntityTickTask task = EntityTickTask.getInstanceUnsafe();
+            if (task == null)
+                return;
+            task.removeEntity(uuid);
         }
 
         private boolean doJob() {
