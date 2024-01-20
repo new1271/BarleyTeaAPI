@@ -26,13 +26,13 @@ public abstract class BaseProjectile extends DefaultEntity
     }
 
     @Nonnull
-    private static EntityType checkEntityType(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
-        Class<? extends Entity> clazz = entityTypeBasedOn.getEntityClass();
+    private static EntityType checkEntityType(@Nonnull NamespacedKey key, @Nonnull EntityType originalType) {
+        Class<? extends Entity> clazz = originalType.getEntityClass();
         if (clazz != null && !Projectile.class.isAssignableFrom(clazz)) {
             BarleyTeaAPI.warnWhenPluginUsable(
                     "BaseProjectile cannot be used on non-projectile entity type! (trigger at " + key + ")");
         }
-        return entityTypeBasedOn;
+        return originalType;
     }
 
     @Nullable
