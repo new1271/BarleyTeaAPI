@@ -13,7 +13,7 @@ public interface CustomItem extends CustomObject {
 
     @Nullable
     static CustomItem get(@Nullable ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty())
+        if (itemStack == null || ItemHelper.isEmpty(itemStack))
             return null;
         else {
             ItemRegister register = ItemRegister.getInstanceUnsafe();

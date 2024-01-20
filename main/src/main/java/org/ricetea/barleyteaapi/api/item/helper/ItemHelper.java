@@ -206,6 +206,17 @@ public class ItemHelper {
         return FallbackNamespacedKeyCache.get();
     }
 
+    public static boolean isEmpty(@Nullable ItemStack itemStack) {
+        if (itemStack == null)
+            return true;
+        else {
+            return switch (itemStack.getType()) {
+                case AIR, CAVE_AIR, VOID_AIR -> true;
+                default -> false;
+            };
+        }
+    }
+
     public static boolean isCustomItem(@Nullable ItemStack itemStack) {
         return getItemID(itemStack) != null;
     }
