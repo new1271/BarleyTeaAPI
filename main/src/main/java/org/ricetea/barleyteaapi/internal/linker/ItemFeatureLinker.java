@@ -20,6 +20,7 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -41,11 +42,12 @@ public final class ItemFeatureLinker {
         for (EquipmentSlot slot : slots) {
             if (slot != null) {
                 ItemStack itemStack = equipment.getItem(slot);
+                ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 boolean result = ObjectUtil.tryMap(() ->
-                        doFeatureCancellable(itemStack, slot, event, featureClass, featureFunc,
+                        doFeatureCancellable(itemStackMaybeModified, slot, event, featureClass, featureFunc,
                                 dataConstructor), true);
                 if (result) {
-                    if (isCopy) {
+                    if (!Objects.equals(itemStack, itemStackMaybeModified)) {
                         equipment.setItem(slot, itemStack, true);
                     }
                 } else {
@@ -70,11 +72,12 @@ public final class ItemFeatureLinker {
         for (EquipmentSlot slot : slots) {
             if (slot != null) {
                 ItemStack itemStack = equipment.getItem(slot);
+                ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 boolean result = ObjectUtil.tryMap(() ->
-                        doFeatureCancellable(itemStack, slot, event, event2, featureClass, featureFunc,
+                        doFeatureCancellable(itemStackMaybeModified, slot, event, event2, featureClass, featureFunc,
                                 dataConstructor), true);
                 if (result) {
-                    if (isCopy) {
+                    if (!Objects.equals(itemStack, itemStackMaybeModified)) {
                         equipment.setItem(slot, itemStack, true);
                     }
                 } else {
@@ -98,10 +101,11 @@ public final class ItemFeatureLinker {
         for (EquipmentSlot slot : slots) {
             if (slot != null) {
                 ItemStack itemStack = equipment.getItem(slot);
+                ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 ObjectUtil.tryCall(() ->
                         doFeature(itemStack, slot, event, featureClass, featureFunc,
                                 dataConstructor));
-                if (isCopy) {
+                if (!Objects.equals(itemStack, itemStackMaybeModified)) {
                     equipment.setItem(slot, itemStack, true);
                 }
             }
