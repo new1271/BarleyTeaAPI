@@ -75,7 +75,15 @@ public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> 
         entities.forEach(_entity -> {
             if (_entity == null)
                 return;
-            LocalizedMessageFormat format = LocalizedMessageFormat.create(_entity.getTranslationKey());
+            String translationKey = _entity.getTranslationKey();
+            LocalizedMessageFormat oldFormat = localizationRegister.lookup(translationKey);
+            if (oldFormat != null && oldFormat.getLocales().contains(LocalizedMessageFormat.DEFAULT_LOCALE))
+                return;
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(translationKey);
+            if (oldFormat != null) {
+                oldFormat.getLocales().forEach(locale ->
+                        format.setFormat(locale, oldFormat.getFormat(locale)));
+            }
             format.setFormat(new MessageFormat(_entity.getDefaultName()));
             localizationRegister.register(format);
         });

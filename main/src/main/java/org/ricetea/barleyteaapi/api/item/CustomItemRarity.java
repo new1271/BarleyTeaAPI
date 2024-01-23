@@ -36,20 +36,20 @@ public interface CustomItemRarity {
     }
 
     static CustomItemRarity create(@Nullable CustomItemRarity nextLevelRarity, @Nullable TextColor rarityColor,
-                                @Nullable TextDecoration... rarityDecorations) {
+                                   @Nullable TextDecoration... rarityDecorations) {
         return create(nextLevelRarity,
                 rarityDecorations == null ? Style.style(rarityColor) : Style.style(rarityColor, rarityDecorations));
     }
 
     @Deprecated
     static CustomItemRarity create(@Nullable CustomItemRarity nextLevelRarity,
-                                @Nullable org.bukkit.ChatColor... rarityColorAndStyle) {
+                                   @Nullable org.bukkit.ChatColor... rarityColorAndStyle) {
         return create(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
     @SuppressWarnings("deprecation")
     static CustomItemRarity create(@Nullable CustomItemRarity nextLevelRarity,
-                                @Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
+                                   @Nullable net.md_5.bungee.api.ChatColor... rarityColorAndStyle) {
         return create(nextLevelRarity, ChatColorHelper.toKyoriStyle(rarityColorAndStyle));
     }
 
@@ -58,7 +58,7 @@ public interface CustomItemRarity {
     }
 
     static CustomItemRarity create(@Nullable TextColor rarityColor,
-                                @Nullable TextDecoration... rarityDecorations) {
+                                   @Nullable TextDecoration... rarityDecorations) {
         return create(null,
                 rarityDecorations == null ? Style.style(rarityColor) : Style.style(rarityColor, rarityDecorations));
     }

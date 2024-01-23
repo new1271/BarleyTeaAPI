@@ -77,7 +77,15 @@ public final class ItemRegisterImpl extends NSKeyedRegisterBase<CustomItem> impl
             CustomItem oldItem = lookupMap.put(_item.getKey(), _item);
             checkFeature(oldItem, true);
             checkFeature(_item, false);
-            LocalizedMessageFormat format = LocalizedMessageFormat.create(_item.getTranslationKey());
+            String translationKey = _item.getTranslationKey();
+            LocalizedMessageFormat oldFormat = localizationRegister.lookup(translationKey);
+            if (oldFormat != null && oldFormat.getLocales().contains(LocalizedMessageFormat.DEFAULT_LOCALE))
+                return;
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(translationKey);
+            if (oldFormat != null) {
+                oldFormat.getLocales().forEach(locale ->
+                        format.setFormat(locale, oldFormat.getFormat(locale)));
+            }
             format.setFormat(new MessageFormat(_item.getDefaultName()));
             localizationRegister.register(format);
         });

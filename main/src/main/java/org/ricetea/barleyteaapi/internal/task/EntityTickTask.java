@@ -33,12 +33,6 @@ public final class EntityTickTask extends LoopTaskBase {
     private final Map<UUID, Optional<BukkitTask>> tickingTable = new HashMap<>();
     @Nonnull
     private final Map<UUID, Operation> operationTable = new HashMap<>();
-
-    private enum Operation {
-        ADD,
-        REMOVE
-    }
-
     private int lastTick;
 
     private EntityTickTask() {
@@ -151,6 +145,11 @@ public final class EntityTickTask extends LoopTaskBase {
             if (needStart)
                 start();
         }
+    }
+
+    private enum Operation {
+        ADD,
+        REMOVE
     }
 
     private record _Task(@Nonnull UUID uuid) implements Runnable {

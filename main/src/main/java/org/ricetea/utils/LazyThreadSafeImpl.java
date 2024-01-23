@@ -8,11 +8,9 @@ import java.util.function.Supplier;
 class LazyThreadSafeImpl<T> implements Lazy<T> {
 
     @Nonnull
-    private final Supplier<T> supplier;
-
-    @Nonnull
     protected final Object syncRoot = new Object();
-
+    @Nonnull
+    private final Supplier<T> supplier;
     @Nullable
     protected T obj;
 

@@ -78,7 +78,15 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
         blocks.forEach(_block -> {
             if (_block == null)
                 return;
-            LocalizedMessageFormat format = LocalizedMessageFormat.create(_block.getTranslationKey());
+            String translationKey = _block.getTranslationKey();
+            LocalizedMessageFormat oldFormat = localizationRegister.lookup(translationKey);
+            if (oldFormat != null && oldFormat.getLocales().contains(LocalizedMessageFormat.DEFAULT_LOCALE))
+                return;
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(translationKey);
+            if (oldFormat != null) {
+                oldFormat.getLocales().forEach(locale ->
+                        format.setFormat(locale, oldFormat.getFormat(locale)));
+            }
             format.setFormat(new MessageFormat(_block.getDefaultName()));
             localizationRegister.register(format);
         });

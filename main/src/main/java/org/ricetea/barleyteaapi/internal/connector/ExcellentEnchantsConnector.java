@@ -10,6 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
+import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.StringHelper;
 import su.nightexpress.excellentenchants.enchantment.impl.ExcellentEnchant;
@@ -47,8 +48,7 @@ public final class ExcellentEnchantsConnector implements SoftDependConnector {
         LocalizationRegister register = LocalizationRegister.getInstanceUnsafe();
         if (register == null)
             return;
-        register.unregisterAll(formatSet::contains);
-        formatSet.clear();
+        CollectionUtil.forEachAndRemoveAll(formatSet, register::unregister);
     }
 
     @Nullable
