@@ -10,9 +10,13 @@ dependencies {
     project(":main")
     project(":nms:v1_20_R1")
     project(":nms:v1_20_R2")
+    project(":nms:v1_20_R3")
 }
 
-val allProjects = listOf(project(":main"), project(":nms:v1_20_R1"), project(":nms:v1_20_R2"))
+val allProjects = listOf(project(":main"),
+        project(":nms:v1_20_R1"),
+        project(":nms:v1_20_R2"),
+        project(":nms:v1_20_R3"))
 
 tasks {
     jar {
