@@ -4,4 +4,4 @@ plugins {
 
 rootProject.name = "BarleyTeaAPI"
 
-include(":main", ":nms:v1_20_R1")
+include(":main", ":nms:v1_20_R1", ":nms:v1_20_R2")

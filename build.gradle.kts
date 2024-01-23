@@ -9,9 +9,10 @@ version = "1.0-SNAPSHOT"
 dependencies {
     project(":main")
     project(":nms:v1_20_R1")
+    project(":nms:v1_20_R2")
 }
 
-val allProjects = listOf(project(":main"), project(":nms:v1_20_R1"))
+val allProjects = listOf(project(":main"), project(":nms:v1_20_R1"), project(":nms:v1_20_R2"))
 
 tasks {
     jar {
