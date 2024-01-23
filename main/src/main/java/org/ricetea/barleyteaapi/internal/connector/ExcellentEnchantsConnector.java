@@ -3,53 +3,52 @@ package org.ricetea.barleyteaapi.internal.connector;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.translation.TranslationRegistry;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
-import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
-import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
+import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.StringHelper;
 import su.nightexpress.excellentenchants.enchantment.impl.ExcellentEnchant;
 import su.nightexpress.excellentenchants.enchantment.registry.EnchantRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public final class ExcellentEnchantsConnector implements SoftDependConnector {
 
-    private TranslationRegistry reg;
-
     private final Map<String, Style> colorPrefixDictionary = new HashMap<>();
+
+    private final Set<LocalizedMessageFormat> formatSet = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Override
     public void onEnable(@Nonnull Plugin plugin) {
-        reg = TranslationRegistry
-                .create(NamespacedKeyUtil.BarleyTeaAPI("excellent_enchant_translation"));
+        LocalizationRegister register = LocalizationRegister.getInstance();
         for (Entry<NamespacedKey, ExcellentEnchant> enchKVPair : EnchantRegistry.REGISTRY_MAP.entrySet()) {
             NamespacedKey key = enchKVPair.getKey();
-            reg.register("enchantment." + key.getNamespace() + "." + key.getKey(), Locale.getDefault(),
-                    new MessageFormat(enchKVPair.getValue().getDisplayName()));
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(
+                    StringHelper.joinWithoutNull(".", "enchantment", key.getNamespace(), key.getKey()));
+            format.setFormat(new MessageFormat(enchKVPair.getValue().getDisplayName()));
+            formatSet.add(format);
+            register.register(format);
         }
-        GlobalTranslators translators = GlobalTranslators.getInstance();
-        translators.addServerTranslationSource(reg);
-        translators.addRenderTranslationSource(reg);
     }
 
     @Override
     public void onDisable() {
-        GlobalTranslators translators = GlobalTranslators.getInstance();
-        translators.removeServerTranslationSource(reg);
-        translators.removeRenderTranslationSource(reg);
+        LocalizationRegister register = LocalizationRegister.getInstanceUnsafe();
+        if (register == null)
+            return;
+        register.unregisterAll(formatSet::contains);
+        formatSet.clear();
     }
 
     @Nullable

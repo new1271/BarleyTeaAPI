@@ -71,12 +71,13 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
+                NamespacedKey key = recipe.getKey();
                 if (recipe instanceof ShapedCraftingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as shaped crafting recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "shaped crafting recipe"));
                 } else if (recipe instanceof ShapelessCraftingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as shapeless crafting recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "shapeless crafting recipe"));
                 } else {
-                    logger.info("registered " + recipe.getKey() + " as unknown-type crafting recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "unknown-type crafting recipe"));
                 }
             }
         }

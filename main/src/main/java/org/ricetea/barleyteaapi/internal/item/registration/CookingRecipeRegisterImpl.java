@@ -82,16 +82,17 @@ public final class CookingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Base
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
+                NamespacedKey key = recipe.getKey();
                 if (recipe instanceof CampfireRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as campfire recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "campfire recipe"));
                 } else if (recipe instanceof SmokingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as smoker recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "smoker recipe"));
                 } else if (recipe instanceof BlastingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as blast-furnace recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "blast-furnace recipe"));
                 } else if (recipe instanceof FurnaceRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as furnace recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "furnace recipe"));
                 } else {
-                    logger.info("registered " + recipe.getKey() + " as unknown-type cooking recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "unknown-type cooking recipe"));
                 }
             }
         }

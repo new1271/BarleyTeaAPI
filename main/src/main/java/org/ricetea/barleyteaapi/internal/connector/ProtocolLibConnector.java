@@ -17,6 +17,7 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEvent.ShowItem;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -27,7 +28,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.i18n.GlobalTranslators;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
@@ -460,7 +460,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 return;
             PacketContainer container = event.getPacket();
             Locale locale = event.getPlayer().locale();
-            Translator translator = GlobalTranslators.getInstance().getServerTranslator();
+            Translator translator = GlobalTranslator.translator();
             {
                 StructureModifier<Component> modifier = container.getSpecificModifier(Component.class);
                 int size = modifier.size();

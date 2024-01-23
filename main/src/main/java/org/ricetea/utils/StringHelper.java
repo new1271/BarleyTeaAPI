@@ -23,4 +23,19 @@ public class StringHelper {
         }
         return joiner.toString();
     }
+
+    @Nonnull
+    public static String replaceOnce(@Nonnull String original, @Nonnull String str, @Nonnull String replacement) {
+        int length = str.length();
+        if (length == 0)
+            return original;
+        int index = original.indexOf(str);
+        if (index < 0)
+            return original;
+        if (index == 0)
+            return replacement + original.substring(length);
+        if (index == original.length() - length)
+            return original.substring(0, index) + replacement;
+        return original.substring(0, index) + replacement + original.substring(index + length);
+    }
 }

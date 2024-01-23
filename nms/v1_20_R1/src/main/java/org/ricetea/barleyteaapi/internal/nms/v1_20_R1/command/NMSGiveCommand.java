@@ -217,8 +217,11 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                         ItemRegister register = ItemRegister.getInstanceUnsafe();
                         if (register != null) {
                             this.customKeys = customKeys = register
-                                    .listAllKeys(type -> type instanceof FeatureCommandGive).stream()
-                                    .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey())).toList();
+                                    .listAll(type -> type instanceof FeatureCommandGive)
+                                    .stream()
+                                    .map(CustomItem::getKey)
+                                    .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
+                                    .toList();
                         }
                     }
                     builtinKeys.stream()
@@ -244,8 +247,11 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                 ItemRegister register = ItemRegister.getInstanceUnsafe();
                 if (register != null) {
                     this.customKeys = customKeys = register
-                            .listAllKeys(type -> type instanceof FeatureCommandGive).stream()
-                            .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey())).toList();
+                            .listAll(type -> type instanceof FeatureCommandGive)
+                            .stream()
+                            .map(CustomItem::getKey)
+                            .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
+                            .toList();
                 }
             }
             return new MinecraftKeyCombinedIterator(builtinKeys, customKeys);

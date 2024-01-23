@@ -8,8 +8,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.base.registration.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseRecipe;
+import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.ObjectUtil;
 
@@ -18,6 +19,7 @@ import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,10 +29,7 @@ import java.util.stream.Collectors;
 
 @Singleton
 @ApiStatus.Internal
-abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister<T> {
-
-    @Nonnull
-    private final ConcurrentHashMap<NamespacedKey, T> lookupTable = new ConcurrentHashMap<>();
+abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegisterBase<T> implements NSKeyedRegister<T> {
 
     @Nonnull
     private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
@@ -58,7 +57,7 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
         if (recipe == null)
             return;
         NamespacedKey recipeKey = recipe.getKey();
-        if (lookupTable.put(recipeKey, recipe) != null)
+        if (getLookupMap().put(recipeKey, recipe) != null)
             unlinkMap(recipeKey);
         NamespacedKey dummyKey = findDummyRecipeKey(recipe);
         if (dummyKey == null) {
@@ -74,7 +73,7 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
         if (recipe == null)
             return;
         NamespacedKey recipeKey = recipe.getKey();
-        if (!lookupTable.remove(recipeKey, recipe))
+        if (!getLookupMap().remove(recipeKey, recipe))
             return;
         unlinkMap(recipeKey);
         afterUnregisterRecipe(recipe);
@@ -82,8 +81,9 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
 
     @Override
     public void unregisterAll() {
-        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        lookupTable.clear();
+        Map<NamespacedKey, T> lookupMap = getLookupMap();
+        var keySet = Collections.unmodifiableSet(lookupMap.keySet());
+        lookupMap.clear();
         collidingTable_revert.clear();
         collidingTable.keySet().forEach(key -> {
             if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI) &&
@@ -111,39 +111,6 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
         }
     }
 
-    @Nullable
-    public T lookup(@Nullable NamespacedKey key) {
-        if (key == null)
-            return null;
-        return lookupTable.get(key);
-    }
-
-    public boolean has(@Nullable NamespacedKey key) {
-        if (key == null)
-            return false;
-        return lookupTable.containsKey(key);
-    }
-
-    public boolean hasAnyRegistered() {
-        return !lookupTable.isEmpty();
-    }
-
-    @Override
-    @Nonnull
-    public Collection<T> listAll() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<T> listAll(@Nullable Predicate<T> predicate) {
-        return predicate == null ? listAll()
-                : ObjectUtil.letNonNull(
-                lookupTable.values().stream().filter(predicate).toList(),
-                Collections::emptySet);
-    }
-
     @Nonnull
     public Collection<T> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
         return ObjectUtil.letNonNull(
@@ -152,43 +119,6 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
                         .filter(Objects::nonNull)
                         .collect(Collectors.toUnmodifiableSet()),
                 Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<T> predicate) {
-        return predicate == null ? listAllKeys()
-                : ObjectUtil.letNonNull(
-                lookupTable.entrySet().stream()
-                        .filter(new Filter<>(predicate))
-                        .map(new Mapper<>())
-                        .toList(),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nullable
-    public T findFirst(@Nullable Predicate<T> predicate) {
-        var stream = lookupTable.values().stream();
-        if (predicate != null)
-            stream = stream.filter(predicate);
-        return stream.findFirst().orElse(null);
-    }
-
-    @Override
-    @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<T> predicate) {
-        var stream = lookupTable.entrySet().stream();
-        if (predicate != null)
-            stream = stream.filter(new Filter<>(predicate));
-        return stream.map(new Mapper<>()).findFirst().orElse(null);
     }
 
     protected void linkMap(@Nonnull NamespacedKey recipeKey, @Nonnull NamespacedKey dummyKey) {
@@ -234,11 +164,11 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> implements IRegister
         }
     }
 
-    private void afterRegisterRecipe(Logger logger, @Nonnull NamespacedKey key) {
-        logger.info("registered " + key);
+    private void afterRegisterRecipe(@Nonnull Logger logger, @Nonnull NamespacedKey key) {
+        logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "recipe"));
     }
 
-    private void afterUnregisterRecipe(Logger logger, @Nonnull NamespacedKey key) {
-        logger.info("unregistered " + key);
+    private void afterUnregisterRecipe(@Nonnull Logger logger, @Nonnull NamespacedKey key) {
+        logger.info(LOGGING_UNREGISTERED_FORMAT.formatted(key));
     }
 }

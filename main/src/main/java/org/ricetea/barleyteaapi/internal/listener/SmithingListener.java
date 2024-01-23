@@ -60,7 +60,7 @@ public final class SmithingListener implements Listener {
                 ItemStack result = oldResult;
                 boolean allPassed = true;
                 SmithingRecipeRegisterImpl register = SmithingRecipeRegisterImpl.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegistered()) {
+                if (register != null && !register.isEmpty()) {
                     for (BaseSmithingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                         if (recipe.getOriginal().equals(originalType) && recipe.filterAdditionType(additionType)
                                 && recipe.filterTemplateType(templateType)) {

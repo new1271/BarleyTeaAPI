@@ -21,4 +21,5 @@ public class Constants {
     @Nonnull
     public static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]
             {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    public static final int MIN_ITERATION_COUNT_FOR_PARALLEL = Math.max(Runtime.getRuntime().availableProcessors() * 5, 8);
 }

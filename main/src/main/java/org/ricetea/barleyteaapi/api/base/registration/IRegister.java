@@ -1,77 +1,51 @@
 package org.ricetea.barleyteaapi.api.base.registration;
 
-import org.bukkit.Keyed;
-import org.bukkit.NamespacedKey;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface IRegister<T extends Keyed> {
-    void register(@Nullable T key);
+public interface IRegister<T> {
 
-    default void registerAll(@Nullable Collection<T> keys) {
-        if (keys != null) {
-            keys.forEach(this::register);
+    void register(@Nullable T item);
+
+    default void registerAll(@Nullable Collection<T> items) {
+        if (items != null) {
+            items.forEach(this::register);
         }
     }
 
-    void unregister(@Nullable T key);
+    void unregister(@Nullable T item);
 
-    void unregisterAll();
+    default void unregisterAll() {
+        unregisterAll(null);
+    }
 
     void unregisterAll(@Nullable Predicate<T> predicate);
 
-    @Nullable
-    T lookup(@Nullable NamespacedKey key);
+    default boolean isEmpty() {
+        return findFirst() == null;
+    }
 
-    boolean has(@Nullable NamespacedKey key);
-
-    boolean hasAnyRegistered();
+    default boolean hasRegistered(@Nullable T item) {
+        if (item == null)
+            return false;
+        return findFirst(Predicate.isEqual(item)) != null;
+    }
 
     @Nonnull
-    Collection<T> listAll();
+    default Collection<T> listAll() {
+        return listAll(null);
+    }
 
     @Nonnull
     Collection<T> listAll(@Nullable Predicate<T> predicate);
 
-    @Nonnull
-    Collection<NamespacedKey> listAllKeys();
-
-    @Nonnull
-    Collection<NamespacedKey> listAllKeys(@Nullable Predicate<T> predicate);
+    @Nullable
+    default T findFirst() {
+        return findFirst(null);
+    }
 
     @Nullable
     T findFirst(@Nullable Predicate<T> predicate);
-
-    @Nullable
-    NamespacedKey findFirstKey(@Nullable Predicate<T> predicate);
-
-    class Filter<T extends Keyed> implements Predicate<Map.Entry<NamespacedKey, T>> {
-
-        @Nonnull
-        Predicate<T> filter;
-
-        public Filter(@Nonnull Predicate<T> filter) {
-            this.filter = filter;
-        }
-
-        @Override
-        public boolean test(Map.Entry<NamespacedKey, T> t) {
-            return filter.test(t.getValue());
-        }
-
-    }
-
-    class Mapper<T extends Keyed> implements Function<Map.Entry<NamespacedKey, T>, NamespacedKey> {
-
-        @Override
-        public NamespacedKey apply(Map.Entry<NamespacedKey, T> t) {
-            return t.getKey();
-        }
-
-    }
 }

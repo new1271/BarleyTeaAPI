@@ -77,12 +77,13 @@ public final class SmithingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
             BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
             if (inst != null) {
                 Logger logger = inst.getLogger();
+                NamespacedKey key = recipe.getKey();
                 if (recipe instanceof SmithingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as normal smithing recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "normal smithing recipe"));
                 } else if (recipe instanceof ArmorTrimSmithingRecipe) {
-                    logger.info("registered " + recipe.getKey() + " as armor-trimming smithing recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "armor-trimming smithing recipe"));
                 } else {
-                    logger.info("registered " + recipe.getKey() + " as unknown-type smithing recipe!");
+                    logger.info(LOGGING_REGISTERED_FORMAT.formatted(key, "unknown-type smithing recipe"));
                 }
             }
         }

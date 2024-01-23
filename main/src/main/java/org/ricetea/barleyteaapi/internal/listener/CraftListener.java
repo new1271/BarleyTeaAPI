@@ -69,7 +69,7 @@ public final class CraftListener implements Listener {
                 ItemStack result = oldResult;
                 boolean allPassed = true;
                 CraftingRecipeRegisterImpl register = CraftingRecipeRegisterImpl.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegistered()) {
+                if (register != null && !register.isEmpty()) {
                     for (BaseCraftingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                         if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
                             result = recipe.apply(craftingMatrix);

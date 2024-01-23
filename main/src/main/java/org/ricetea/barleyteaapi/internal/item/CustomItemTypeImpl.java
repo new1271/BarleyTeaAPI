@@ -12,18 +12,16 @@ import org.ricetea.utils.Either;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Immutable
 @ApiStatus.Internal
 public class CustomItemTypeImpl extends Either<Material, CustomItem> implements CustomItemType {
     @Nonnull
-    private static final ConcurrentHashMap<Material, CustomItemType> vanillaMaterialMap = new ConcurrentHashMap<>();
+    private static final Map<Material, CustomItemType> vanillaMaterialMap = Collections.synchronizedMap(new EnumMap<>(Material.class));
     @Nonnull
-    private static final ConcurrentHashMap<CustomItem, CustomItemType> CustomItemMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<CustomItem, CustomItemType> customItemMap = new ConcurrentHashMap<>();
 
     private CustomItemTypeImpl(@Nullable Material left) {
         super(left, null);
@@ -40,7 +38,7 @@ public class CustomItemTypeImpl extends Either<Material, CustomItem> implements 
 
     @Nonnull
     public static CustomItemType get(@Nonnull CustomItem CustomItem) {
-        return CustomItemMap.computeIfAbsent(CustomItem, CustomItemTypeImpl::new);
+        return customItemMap.computeIfAbsent(CustomItem, CustomItemTypeImpl::new);
     }
 
     @Nonnull
@@ -65,7 +63,7 @@ public class CustomItemTypeImpl extends Either<Material, CustomItem> implements 
 
     @ApiStatus.Internal
     public static void removeInstances(@Nonnull Collection<CustomItem> blocks) {
-        blocks.forEach(CustomItemMap::remove);
+        blocks.forEach(customItemMap::remove);
     }
 
     @Nullable

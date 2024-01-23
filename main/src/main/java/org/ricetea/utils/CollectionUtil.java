@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CollectionUtil {
     private CollectionUtil() {
@@ -59,10 +60,21 @@ public class CollectionUtil {
     public static <T> List<T> toUnmodifiableList(@Nullable Collection<T> collection) {
         if (collection == null)
             return Collections.emptyList();
-        if (collection instanceof List<?> entityList) {
-            return (List<T>) Collections.unmodifiableList(entityList);
+        if (collection instanceof List<?> list) {
+            return (List<T>) Collections.unmodifiableList(list);
         } else
             return collection.stream().toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nonnull
+    public static <T> Set<T> toUnmodifiableSet(@Nullable Collection<T> collection) {
+        if (collection == null)
+            return Collections.emptySet();
+        if (collection instanceof Set<?> set) {
+            return (Set<T>) Collections.unmodifiableSet(set);
+        } else
+            return collection.stream().collect(Collectors.toUnmodifiableSet());
     }
 
     public static <T> void forEach(

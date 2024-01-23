@@ -54,7 +54,7 @@ public final class CookListener implements Listener {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
-                if (register != null && register.hasAnyRegistered()) {
+                if (register != null && !register.isEmpty()) {
                     for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                         if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                             result = recipe.apply(source);
@@ -103,7 +103,7 @@ public final class CookListener implements Listener {
         NamespacedKey recipeKey = keyedRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isCustomItem()) {
             CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
-            if (register != null && register.hasAnyRegistered()) {
+            if (register != null && !register.isEmpty()) {
                 for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                     if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                         event.setTotalCookTime(source.getAmount() * recipe.getCookingTime());
@@ -125,7 +125,7 @@ public final class CookListener implements Listener {
         NamespacedKey recipeKey = campfireRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isCustomItem()) {
             CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
-            if (register != null && register.hasAnyRegistered()) {
+            if (register != null && !register.isEmpty()) {
                 for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
                     if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                         event.setTotalCookTime(recipe.getCookingTime());

@@ -199,8 +199,11 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                         EntityRegister register = EntityRegister.getInstanceUnsafe();
                         if (register != null) {
                             this.customKeys = customKeys = register
-                                    .listAllKeys(type -> type instanceof FeatureCommandSummon).stream()
-                                    .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey())).toList();
+                                    .listAll(type -> type instanceof FeatureCommandSummon)
+                                    .stream()
+                                    .map(CustomEntity::getKey)
+                                    .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
+                                    .toList();
                         }
                     }
                     builtinKeys.stream()
@@ -225,8 +228,11 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
                     this.customKeys = customKeys = register
-                            .listAllKeys(type -> type instanceof FeatureCommandSummon).stream()
-                            .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey())).toList();
+                            .listAll(type -> type instanceof FeatureCommandSummon)
+                            .stream()
+                            .map(CustomEntity::getKey)
+                            .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
+                            .toList();
                 }
             }
             return new MinecraftKeyCombinedIterator(builtinKeys, customKeys);

@@ -10,26 +10,33 @@ import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
+import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
+import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
+import org.ricetea.barleyteaapi.api.task.LoopTask;
+import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
 import org.ricetea.barleyteaapi.internal.item.CustomItemTypeImpl;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
-import org.ricetea.utils.CollectionUtil;
+import org.ricetea.barleyteaapi.util.SyncUtil;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import java.text.MessageFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 @ApiStatus.Internal
-public final class ItemRegisterImpl implements ItemRegister {
+public final class ItemRegisterImpl extends NSKeyedRegisterBase<CustomItem> implements ItemRegister {
     @Nonnull
     private static final Lazy<ItemRegisterImpl> inst = Lazy.create(ItemRegisterImpl::new);
 
@@ -37,9 +44,6 @@ public final class ItemRegisterImpl implements ItemRegister {
     private final AtomicInteger itemNeedTick = new AtomicInteger(0);
     @Nonnull
     private final AtomicInteger itemNeedMovingFeature = new AtomicInteger(0);
-
-    @Nonnull
-    private final ConcurrentHashMap<NamespacedKey, CustomItem> lookupTable = new ConcurrentHashMap<>();
 
     private ItemRegisterImpl() {
     }
@@ -54,95 +58,58 @@ public final class ItemRegisterImpl implements ItemRegister {
         return inst.getUnsafe();
     }
 
+    @Override
     public void register(@Nullable CustomItem item) {
         if (item == null)
             return;
-        lookupTable.put(item.getKey(), item);
-        if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                Logger logger = inst.getLogger();
-                logger.info("registered " + item.getKey() + " as item!");
-                if (item instanceof FeatureItemTick && itemNeedTick.getAndIncrement() == 0) {
-                    ItemTickTask.getInstance().start();
-                }
-                if (item instanceof FeatureItemHoldEntityMove) {
-                    itemNeedMovingFeature.getAndIncrement();
-                }
-                Bukkit.getPluginManager().callEvent(new ItemsRegisteredEvent(List.of(item)));
-            }
-        }
+        registerAll(Set.of(item));
     }
 
-    public void unregister(@Nullable CustomItem item) {
+    @Override
+    public void registerAll(@Nullable Collection<CustomItem> items) {
+        if (items == null)
+            return;
+        LocalizationRegister localizationRegister = LocalizationRegister.getInstance();
+        Map<NamespacedKey, CustomItem> lookupMap = getLookupMap();
+        items.forEach(_item -> {
+            if (_item == null)
+                return;
+            CustomItem oldItem = lookupMap.put(_item.getKey(), _item);
+            checkFeature(oldItem, true);
+            checkFeature(_item, false);
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(_item.getTranslationKey());
+            format.setFormat(new MessageFormat(_item.getDefaultName()));
+            localizationRegister.register(format);
+        });
+        refreshFeature();
+        BarleyTeaAPI apiInst = BarleyTeaAPI.getInstanceUnsafe();
+        if (apiInst != null) {
+            Logger logger = apiInst.getLogger();
+            items.forEach(_item -> {
+                if (_item == null)
+                    return;
+                logger.info(LOGGING_REGISTERED_FORMAT.formatted(_item.getKey(), "item"));
+            });
+        }
+        SyncUtil.callInMainThread(apiInst, () ->
+                Bukkit.getPluginManager().callEvent(new ItemsRegisteredEvent(items)));
+    }
+
+    private void checkFeature(@Nullable CustomItem item, boolean forRemoval) {
         if (item == null)
             return;
-        unregister0(item);
-        List<CustomItem> list = List.of(item);
-        Bukkit.getPluginManager().callEvent(new ItemsUnregisteredEvent(list));
-        CustomItemTypeImpl.removeInstances(list);
+        if (item instanceof FeatureItemTick)
+            itemNeedTick.getAndAdd(forRemoval ? -1 : 1);
+        if (item instanceof FeatureItemHoldEntityMove)
+            itemNeedMovingFeature.getAndAdd(forRemoval ? -1 : 1);
     }
 
-    public void unregister0(@Nullable CustomItem item) {
-        if (item == null || !lookupTable.remove(item.getKey(), item))
-            return;
-        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-        if (inst != null) {
-            Logger logger = inst.getLogger();
-            logger.info("unregistered " + item.getKey());
-            if (item instanceof FeatureItemTick && itemNeedTick.decrementAndGet() == 0) {
-                ItemTickTask.getInstance().stop();
-            }
-            if (item instanceof FeatureItemHoldEntityMove) {
-                itemNeedMovingFeature.getAndDecrement();
-            }
+    private void refreshFeature() {
+        if (hasAnyRegisteredNeedTicking()) {
+            ItemTickTask.getInstance().start();
+        } else {
+            ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
         }
-    }
-
-    @Override
-    public void unregisterAll() {
-        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        var values = CollectionUtil.toUnmodifiableList(lookupTable.values());
-        lookupTable.clear();
-        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
-        if (logger != null) {
-            for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey());
-            }
-            Bukkit.getPluginManager().callEvent(new ItemsUnregisteredEvent(values));
-            CustomItemTypeImpl.removeInstances(values);
-        }
-    }
-
-    @Override
-    public void unregisterAll(@Nullable Predicate<CustomItem> predicate) {
-        if (predicate == null)
-            unregisterAll();
-        else {
-            var items = listAll(predicate);
-            for (CustomItem item : items) {
-                unregister0(item);
-            }
-            Bukkit.getPluginManager().callEvent(new ItemsUnregisteredEvent(items));
-            CustomItemTypeImpl.removeInstances(items);
-        }
-    }
-
-    @Nullable
-    public CustomItem lookup(@Nullable NamespacedKey key) {
-        if (key == null)
-            return null;
-        return lookupTable.get(key);
-    }
-
-    public boolean has(@Nullable NamespacedKey key) {
-        if (key == null)
-            return false;
-        return lookupTable.containsKey(key);
-    }
-
-    public boolean hasAnyRegistered() {
-        return !lookupTable.isEmpty();
     }
 
     public boolean hasAnyRegisteredNeedTicking() {
@@ -154,57 +121,51 @@ public final class ItemRegisterImpl implements ItemRegister {
     }
 
     @Override
-    @Nonnull
-    public Collection<CustomItem> listAll() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
-                Collections::emptySet);
+    public void unregister(@Nullable CustomItem item) {
+        if (item == null || !getLookupMap().remove(item.getKey(), item))
+            return;
+        checkFeature(item, true);
+        Set<CustomItem> items = Set.of(item);
+        CustomItemTypeImpl.removeInstances(items);
+        refreshFeature();
+        BarleyTeaAPI apiInst = BarleyTeaAPI.getInstanceUnsafe();
+        if (apiInst != null) {
+            Logger logger = apiInst.getLogger();
+            logger.info(LOGGING_UNREGISTERED_FORMAT.formatted(item.getKey()));
+        }
+        SyncUtil.callInMainThread(apiInst, () ->
+                Bukkit.getPluginManager().callEvent(new ItemsUnregisteredEvent(items)));
     }
 
     @Override
-    @Nonnull
-    public Collection<CustomItem> listAll(@Nullable Predicate<CustomItem> predicate) {
-        return predicate == null ? listAll()
-                : ObjectUtil.letNonNull(
-                lookupTable.values().stream()
-                        .filter(predicate)
-                        .toList(),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<CustomItem> predicate) {
-        return predicate == null ? listAllKeys()
-                : ObjectUtil.letNonNull(
-                lookupTable.entrySet().stream()
-                        .filter(new Filter<>(predicate))
-                        .map(new Mapper<>())
-                        .toList(),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nullable
-    public CustomItem findFirst(@Nullable Predicate<CustomItem> predicate) {
-        var stream = lookupTable.values().stream();
-        if (predicate != null)
+    public void unregisterAll(@Nullable Predicate<CustomItem> predicate) {
+        if (isEmpty())
+            return;
+        Map<NamespacedKey, CustomItem> lookupMap = getLookupMap();
+        Collection<CustomItem> values = lookupMap.values();
+        Stream<CustomItem> stream = values.stream();
+        if (predicate != null) {
+            if (getCachedSize() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL)
+                stream = stream.parallel();
             stream = stream.filter(predicate);
-        return stream.findFirst().orElse(null);
-    }
-
-    @Override
-    @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<CustomItem> predicate) {
-        var stream = lookupTable.entrySet().stream();
-        if (predicate != null)
-            stream = stream.filter(new Filter<>(predicate));
-        return stream.map(new Mapper<>()).findFirst().orElse(null);
+        }
+        Set<CustomItem> items = stream.collect(Collectors.toUnmodifiableSet());
+        items.forEach(_item -> {
+            if (_item == null)
+                return;
+            if (lookupMap.remove(_item.getKey(), _item)) {
+                checkFeature(_item, true);
+            }
+        });
+        CustomItemTypeImpl.removeInstances(items);
+        refreshFeature();
+        BarleyTeaAPI apiInst = BarleyTeaAPI.getInstanceUnsafe();
+        if (apiInst != null) {
+            Logger logger = apiInst.getLogger();
+            items.forEach(_item ->
+                    logger.info(LOGGING_UNREGISTERED_FORMAT.formatted(_item.getKey())));
+        }
+        SyncUtil.callInMainThread(apiInst, () ->
+                Bukkit.getPluginManager().callEvent(new ItemsUnregisteredEvent(items)));
     }
 }

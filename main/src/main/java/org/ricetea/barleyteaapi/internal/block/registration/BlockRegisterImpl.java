@@ -15,29 +15,34 @@ import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.event.BlocksRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.BlocksUnregisteredEvent;
-import org.ricetea.barleyteaapi.internal.block.CustomBlockTypeImpl;
+import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
+import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
+import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
-import org.ricetea.utils.CollectionUtil;
+import org.ricetea.barleyteaapi.util.SyncUtil;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 @ApiStatus.Internal
-public final class BlockRegisterImpl implements BlockRegister {
+public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> implements BlockRegister {
     @Nonnull
     private static final Lazy<BlockRegisterImpl> inst = Lazy.create(BlockRegisterImpl::new);
-
-    @Nonnull
-    private final ConcurrentHashMap<NamespacedKey, CustomBlock> lookupTable = new ConcurrentHashMap<>();
 
     private BlockRegisterImpl() {
     }
@@ -53,198 +58,91 @@ public final class BlockRegisterImpl implements BlockRegister {
     }
 
     @Override
-    public void registerAll(@Nullable Collection<CustomBlock> blocks) {
-        if (blocks == null)
-            return;
-        refreshCustomBlocks(
-                blocks.stream()
-                        .map(block -> RefreshCustomBlockRecord.create(lookupTable.put(block.getKey(), block), block))
-                        .filter(Objects::nonNull)
-                        .toList());
-        if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                Logger logger = inst.getLogger();
-                for (CustomBlock block : blocks)
-                    logger.info("registered " + block.getKey() + " as block!");
-                Bukkit.getPluginManager().callEvent(new BlocksRegisteredEvent(blocks));
-            }
-        }
-    }
-
-    @Override
     public void register(@Nullable CustomBlock block) {
         if (block == null)
             return;
-        var record = RefreshCustomBlockRecord.create(lookupTable.put(block.getKey(), block), block);
-        if (record != null)
-            refreshCustomBlocks(List.of(record));
-        if (BarleyTeaAPI.checkPluginUsable()) {
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                Logger logger = inst.getLogger();
-                logger.info("registered " + block.getKey() + " as block!");
-                Bukkit.getPluginManager().callEvent(new BlocksRegisteredEvent(List.of(block)));
-            }
+        registerAll(Set.of(block));
+    }
+
+    @Override
+    public void registerAll(@Nullable Collection<CustomBlock> blocks) {
+        if (blocks == null)
+            return;
+        LocalizationRegister localizationRegister = LocalizationRegister.getInstance();
+        refreshCustomBlocks(
+                blocks.stream()
+                        .map(_block -> RefreshCustomBlockRecord.create(getLookupMap().put(_block.getKey(), _block),
+                                _block))
+                        .filter(Objects::nonNull)
+                        .toList());
+        blocks.forEach(_block -> {
+            if (_block == null)
+                return;
+            LocalizedMessageFormat format = LocalizedMessageFormat.create(_block.getTranslationKey());
+            format.setFormat(new MessageFormat(_block.getDefaultName()));
+            localizationRegister.register(format);
+        });
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
+        if (inst != null) {
+            Logger logger = inst.getLogger();
+            blocks.forEach(_block -> {
+                if (_block == null)
+                    return;
+                logger.info(LOGGING_REGISTERED_FORMAT.formatted(_block.getKey(), "block"));
+            });
         }
+        SyncUtil.callInMainThread(inst,
+                () -> Bukkit.getPluginManager().callEvent(new BlocksRegisteredEvent(blocks)),
+                false);
     }
 
     @Override
     public void unregister(@Nullable CustomBlock block) {
-        if (block == null || !lookupTable.remove(block.getKey(), block))
+        if (block == null || !getLookupMap().remove(block.getKey(), block))
             return;
-        var record = RefreshCustomBlockRecord.create(block, null);
-        if (record != null)
-            refreshCustomBlocks(List.of(record));
+        Set<CustomBlock> blocks = Set.of(block);
+        refreshCustomBlocks(blocks.stream()
+                .map(_block -> RefreshCustomBlockRecord.create(_block, null))
+                .toList());
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
-            logger.info("unregistered " + block.getKey());
-            List<CustomBlock> blocks = List.of(block);
-            Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(blocks));
-            CustomBlockTypeImpl.removeInstances(blocks);
+            blocks.forEach(item ->
+                    logger.info(LOGGING_UNREGISTERED_FORMAT.formatted(item.getKey())));
         }
-    }
-
-    @Override
-    public void unregisterAll() {
-        var keySet = Collections.unmodifiableSet(lookupTable.keySet());
-        var values = CollectionUtil.toUnmodifiableList(lookupTable.values());
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                if (!chunk.isGenerated())
-                    continue;
-                for (var entry : ChunkStorage.getBlockDataContainersFromChunk(chunk)) {
-                    Block iteratedBlock = entry.getKey();
-                    NamespacedKey key = BlockHelper.getBlockID(entry.getValue());
-                    if (key == null)
-                        continue;
-                    CustomBlock block = lookupTable.get(key);
-                    if (block instanceof FeatureBlockLoad feature)
-                        feature.handleBlockUnloaded(iteratedBlock);
-                    if (block instanceof FeatureBlockTick) {
-                        BlockTickTask task = BlockTickTask.getInstanceUnsafe();
-                        if (task != null) {
-                            task.removeBlock(iteratedBlock);
-                        }
-                    }
-                }
-            }
-        }
-        lookupTable.clear();
-        Logger logger = ObjectUtil.safeMap(BarleyTeaAPI.getInstanceUnsafe(), BarleyTeaAPI::getLogger);
-        if (logger != null) {
-            for (NamespacedKey key : keySet) {
-                logger.info("unregistered " + key.getKey());
-            }
-        }
-        Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(values));
-        CustomBlockTypeImpl.removeInstances(values);
+        SyncUtil.callInMainThread(inst,
+                () -> Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(blocks)),
+                false);
     }
 
     @Override
     public void unregisterAll(@Nullable Predicate<CustomBlock> predicate) {
-        if (predicate == null)
-            unregisterAll();
-        else {
-            ArrayList<RefreshCustomBlockRecord> collectingList = new ArrayList<>();
-            ArrayList<CustomBlock> collectingList2 = new ArrayList<>();
-            Logger logger = null;
-            BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
-            if (inst != null) {
-                logger = inst.getLogger();
-            }
-            for (var iterator = lookupTable.entrySet().iterator(); iterator.hasNext(); ) {
-                var entry = iterator.next();
-                NamespacedKey key = entry.getKey();
-                CustomBlock blockType = entry.getValue();
-                if (predicate.test(blockType)) {
-                    iterator.remove();
-                    var record = RefreshCustomBlockRecord.create(blockType, null);
-                    if (record != null)
-                        collectingList.add(record);
-                    collectingList2.add(blockType);
-                    if (logger != null)
-                        logger.info("unregistered " + key);
-                }
-            }
-            refreshCustomBlocks(collectingList);
-            Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(collectingList2));
-            CustomBlockTypeImpl.removeInstances(collectingList2);
-        }
-    }
-
-    @Nullable
-    public CustomBlock lookup(@Nullable NamespacedKey key) {
-        if (key == null)
-            return null;
-        return lookupTable.get(key);
-    }
-
-    public boolean has(@Nullable NamespacedKey key) {
-        if (key == null)
-            return false;
-        return lookupTable.containsKey(key);
-    }
-
-    @Override
-    public boolean hasAnyRegistered() {
-        return !lookupTable.isEmpty();
-    }
-
-    @Override
-    @Nonnull
-    public Collection<CustomBlock> listAll() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.values()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<CustomBlock> listAll(@Nullable Predicate<CustomBlock> predicate) {
-        return predicate == null ? listAll()
-                : ObjectUtil.letNonNull(
-                lookupTable.values().stream()
-                        .filter(predicate)
-                        .toList(),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableCollection(lookupTable.keySet()),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nonnull
-    public Collection<NamespacedKey> listAllKeys(@Nullable Predicate<CustomBlock> predicate) {
-        return predicate == null ? listAllKeys()
-                : ObjectUtil.letNonNull(
-                lookupTable.entrySet().stream()
-                        .filter(new Filter<>(predicate))
-                        .map(new Mapper<>())
-                        .toList(),
-                Collections::emptySet);
-    }
-
-    @Override
-    @Nullable
-    public CustomBlock findFirst(@Nullable Predicate<CustomBlock> predicate) {
-        var stream = lookupTable.values().stream();
-        if (predicate != null)
+        if (isEmpty())
+            return;
+        Map<NamespacedKey, CustomBlock> lookupMap = getLookupMap();
+        Collection<CustomBlock> values = lookupMap.values();
+        Stream<CustomBlock> stream = values.stream();
+        if (predicate != null) {
+            if (getCachedSize() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL)
+                stream = stream.parallel();
             stream = stream.filter(predicate);
-        return stream.findFirst().orElse(null);
-    }
-
-    @Override
-    @Nullable
-    public NamespacedKey findFirstKey(@Nullable Predicate<CustomBlock> predicate) {
-        var stream = lookupTable.entrySet().stream();
-        if (predicate != null)
-            stream = stream.filter(new Filter<>(predicate));
-        return stream.map(new Mapper<>()).findFirst().orElse(null);
+        }
+        Set<CustomBlock> blocks = stream.collect(Collectors.toUnmodifiableSet());
+        if (blocks.isEmpty())
+            return;
+        values.removeAll(blocks);
+        refreshCustomBlocks(blocks.stream()
+                .map(_block -> RefreshCustomBlockRecord.create(_block, null))
+                .toList());
+        BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
+        if (inst != null) {
+            Logger logger = inst.getLogger();
+            blocks.forEach(item ->
+                    logger.info(LOGGING_UNREGISTERED_FORMAT.formatted(item.getKey())));
+        }
+        SyncUtil.callInMainThread(inst,
+                () -> Bukkit.getPluginManager().callEvent(new BlocksUnregisteredEvent(blocks)),
+                false);
     }
 
     private void refreshCustomBlocks(@Nonnull Collection<RefreshCustomBlockRecord> records) {
@@ -295,6 +193,7 @@ public final class BlockRegisterImpl implements BlockRegister {
                 }
             }
         }
+        refreshCachedSize();
     }
 
     private record RefreshCustomBlockRecord(@Nullable NamespacedKey key,

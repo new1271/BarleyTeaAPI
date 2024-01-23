@@ -90,7 +90,7 @@ public final class ChunkListener implements Listener {
         if (event == null)
             return;
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (register == null || !register.hasAnyRegistered())
+        if (register == null || register.isEmpty())
             return;
         BlockTickTask task = BlockTickTask.getInstance();
         CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),
@@ -119,7 +119,7 @@ public final class ChunkListener implements Listener {
         if (event == null)
             return;
         BlockRegister register = BlockRegister.getInstanceUnsafe();
-        if (register == null || !register.hasAnyRegistered())
+        if (register == null || register.isEmpty())
             return;
         BlockTickTask task = BlockTickTask.getInstanceUnsafe();
         CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),

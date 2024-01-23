@@ -37,11 +37,6 @@ public final class BlockTickTask extends LoopTaskBase {
     private final Map<NamespacedKey, Map<BlockLocation, Operation>> operationTable = new ConcurrentHashMap<>();
     private int lastTick;
 
-    private enum Operation {
-        ADD,
-        REMOVE
-    }
-
     private BlockTickTask() {
         super(50);
     }
@@ -61,7 +56,7 @@ public final class BlockTickTask extends LoopTaskBase {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
-        if (api == null || register == null || !register.hasAnyRegistered()) {
+        if (api == null || register == null || register.isEmpty()) {
             stop();
             return;
         }
@@ -162,6 +157,11 @@ public final class BlockTickTask extends LoopTaskBase {
             if (needStart)
                 start();
         }
+    }
+
+    private enum Operation {
+        ADD,
+        REMOVE
     }
 
     private record BlockLocation(int x, int y, int z) {

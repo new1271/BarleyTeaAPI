@@ -8,16 +8,15 @@ import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.List;
 
 public final class ItemsUnregisteredEvent extends Event {
 
     private static final @Nonnull Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
-    private final @Nonnull List<CustomItem> items;
+    private final @Nonnull Collection<CustomItem> items;
 
     public ItemsUnregisteredEvent(@Nonnull Collection<CustomItem> items) {
-        this.items = CollectionUtil.toUnmodifiableList(items);
+        this.items = CollectionUtil.toUnmodifiableSet(items);
     }
 
     @Nonnull
@@ -26,7 +25,7 @@ public final class ItemsUnregisteredEvent extends Event {
     }
 
     @Nonnull
-    public List<CustomItem> getItems() {
+    public Collection<CustomItem> getItems() {
         return items;
     }
 

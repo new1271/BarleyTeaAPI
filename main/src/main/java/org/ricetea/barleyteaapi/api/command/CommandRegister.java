@@ -1,7 +1,7 @@
 package org.ricetea.barleyteaapi.api.command;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.ricetea.barleyteaapi.api.base.registration.IRegister;
+import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.internal.command.CommandRegisterBase;
 
 import javax.annotation.Nonnull;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Experimental
-public interface CommandRegister<T> extends IRegister<Command<T>> {
+public interface CommandRegister<T> extends NSKeyedRegister<Command<T>> {
 
     @Nonnull
     static <C, T extends CommandRegister<C>> T getInstance(@Nonnull Class<T> clazz) {
