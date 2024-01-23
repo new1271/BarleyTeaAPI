@@ -8,16 +8,13 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.command.CommandRegister;
 import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
-import org.ricetea.barleyteaapi.internal.nms.INBTItemHelper;
-import org.ricetea.barleyteaapi.internal.nms.INMSEntityHelper;
-import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
-import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
+import org.ricetea.barleyteaapi.internal.nms.*;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSCommandRegisterImpl;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSRegularCommand;
@@ -29,29 +26,22 @@ import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.helper.NMSItemHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.logging.Logger;
 
-public final class PluginEntryPoint extends JavaPlugin implements Listener {
+public final class NMSEntryPoint implements Listener, INMSEntryPoint {
 
-    private static PluginEntryPoint _inst;
-
+    @Nullable
     private NMSRegularCommand summonCommand, giveCommand;
 
     @Nonnull
-    public static PluginEntryPoint getInstance() {
-        return Objects.requireNonNull(_inst);
+    private final BarleyTeaAPI apiInst;
+
+    public NMSEntryPoint(@Nonnull BarleyTeaAPI apiInst) {
+        this.apiInst = apiInst;
     }
 
-    @Nullable
-    public static PluginEntryPoint getInstanceUnsafe() {
-        return _inst;
-    }
-
-    @Override
     public void onEnable() {
-        _inst = this;
-        Logger logger = getLogger();
+        Logger logger = apiInst.getLogger();
         logger.info("registering command register...");
         NMSCommandRegisterImpl commandRegister = new NMSCommandRegisterImpl();
         CommandRegister.setInstance(commandRegister, NMSCommandRegisterImpl.class);
@@ -83,12 +73,11 @@ public final class PluginEntryPoint extends JavaPlugin implements Listener {
                 return NBTItemHelper.setNBT(original, NBTTagCompoundHelper.merge(compound2, compound));
             }
         }, INBTItemHelper.class);
-        Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(this, apiInst);
     }
 
-    @Override
     public void onDisable() {
-        Logger logger = getLogger();
+        Logger logger = apiInst.getLogger();
         logger.info("unregistering command register...");
         NMSCommandRegisterImpl commandRegister = CommandRegister.getInstanceUnsafe(NMSCommandRegisterImpl.class);
         if (commandRegister != null) {

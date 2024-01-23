@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.ricetea"
-version = "1.0-NMS-1.20-R1"
+version = "1.0"
 
 
 java {
@@ -20,7 +20,7 @@ dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     // paperweight.foliaDevBundle("1.20.4-R0.1-SNAPSHOT")
     // paperweight.devBundle("com.example.paperfork", "1.20.4-R0.1-SNAPSHOT")
-    implementation(project(":BarleyTeaAPI"))
+    implementation(project(":main"))
 }
 
 tasks {
@@ -39,18 +39,6 @@ tasks {
 
     javadoc {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-    }
-
-    processResources {
-        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
-        val props = mapOf(
-                "version" to project.version,
-                "apiVersion" to "1.20"
-        )
-        inputs.properties(props)
-        filesMatching("plugin.yml") {
-            expand(props)
-        }
     }
 }
 

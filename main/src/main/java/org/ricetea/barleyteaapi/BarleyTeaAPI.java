@@ -14,9 +14,11 @@ import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
 import org.ricetea.barleyteaapi.internal.listener.*;
+import org.ricetea.barleyteaapi.internal.nms.INMSEntryPoint;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
+import org.ricetea.barleyteaapi.util.NativeUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.SupplierUtil;
@@ -25,6 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Singleton
@@ -33,6 +36,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
     private static BarleyTeaAPI _inst;
     @Nullable
     private SoftDependRegister<BarleyTeaAPI> softDependRegister;
+    @Nullable
+    private INMSEntryPoint nmsEntryPoint;
 
     @Nonnull
     public static BarleyTeaAPI getInstance() {
@@ -94,6 +99,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
         registerEventListeners();
         logger.info("initializing API...");
         DefaultItemRendererImpl.getInstance().checkIsRegistered();
+        logger.info("initializing NMS Feature...");
+        loadNMSFeature();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }
@@ -120,8 +127,46 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(SmithingListener.getInstance(), this);
     }
 
+    private void loadNMSFeature() {
+        String nmsVersion = NativeUtil.getNMSVersion();
+        Logger logger = getLogger();
+        logger.info("Loading NMS Support for \"" + nmsVersion + "\" ...");
+        Exception ex = null;
+        if (nmsVersion.startsWith("v_")) {
+            nmsVersion = nmsVersion.replace("v_", "v");
+        }
+        final String finalNmsVersion = nmsVersion;
+        Supplier<?> nmsSupplier = ObjectUtil.tryMap(() -> {
+            try {
+                return SupplierUtil.fromConstuctor(
+                        Class.forName("org.ricetea.barleyteaapi.internal.nms." + finalNmsVersion + ".NMSEntryPoint"),
+                        this);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        if (nmsSupplier == null) {
+            ObjectUtil.safeCall(ex, Exception::printStackTrace);
+            logger.warning("Cannot loaded NMS Support for \"" + nmsVersion + "\", some feature will be lost!");
+            return;
+        }
+        if (nmsSupplier.get() instanceof INMSEntryPoint entryPoint) {
+            try {
+                entryPoint.onEnable();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+                logger.warning("Cannot loaded NMS Support for \"" + nmsVersion + "\", some feature will be lost!");
+                return;
+            }
+            this.nmsEntryPoint = entryPoint;
+            logger.info("Successfully loaded NMS Support for \"" + nmsVersion + "\" !");
+        }
+    }
+
     @Override
     public void onDisable() {
+        ObjectUtil.safeCall(nmsEntryPoint, INMSEntryPoint::onDisable);
         Logger logger = getLogger();
         logger.info("uninitializing API...");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());

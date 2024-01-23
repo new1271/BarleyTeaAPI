@@ -1,42 +1,23 @@
 import java.util.*
 
 plugins {
+    `java-library`
 }
 
-version = "1.0"
+version = "1.0-SNAPSHOT"
 
 dependencies {
-    project(":BarleyTeaAPI")
-    project(":nms:BarleyTeaAPI-NMS-Supports")
+    project(":main")
+    project(":nms:v1_20_R1")
 }
 
-val allProjects = listOf(project(":BarleyTeaAPI"), project(":nms:BarleyTeaAPI-NMS-Supports"))
-
-val publish: TaskProvider<Task> = tasks.register("publish") {}
-val clean: TaskProvider<Task> = tasks.register("clean") {}
+val allProjects = listOf(project(":main"), project(":nms:v1_20_R1"))
 
 tasks {
-    clean {
+    jar {
         val layoutDir = File(project.buildDir.path, "libs")
-        val publishDir = File(project.buildDir.path, "publications")
-        if (layoutDir.exists())
-            layoutDir.delete()
-        if (publishDir.exists())
-            publishDir.delete()
-        allProjects.parallelStream().map {
-            it.tasks["clean"]
-        }.filter(Objects::nonNull).forEach {
-            dependsOn(it)
-        }
-    }
-
-    publish {
-        val layoutDir = File(project.buildDir.path, "libs")
-        val publishDir = File(project.buildDir.path, "publications")
         if (!layoutDir.exists())
             layoutDir.mkdir()
-        if (!publishDir.exists())
-            publishDir.mkdir()
         logger.lifecycle(layoutDir.path)
         allProjects.parallelStream().map {
             it.tasks["assemble"]
@@ -45,23 +26,11 @@ tasks {
             it.doLast {
                 val projectBuildDir = File(it.project.buildDir.path, "libs")
                 projectBuildDir.listFiles()?.forEach {
-                    if (it.isFile) {
-                        val dest = File(layoutDir.path, it.name)
-                        dest.delete()
-                        it.copyTo(dest)
-                        logger.lifecycle("Copied ${it.name} into ${dest.path}")
+                    if (it.isFile && !it.name.endsWith("dev.jar")) {
+                        logger.lifecycle("Include ${it.path}")
+                        from(zipTree(it))
                     }
                 }
-            }
-        }
-        val mainProject = allProjects.first()
-        val task = mainProject.tasks["publishToMavenLocal"]
-        dependsOn(task)
-        task.doLast {
-            val projectPublishDir = File(mainProject.buildDir.path, "publications")
-            projectPublishDir.listFiles()?.forEach {
-                val dest = File(publishDir, it.name)
-                it.copyRecursively(dest, overwrite = true)
             }
         }
     }
