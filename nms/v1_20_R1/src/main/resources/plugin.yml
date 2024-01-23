@@ -1,8 +1,0 @@
-name: BarleyTeaAPI-NMS-Supports
-version: '${version}'
-main: org.ricetea.barleyteaapi.internal.nms.v1_20_R1.PluginEntryPoint
-api-version: '1.20'
-depend: [ BarleyTeaAPI ]
-authors: [ new1271 (RiceTeaInMC) ]
-description: A multi-functional api for paper-like server
-website: https://github.com/new1271/BarleyTeaAPI

@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command;
+package org.ricetea.barleyteaapi.internal.nms.v1_20_R2.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -23,16 +23,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_20_R2.util.CraftMagicNumbers;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.helper.NMSItemHelper;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.MinecraftKeyCombinedIterator;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.NMSCommandArgument;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.NMSCommandUtil;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R2.helper.NMSItemHelper;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R2.util.MinecraftKeyCombinedIterator;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R2.util.NMSCommandArgument;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R2.util.NMSCommandUtil;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
