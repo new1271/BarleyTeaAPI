@@ -1,5 +1,7 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -7,8 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.event.world.EntitiesLoadEvent;
-import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
@@ -42,46 +42,44 @@ public final class ChunkListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void listenEntitiesLoad(EntitiesLoadEvent event) {
+    public void listenEntitiesLoad(EntityAddToWorldEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
         EntityTickTask task = EntityTickTask.getInstance();
-        for (Entity entity : event.getEntities()) {
-            CustomEntity entityType = CustomEntity.get(entity);
-            if (entityType == null)
-                return;
-            if (entityType instanceof FeatureEntityLoad feature) {
-                try {
-                    feature.handleEntityLoaded(entity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        Entity entity = event.getEntity();
+        CustomEntity entityType = CustomEntity.get(entity);
+        if (entityType == null)
+            return;
+        if (entityType instanceof FeatureEntityLoad feature) {
+            try {
+                feature.handleEntityLoaded(entity);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (entityType instanceof FeatureEntityTick) {
-                task.addEntity(entity);
-            }
+        }
+        if (entityType instanceof FeatureEntityTick) {
+            task.addEntity(entity);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void listenEntitiesUnload(EntitiesUnloadEvent event) {
+    public void listenEntitiesUnload(EntityRemoveFromWorldEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
         EntityTickTask task = EntityTickTask.getInstanceUnsafe();
-        for (Entity entity : event.getEntities()) {
-            CustomEntity entityType = CustomEntity.get(entity);
-            if (entityType == null)
-                return;
-            if (entityType instanceof FeatureEntityLoad feature) {
-                try {
-                    feature.handleEntityUnloaded(entity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        Entity entity = event.getEntity();
+        CustomEntity entityType = CustomEntity.get(entity);
+        if (entityType == null)
+            return;
+        if (entityType instanceof FeatureEntityLoad feature) {
+            try {
+                feature.handleEntityUnloaded(entity);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (entityType instanceof FeatureEntityTick && task != null) {
-                task.removeEntity(entity);
-            }
+        }
+        if (entityType instanceof FeatureEntityTick && task != null) {
+            task.removeEntity(entity);
         }
     }
 
