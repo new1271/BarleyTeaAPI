@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.api.block.registration;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
@@ -15,13 +14,11 @@ import javax.inject.Singleton;
 public interface BlockRegister extends NSKeyedRegister<CustomBlock> {
     @Nonnull
     static BlockRegister getInstance() {
-        BarleyTeaAPI.checkPluginUsable();
         return BlockRegisterImpl.getInstance();
     }
 
     @Nullable
     static BlockRegister getInstanceUnsafe() {
-        BarleyTeaAPI.checkPluginUsable();
         return BlockRegisterImpl.getInstanceUnsafe();
     }
 

@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
@@ -16,13 +15,11 @@ public interface CookingRecipeRegister extends NSKeyedRegister<BaseCookingRecipe
 
     @Nonnull
     static CookingRecipeRegister getInstance() {
-        BarleyTeaAPI.checkPluginUsable();
         return CookingRecipeRegisterImpl.getInstance();
     }
 
     @Nullable
     static CookingRecipeRegister getInstanceUnsafe() {
-        BarleyTeaAPI.checkPluginUsable();
         return CookingRecipeRegisterImpl.getInstanceUnsafe();
     }
 

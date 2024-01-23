@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.api.entity.registration;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
@@ -15,13 +14,11 @@ import javax.inject.Singleton;
 public interface EntityRegister extends NSKeyedRegister<CustomEntity> {
     @Nonnull
     static EntityRegister getInstance() {
-        BarleyTeaAPI.checkPluginUsable();
         return EntityRegisterImpl.getInstance();
     }
 
     @Nullable
     static EntityRegister getInstanceUnsafe() {
-        BarleyTeaAPI.checkPluginUsable();
         return EntityRegisterImpl.getInstanceUnsafe();
     }
 

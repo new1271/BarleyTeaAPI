@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.registration;
 
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.registration.IRegister;
 import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
@@ -15,13 +14,11 @@ import javax.inject.Singleton;
 public interface ItemRendererRegister extends NSKeyedRegister<ItemRenderer> {
     @Nonnull
     static ItemRendererRegister getInstance() {
-        BarleyTeaAPI.checkPluginUsable();
         return ItemRendererRegisterImpl.getInstance();
     }
 
     @Nullable
     static ItemRendererRegister getInstanceUnsafe() {
-        BarleyTeaAPI.checkPluginUsable();
         return ItemRendererRegisterImpl.getInstanceUnsafe();
     }
 
