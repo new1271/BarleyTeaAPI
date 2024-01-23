@@ -19,6 +19,7 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
@@ -175,13 +176,13 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
                                         if (feature != null) {
                                             final FeatureBlockLoad finalFeature = feature;
                                             scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> finalFeature.handleBlockUnloaded(block));
+                                                    () -> BlockFeatureLinker.unloadBlock(finalFeature, block));
                                         }
                                         feature = record.newFeature;
                                         if (feature != null) {
                                             final FeatureBlockLoad finalFeature = feature;
                                             scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> finalFeature.handleBlockLoaded(block));
+                                                    () -> BlockFeatureLinker.loadBlock(finalFeature, block));
                                         }
                                     }
                                     boolean hasTickingOld = record.hasTickingOld();

@@ -12,7 +12,10 @@ import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.*;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawnPosibility;
@@ -87,10 +90,7 @@ public final class EntitySpawnListener implements Listener {
                         return;
                     switch (result) {
                         case Handled -> {
-                            if (entityType instanceof FeatureEntityLoad feature2) {
-                                if (!entity.isDead())
-                                    feature2.handleEntityLoaded(entity);
-                            }
+                            EntityFeatureLinker.loadEntity(entityType, entity);
                             return;
                         }
                         case Cancelled -> {

@@ -16,6 +16,7 @@ import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
@@ -189,13 +190,13 @@ public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> 
                                     if (feature != null) {
                                         final FeatureEntityLoad finalFeature = feature;
                                         scheduler.scheduleSyncDelayedTask(plugin,
-                                                () -> finalFeature.handleEntityUnloaded(entity));
+                                                () -> EntityFeatureLinker.unloadEntity(finalFeature, entity));
                                     }
                                     feature = record.newFeature();
                                     if (feature != null) {
                                         final FeatureEntityLoad finalFeature = feature;
                                         scheduler.scheduleSyncDelayedTask(plugin,
-                                                () -> finalFeature.handleEntityLoaded(entity));
+                                                () -> EntityFeatureLinker.loadEntity(finalFeature, entity));
                                     }
                                 }
                                 boolean hasTickingOld = record.hasTickingOld();

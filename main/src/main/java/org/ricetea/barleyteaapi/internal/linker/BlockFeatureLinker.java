@@ -6,10 +6,14 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -17,6 +21,9 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public final class BlockFeatureLinker {
+    @Nonnull
+    private static final Set<Block> loadedBlocks = Collections.newSetFromMap(new WeakHashMap<>());
+
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(
             @Nullable Block block, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
@@ -92,5 +99,49 @@ public final class BlockFeatureLinker {
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, block));
+    }
+
+    public static void loadBlock(@Nonnull Block block) {
+        CustomBlock blockType = CustomBlock.get(block);
+        if (blockType == null)
+            return;
+        loadBlock(block);
+    }
+
+    public static void loadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
+        if (blockType instanceof FeatureBlockLoad feature) {
+            loadBlock(feature, block);
+        }
+    }
+
+    public static void loadBlock(@Nonnull FeatureBlockLoad feature, @Nonnull Block block) {
+        if (block.isEmpty())
+            return;
+        synchronized (loadedBlocks) {
+            if (!loadedBlocks.add(block))
+                return;
+        }
+        ObjectUtil.tryCall(() -> feature.handleBlockLoaded(block));
+    }
+
+    public static void unloadBlock(@Nonnull Block block) {
+        CustomBlock blockType = CustomBlock.get(block);
+        if (blockType == null)
+            return;
+        unloadBlock(blockType, block);
+    }
+
+    public static void unloadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
+        if (blockType instanceof FeatureBlockLoad feature) {
+            unloadBlock(feature, block);
+        }
+    }
+
+    public static void unloadBlock(@Nonnull FeatureBlockLoad feature, @Nonnull Block block) {
+        synchronized (loadedBlocks) {
+            if (!loadedBlocks.remove(block))
+                return;
+        }
+        ObjectUtil.tryCall(() -> feature.handleBlockUnloaded(block));
     }
 }

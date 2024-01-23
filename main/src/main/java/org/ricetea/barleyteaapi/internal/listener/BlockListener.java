@@ -45,6 +45,7 @@ public final class BlockListener implements Listener {
     public void listenBlockPlace(BlockPlaceEvent event) {
         if (event == null || event.isCancelled())
             return;
+        Block block = event.getBlock();
         try {
             if (!ItemFeatureLinker.doFeatureCancellable(event.getItemInHand(), event,
                     FeatureItemHoldPlayerPlace.class, FeatureItemHoldPlayerPlace::handleItemHoldPlayerPlaceBlock,
@@ -56,7 +57,7 @@ public final class BlockListener implements Listener {
             e.printStackTrace();
         }
         try {
-            if (!BlockFeatureLinker.doFeatureCancellable(event.getBlock(), event, FeatureBlockPlace.class,
+            if (!BlockFeatureLinker.doFeatureCancellable(block, event, FeatureBlockPlace.class,
                     FeatureBlockPlace::handleBlockPlaceByPlayer, DataBlockPlaceByPlayer::new)) {
                 event.setCancelled(true);
                 return;
@@ -64,13 +65,9 @@ public final class BlockListener implements Listener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-            BlockFeatureLinker.doFeature(event.getBlock(), FeatureBlockLoad.class,
-                    FeatureBlockLoad::handleBlockLoaded);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (CustomBlockType.get(event.getBlock()).asCustomBlock() instanceof FeatureBlockTick) {
+        CustomBlock blockType = CustomBlock.get(block);
+        BlockFeatureLinker.loadBlock(blockType, block);
+        if (blockType instanceof FeatureBlockTick) {
             BlockTickTask.getInstance().addBlock(event.getBlock());
         }
     }
@@ -94,15 +91,9 @@ public final class BlockListener implements Listener {
                 e.printStackTrace();
             }
         }
+        BlockFeatureLinker.unloadBlock(blockType, block);
         if (blockType instanceof FeatureBlockTick) {
             BlockTickTask.getInstance().removeBlock(block);
-        }
-        if (blockType instanceof FeatureBlockLoad feature) {
-            try {
-                feature.handleBlockUnloaded(block);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         ChunkStorage.removeBlockDataContainer(block);
         if (event.isDropItems()) {
@@ -153,15 +144,9 @@ public final class BlockListener implements Listener {
                     return;
                 }
             }
+            BlockFeatureLinker.unloadBlock(blockType, block);
             if (blockType instanceof FeatureBlockTick) {
                 BlockTickTask.getInstance().removeBlock(block);
-            }
-            if (blockType instanceof FeatureBlockLoad feature) {
-                try {
-                    feature.handleBlockUnloaded(block);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
             ChunkStorage.removeBlockDataContainer(block);
             PrepareToDrops.put(block.getLocation(), blockType.getKey());
@@ -188,8 +173,8 @@ public final class BlockListener implements Listener {
         Block to = event.getToBlock();
         ChunkStorage.setBlockDataContainer(to, container);
         if (blockType instanceof FeatureBlockLoad feature) {
-            feature.handleBlockUnloaded(from);
-            feature.handleBlockLoaded(to);
+            BlockFeatureLinker.unloadBlock(feature, from);
+            BlockFeatureLinker.loadBlock(feature, to);
         }
     }
 

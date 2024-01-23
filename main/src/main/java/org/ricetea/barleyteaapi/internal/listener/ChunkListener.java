@@ -11,15 +11,15 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.CollectionUtil;
@@ -50,13 +50,7 @@ public final class ChunkListener implements Listener {
         CustomEntity entityType = CustomEntity.get(entity);
         if (entityType == null)
             return;
-        if (entityType instanceof FeatureEntityLoad feature) {
-            try {
-                feature.handleEntityLoaded(entity);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        EntityFeatureLinker.loadEntity(entityType, entity);
         if (entityType instanceof FeatureEntityTick) {
             task.addEntity(entity);
         }
@@ -71,13 +65,7 @@ public final class ChunkListener implements Listener {
         CustomEntity entityType = CustomEntity.get(entity);
         if (entityType == null)
             return;
-        if (entityType instanceof FeatureEntityLoad feature) {
-            try {
-                feature.handleEntityUnloaded(entity);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        EntityFeatureLinker.unloadEntity(entityType, entity);
         if (entityType instanceof FeatureEntityTick && task != null) {
             task.removeEntity(entity);
         }
@@ -99,13 +87,7 @@ public final class ChunkListener implements Listener {
                     CustomBlock blockType = register.lookup(id);
                     if (blockType == null)
                         return;
-                    if (blockType instanceof FeatureBlockLoad feature) {
-                        try {
-                            feature.handleBlockLoaded(block);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    BlockFeatureLinker.loadBlock(blockType, block);
                     if (blockType instanceof FeatureBlockTick) {
                         task.addBlock(block);
                     }
@@ -128,13 +110,7 @@ public final class ChunkListener implements Listener {
                     CustomBlock blockType = register.lookup(id);
                     if (blockType == null)
                         return;
-                    if (blockType instanceof FeatureBlockLoad feature) {
-                        try {
-                            feature.handleBlockUnloaded(block);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    BlockFeatureLinker.unloadBlock(blockType, block);
                     if (blockType instanceof FeatureBlockTick && task != null) {
                         task.removeBlock(block);
                     }

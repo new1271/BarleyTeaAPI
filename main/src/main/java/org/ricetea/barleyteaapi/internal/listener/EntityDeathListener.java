@@ -11,7 +11,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
@@ -85,7 +84,7 @@ public final class EntityDeathListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        EntityFeatureLinker.doFeature(entity, FeatureEntityLoad.class, FeatureEntityLoad::handleEntityUnloaded);
+        EntityFeatureLinker.unloadEntity(entity);
     }
 
     @SuppressWarnings("DataFlowIssue")

@@ -26,11 +26,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.MinecraftKeyCombinedIterator;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.NMSCommandArgument;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.util.NMSCommandUtil;
@@ -136,9 +136,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                                 _entity -> _entity != null
                                         && feature.handleCommandSummon(
                                         new DataCommandSummon(_entity, nbt.toString())))) {
-                            if (entityType instanceof FeatureEntityLoad feature2 && !bukkitEntity.isDead()) {
-                                feature2.handleEntityLoaded(bukkitEntity);
-                            }
+                            EntityFeatureLinker.loadEntity(entityType, bukkitEntity);
                             if (entityType instanceof FeatureEntityTick) {
                                 EntityTickTask.getInstance().addEntity(bukkitEntity);
                             }

@@ -9,10 +9,14 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.projectiles.ProjectileSource;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.entity.feature.*;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectileSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 import javax.annotation.Nonnull;
@@ -50,9 +54,7 @@ public abstract class BaseProjectile extends DefaultEntity
         Projectile entity = (Projectile) world.spawnEntity(location, getOriginalType(), SpawnReason.CUSTOM);
         entity.setShooter(shooter);
         if (EntityHelper.tryRegister(this, entity, this::handleEntitySpawn)) {
-            if (this instanceof FeatureEntityLoad feature) {
-                feature.handleEntityLoaded(entity);
-            }
+            EntityFeatureLinker.loadEntity(this, entity);
             if (this instanceof FeatureEntityTick) {
                 EntityTickTask.getInstance().addEntity(entity);
             }

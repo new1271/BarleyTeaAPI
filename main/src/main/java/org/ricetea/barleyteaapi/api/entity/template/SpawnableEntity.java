@@ -6,13 +6,13 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 
 import javax.annotation.Nonnull;
@@ -35,9 +35,7 @@ public abstract class SpawnableEntity extends DefaultEntity
             return null;
         Entity entity = world.spawn(location, entityClazz, false, null);
         if (EntityHelper.tryRegister(this, entity, this::handleEntitySpawn)) {
-            if (this instanceof FeatureEntityLoad feature) {
-                feature.handleEntityLoaded(entity);
-            }
+            EntityFeatureLinker.loadEntity(this, entity);
             if (this instanceof FeatureEntityTick) {
                 EntityTickTask.getInstance().addEntity(entity);
             }
