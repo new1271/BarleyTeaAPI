@@ -41,7 +41,7 @@ public final class BlockListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockPlace(BlockPlaceEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -72,7 +72,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockBreak(BlockBreakEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -101,7 +101,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockDrop(BlockDropItemEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
@@ -113,7 +113,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockExplode(BlockExplodeEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
@@ -153,7 +153,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockFromTo(BlockFromToEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -178,7 +178,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenPistonExtend(BlockPistonExtendEvent event) {
         if (event == null || event.isCancelled())
             return;

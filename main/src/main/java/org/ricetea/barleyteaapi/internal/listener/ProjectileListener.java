@@ -31,12 +31,12 @@ public final class ProjectileListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void listenProjectileHit(ProjectileHitEvent event) {
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void listenProjectileHitFirst(ProjectileHitEvent event) {
         if (event == null || event.isCancelled())
             return;
         if (event.getHitEntity() != null) {
-            onProjectileHitEntity(event);
+            onProjectileHitEntityFirst(event);
         }
         if (event.isCancelled())
             return;
@@ -45,7 +45,16 @@ public final class ProjectileListener implements Listener {
         }
     }
 
-    private void onProjectileHitEntity(@Nonnull ProjectileHitEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenProjectileHitLast(ProjectileHitEvent event) {
+        if (event == null || event.isCancelled())
+            return;
+        if (event.getHitEntity() != null) {
+            onProjectileHitEntityLast(event);
+        }
+    }
+
+    private void onProjectileHitEntityFirst(@Nonnull ProjectileHitEvent event) {
         Projectile entity = event.getEntity();
         Entity shooter = EntityHelper.getProjectileShooterEntity(entity);
         if (!EntityFeatureLinker.doFeatureCancellable(shooter, event, FeatureEntityShoot.class,
@@ -58,6 +67,9 @@ public final class ProjectileListener implements Listener {
             event.setCancelled(true);
             return;
         }
+    }
+
+    private void onProjectileHitEntityLast(@Nonnull ProjectileHitEvent event) {
         if (!EntityFeatureLinker.doFeatureCancellable(event.getHitEntity(), event, FeatureEntityHit.class,
                 FeatureEntityHit::handleEntityHit, DataEntityHit::new)) {
             event.setCancelled(true);

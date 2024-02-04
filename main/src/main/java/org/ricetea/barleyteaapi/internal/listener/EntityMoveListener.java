@@ -32,9 +32,9 @@ public final class EntityMoveListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityMove(EntityMoveEvent event) {
-        if (event == null)
+        if (event == null || event.isCancelled())
             return;
         if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityMove.class,
                 FeatureEntityMove::handleEntityMove, DataEntityMove::new))

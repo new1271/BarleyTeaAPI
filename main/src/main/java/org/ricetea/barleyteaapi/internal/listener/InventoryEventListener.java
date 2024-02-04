@@ -90,7 +90,7 @@ public final class InventoryEventListener implements Listener {
         return new WithFlag<>(AlternativeItemState.restore(itemStack), true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemEnchanting(EnchantItemEvent event) {
         if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
@@ -109,7 +109,7 @@ public final class InventoryEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemGrinding(PrepareGrindstoneEvent event) {
         if (event == null || !ItemRegister.hasRegistered())
             return;

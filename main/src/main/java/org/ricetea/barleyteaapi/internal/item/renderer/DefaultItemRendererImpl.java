@@ -34,6 +34,7 @@ import org.ricetea.barleyteaapi.api.item.render.ItemSubRendererSupportingState;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
+import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
@@ -125,6 +126,13 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         double toolDamage = 0, toolSpeed = 0;
 
         if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
+            final boolean isBedrockPlayer;
+            if (player != null && apiInstance.getSoftDependRegister().get(BulitInSoftDepend.Geyser)
+                    instanceof GeyserConnector connector) {
+                isBedrockPlayer = connector.isBedrockPlayer(player);
+            } else {
+                isBedrockPlayer = false;
+            }
             final Map<Enchantment, Integer> enchantmentMap = meta.getEnchants();
             final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
@@ -150,6 +158,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     component = component.fallback(connector.getEnchantmentName(enchantment));
                     style = connector.getEnchantmentTierStyleUnsafe(enchantment, defaultEnchantTextStyleLazy);
                 } else {
+                    if (isBedrockPlayer)
+                        return;
                     style = (enchantment.isCursed() ? cursedEnchantTextStyleLazy : defaultEnchantTextStyleLazy).get();
                 }
                 component = component.style(style);

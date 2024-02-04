@@ -45,7 +45,7 @@ public final class PlayerEventListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemDamaged(PlayerItemDamageEvent event) {
         if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
@@ -79,7 +79,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemMending(PlayerItemMendEvent event) {
         if (event == null || event.isCancelled() || !ItemRegister.hasRegistered())
             return;
@@ -140,7 +140,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenPlayerSwitchItem(PlayerItemHeldEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -157,7 +157,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemBreak(PlayerItemBreakEvent event) {
         if (event == null)
             return;
@@ -165,7 +165,7 @@ public final class PlayerEventListener implements Listener {
                 FeatureItemDamage::handleItemBroken, DataItemBroken::new);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemConsume(PlayerItemConsumeEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -176,7 +176,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemInteractBlock(PlayerInteractEvent event) {
         if (event == null)
             return;
@@ -217,7 +217,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemInteractEntity(PlayerInteractEntityEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -229,7 +229,7 @@ public final class PlayerEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemWear(PlayerArmorChangeEvent event) {
         if (event == null)
             return;
@@ -245,7 +245,7 @@ public final class PlayerEventListener implements Listener {
             feature.handleItemWear(new DataItemWear(event));
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenPlayerJoin(PlayerJoinEvent event) {
         if (event == null)
             return;
@@ -259,7 +259,7 @@ public final class PlayerEventListener implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenPlayerQuit(PlayerQuitEvent event) {
         if (event == null)
             return;

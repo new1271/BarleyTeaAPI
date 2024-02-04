@@ -8,6 +8,9 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 public interface LoopTask extends Runnable {
+
+    static ThreadLocal<Stopwatch> TLStopwatches = ThreadLocal.withInitial(Stopwatch::createUnstarted);
+
     @Nonnegative
     long getStepTime();
 
@@ -17,7 +20,7 @@ public interface LoopTask extends Runnable {
 
     @Nonnull
     default Stopwatch getStopwatch() {
-        return Stopwatch.createUnstarted();
+        return TLStopwatches.get().reset();
     }
 
     default void start() {
@@ -48,6 +51,5 @@ public interface LoopTask extends Runnable {
                 service.runTask(this);
             }
         }
-        stopwatch.reset();
     }
 }

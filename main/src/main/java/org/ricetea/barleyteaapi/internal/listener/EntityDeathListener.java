@@ -44,7 +44,7 @@ public final class EntityDeathListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityDeath(EntityDeathEvent event) {
         if (event == null || event.isCancelled())
             return;

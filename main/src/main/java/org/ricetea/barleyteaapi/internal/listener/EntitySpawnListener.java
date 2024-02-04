@@ -50,7 +50,7 @@ public final class EntitySpawnListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenEntitySpawn(EntitySpawnEvent event) {
         if (event == null || event.isCancelled())
             return;

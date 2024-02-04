@@ -37,7 +37,7 @@ public final class CraftListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenItemCrafting(PrepareItemCraftEvent event) {
         if (event == null || event.getRecipe() == null)
             return;

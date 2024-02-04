@@ -58,7 +58,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityExplode(EntityExplodeEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;
@@ -98,7 +98,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityChangeBlock(EntityChangeBlockEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;

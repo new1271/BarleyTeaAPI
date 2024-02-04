@@ -28,7 +28,7 @@ public final class EntityTargetListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityTarget(EntityTargetEvent event) {
         if (event == null || event.isCancelled())
             return;

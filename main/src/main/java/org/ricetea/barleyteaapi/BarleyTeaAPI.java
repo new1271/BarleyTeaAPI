@@ -11,6 +11,7 @@ import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
+import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
 import org.ricetea.barleyteaapi.internal.listener.*;
@@ -92,6 +93,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 SupplierUtil.fromConstuctor(ExcellentEnchantsConnector.class));
         softDependRegister.register(BulitInSoftDepend.ProtocolLib,
                 SupplierUtil.fromConstuctor(ProtocolLibConnector.class));
+        softDependRegister.register(BulitInSoftDepend.Geyser,
+                SupplierUtil.fromConstuctor(GeyserConnector.class));
         this.softDependRegister = softDependRegister;
         softDependRegister.reloadAll();
         Logger logger = getLogger();

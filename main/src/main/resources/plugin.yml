@@ -12,3 +12,4 @@ depend:
   - "ProtocolLib"
 softdepend:
   - "ExcellentEnchants"
+  - "Geyser-Spigot"

@@ -5,7 +5,8 @@ import java.util.function.Supplier;
 
 public enum BulitInSoftDepend implements Supplier<String> {
     ExcellentEnchants("ExcellentEnchants"),
-    ProtocolLib("ProtocolLib");
+    ProtocolLib("ProtocolLib"),
+    Geyser("Geyser-Spigot");
 
     private final String pluginName;
 

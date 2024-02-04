@@ -26,7 +26,7 @@ public final class EntityTameListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntityTame(EntityTameEvent event) {
         if (event == null || event.isCancelled())
             return;

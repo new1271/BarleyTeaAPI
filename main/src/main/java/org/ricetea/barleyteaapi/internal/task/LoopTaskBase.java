@@ -9,10 +9,7 @@ import javax.annotation.Nonnull;
 
 @ApiStatus.Internal
 public abstract class LoopTaskBase implements LoopTask {
-
     private final long stepTime;
-    @Nonnull
-    private final Lazy<Stopwatch> stopwatchLazy = Lazy.create(Stopwatch::createUnstarted);
     private boolean started;
 
     public LoopTaskBase(long stepTime) {
@@ -32,10 +29,5 @@ public abstract class LoopTaskBase implements LoopTask {
     @Override
     public void setStarted(boolean started) {
         this.started = started;
-    }
-
-    @Override
-    public @Nonnull Stopwatch getStopwatch() {
-        return stopwatchLazy.get();
     }
 }

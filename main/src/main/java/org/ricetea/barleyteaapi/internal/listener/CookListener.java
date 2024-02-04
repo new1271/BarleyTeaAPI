@@ -39,7 +39,7 @@ public final class CookListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenBlockCook(BlockCookEvent event) {
         if (event == null)
             return;

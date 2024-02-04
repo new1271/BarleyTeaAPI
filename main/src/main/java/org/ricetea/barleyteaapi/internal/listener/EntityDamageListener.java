@@ -43,11 +43,20 @@ public final class EntityDamageListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void listenEntityDamage(EntityDamageEvent event) {
+    public void listenEntityDamageFirst(EntityDamageEvent event) {
         if (event == null || event.isCancelled())
             return;
         if (event instanceof EntityDamageByEntityEvent _event) {
-            onEntityDamageByEntity(_event);
+            onEntityDamageByEntityFirst(_event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenEntityDamageLast(EntityDamageEvent event) {
+        if (event == null || event.isCancelled())
+            return;
+        if (event instanceof EntityDamageByEntityEvent _event) {
+            onEntityDamageByEntityLast(_event);
         } else if (event instanceof EntityDamageByBlockEvent _event) {
             onEntityDamageByBlock(_event);
         } else {
@@ -55,8 +64,7 @@ public final class EntityDamageListener implements Listener {
         }
     }
 
-    public void onEntityDamageByEntity(@Nonnull EntityDamageByEntityEvent event) {
-        Entity damagee = event.getEntity();
+    public void onEntityDamageByEntityFirst(@Nonnull EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
         if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
                 event, Constants.ALL_SLOTS,
@@ -70,6 +78,10 @@ public final class EntityDamageListener implements Listener {
             event.setCancelled(true);
             return;
         }
+    }
+
+    public void onEntityDamageByEntityLast(@Nonnull EntityDamageByEntityEvent event) {
+        Entity damagee = event.getEntity();
         if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damagee, LivingEntity.class),
                 event, Constants.ALL_SLOTS,
                 FeatureItemHoldEntityDamage.class, FeatureItemHoldEntityDamage::handleItemHoldEntityDamagedByEntity,

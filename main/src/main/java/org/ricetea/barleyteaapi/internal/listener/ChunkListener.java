@@ -41,7 +41,7 @@ public final class ChunkListener implements Listener {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntitiesLoad(EntityAddToWorldEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
@@ -56,7 +56,7 @@ public final class ChunkListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntitiesUnload(EntityRemoveFromWorldEvent event) {
         if (event == null || !EntityRegister.hasRegistered())
             return;
@@ -71,7 +71,7 @@ public final class ChunkListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenChunkLoad(ChunkLoadEvent event) {
         if (event == null)
             return;
@@ -94,7 +94,7 @@ public final class ChunkListener implements Listener {
                 });
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void listenChunkUnload(ChunkUnloadEvent event) {
         if (event == null)
             return;

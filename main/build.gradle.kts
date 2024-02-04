@@ -10,11 +10,13 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://repo.opencollab.dev/main/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.2.0-SNAPSHOT")
+    compileOnly("org.geysermc.geyser:api:2.2.0-SNAPSHOT")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
 }
 
