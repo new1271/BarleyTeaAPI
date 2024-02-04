@@ -188,7 +188,7 @@ public final class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenPistonRetract(BlockPistonRetractEvent event) {
         if (event == null || event.isCancelled())
             return;

@@ -190,7 +190,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenEntityDropItem(EntityDropItemEvent event) {
         if (event == null || event.isCancelled() || !BlockRegister.hasRegistered())
             return;

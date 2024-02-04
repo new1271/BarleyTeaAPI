@@ -73,7 +73,7 @@ public final class CookListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenFurnaceBurn(FurnaceBurnEvent event) {
         if (event == null)
             return;
@@ -91,7 +91,7 @@ public final class CookListener implements Listener {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
         if (event == null)
             return;
@@ -115,7 +115,7 @@ public final class CookListener implements Listener {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void listenCampfireStartCook(CampfireStartEvent event) {
         if (event == null)
             return;
