@@ -62,6 +62,7 @@ public final class CachedList<T> implements List<T> {
         return false;
     }
 
+    @Nonnull
     @Override
     public Iterator<T> iterator() {
         if (_list != null)
@@ -88,6 +89,7 @@ public final class CachedList<T> implements List<T> {
         return Collections.emptyIterator();
     }
 
+    @Nonnull
     @Override
     public Object[] toArray() {
         Object[] result = listToArray();

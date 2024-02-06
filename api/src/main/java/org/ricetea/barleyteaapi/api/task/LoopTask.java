@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public interface LoopTask extends Runnable {
 
-    static ThreadLocal<Stopwatch> TLStopwatches = ThreadLocal.withInitial(Stopwatch::createUnstarted);
+    ThreadLocal<Stopwatch> TLStopwatches = ThreadLocal.withInitial(Stopwatch::createUnstarted);
 
     @Nonnegative
     long getStepTime();
@@ -25,8 +25,11 @@ public interface LoopTask extends Runnable {
 
     default void start() {
         if (!isStarted()) {
-            setStarted(true);
-            TaskService.getInstance().runTask(this);
+            TaskService service = TaskService.getInstanceUnsafe();
+            if (service != null) {
+                setStarted(true);
+                service.runTask(this);
+            }
         }
     }
 
@@ -42,7 +45,11 @@ public interface LoopTask extends Runnable {
         ObjectUtil.tryCall(this::runLoop);
         stopwatch.stop();
         if (isStarted()) {
-            TaskService service = TaskService.getInstance();
+            TaskService service = TaskService.getInstanceUnsafe();
+            if (service == null) {
+                stop();
+                return;
+            }
             long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
             long stepTime = getStepTime();
             if (elapsed < stepTime) {
