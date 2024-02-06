@@ -1,24 +1,54 @@
 package org.ricetea.barleyteaapi;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.ApiStatus;
+import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
+import org.ricetea.barleyteaapi.api.entity.CustomEntity;
+import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
+import org.ricetea.barleyteaapi.api.entity.counter.TickCounterTrigger;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
+import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
-import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.api.internal.entity.counter.TickCounterConstuctors;
+import org.ricetea.barleyteaapi.api.internal.entity.counter.TickingServices;
+import org.ricetea.barleyteaapi.api.internal.misc.MiscInternalFunctions;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSEntryPoint;
+import org.ricetea.barleyteaapi.api.item.registration.*;
+import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
+import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
+import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.api.task.TaskService;
+import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
+import org.ricetea.barleyteaapi.internal.chunk.ChunkStorageImpl;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
 import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
+import org.ricetea.barleyteaapi.internal.entity.counter.AsyncTickingServiceImpl;
+import org.ricetea.barleyteaapi.internal.entity.counter.PersistentTickCounterImpl;
+import org.ricetea.barleyteaapi.internal.entity.counter.SyncTickingServiceImpl;
+import org.ricetea.barleyteaapi.internal.entity.counter.TransientTickCounterImpl;
+import org.ricetea.barleyteaapi.internal.entity.registration.EntityRegisterImpl;
+import org.ricetea.barleyteaapi.internal.item.registration.*;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.listener.*;
-import org.ricetea.barleyteaapi.internal.nms.INMSEntryPoint;
+import org.ricetea.barleyteaapi.internal.localization.LocalizationRegisterImpl;
+import org.ricetea.barleyteaapi.internal.misc.ThreadLocalRandomProviderImpl;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
+import org.ricetea.barleyteaapi.internal.task.TaskServiceImpl;
 import org.ricetea.barleyteaapi.util.NativeUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
 import org.ricetea.utils.ObjectUtil;
@@ -28,6 +58,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.Objects;
+import java.util.function.IntUnaryOperator;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -88,6 +120,12 @@ public final class BarleyTeaAPI extends JavaPlugin {
     @Override
     public void onEnable() {
         _inst = this;
+        Logger logger = getLogger();
+        logger.info("initializing API...");
+        loadApiImplementations();
+        logger.info("initializing NMS Feature...");
+        loadNMSFeature();
+        logger.info("initializing Soft-depends");
         SoftDependRegister<BarleyTeaAPI> softDependRegister = new SoftDependRegister<>(this);
         softDependRegister.register(BulitInSoftDepend.ExcellentEnchants,
                 SupplierUtil.fromConstuctor(ExcellentEnchantsConnector.class));
@@ -97,13 +135,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 SupplierUtil.fromConstuctor(GeyserConnector.class));
         this.softDependRegister = softDependRegister;
         softDependRegister.reloadAll();
-        Logger logger = getLogger();
         logger.info("registering listeners");
         registerEventListeners();
-        logger.info("initializing API...");
-        DefaultItemRendererImpl.getInstance().checkIsRegistered();
-        logger.info("initializing NMS Feature...");
-        loadNMSFeature();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }
@@ -128,6 +161,80 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(ProjectileListener.getInstance(), this);
         pluginManager.registerEvents(SlimeSplitListener.getInstance(), this);
         pluginManager.registerEvents(SmithingListener.getInstance(), this);
+    }
+
+    private void loadApiImplementations() {
+        final ServicesManager servicesManager = Bukkit.getServicesManager();
+        loadApiImplementation(servicesManager, new BlockRegisterImpl(), BlockRegister.class);
+        loadApiImplementation(servicesManager, new TickCounterConstuctors() {
+            @Nonnull
+            @Override
+            public TickCounter persistentCounter(@Nonnull NamespacedKey key,
+                                                 @Nonnull IntUnaryOperator operator,
+                                                 @Nonnull TickCounterTrigger trigger,
+                                                 int startValue) {
+                return new PersistentTickCounterImpl(key, operator, trigger, startValue);
+            }
+
+            @Nonnull
+            @Override
+            public TickCounter transistentCounter(@Nonnull NamespacedKey key,
+                                                  @Nonnull IntUnaryOperator operator,
+                                                  @Nonnull TickCounterTrigger trigger,
+                                                  int startValue) {
+                return new TransientTickCounterImpl(key, operator, trigger, startValue);
+            }
+        }, TickCounterConstuctors.class);
+        loadApiImplementation(servicesManager, new TickingServices() {
+            @Nonnull
+            private final TickingService syncService = new SyncTickingServiceImpl(),
+                    asyncService = new AsyncTickingServiceImpl();
+
+            @Nonnull
+            @Override
+            public TickingService syncService() {
+                return syncService;
+            }
+
+            @Nonnull
+            @Override
+            public TickingService asyncService() {
+                return asyncService;
+            }
+        }, TickingServices.class);
+        loadApiImplementation(servicesManager, new MiscInternalFunctions() {
+            @Override
+            public <T extends Entity> boolean tryRegisterEntityAfterSpawn
+                    (@Nonnull CustomEntity entityType, @Nonnull T entity, @Nullable Predicate<T> predicate) {
+                if (EntityHelper.tryRegister(entityType, entity, predicate)) {
+                    EntityFeatureLinker.loadEntity(entityType, entity);
+                    if (entityType instanceof FeatureEntityTick) {
+                        EntityTickTask.getInstance().addEntity(entity);
+                    }
+                    return true;
+                } else {
+                    entity.remove();
+                    return false;
+                }
+            }
+        }, MiscInternalFunctions.class);
+        loadApiImplementation(servicesManager, new EntityRegisterImpl(), EntityRegister.class);
+        loadApiImplementation(servicesManager, new ChunkStorageImpl(), ChunkStorage.class);
+        loadApiImplementation(servicesManager, new CookingRecipeRegisterImpl(), CookingRecipeRegister.class);
+        loadApiImplementation(servicesManager, new CraftingRecipeRegisterImpl(), CraftingRecipeRegister.class);
+        loadApiImplementation(servicesManager, new ItemRegisterImpl(), ItemRegister.class);
+        loadApiImplementation(servicesManager, new ItemRendererRegisterImpl(), ItemRendererRegister.class);
+        loadApiImplementation(servicesManager, new ItemSubRendererRegisterImpl(), ItemSubRendererRegister.class);
+        loadApiImplementation(servicesManager, new SmithingRecipeRegisterImpl(), SmithingRecipeRegister.class);
+        loadApiImplementation(servicesManager, new LocalizationRegisterImpl(), LocalizationRegister.class);
+        loadApiImplementation(servicesManager, new ThreadLocalRandomProviderImpl(), RandomProvider.class);
+        loadApiImplementation(servicesManager, new TaskServiceImpl(), TaskService.class);
+        loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
+    }
+
+    public <T> void loadApiImplementation(@Nonnull ServicesManager servicesManager,
+                                           @Nonnull T service, @Nonnull Class<T> serviceClazz) {
+        servicesManager.register(serviceClazz, service, this, ServicePriority.Lowest);
     }
 
     private void loadNMSFeature() {
@@ -156,8 +263,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         if (nmsSupplier.get() instanceof INMSEntryPoint entryPoint) {
             try {
                 entryPoint.onEnable();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 logger.warning("Cannot loaded NMS Support for \"" + nmsVersion + "\", some feature will be lost!");
                 return;
@@ -178,9 +284,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
         ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
         ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
-        ObjectUtil.safeCall(TickingService.syncService(), TickingService::shutdown);
-        ObjectUtil.safeCall(TickingService.asyncService(), TickingService::shutdown);
+        ObjectUtil.safeCall(TickingService.syncServiceUnsafe(), TickingService::shutdown);
+        ObjectUtil.safeCall(TickingService.asyncServiceUnsafe(), TickingService::shutdown);
         ObjectUtil.safeCall(TaskService.getInstance(), TaskService::shutdown);
+        Bukkit.getServicesManager().unregisterAll(this);
         Bukkit.getScheduler().cancelTasks(this);
         _inst = null;
         logger.info("BarleyTeaAPI successfully unloaded!");

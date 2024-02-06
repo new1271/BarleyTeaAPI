@@ -15,9 +15,9 @@ import org.ricetea.barleyteaapi.api.block.feature.*;
 import org.ricetea.barleyteaapi.api.block.feature.data.*;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerPlace;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlock;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
@@ -95,7 +95,7 @@ public final class BlockListener implements Listener {
         if (blockType instanceof FeatureBlockTick) {
             BlockTickTask.getInstance().removeBlock(block);
         }
-        ChunkStorage.removeBlockDataContainer(block);
+        ChunkStorage.getInstance().removeBlockDataContainer(block);
         if (event.isDropItems()) {
             PrepareToDrops.put(event.getBlock().getLocation(), blockType.getKey());
         }
@@ -148,7 +148,7 @@ public final class BlockListener implements Listener {
             if (blockType instanceof FeatureBlockTick) {
                 BlockTickTask.getInstance().removeBlock(block);
             }
-            ChunkStorage.removeBlockDataContainer(block);
+            ChunkStorage.getInstance().removeBlockDataContainer(block);
             PrepareToDrops.put(block.getLocation(), blockType.getKey());
         }
     }
@@ -166,12 +166,12 @@ public final class BlockListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        PersistentDataContainer container = ChunkStorage.getBlockDataContainer(from, false);
+        PersistentDataContainer container = ChunkStorage.getInstance().getBlockDataContainer(from, false);
         if (container != null) {
-            ChunkStorage.removeBlockDataContainer(from);
+            ChunkStorage.getInstance().removeBlockDataContainer(from);
         }
         Block to = event.getToBlock();
-        ChunkStorage.setBlockDataContainer(to, container);
+        ChunkStorage.getInstance().setBlockDataContainer(to, container);
         if (blockType instanceof FeatureBlockLoad feature) {
             BlockFeatureLinker.unloadBlock(feature, from);
             BlockFeatureLinker.loadBlock(feature, to);

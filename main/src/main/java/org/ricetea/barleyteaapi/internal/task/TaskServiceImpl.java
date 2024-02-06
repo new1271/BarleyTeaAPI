@@ -2,7 +2,6 @@ package org.ricetea.barleyteaapi.internal.task;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.task.TaskService;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.UnsafeHelper;
 
 import javax.annotation.Nonnull;
@@ -17,20 +16,9 @@ import java.util.concurrent.TimeUnit;
 public final class TaskServiceImpl implements TaskService {
 
     @Nonnull
-    private static final Lazy<TaskServiceImpl> _inst = Lazy.create(TaskServiceImpl::new);
-
-    @Nonnull
     private final Object syncRoot = new Object();
 
     private ScheduledExecutorService executorService;
-
-    private TaskServiceImpl() {
-    }
-
-    @Nonnull
-    public static TaskServiceImpl getInstance() {
-        return _inst.get();
-    }
 
     @Nonnull
     private ScheduledExecutorService getExecutorService() {

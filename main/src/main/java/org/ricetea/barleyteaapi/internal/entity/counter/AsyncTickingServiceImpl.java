@@ -8,10 +8,8 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
 import org.ricetea.barleyteaapi.internal.task.LoopTaskBase;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Singleton;
 import java.util.AbstractMap;
@@ -26,9 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class AsyncTickingServiceImpl extends LoopTaskBase implements TickingService {
 
     @Nonnull
-    private static final Lazy<AsyncTickingServiceImpl> _inst = Lazy.create(AsyncTickingServiceImpl::new);
-
-    @Nonnull
     private final Set<Entity> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
 
     @Nonnull
@@ -40,18 +35,8 @@ public final class AsyncTickingServiceImpl extends LoopTaskBase implements Ticki
     @Nonnull
     private final Object syncRoot = new Object();
 
-    private AsyncTickingServiceImpl() {
+    public AsyncTickingServiceImpl() {
         super(50);
-    }
-
-    @Nonnull
-    public static AsyncTickingServiceImpl getInstance() {
-        return _inst.get();
-    }
-
-    @Nullable
-    public static AsyncTickingServiceImpl getInstanceUnsafe() {
-        return _inst.getUnsafe();
     }
 
     @Override

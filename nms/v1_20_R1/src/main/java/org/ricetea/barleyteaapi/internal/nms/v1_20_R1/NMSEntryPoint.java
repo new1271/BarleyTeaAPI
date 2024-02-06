@@ -8,13 +8,17 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.ServicesManager;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.command.CommandRegister;
 import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
-import org.ricetea.barleyteaapi.internal.nms.*;
+import org.ricetea.barleyteaapi.api.internal.nms.INBTItemHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSEntityHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSEntryPoint;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSCommandRegisterImpl;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSRegularCommand;
@@ -42,16 +46,22 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
 
     public void onEnable() {
         Logger logger = apiInst.getLogger();
-        logger.info("registering command register...");
+        logger.info("[NMS] registering command register...");
         NMSCommandRegisterImpl commandRegister = new NMSCommandRegisterImpl();
         CommandRegister.setInstance(commandRegister, NMSCommandRegisterImpl.class);
-        logger.info("registering '/givebarley' command...");
+        logger.info("[NMS] registering '/givebarley' command...");
         commandRegister.register(giveCommand = new NMSGiveCommand());
-        logger.info("registering '/summonbarley' command...");
+        logger.info("[NMS] registering '/summonbarley' command...");
         commandRegister.register(summonCommand = new NMSSummonCommand());
-        logger.info("registering nms function...");
-        NMSHelperRegister.setHelper(NMSEntityHelper::damage, INMSEntityHelper.class);
-        NMSHelperRegister.setHelper(new INMSItemHelper() {
+        logger.info("[NMS] registering nms implementation...");
+        loadNmsImplementations();
+        Bukkit.getPluginManager().registerEvents(this, apiInst);
+    }
+
+    private void loadNmsImplementations() {
+        ServicesManager servicesManager = Bukkit.getServicesManager();
+        apiInst.loadApiImplementation(servicesManager, NMSEntityHelper::damage, INMSEntityHelper.class);
+        apiInst.loadApiImplementation(servicesManager, new INMSItemHelper() {
             @Nullable
             @Override
             public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material) {
@@ -64,7 +74,7 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
                 return NMSItemHelper.createItemStackFromNbtString(nbt);
             }
         }, INMSItemHelper.class);
-        NMSHelperRegister.setHelper(new INBTItemHelper() {
+        apiInst.loadApiImplementation(servicesManager, new INBTItemHelper() {
             @Nonnull
             @Override
             public ItemStack copyNbtWhenSmithing(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying) {
@@ -73,7 +83,6 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
                 return NBTItemHelper.setNBT(original, NBTTagCompoundHelper.merge(compound2, compound));
             }
         }, INBTItemHelper.class);
-        Bukkit.getPluginManager().registerEvents(this, apiInst);
     }
 
     public void onDisable() {
@@ -84,9 +93,6 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
             commandRegister.unregisterAll();
             CommandRegister.setInstance(null, NMSCommandRegisterImpl.class);
         }
-        logger.info("unregistering nms function...");
-        NMSHelperRegister.setHelper(null, INMSEntityHelper.class);
-        NMSHelperRegister.setHelper(null, INMSItemHelper.class);
     }
 
     @EventHandler

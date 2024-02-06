@@ -51,7 +51,6 @@ import java.util.function.Supplier;
 @Singleton
 @ApiStatus.Internal
 public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
-    private static final @Nonnull Lazy<DefaultItemRendererImpl> _inst = Lazy.create(DefaultItemRendererImpl::new);
     private static final @Nonnull EquipmentSlot[] slots = EquipmentSlot.values();
     private static final @Nonnull Operation[] operations = Operation.values();
     private static final @Nonnull Comparator<Attribute> attributeComparator = (a, b) -> {
@@ -80,18 +79,9 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         return Collections.unmodifiableList(result);
     });
 
-    private DefaultItemRendererImpl() {
+    public DefaultItemRendererImpl() {
         super(NamespacedKeyUtil.BarleyTeaAPI("default_item_renderer"));
-    }
-
-    @Nonnull
-    public static DefaultItemRendererImpl getInstance() {
-        return _inst.get();
-    }
-
-    public void checkIsRegistered() {
-        if (!isRegistered())
-            ItemRendererRegister.getInstance().register(this);
+        ObjectUtil.tryCall(() -> ItemRendererRegister.getInstance().register(this));
     }
 
     @Nonnull

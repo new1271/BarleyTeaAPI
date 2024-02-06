@@ -25,6 +25,7 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
+import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
@@ -34,8 +35,6 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Singleton
 @ApiStatus.Internal
@@ -75,7 +74,7 @@ public final class EntitySpawnListener implements Listener {
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
         Entity entity = event.getEntity();
-        Random rnd = ThreadLocalRandom.current();
+        RandomProvider rnd = RandomProvider.getInstance();
         Lazy<DataNaturalSpawnPosibility> dataLazy = Lazy.create(() ->
                 new DataNaturalSpawnPosibility(event.getLocation(), event.getSpawnReason()));
         for (CustomEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn

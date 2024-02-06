@@ -29,8 +29,8 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.entity.BarleyFallingBlock;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
@@ -90,7 +90,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
             if (blockType instanceof FeatureBlockTick) {
                 BlockTickTask.getInstance().removeBlock(block);
             }
-            ChunkStorage.removeBlockDataContainer(block);
+            ChunkStorage.getInstance().removeBlockDataContainer(block);
             if (blockType instanceof FeatureBlockBreak) {
                 var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
                 list.add(blockType);
@@ -108,6 +108,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
         switch (entityType) {
             case FALLING_BLOCK -> {
                 NamespacedKey key = EntityHelper.getEntityID(entity);
+                ChunkStorage chunkStorage = ChunkStorage.getInstance();
                 if (key == null) {
                     CustomBlock blockType = CustomBlock.get(block);
                     if (blockType == null)
@@ -123,15 +124,14 @@ public final class EntityChangeEnvironmentListener implements Listener {
                         }
                     }
                     EntityHelper.register(BarleyFallingBlock.getInstance(), entity);
-                    PersistentDataContainer container = ChunkStorage.getBlockDataContainer(block,
-                            false);
+                    PersistentDataContainer container = chunkStorage.getBlockDataContainer(block, false);
                     if (container != null)
                         BarleyFallingBlock.setBlockDataContainer(entity, container);
                     BlockFeatureLinker.unloadBlock(blockType, block);
                     if (blockType instanceof FeatureBlockTick) {
                         BlockTickTask.getInstance().removeBlock(block);
                     }
-                    ChunkStorage.removeBlockDataContainer(block);
+                    chunkStorage.removeBlockDataContainer(block);
                 } else {
                     EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
                     if (entityRegister != null
@@ -141,15 +141,14 @@ public final class EntityChangeEnvironmentListener implements Listener {
                             NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
                             if (id != null) {
                                 CustomBlock blockType = BlockRegister.getInstance().lookup(id);
-                                PersistentDataContainer previousDataContainer = ChunkStorage
-                                        .getBlockDataContainer(block,
-                                                false);
-                                ChunkStorage.setBlockDataContainer(block, container);
+                                PersistentDataContainer previousDataContainer = chunkStorage.getBlockDataContainer(
+                                        block, false);
+                                chunkStorage.setBlockDataContainer(block, container);
                                 try {
                                     if (blockType instanceof FeatureBlockFalling blockFallingFeature
                                             && !blockFallingFeature.handleBlockFallToGround(block)) {
                                         event.setCancelled(true);
-                                        ChunkStorage.setBlockDataContainer(block, previousDataContainer);
+                                        chunkStorage.setBlockDataContainer(block, previousDataContainer);
                                         return;
                                     }
                                 } catch (Exception e) {
@@ -181,7 +180,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 if (blockType instanceof FeatureBlockTick) {
                     BlockTickTask.getInstance().removeBlock(block);
                 }
-                ChunkStorage.removeBlockDataContainer(block);
+                ChunkStorage.getInstance().removeBlockDataContainer(block);
                 if (blockType instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
                     var list = PrepareToDrops.computeIfAbsent(event.getEntity(), k -> new ArrayList<>());
                     list.add(blockType);

@@ -11,7 +11,6 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -25,21 +24,8 @@ import java.util.logging.Logger;
 @ApiStatus.Internal
 public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<BaseCraftingRecipe> implements CraftingRecipeRegister {
 
-    @Nonnull
-    private static final Lazy<CraftingRecipeRegisterImpl> inst = Lazy.create(CraftingRecipeRegisterImpl::new);
-
-    private CraftingRecipeRegisterImpl() {
+    public CraftingRecipeRegisterImpl() {
         super("dummy_crafting_recipe");
-    }
-
-    @Nonnull
-    public static CraftingRecipeRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static CraftingRecipeRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
     }
 
     @Override

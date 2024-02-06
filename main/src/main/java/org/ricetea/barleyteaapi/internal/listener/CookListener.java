@@ -20,7 +20,6 @@ import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCookingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
-import org.ricetea.barleyteaapi.internal.item.registration.CookingRecipeRegisterImpl;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -53,9 +52,9 @@ public final class CookListener implements Listener {
                 boolean allPassed = true;
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
-                CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
+                CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
                 if (register != null && !register.isEmpty()) {
-                    for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                    for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
                         if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                             result = recipe.apply(source);
                             allPassed = false;
@@ -102,9 +101,9 @@ public final class CookListener implements Listener {
         CustomItemType itemType = CustomItemType.get(source);
         NamespacedKey recipeKey = keyedRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isCustomItem()) {
-            CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
+            CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
             if (register != null && !register.isEmpty()) {
-                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
                     if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                         event.setTotalCookTime(source.getAmount() * recipe.getCookingTime());
                         break;
@@ -124,9 +123,9 @@ public final class CookListener implements Listener {
         CustomItemType itemType = CustomItemType.get(event.getSource());
         NamespacedKey recipeKey = campfireRecipe.getKey();
         if (!recipeKey.getNamespace().equals(NamespacedKey.MINECRAFT) || itemType.isCustomItem()) {
-            CookingRecipeRegisterImpl register = CookingRecipeRegisterImpl.getInstanceUnsafe();
+            CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
             if (register != null && !register.isEmpty()) {
-                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
                     if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                         event.setTotalCookTime(recipe.getCookingTime());
                         break;

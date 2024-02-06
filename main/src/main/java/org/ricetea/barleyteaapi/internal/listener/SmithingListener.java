@@ -13,7 +13,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
-import org.ricetea.barleyteaapi.internal.item.registration.SmithingRecipeRegisterImpl;
+import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -59,9 +59,9 @@ public final class SmithingListener implements Listener {
                 final ItemStack oldResult = event.getResult();
                 ItemStack result = oldResult;
                 boolean allPassed = true;
-                SmithingRecipeRegisterImpl register = SmithingRecipeRegisterImpl.getInstanceUnsafe();
+                SmithingRecipeRegister register = SmithingRecipeRegister.getInstanceUnsafe();
                 if (register != null && !register.isEmpty()) {
-                    for (BaseSmithingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                    for (BaseSmithingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
                         if (recipe.getOriginal().equals(originalType) && recipe.filterAdditionType(additionType)
                                 && recipe.filterTemplateType(templateType)) {
                             result = recipe.apply(original, template, addition);

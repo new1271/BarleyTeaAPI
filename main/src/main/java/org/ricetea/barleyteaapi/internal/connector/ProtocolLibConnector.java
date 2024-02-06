@@ -19,6 +19,7 @@ import net.kyori.adventure.text.event.HoverEvent.ShowItem;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
+import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -32,8 +33,7 @@ import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
-import org.ricetea.barleyteaapi.internal.nms.INMSItemHelper;
-import org.ricetea.barleyteaapi.internal.nms.NMSHelperRegister;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
@@ -120,7 +120,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     return component;
                 String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
                         + nbtHolder.string() + "}";
-                INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
+                INMSItemHelper helper = Bukkit.getServicesManager().load(INMSItemHelper.class);
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {
@@ -413,7 +413,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     return component;
                 String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
                         + nbtHolder.string() + "}";
-                INMSItemHelper helper = NMSHelperRegister.getHelper(INMSItemHelper.class);
+                INMSItemHelper helper = Bukkit.getServicesManager().load(INMSItemHelper.class);
                 if (helper != null) {
                     ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
                     if (itemStack != null) {

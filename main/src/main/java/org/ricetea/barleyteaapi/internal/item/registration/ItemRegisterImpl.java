@@ -6,6 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
+import org.ricetea.barleyteaapi.api.internal.item.CustomItemTypeImpl;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
@@ -14,11 +15,9 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.api.task.LoopTask;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
-import org.ricetea.barleyteaapi.internal.item.CustomItemTypeImpl;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -37,26 +36,11 @@ import java.util.stream.Stream;
 @Singleton
 @ApiStatus.Internal
 public final class ItemRegisterImpl extends NSKeyedRegisterBase<CustomItem> implements ItemRegister {
-    @Nonnull
-    private static final Lazy<ItemRegisterImpl> inst = Lazy.create(ItemRegisterImpl::new);
 
     @Nonnull
     private final AtomicInteger itemNeedTick = new AtomicInteger(0);
     @Nonnull
     private final AtomicInteger itemNeedMovingFeature = new AtomicInteger(0);
-
-    private ItemRegisterImpl() {
-    }
-
-    @Nonnull
-    public static ItemRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static ItemRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
-    }
 
     @Override
     public void register(@Nullable CustomItem item) {

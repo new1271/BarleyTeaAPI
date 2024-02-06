@@ -15,7 +15,7 @@ import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
-import org.ricetea.barleyteaapi.internal.item.registration.CraftingRecipeRegisterImpl;
+import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
 
@@ -68,9 +68,9 @@ public final class CraftListener implements Listener {
                 final ItemStack oldResult = inventory.getResult();
                 ItemStack result = oldResult;
                 boolean allPassed = true;
-                CraftingRecipeRegisterImpl register = CraftingRecipeRegisterImpl.getInstanceUnsafe();
+                CraftingRecipeRegister register = CraftingRecipeRegister.getInstanceUnsafe();
                 if (register != null && !register.isEmpty()) {
-                    for (BaseCraftingRecipe recipe : register.listAllAssociatedWithDummies(recipeKey)) {
+                    for (BaseCraftingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
                         if (recipe.checkMatrixOfTypes(craftingTypeOfMatrix)) {
                             result = recipe.apply(craftingMatrix);
                             allPassed = false;

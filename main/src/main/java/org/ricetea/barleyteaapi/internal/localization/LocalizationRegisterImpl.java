@@ -7,7 +7,6 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.StringKeyedRegisterBase;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,24 +17,11 @@ import javax.inject.Singleton;
 public final class LocalizationRegisterImpl extends StringKeyedRegisterBase<LocalizedMessageFormat> implements LocalizationRegister {
 
     @Nonnull
-    private static final Lazy<LocalizationRegisterImpl> _inst = Lazy.create(LocalizationRegisterImpl::new);
-
-    @Nonnull
     private final TranslationRegistry registry;
 
-    private LocalizationRegisterImpl() {
+    public LocalizationRegisterImpl() {
         registry = TranslationRegistry.create(NamespacedKeyUtil.BarleyTeaAPI("translations"));
         GlobalTranslator.translator().addSource(registry);
-    }
-
-    @Nonnull
-    public static LocalizationRegisterImpl getInstance() {
-        return _inst.get();
-    }
-
-    @Nullable
-    public static LocalizationRegisterImpl getInstanceUnsafe() {
-        return _inst.getUnsafe();
     }
 
     @Nonnull

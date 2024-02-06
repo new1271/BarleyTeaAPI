@@ -14,7 +14,6 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.SmithingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.SmithingRecipeRegister;
 import org.ricetea.utils.CollectionUtil;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,21 +24,8 @@ import java.util.logging.Logger;
 @ApiStatus.Internal
 public final class SmithingRecipeRegisterImpl extends BaseRecipeRegisterImpl<BaseSmithingRecipe> implements SmithingRecipeRegister {
 
-    @Nonnull
-    private static final Lazy<SmithingRecipeRegisterImpl> inst = Lazy.create(SmithingRecipeRegisterImpl::new);
-
-    private SmithingRecipeRegisterImpl() {
+    public SmithingRecipeRegisterImpl() {
         super("dummy_smithing_recipe");
-    }
-
-    @Nonnull
-    public static SmithingRecipeRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static SmithingRecipeRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
     }
 
     @Override

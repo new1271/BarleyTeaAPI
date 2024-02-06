@@ -12,7 +12,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.entity.template.DefaultEntity;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 
@@ -58,7 +58,7 @@ public final class BarleyFallingBlock extends DefaultEntity implements FeatureEn
     public Entity handleEntitySpawn(@Nonnull Location location, @Nonnull Block block) {
         FallingBlock entity = location.getWorld().spawnFallingBlock(location, block.getBlockData());
         EntityHelper.register(this, entity);
-        PersistentDataContainer blockDataContainer = ChunkStorage.getBlockDataContainer(block, false);
+        PersistentDataContainer blockDataContainer = ChunkStorage.getInstance().getBlockDataContainer(block, false);
         if (blockDataContainer != null && !blockDataContainer.isEmpty()) {
             entity.getPersistentDataContainer().set(blockDataKey, PersistentDataType.TAG_CONTAINER, blockDataContainer);
         }

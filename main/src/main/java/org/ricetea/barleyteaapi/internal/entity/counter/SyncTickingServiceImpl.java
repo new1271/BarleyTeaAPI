@@ -8,7 +8,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.SoftCache;
 import org.ricetea.utils.UnsafeHelper;
@@ -29,9 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SyncTickingServiceImpl implements TickingService, Runnable {
 
     @Nonnull
-    private static final Lazy<SyncTickingServiceImpl> _inst = Lazy.create(SyncTickingServiceImpl::new);
-
-    @Nonnull
     private final Set<Entity> entitiesPrepareToRemove = ConcurrentHashMap.newKeySet();
 
     @Nonnull
@@ -49,20 +45,6 @@ public final class SyncTickingServiceImpl implements TickingService, Runnable {
 
     @Nullable
     private BukkitTask task;
-
-
-    private SyncTickingServiceImpl() {
-    }
-
-    @Nonnull
-    public static SyncTickingServiceImpl getInstance() {
-        return _inst.get();
-    }
-
-    @Nullable
-    public static SyncTickingServiceImpl getInstanceUnsafe() {
-        return _inst.getUnsafe();
-    }
 
     private void startIfRequired() {
         if (BarleyTeaAPI.checkPluginUsable()) {

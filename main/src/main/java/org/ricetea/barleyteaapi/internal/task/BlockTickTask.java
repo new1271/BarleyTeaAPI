@@ -12,7 +12,6 @@ import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
-import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
@@ -55,7 +54,7 @@ public final class BlockTickTask extends LoopTaskBase {
     public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        BlockRegisterImpl register = BlockRegisterImpl.getInstanceUnsafe();
+        BlockRegister register = BlockRegister.getInstanceUnsafe();
         if (api == null || register == null || register.isEmpty()) {
             stop();
             return;

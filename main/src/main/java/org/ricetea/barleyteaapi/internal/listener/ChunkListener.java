@@ -17,7 +17,7 @@ import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
@@ -79,7 +79,7 @@ public final class ChunkListener implements Listener {
         if (register == null || register.isEmpty())
             return;
         BlockTickTask task = BlockTickTask.getInstance();
-        CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),
+        CollectionUtil.forEach(ChunkStorage.getInstance().getBlockDataContainersFromChunk(event.getChunk()),
                 (block, container) -> {
                     if (block == null)
                         return;
@@ -102,7 +102,7 @@ public final class ChunkListener implements Listener {
         if (register == null || register.isEmpty())
             return;
         BlockTickTask task = BlockTickTask.getInstanceUnsafe();
-        CollectionUtil.forEach(ChunkStorage.getBlockDataContainersFromChunk(event.getChunk()),
+        CollectionUtil.forEach(ChunkStorage.getInstance().getBlockDataContainersFromChunk(event.getChunk()),
                 (block, container) -> {
                     if (block == null)
                         return;

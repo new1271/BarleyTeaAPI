@@ -15,15 +15,14 @@ import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.event.BlocksRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.BlocksUnregisteredEvent;
+import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
-import org.ricetea.barleyteaapi.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -42,21 +41,6 @@ import java.util.stream.Stream;
 @Singleton
 @ApiStatus.Internal
 public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> implements BlockRegister {
-    @Nonnull
-    private static final Lazy<BlockRegisterImpl> inst = Lazy.create(BlockRegisterImpl::new);
-
-    private BlockRegisterImpl() {
-    }
-
-    @Nonnull
-    public static BlockRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static BlockRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
-    }
 
     @Override
     public void register(@Nullable CustomBlock block) {
@@ -156,11 +140,12 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
 
     private void refreshCustomBlocks(@Nonnull Collection<RefreshCustomBlockRecord> records) {
         if (records.stream().anyMatch(RefreshCustomBlockRecord::needOperate)) {
+            ChunkStorage chunkStorage = ChunkStorage.getInstance();
             for (World world : Bukkit.getWorlds()) {
                 for (Chunk chunk : world.getLoadedChunks()) {
                     if (!chunk.isGenerated())
                         continue;
-                    for (var entry : ChunkStorage.getBlockDataContainersFromChunk(chunk)) {
+                    for (var entry : chunkStorage.getBlockDataContainersFromChunk(chunk)) {
                         Block block = entry.getKey();
                         NamespacedKey key = BlockHelper.getBlockID(entry.getValue());
                         if (key == null)

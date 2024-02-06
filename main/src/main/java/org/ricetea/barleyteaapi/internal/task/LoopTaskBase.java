@@ -1,11 +1,7 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import com.google.common.base.Stopwatch;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.task.LoopTask;
-import org.ricetea.utils.Lazy;
-
-import javax.annotation.Nonnull;
 
 @ApiStatus.Internal
 public abstract class LoopTaskBase implements LoopTask {

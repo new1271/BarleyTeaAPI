@@ -20,7 +20,6 @@ import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -39,21 +38,6 @@ import java.util.stream.Stream;
 @Singleton
 @ApiStatus.Internal
 public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> implements EntityRegister {
-    @Nonnull
-    private static final Lazy<EntityRegisterImpl> inst = Lazy.create(EntityRegisterImpl::new);
-
-    private EntityRegisterImpl() {
-    }
-
-    @Nonnull
-    public static EntityRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static EntityRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
-    }
 
     @Override
     public void register(@Nullable CustomEntity entity) {

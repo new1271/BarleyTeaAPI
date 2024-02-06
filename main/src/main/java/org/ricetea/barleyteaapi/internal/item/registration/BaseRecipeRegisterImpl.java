@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.base.registration.NSKeyedRegister;
+import org.ricetea.barleyteaapi.api.base.registration.RecipeKeyedRegister;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseRecipe;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Singleton
 @ApiStatus.Internal
-abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegisterBase<T> implements NSKeyedRegister<T> {
+abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegisterBase<T> implements RecipeKeyedRegister<T> {
 
     @Nonnull
     private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
@@ -112,7 +112,7 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegis
     }
 
     @Nonnull
-    public Collection<T> listAllAssociatedWithDummies(@Nonnull NamespacedKey key) {
+    public Collection<T> listAllAssociatedWithDummyRecipe(@Nonnull NamespacedKey key) {
         return ObjectUtil.letNonNull(
                 collidingTable.get(key).stream()
                         .map(this::lookup)

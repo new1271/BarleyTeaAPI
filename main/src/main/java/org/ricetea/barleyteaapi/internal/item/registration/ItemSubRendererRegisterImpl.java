@@ -5,9 +5,7 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.registration.ItemSubRendererRegister;
 import org.ricetea.barleyteaapi.api.item.render.ItemSubRenderer;
 import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
-import org.ricetea.utils.Lazy;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.logging.Logger;
@@ -15,21 +13,6 @@ import java.util.logging.Logger;
 @Singleton
 @ApiStatus.Internal
 public final class ItemSubRendererRegisterImpl extends NSKeyedRegisterBase<ItemSubRenderer> implements ItemSubRendererRegister {
-    @Nonnull
-    private static final Lazy<ItemSubRendererRegisterImpl> inst = Lazy.create(ItemSubRendererRegisterImpl::new);
-
-    private ItemSubRendererRegisterImpl() {
-    }
-
-    @Nonnull
-    public static ItemSubRendererRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static ItemSubRendererRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
-    }
 
     @Override
     public void register(@Nullable ItemSubRenderer renderer) {

@@ -8,7 +8,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.recipe.*;
 import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,21 +18,8 @@ import java.util.logging.Logger;
 @ApiStatus.Internal
 public final class CookingRecipeRegisterImpl extends BaseRecipeRegisterImpl<BaseCookingRecipe> implements CookingRecipeRegister {
 
-    @Nonnull
-    private static final Lazy<CookingRecipeRegisterImpl> inst = Lazy.create(CookingRecipeRegisterImpl::new);
-
-    private CookingRecipeRegisterImpl() {
+    public CookingRecipeRegisterImpl() {
         super("dummy_cooking_recipe");
-    }
-
-    @Nonnull
-    public static CookingRecipeRegisterImpl getInstance() {
-        return inst.get();
-    }
-
-    @Nullable
-    public static CookingRecipeRegisterImpl getInstanceUnsafe() {
-        return inst.getUnsafe();
     }
 
     @Override

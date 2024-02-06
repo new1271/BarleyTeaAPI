@@ -10,7 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
-import org.ricetea.barleyteaapi.internal.item.registration.ItemRegisterImpl;
+import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
@@ -43,7 +43,7 @@ public final class ItemTickTask extends LoopTaskBase {
     public void runLoop() {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        ItemRegisterImpl register = ItemRegisterImpl.getInstanceUnsafe();
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
         if (api == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
             stop();
         } else {

@@ -14,10 +14,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    compileOnly(dependencyNotation = "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.2.0-SNAPSHOT")
     compileOnly("org.geysermc.geyser:api:2.2.0-SNAPSHOT")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+    implementation(project(":api"))
 }
 
 java {
@@ -34,7 +35,6 @@ tasks {
         // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
         // See https://openjdk.java.net/jeps/247 for more information.
         options.release.set(17)
-        options.debugOptions.debugLevel = "vars"
     }
 
     javadoc {

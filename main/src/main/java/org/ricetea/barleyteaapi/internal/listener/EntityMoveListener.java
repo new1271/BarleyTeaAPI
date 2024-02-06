@@ -10,7 +10,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityMove;
-import org.ricetea.barleyteaapi.internal.item.registration.ItemRegisterImpl;
+import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Constants;
@@ -41,7 +41,7 @@ public final class EntityMoveListener implements Listener {
             event.setCancelled(true);
         if (!(event.getEntity() instanceof Player))
             return;
-        ItemRegisterImpl register = ItemRegisterImpl.getInstanceUnsafe();
+        ItemRegister register = ItemRegister.getInstanceUnsafe();
         if (register == null || !register.hasAnyRegisteredNeedMovingFeature())
             return;
         if (!ItemFeatureLinker.forEachEquipmentCancellable(event.getEntity(), event,
