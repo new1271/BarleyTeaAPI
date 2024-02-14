@@ -4,8 +4,10 @@ import net.kyori.adventure.translation.Translatable;
 import org.bukkit.Keyed;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
 
-public interface CustomObject extends Keyed, Translatable {
+public interface CustomObject<F extends Feature> extends Keyed, Translatable {
     @Nonnull
     @Override
     default String translationKey() {
@@ -19,4 +21,10 @@ public interface CustomObject extends Keyed, Translatable {
     default String getDefaultName() {
         return getTranslationKey();
     }
+
+    @Nullable
+    <T extends F> T getFeature(@Nonnull Class<T> featureClass);
+
+    @Nonnull
+    Collection<Class<? extends F>> getFeatures();
 }

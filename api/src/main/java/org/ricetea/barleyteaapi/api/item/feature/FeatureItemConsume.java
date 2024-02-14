@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemConsume;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemConsume {
+public interface FeatureItemConsume extends ItemFeature {
     boolean handleItemConsume(@Nonnull DataItemConsume data);
 }

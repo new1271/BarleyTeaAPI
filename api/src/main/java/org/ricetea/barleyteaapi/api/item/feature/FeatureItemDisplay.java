@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDisplay;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemDisplay {
+public interface FeatureItemDisplay extends ItemFeature {
     void handleItemDisplay(@Nonnull DataItemDisplay data);
 }

@@ -6,7 +6,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureNaturalSpawn {
+public interface FeatureNaturalSpawn extends EntityFeature {
     @Nonnull
     StateNaturalSpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data);
 

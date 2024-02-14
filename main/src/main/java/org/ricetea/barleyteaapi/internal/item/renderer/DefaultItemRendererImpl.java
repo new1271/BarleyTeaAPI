@@ -37,10 +37,7 @@ import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
 import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
-import org.ricetea.utils.Box;
-import org.ricetea.utils.Lazy;
-import org.ricetea.utils.ObjectUtil;
-import org.ricetea.utils.SoftCache;
+import org.ricetea.utils.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -128,13 +125,14 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
             final SoftDependConnector excellentEnchantsConnector = apiInstance.getSoftDependRegister()
                     .get(BulitInSoftDepend.ExcellentEnchants);
+            boolean isToolFinal = isTool;
             enchantmentMap.forEach((enchantment, boxedLevel) -> {
                 if (boxedLevel == null)
                     return;
                 final int level = boxedLevel;
                 final NamespacedKey key = enchantment.getKey();
                 final String enchantName = "enchantment." + key.getNamespace() + "." + key.getKey();
-                if (isTool && enchantment.equals(Enchantment.DAMAGE_ALL)) {
+                if (isToolFinal && enchantment.equals(Enchantment.DAMAGE_ALL)) {
                     if (level > 0) {
                         double value = ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
                         value += (1 + (0.5) * (level - 1));
@@ -174,15 +172,23 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             renderLoreStack.addAll(meta.lore());
 
         if (!meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-            Queue<Component> toolAttributeLoreStack = (isTool ? renderLoreStackList.get(2).get() : null);
             Multimap<Attribute, AttributeModifier> attributeMap = meta.getAttributeModifiers();
-            if (attributeMap == null)
+            if (attributeMap == null) {
                 attributeMap = ItemHelper.getDefaultAttributeModifiers(itemStack);
+            } else if (isTool && !attributeMap.isEmpty()) {
+                if (attributeMap.values().parallelStream()
+                        .anyMatch(attributeModifier ->
+                                !attributeModifier.getName().equals(Constants.DEFAULT_ATTRIBUTE_MODIFIER_NAME))) {
+                    isTool = false;
+                }
+            }
+            Queue<Component> toolAttributeLoreStack = (isTool ? renderLoreStackList.get(2).get() : null);
             if (!attributeMap.isEmpty()) {
                 Deque<Component> slotAttributeLoreStack = renderLoreStackList.get(3).get();
                 HashMap<EquipmentSlot, TreeMap<Attribute, double[]>> slotAttributeMap = new HashMap<>();
                 final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
                 final Box<Double> toolSpeedIncreaseBox = Box.box(0.0);
+                boolean isToolFinal = isTool;
                 attributeMap.asMap().forEach((attribute, modifiers) -> {
                     if (attribute == null)
                         return;
@@ -197,7 +203,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                         if (amount == 0)
                             return;
                         EquipmentSlot slot = modifier.getSlot();
-                        if (isTool && (slot == null || slot.equals(EquipmentSlot.HAND))) {
+                        if (isToolFinal && (slot == null || slot.equals(EquipmentSlot.HAND))) {
                             if (operation.equals(AttributeModifier.Operation.ADD_NUMBER)) {
                                 if (increaseBox != null) {
                                     increaseBox.set(

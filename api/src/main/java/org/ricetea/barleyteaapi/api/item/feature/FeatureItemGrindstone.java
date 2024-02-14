@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemGrindstone;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemGrindstone {
+public interface FeatureItemGrindstone extends ItemFeature {
     boolean handleItemGrindstone(@Nonnull DataItemGrindstone data);
 }

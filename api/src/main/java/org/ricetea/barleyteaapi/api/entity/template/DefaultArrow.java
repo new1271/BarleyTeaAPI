@@ -14,9 +14,9 @@ import org.ricetea.barleyteaapi.api.internal.misc.MiscInternalFunctions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class BaseArrow extends BaseProjectile {
+public abstract class DefaultArrow extends DefaultProjectile {
 
-    public BaseArrow(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
+    public DefaultArrow(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
         super(key, checkEntityType(key, entityTypeBasedOn));
     }
 

@@ -6,7 +6,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShotEntity;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureEntityShoot {
+public interface FeatureEntityShoot extends EntityFeature {
     boolean handleEntityShoot(@Nonnull DataEntityShoot data);
 
     boolean handleShotEntity(@Nonnull DataEntityShotEntity data);

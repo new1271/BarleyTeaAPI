@@ -4,6 +4,6 @@ import org.bukkit.block.Block;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureBlockTick {
+public interface FeatureBlockTick extends BlockFeature {
     void handleTick(@Nonnull Block block);
 }

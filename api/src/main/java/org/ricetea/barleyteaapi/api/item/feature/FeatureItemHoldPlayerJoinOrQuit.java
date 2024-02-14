@@ -5,7 +5,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerQuit;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldPlayerJoinOrQuit {
+public interface FeatureItemHoldPlayerJoinOrQuit extends ItemFeature {
     void handleItemHoldPlayerJoin(@Nonnull DataItemHoldPlayerJoin data);
 
     void handleItemHoldPlayerQuit(@Nonnull DataItemHoldPlayerQuit data);

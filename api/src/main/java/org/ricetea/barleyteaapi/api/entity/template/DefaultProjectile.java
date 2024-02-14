@@ -19,10 +19,10 @@ import org.ricetea.barleyteaapi.api.internal.misc.MiscInternalFunctions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class BaseProjectile extends DefaultEntity
+public abstract class DefaultProjectile extends DefaultEntity
         implements FeatureCommandSummon, FeatureProjectileSpawn, FeatureProjectile {
 
-    public BaseProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
+    public DefaultProjectile(@Nonnull NamespacedKey key, @Nonnull EntityType entityTypeBasedOn) {
         super(key, checkEntityType(key, entityTypeBasedOn));
     }
 
@@ -34,11 +34,6 @@ public abstract class BaseProjectile extends DefaultEntity
                     .printStackTrace();
         }
         return originalType;
-    }
-
-    @Nullable
-    public Projectile handleEntitySpawn(@Nullable Location location) {
-        return handleEntitySpawn(location, null);
     }
 
     @Nullable

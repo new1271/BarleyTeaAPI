@@ -6,7 +6,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureProjectile {
+public interface FeatureProjectile extends EntityFeature {
     boolean handleProjectileLaunch(@Nonnull DataProjectileLaunch data);
 
     boolean handleProjectileHitEntity(@Nonnull DataProjectileHitEntity data);

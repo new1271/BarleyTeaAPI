@@ -6,7 +6,7 @@ import org.bukkit.entity.Entity;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface FeatureEntitySpawn {
+public interface FeatureEntitySpawn extends EntityFeature {
     @Nullable
     Entity handleEntitySpawn(@Nonnull Location location);
 }

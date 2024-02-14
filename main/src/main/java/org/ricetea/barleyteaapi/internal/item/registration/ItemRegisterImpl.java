@@ -8,26 +8,24 @@ import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.internal.item.CustomItemTypeImpl;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
+import org.ricetea.barleyteaapi.api.item.feature.ItemFeature;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.api.task.LoopTask;
-import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
+import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.ObjectUtil;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,12 +33,7 @@ import java.util.stream.Stream;
 
 @Singleton
 @ApiStatus.Internal
-public final class ItemRegisterImpl extends NSKeyedRegisterBase<CustomItem> implements ItemRegister {
-
-    @Nonnull
-    private final AtomicInteger itemNeedTick = new AtomicInteger(0);
-    @Nonnull
-    private final AtomicInteger itemNeedMovingFeature = new AtomicInteger(0);
+public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem, ItemFeature> implements ItemRegister {
 
     @Override
     public void register(@Nullable CustomItem item) {
@@ -90,26 +83,18 @@ public final class ItemRegisterImpl extends NSKeyedRegisterBase<CustomItem> impl
     private void checkFeature(@Nullable CustomItem item, boolean forRemoval) {
         if (item == null)
             return;
-        if (item instanceof FeatureItemTick)
-            itemNeedTick.getAndAdd(forRemoval ? -1 : 1);
-        if (item instanceof FeatureItemHoldEntityMove)
-            itemNeedMovingFeature.getAndAdd(forRemoval ? -1 : 1);
+        if (forRemoval)
+            unregisterFeatures(item);
+        else
+            registerFeatures(item);
     }
 
     private void refreshFeature() {
-        if (hasAnyRegisteredNeedTicking()) {
-            ItemTickTask.getInstance().start();
-        } else {
+        if (findFirstOfFeature(FeatureItemTick.class) == null) {
             ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
+        } else {
+            ItemTickTask.getInstance().start();
         }
-    }
-
-    public boolean hasAnyRegisteredNeedTicking() {
-        return itemNeedTick.get() > 0;
-    }
-
-    public boolean hasAnyRegisteredNeedMovingFeature() {
-        return itemNeedMovingFeature.get() > 0;
     }
 
     @Override

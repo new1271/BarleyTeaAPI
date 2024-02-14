@@ -5,7 +5,7 @@ import org.ricetea.barleyteaapi.api.block.feature.state.StateBlockClicked;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureBlockClick {
+public interface FeatureBlockClick extends BlockFeature {
     @Nonnull
     StateBlockClicked handleBlockClicked(@Nonnull DataBlockClicked data);
 }

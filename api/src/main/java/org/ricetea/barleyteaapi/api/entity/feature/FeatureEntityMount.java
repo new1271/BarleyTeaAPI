@@ -7,7 +7,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMount;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureEntityMount {
+public interface FeatureEntityMount extends EntityFeature {
     boolean handleEntityMount(@Nonnull DataEntityMount data);
 
     boolean handleEntityBeMounted(@Nonnull DataEntityBeMounted data);

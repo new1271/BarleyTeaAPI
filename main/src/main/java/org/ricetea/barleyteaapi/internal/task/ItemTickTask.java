@@ -44,7 +44,7 @@ public final class ItemTickTask extends LoopTaskBase {
         BarleyTeaAPI api = BarleyTeaAPI.getInstanceUnsafe();
         BukkitScheduler scheduler = Bukkit.getScheduler();
         ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (api == null || register == null || !register.hasAnyRegisteredNeedTicking()) {
+        if (api == null || register == null || register.findFirstOfFeature(FeatureItemTick.class) == null) {
             stop();
         } else {
             int currentTick = Bukkit.getCurrentTick();

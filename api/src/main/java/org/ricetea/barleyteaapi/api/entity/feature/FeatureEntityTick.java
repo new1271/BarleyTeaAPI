@@ -4,6 +4,6 @@ import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureEntityTick {
+public interface FeatureEntityTick extends EntityFeature {
     void handleTick(@Nonnull Entity entity);
 }

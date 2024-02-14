@@ -3,11 +3,23 @@ package org.ricetea.barleyteaapi.api.block.template;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
 import org.ricetea.barleyteaapi.api.helper.TranslationKeyHelper;
+import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.WeakHashMap;
 
 public class DefaultBlock implements CustomBlock {
+
+    @Nonnull
+    private final WeakHashMap<Class<? extends BlockFeature>, Object> castedMap = new WeakHashMap<>();
+
+    @Nonnull
+    private final Lazy<Collection<Class<? extends BlockFeature>>> featuresLazy =
+            Lazy.createThreadSafe(CustomBlock.super::getFeatures);
 
     @Nonnull
     private final NamespacedKey key;
@@ -40,5 +52,18 @@ public class DefaultBlock implements CustomBlock {
     @Override
     public Material getOriginalType() {
         return originalType;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T extends BlockFeature> T getFeature(@Nonnull Class<T> featureClass) {
+        return (T) castedMap.computeIfAbsent(featureClass, CustomBlock.super::getFeature);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Class<? extends BlockFeature>> getFeatures() {
+        return featuresLazy.get();
     }
 }

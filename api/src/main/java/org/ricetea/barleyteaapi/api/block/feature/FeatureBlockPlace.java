@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockPlaceByPlayer;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureBlockPlace {
+public interface FeatureBlockPlace extends BlockFeature {
     boolean handleBlockPlaceByPlayer(@Nonnull DataBlockPlaceByPlayer data);
 }

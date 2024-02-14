@@ -6,7 +6,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureBlockFalling {
+public interface FeatureBlockFalling extends BlockFeature {
     boolean handleBlockStartFall(@Nonnull Block block);
 
     boolean handleBlockFallToGround(@Nonnull Block block);

@@ -7,7 +7,7 @@ import org.bukkit.inventory.PlayerInventory;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemTick {
+public interface FeatureItemTick extends ItemFeature {
     void handleTickOnEquipment(@Nonnull Player player, @Nonnull PlayerInventory inventory,
                                @Nonnull ItemStack itemStack,
                                @Nonnull EquipmentSlot slot);

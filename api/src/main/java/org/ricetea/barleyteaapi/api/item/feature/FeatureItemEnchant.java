@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemEnchant;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemEnchant {
+public interface FeatureItemEnchant extends ItemFeature {
     boolean handleItemEnchant(@Nonnull DataItemEnchant data);
 }

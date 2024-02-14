@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Unmodifiable;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
@@ -30,12 +31,8 @@ import org.ricetea.barleyteaapi.api.item.render.ItemSubRendererSupportingState;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
-import org.ricetea.utils.Box;
-import org.ricetea.utils.Cache;
-import org.ricetea.utils.ObjectUtil;
-import org.ricetea.utils.WithFlag;
+import org.ricetea.utils.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -136,7 +133,7 @@ public class ItemHelper {
             return;
         itemMeta.removeAttributeModifier(attribute);
         itemMeta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
-                "default modifiers", amount, operation, equipmentSlot));
+                Constants.DEFAULT_ATTRIBUTE_MODIFIER_NAME, amount, operation, equipmentSlot));
     }
 
     public static int getDurabilityDamage(@Nonnull CustomItemType itemType, @Nullable ItemStack itemStack) {

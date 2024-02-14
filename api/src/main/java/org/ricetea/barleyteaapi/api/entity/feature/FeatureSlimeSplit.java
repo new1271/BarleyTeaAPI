@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataSlimeSplit;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureSlimeSplit {
+public interface FeatureSlimeSplit extends EntityFeature {
     boolean handleSlimeSplit(@Nonnull DataSlimeSplit data);
 }

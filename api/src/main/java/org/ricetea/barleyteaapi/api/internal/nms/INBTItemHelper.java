@@ -4,9 +4,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @ApiStatus.Internal
 public interface INBTItemHelper extends IHelper {
     @Nonnull
-    ItemStack copyNbtWhenSmithing(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying);
+    ItemStack copyNbt(@Nonnull ItemStack original, @Nonnull ItemStack result, @Nullable String... tagBlacklist);
+
+    @Nonnull
+    ItemStack mergeNbt(@Nonnull ItemStack original, @Nonnull ItemStack result, @Nullable String... tags);
 }

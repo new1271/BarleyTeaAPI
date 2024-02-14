@@ -7,7 +7,7 @@ import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemClick {
+public interface FeatureItemClick extends ItemFeature {
     boolean handleItemClickNothing(@Nonnull DataItemClickNothing data);
 
     StateItemClickBlock handleItemClickBlock(@Nonnull DataItemClickBlock data);

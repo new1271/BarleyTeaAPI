@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlo
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldPlayerPlace {
+public interface FeatureItemHoldPlayerPlace extends ItemFeature {
     boolean handleItemHoldPlayerPlaceBlock(@Nonnull DataItemHoldPlayerPlaceBlock data);
 }

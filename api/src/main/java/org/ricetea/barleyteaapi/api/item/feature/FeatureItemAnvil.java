@@ -6,7 +6,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemAnvilRepair;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemAnvil {
+public interface FeatureItemAnvil extends ItemFeature {
     boolean handleItemAnvilRename(@Nonnull DataItemAnvilRename data);
 
     boolean handleItemAnvilCombine(@Nonnull DataItemAnvilCombine data);

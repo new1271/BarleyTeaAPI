@@ -79,6 +79,30 @@ public final class ObjectUtil {
     }
 
     @Nullable
+    public static <T, R> R tryMap(@Nullable T obj, @Nonnull Function<T, R> function) {
+        if (obj == null)
+            return null;
+        try {
+            return function.apply(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Nonnull
+    public static <T, R> R tryMap(@Nullable T obj, @Nonnull Function<T, R> function, @Nonnull R defaultValue) {
+        if (obj == null)
+            return defaultValue;
+        try {
+            return ObjectUtil.letNonNull(function.apply(obj), defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    @Nullable
     public static <R> R tryMapSilently(@Nonnull Supplier<R> supplier) {
         try {
             return supplier.get();
@@ -96,6 +120,28 @@ public final class ObjectUtil {
         }
     }
 
+    @Nullable
+    public static <T, R> R tryMapSilently(@Nullable T obj, @Nonnull Function<T, R> function) {
+        if (obj == null)
+            return null;
+        try {
+            return function.apply(obj);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    @Nonnull
+    public static <T, R> R tryMapSilently(@Nullable T obj, @Nonnull Function<T, R> function, @Nonnull R defaultValue) {
+        if (obj == null)
+            return defaultValue;
+        try {
+            return ObjectUtil.letNonNull(function.apply(obj), defaultValue);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
+    }
+
     public static void tryCall(@Nonnull Runnable runnable) {
         try {
             runnable.run();
@@ -104,9 +150,28 @@ public final class ObjectUtil {
         }
     }
 
+    public static <T> void tryCall(@Nullable T obj, @Nonnull Consumer<T> consumer) {
+        if (obj == null)
+            return;
+        try {
+            consumer.accept(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void tryCallSilently(@Nonnull Runnable runnable) {
         try {
             runnable.run();
+        } catch (Exception ignored) {
+        }
+    }
+
+    public static <T> void tryCallSilently(@Nullable T obj, @Nonnull Consumer<T> consumer) {
+        if (obj == null)
+            return;
+        try {
+            consumer.accept(obj);
         } catch (Exception ignored) {
         }
     }

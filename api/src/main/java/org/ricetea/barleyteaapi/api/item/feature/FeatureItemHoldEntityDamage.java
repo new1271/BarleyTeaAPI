@@ -7,7 +7,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDamagedB
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldEntityDamage {
+public interface FeatureItemHoldEntityDamage extends ItemFeature {
     boolean handleItemHoldEntityDamagedByEntity(@Nonnull DataItemHoldEntityDamagedByEntity data);
 
     boolean handleItemHoldEntityDamagedByBlock(@Nonnull DataItemHoldEntityDamagedByBlock data);

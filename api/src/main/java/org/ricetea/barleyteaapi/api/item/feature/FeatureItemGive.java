@@ -4,7 +4,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
-public interface FeatureItemGive {
+public interface FeatureItemGive extends ItemFeature {
     @Nullable
     ItemStack handleItemGive(int count);
 }

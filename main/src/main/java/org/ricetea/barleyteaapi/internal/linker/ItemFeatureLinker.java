@@ -13,6 +13,7 @@ import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
+import org.ricetea.barleyteaapi.api.item.feature.ItemFeature;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.utils.MathHelper;
@@ -28,7 +29,7 @@ import java.util.function.BiPredicate;
 @ApiStatus.Internal
 public final class ItemFeatureLinker {
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull EquipmentSlot[] slots,
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
@@ -58,7 +59,7 @@ public final class ItemFeatureLinker {
         return true;
     }
 
-    public static <TFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TEvent2 extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean forEachEquipmentCancellable(
             @Nullable LivingEntity entity, @Nullable TEvent event,
             @Nullable TEvent2 event2, @Nonnull EquipmentSlot[] slots,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
@@ -88,7 +89,7 @@ public final class ItemFeatureLinker {
         return true;
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void forEachEquipment(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void forEachEquipment(
             @Nullable LivingEntity entity, @Nullable TEvent event, @Nonnull EquipmentSlot[] slots,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
@@ -112,7 +113,7 @@ public final class ItemFeatureLinker {
         }
     }
 
-    public static <TFeature, TEvent extends Event, TEvent2 extends Event,
+    public static <TFeature extends ItemFeature, TEvent extends Event, TEvent2 extends Event,
             TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nullable TEvent2 event2, @Nonnull Class<TFeature> featureClass,
@@ -120,7 +121,7 @@ public final class ItemFeatureLinker {
             @Nonnull ItemDataConstructorForEquipment2<TEvent, TEvent2, TData> dataConstructor) {
         if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
             return true;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return true;
         return ObjectUtil.tryMap(() -> {
@@ -133,13 +134,13 @@ public final class ItemFeatureLinker {
         }, true);
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
             return true;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return true;
         return ObjectUtil.tryMap(() -> {
@@ -152,13 +153,13 @@ public final class ItemFeatureLinker {
         }, true);
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> boolean doFeatureCancellable(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> boolean doFeatureCancellable(
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || !ItemRegister.hasRegistered())
             return true;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return true;
         return ObjectUtil.tryMap(() -> {
@@ -171,37 +172,37 @@ public final class ItemFeatureLinker {
     }
 
     @Nonnull
-    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>, TReturn> TReturn doFeatureAndReturn(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>, TReturn> TReturn doFeatureAndReturn(
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiFunction<TFeature, TData, TReturn> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor, @Nonnull TReturn defaultValue) {
         if (itemStack == null || event == null || !ItemRegister.hasRegistered())
             return defaultValue;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return defaultValue;
         return ObjectUtil.tryMap(() -> featureFunc.apply(feature, dataConstructor.apply(event)), defaultValue);
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> void doFeature(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseFeatureData<TEvent>> void doFeature(
             @Nullable ItemStack itemStack, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructor<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || !ItemRegister.hasRegistered())
             return;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event)));
     }
 
-    public static <TFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void doFeature(
+    public static <TFeature extends ItemFeature, TEvent extends Event, TData extends BaseItemHoldEntityFeatureData<TEvent>> void doFeature(
             @Nullable ItemStack itemStack, @Nullable EquipmentSlot equipmentSlot, @Nullable TEvent event,
             @Nonnull Class<TFeature> featureClass, @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull ItemDataConstructorForEquipment<TEvent, TData> dataConstructor) {
         if (itemStack == null || event == null || equipmentSlot == null || !ItemRegister.hasRegistered())
             return;
-        TFeature feature = ObjectUtil.tryCast(CustomItem.get(itemStack), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomItem.get(itemStack), (obj) -> obj.getFeature(featureClass));
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event, itemStack, equipmentSlot)));

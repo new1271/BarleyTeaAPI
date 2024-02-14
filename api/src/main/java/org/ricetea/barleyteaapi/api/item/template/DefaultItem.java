@@ -7,11 +7,23 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.api.helper.TranslationKeyHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
+import org.ricetea.barleyteaapi.api.item.feature.ItemFeature;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
+import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.WeakHashMap;
 
 public class DefaultItem implements CustomItem {
+
+    @Nonnull
+    private final WeakHashMap<Class<? extends ItemFeature>, Object> castedMap = new WeakHashMap<>();
+
+    @Nonnull
+    private final Lazy<Collection<Class<? extends ItemFeature>>> featuresLazy =
+            Lazy.createThreadSafe(CustomItem.super::getFeatures);
 
     @Nonnull
     private final NamespacedKey key;
@@ -74,5 +86,18 @@ public class DefaultItem implements CustomItem {
     public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         return meta != null && meta.hasEnchants();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T extends ItemFeature> T getFeature(@Nonnull Class<T> featureClass) {
+        return (T) castedMap.computeIfAbsent(featureClass, CustomItem.super::getFeature);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Class<? extends ItemFeature>> getFeatures() {
+        return featuresLazy.get();
     }
 }

@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityHit;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureEntityHit {
+public interface FeatureEntityHit extends EntityFeature {
     boolean handleEntityHit(@Nonnull DataEntityHit data);
 }

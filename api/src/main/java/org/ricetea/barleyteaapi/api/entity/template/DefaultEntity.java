@@ -3,11 +3,23 @@ package org.ricetea.barleyteaapi.api.entity.template;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.EntityFeature;
 import org.ricetea.barleyteaapi.api.helper.TranslationKeyHelper;
+import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.WeakHashMap;
 
 public class DefaultEntity implements CustomEntity {
+
+    @Nonnull
+    private final WeakHashMap<Class<? extends EntityFeature>, Object> castedMap = new WeakHashMap<>();
+
+    @Nonnull
+    private final Lazy<Collection<Class<? extends EntityFeature>>> featuresLazy =
+            Lazy.createThreadSafe(CustomEntity.super::getFeatures);
 
     @Nonnull
     private final NamespacedKey key;
@@ -42,4 +54,16 @@ public class DefaultEntity implements CustomEntity {
         return originalType;
     }
 
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T extends EntityFeature> T getFeature(@Nonnull Class<T> featureClass) {
+        return (T) castedMap.computeIfAbsent(featureClass, CustomEntity.super::getFeature);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Class<? extends EntityFeature>> getFeatures() {
+        return featuresLazy.get();
+    }
 }

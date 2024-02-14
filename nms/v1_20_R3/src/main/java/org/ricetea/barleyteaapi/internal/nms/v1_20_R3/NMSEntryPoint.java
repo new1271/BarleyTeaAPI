@@ -1,6 +1,8 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R3;
 
 import com.google.common.collect.Multimap;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -27,9 +29,11 @@ import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.helper.NBTItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.helper.NBTTagCompoundHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.helper.NMSEntityHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.helper.NMSItemHelper;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class NMSEntryPoint implements Listener, INMSEntryPoint {
@@ -77,11 +81,77 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
         apiInst.loadApiImplementation(servicesManager, new INBTItemHelper() {
             @Nonnull
             @Override
-            public ItemStack copyNbtWhenSmithing(@Nonnull ItemStack original, @Nonnull ItemStack itemStackCopying) {
-                var compound = NBTItemHelper.getNBT(original);
-                var compound2 = NBTItemHelper.getNBT(itemStackCopying);
-                return NBTItemHelper.setNBT(original, NBTTagCompoundHelper.merge(compound2, compound));
+            public ItemStack copyNbt(@Nonnull ItemStack original, @Nonnull ItemStack result,
+                                     @Nullable String... tagBlacklist) {
+                var compoundOfOriginal = NBTItemHelper.getNBT(original);
+                var compoundOfResult = NBTItemHelper.getNBT(result);
+                if (tagBlacklist != null && tagBlacklist.length > 0) {
+                    compoundOfOriginal = compoundOfOriginal.copy();
+                    for (String tag : tagBlacklist) {
+                        var currentCompoundNode = compoundOfOriginal;
+                        String[] paths = tag.split("\\.");
+                        for (int i = 0, length = paths.length; i < length; i++) {
+                            if (currentCompoundNode == null)
+                                break;
+                            String path = paths[i];
+                            if (i == length - 1) {
+                                currentCompoundNode.remove(path);
+                                break;
+                            } else if (currentCompoundNode.contains(path)) {
+                                currentCompoundNode = ObjectUtil.tryCast(currentCompoundNode.get(path), CompoundTag.class);
+                            } else {
+                                currentCompoundNode = null;
+                            }
+                        }
+                    }
+                }
+                return NBTItemHelper.setNBT(result, NBTTagCompoundHelper.merge(compoundOfResult, compoundOfOriginal));
             }
+
+            @Nonnull
+            @Override
+            public ItemStack mergeNbt(@Nonnull ItemStack original, @Nonnull ItemStack result, @Nullable String... tags) {
+                var compoundOfOriginal = NBTItemHelper.getNBT(original);
+                var compoundOfResult = NBTItemHelper.getNBT(result);
+                if (tags != null && tags.length > 0) {
+                    compoundOfOriginal = compoundOfOriginal.copy();
+                    for (String tag : tags) {
+                        var currentCompoundNodeOfOriginal = compoundOfOriginal;
+                        var currentCompoundNodeOfResult = compoundOfResult;
+                        String[] paths = tag.split("\\.");
+                        for (int i = 0, length = paths.length; i < length; i++) {
+                            if (currentCompoundNodeOfOriginal == null || currentCompoundNodeOfResult == null)
+                                break;
+                            String path = paths[i];
+                            if (i == length - 1) {
+                                merge(currentCompoundNodeOfResult, currentCompoundNodeOfOriginal);
+                                break;
+                            } else if (currentCompoundNodeOfOriginal.contains(path)) {
+                                currentCompoundNodeOfOriginal = ObjectUtil.tryCast(currentCompoundNodeOfOriginal.get(path), CompoundTag.class);
+                                currentCompoundNodeOfResult = ObjectUtil.tryCast(currentCompoundNodeOfResult.get(path), CompoundTag.class);
+                            } else {
+                                currentCompoundNodeOfOriginal = null;
+                                currentCompoundNodeOfResult = null;
+                            }
+                        }
+                    }
+                    return NBTItemHelper.setNBT(result, compoundOfResult);
+                }
+                return result;
+            }
+
+            private void merge(@Nonnull CompoundTag node, @Nonnull CompoundTag node2) {
+                for (String tagKey : node2.getAllKeys()) {
+                    Tag tag = node.get(tagKey);
+                    if (tag == null) {
+                        node.put(tagKey, Objects.requireNonNull(node2.get(tagKey)));
+                    } else if (tag.getId() == 10 && tag instanceof CompoundTag compoundTag &&
+                            node2.contains(tagKey, 10)) { //Compound Type
+                        merge(compoundTag, node2.getCompound(tagKey));
+                    }
+                }
+            }
+
         }, INBTItemHelper.class);
     }
 

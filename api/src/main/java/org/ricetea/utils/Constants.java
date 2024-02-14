@@ -13,6 +13,8 @@ public class Constants {
     @Nonnull
     public static final NamespacedKey EMPTY_NAMESPACED_KEY = NamespacedKey.minecraft("empty");
     @Nonnull
+    public static final String DEFAULT_ATTRIBUTE_MODIFIER_NAME = "default modifiers";
+    @Nonnull
     public static final IntUnaryOperator IncreaseOperator = i -> i + 1;
     @Nonnull
     public static final IntUnaryOperator DecreaseOperator = i -> i - 1;

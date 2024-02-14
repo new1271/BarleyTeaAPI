@@ -4,6 +4,6 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureEntityDeath {
+public interface FeatureEntityDeath extends EntityFeature {
     boolean handleEntityDeath(@Nonnull DataEntityDeath data);
 }

@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.EntityFeature;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.utils.ObjectUtil;
@@ -26,13 +27,13 @@ public final class EntityFeatureLinker {
     @Nonnull
     private static final Set<Entity> loadedEntitys = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(
+    public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature extends EntityFeature> boolean doFeatureCancellable(
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
         if (entity == null || event == null || !EntityRegister.hasRegistered())
             return true;
-        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomEntity.get(entity), obj -> obj.getFeature(featureClass));
         if (feature == null)
             return true;
         return ObjectUtil.tryMap(() -> {
@@ -44,14 +45,15 @@ public final class EntityFeatureLinker {
         }, true);
     }
 
-    public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>, TFeature> boolean doFeatureCancellable(
+    public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>,
+            TFeature extends EntityFeature> boolean doFeatureCancellable(
             @Nullable Entity entity, @Nullable TEvent event, @Nullable TEvent2 event2,
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiPredicate<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
         if (entity == null || event == null || !EntityRegister.hasRegistered())
             return true;
-        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomEntity.get(entity), obj -> obj.getFeature(featureClass));
         if (feature == null)
             return true;
         return ObjectUtil.tryMap(() -> {
@@ -63,37 +65,39 @@ public final class EntityFeatureLinker {
         }, true);
     }
 
-    public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>, TFeature> void doFeature(
+    public static <TEvent extends Event, TEvent2 extends Event, TData extends BaseFeatureData<TEvent>,
+            TFeature extends EntityFeature> void doFeature(
             @Nullable Entity entity, @Nullable TEvent event, @Nullable TEvent2 event2,
             @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull BiFunction<TEvent, TEvent2, TData> dataConstructor) {
         if (entity == null || event == null || !EntityRegister.hasRegistered())
             return;
-        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomEntity.get(entity), obj -> obj.getFeature(featureClass));
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event, event2)));
     }
 
-    public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature> void doFeature(
+    public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>,
+            TFeature extends EntityFeature> void doFeature(
             @Nullable Entity entity, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, TData> featureFunc,
             @Nonnull Function<TEvent, TData> dataConstructor) {
         if (entity == null || event == null || !EntityRegister.hasRegistered())
             return;
-        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomEntity.get(entity), obj -> obj.getFeature(featureClass));
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, dataConstructor.apply(event)));
     }
 
-    public static <TFeature> void doFeature(
+    public static <TFeature extends EntityFeature> void doFeature(
             @Nullable Entity entity, @Nonnull Class<TFeature> featureClass,
             @Nonnull BiConsumer<TFeature, Entity> featureFunc) {
         if (entity == null || !EntityRegister.hasRegistered())
             return;
-        TFeature feature = ObjectUtil.tryCast(CustomEntity.get(entity), featureClass);
+        TFeature feature = ObjectUtil.tryMap(CustomEntity.get(entity), obj -> obj.getFeature(featureClass));
         if (feature == null)
             return;
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, entity));

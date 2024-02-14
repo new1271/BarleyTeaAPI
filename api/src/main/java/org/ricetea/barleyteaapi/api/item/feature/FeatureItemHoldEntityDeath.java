@@ -5,7 +5,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerDeath;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldEntityDeath {
+public interface FeatureItemHoldEntityDeath extends ItemFeature {
 
     boolean handleItemHoldEntityDeath(@Nonnull DataItemHoldEntityDeath data);
 

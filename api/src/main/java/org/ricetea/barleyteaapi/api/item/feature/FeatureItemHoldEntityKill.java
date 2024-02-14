@@ -5,7 +5,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityKillPlay
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldEntityKill {
+public interface FeatureItemHoldEntityKill extends ItemFeature {
 
     boolean handleItemHoldEntityKillEntity(@Nonnull DataItemHoldEntityKillEntity data);
 

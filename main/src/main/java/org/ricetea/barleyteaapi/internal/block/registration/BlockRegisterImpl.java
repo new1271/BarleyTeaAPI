@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
+import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
@@ -18,7 +19,7 @@ import org.ricetea.barleyteaapi.api.event.BlocksUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
-import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
+import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 
 @Singleton
 @ApiStatus.Internal
-public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> implements BlockRegister {
+public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBlock, BlockFeature> implements BlockRegister {
 
     @Override
     public void register(@Nullable CustomBlock block) {
@@ -74,6 +75,7 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
             }
             format.setFormat(new MessageFormat(_block.getDefaultName()));
             localizationRegister.register(format);
+            registerFeatures(_block);
         });
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
@@ -97,6 +99,7 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
         refreshCustomBlocks(blocks.stream()
                 .map(_block -> RefreshCustomBlockRecord.create(_block, null))
                 .toList());
+        unregisterFeatures(block);
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
@@ -124,6 +127,7 @@ public final class BlockRegisterImpl extends NSKeyedRegisterBase<CustomBlock> im
         if (blocks.isEmpty())
             return;
         values.removeAll(blocks);
+        blocks.forEach(this::unregisterFeatures);
         refreshCustomBlocks(blocks.stream()
                 .map(_block -> RefreshCustomBlockRecord.create(_block, null))
                 .toList());

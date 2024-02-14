@@ -7,9 +7,12 @@ import org.bukkit.projectiles.ProjectileSource;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface FeatureProjectileSpawn extends FeatureEntitySpawn {
+public interface FeatureProjectileSpawn extends EntityFeature {
+
     @Nullable
-    Projectile handleEntitySpawn(@Nonnull Location location);
+    default Projectile handleEntitySpawn(@Nonnull Location location) {
+        return handleEntitySpawn(location, null);
+    }
 
     @Nullable
     Projectile handleEntitySpawn(@Nonnull Location location, @Nullable ProjectileSource source);

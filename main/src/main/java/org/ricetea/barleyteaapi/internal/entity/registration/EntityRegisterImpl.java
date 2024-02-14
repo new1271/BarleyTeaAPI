@@ -15,7 +15,7 @@ import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
-import org.ricetea.barleyteaapi.internal.base.registration.NSKeyedRegisterBase;
+import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 @Singleton
 @ApiStatus.Internal
-public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> implements EntityRegister {
+public final class EntityRegisterImpl extends CustomObjectRegisterBase<CustomEntity, EntityFeature> implements EntityRegister {
 
     @Override
     public void register(@Nullable CustomEntity entity) {
@@ -71,6 +71,7 @@ public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> 
             }
             format.setFormat(new MessageFormat(_entity.getDefaultName()));
             localizationRegister.register(format);
+            registerFeatures(_entity);
         });
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
@@ -115,6 +116,7 @@ public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> 
         refreshCustomEntities(entities.stream()
                 .map(_entity -> RefreshCustomEntityRecord.create(_entity, null))
                 .toList());
+        unregisterFeatures(entity);
         BarleyTeaAPI inst = BarleyTeaAPI.getInstanceUnsafe();
         if (inst != null) {
             Logger logger = inst.getLogger();
@@ -142,6 +144,7 @@ public final class EntityRegisterImpl extends NSKeyedRegisterBase<CustomEntity> 
         if (entities.isEmpty())
             return;
         values.removeAll(entities);
+        entities.forEach(this::unregisterFeatures);
         refreshCustomEntities(entities.stream()
                 .map(_entity -> RefreshCustomEntityRecord.create(_entity, null))
                 .toList());

@@ -4,7 +4,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityMove;
 
 import javax.annotation.Nonnull;
 
-public interface FeatureItemHoldEntityMove {
+public interface FeatureItemHoldEntityMove extends ItemFeature {
 
     boolean handleItemHoldEntityEntityMove(@Nonnull DataItemHoldEntityMove data);
 }
