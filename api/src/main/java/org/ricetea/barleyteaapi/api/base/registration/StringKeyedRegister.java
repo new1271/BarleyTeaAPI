@@ -29,7 +29,7 @@ public interface StringKeyedRegister<T> extends IRegister<T> {
     }
 
     @Nonnull
-    Collection<String> listAllKeys(@Nullable Predicate<String> predicate);
+    Collection<String> listAllKeys(@Nullable Predicate<? super String> predicate);
 
     @Nullable
     default String findFirstKey() {
@@ -37,5 +37,5 @@ public interface StringKeyedRegister<T> extends IRegister<T> {
     }
 
     @Nullable
-    String findFirstKey(@Nullable Predicate<String> predicate);
+    String findFirstKey(@Nullable Predicate<? super String> predicate);
 }

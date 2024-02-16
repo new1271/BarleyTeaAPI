@@ -47,7 +47,7 @@ public final class EntityRegisterImpl extends CustomObjectRegisterBase<CustomEnt
     }
 
     @Override
-    public void registerAll(@Nullable Collection<CustomEntity> entities) {
+    public void registerAll(@Nullable Collection<? extends CustomEntity> entities) {
         if (entities == null)
             return;
         LocalizationRegister localizationRegister = LocalizationRegister.getInstance();
@@ -129,7 +129,7 @@ public final class EntityRegisterImpl extends CustomObjectRegisterBase<CustomEnt
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<CustomEntity> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super CustomEntity> predicate) {
         if (isEmpty())
             return;
         Map<NamespacedKey, CustomEntity> lookupMap = getLookupMap();

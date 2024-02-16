@@ -13,9 +13,9 @@ public final class BlocksUnregisteredEvent extends Event {
 
     private static final @Nonnull Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
-    private final @Nonnull Collection<CustomBlock> blocks;
+    private final @Nonnull Collection<? extends CustomBlock> blocks;
 
-    public BlocksUnregisteredEvent(@Nonnull Collection<CustomBlock> blocks) {
+    public BlocksUnregisteredEvent(@Nonnull Collection<? extends CustomBlock> blocks) {
         this.blocks = CollectionUtil.toUnmodifiableSet(blocks);
     }
 
@@ -25,7 +25,7 @@ public final class BlocksUnregisteredEvent extends Event {
     }
 
     @Nonnull
-    public Collection<CustomBlock> getBlocks() {
+    public Collection<? extends CustomBlock> getBlocks() {
         return blocks;
     }
 

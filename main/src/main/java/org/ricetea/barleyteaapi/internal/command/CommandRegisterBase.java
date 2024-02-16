@@ -76,7 +76,7 @@ public abstract class CommandRegisterBase<T> extends NSKeyedRegisterBase<Command
     protected abstract void unregister0(@Nonnull Command<T> command);
 
     @Override
-    public void unregisterAll(@Nullable Predicate<Command<T>> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super Command<T>> predicate) {
         Map<NamespacedKey, Command<T>> lookupMap = getLookupMap();
         Collection<Command<T>> values = lookupMap.values();
         Stream<Command<T>> stream = values.stream();

@@ -70,7 +70,7 @@ public abstract class NSKeyedRegisterBase<T extends Keyed> implements NSKeyedReg
     }
 
     @Override
-    public void registerAll(@Nullable Collection<T> items) {
+    public void registerAll(@Nullable Collection<? extends T> items) {
         if (items == null)
             return;
         items.forEach(item -> ObjectUtil.safeCall(item, (_item) -> lookupMap.put(_item.getKey(), _item)));
@@ -94,7 +94,7 @@ public abstract class NSKeyedRegisterBase<T extends Keyed> implements NSKeyedReg
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<T> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super T> predicate) {
         if (predicate == null)
             lookupMap.clear();
         else
@@ -132,7 +132,7 @@ public abstract class NSKeyedRegisterBase<T extends Keyed> implements NSKeyedReg
 
     @Nonnull
     @Override
-    public Set<T> listAll(@Nullable Predicate<T> predicate) {
+    public Set<T> listAll(@Nullable Predicate<? super T> predicate) {
         if (isEmpty())
             return Collections.emptySet();
         Collection<T> values = lookupMap.values();
@@ -161,7 +161,7 @@ public abstract class NSKeyedRegisterBase<T extends Keyed> implements NSKeyedReg
 
     @Nullable
     @Override
-    public T findFirst(@Nullable Predicate<T> predicate) {
+    public T findFirst(@Nullable Predicate<? super T> predicate) {
         if (isEmpty())
             return null;
         Stream<T> stream = lookupMap.values().stream();

@@ -21,7 +21,7 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
 
     @Nonnull
     @Override
-    public <R extends F> Collection<R> listAllOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<R> predicate) {
+    public <R extends F> Collection<R> listAllOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate) {
         var stream = featureMultiMap.get(clazz).stream();
         if (getCachedSize() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
             stream = stream.parallel();
@@ -35,7 +35,7 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
 
     @Nullable
     @Override
-    public <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<R> predicate) {
+    public <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate) {
         var stream = featureMultiMap.get(clazz)
                 .stream()
                 .map(clazz::cast);

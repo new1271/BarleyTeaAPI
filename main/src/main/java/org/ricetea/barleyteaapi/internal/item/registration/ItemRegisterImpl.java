@@ -43,7 +43,7 @@ public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem,
     }
 
     @Override
-    public void registerAll(@Nullable Collection<CustomItem> items) {
+    public void registerAll(@Nullable Collection<? extends CustomItem> items) {
         if (items == null)
             return;
         LocalizationRegister localizationRegister = LocalizationRegister.getInstance();
@@ -115,7 +115,7 @@ public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem,
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<CustomItem> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super CustomItem> predicate) {
         if (isEmpty())
             return;
         Map<NamespacedKey, CustomItem> lookupMap = getLookupMap();

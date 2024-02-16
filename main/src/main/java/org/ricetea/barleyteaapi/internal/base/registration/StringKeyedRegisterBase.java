@@ -75,7 +75,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
     }
 
     @Override
-    public void registerAll(@Nullable Collection<T> items) {
+    public void registerAll(@Nullable Collection<? extends T> items) {
         if (items == null)
             return;
         items.forEach(item -> ObjectUtil.safeCall(item, (_item) -> lookupMap.put(getKeyFromItem(_item), _item)));
@@ -99,7 +99,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<T> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super T> predicate) {
         if (predicate == null)
             lookupMap.clear();
         else
@@ -122,7 +122,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
 
     @Nonnull
     @Override
-    public Collection<String> listAllKeys(@Nullable Predicate<String> predicate) {
+    public Collection<String> listAllKeys(@Nullable Predicate<? super String> predicate) {
         if (isEmpty())
             return Collections.emptySet();
         Set<String> keySet = lookupMap.keySet();
@@ -137,7 +137,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
 
     @Nonnull
     @Override
-    public Set<T> listAll(@Nullable Predicate<T> predicate) {
+    public Set<T> listAll(@Nullable Predicate<? super T> predicate) {
         if (isEmpty())
             return Collections.emptySet();
         Collection<T> values = lookupMap.values();
@@ -152,7 +152,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
 
     @Nullable
     @Override
-    public String findFirstKey(@Nullable Predicate<String> predicate) {
+    public String findFirstKey(@Nullable Predicate<? super String> predicate) {
         if (isEmpty())
             return null;
         Stream<String> stream = lookupMap.keySet().stream();
@@ -166,7 +166,7 @@ public abstract class StringKeyedRegisterBase<T> implements StringKeyedRegister<
 
     @Nullable
     @Override
-    public T findFirst(@Nullable Predicate<T> predicate) {
+    public T findFirst(@Nullable Predicate<? super T> predicate) {
         if (isEmpty())
             return null;
         Stream<T> stream = lookupMap.values().stream();

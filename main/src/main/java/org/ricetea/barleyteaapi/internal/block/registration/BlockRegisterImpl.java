@@ -51,7 +51,7 @@ public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBloc
     }
 
     @Override
-    public void registerAll(@Nullable Collection<CustomBlock> blocks) {
+    public void registerAll(@Nullable Collection<? extends CustomBlock> blocks) {
         if (blocks == null)
             return;
         LocalizationRegister localizationRegister = LocalizationRegister.getInstance();
@@ -112,7 +112,7 @@ public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBloc
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<CustomBlock> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super CustomBlock> predicate) {
         if (isEmpty())
             return;
         Map<NamespacedKey, CustomBlock> lookupMap = getLookupMap();

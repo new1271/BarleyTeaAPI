@@ -9,7 +9,7 @@ public interface IRegister<T> {
 
     void register(@Nullable T item);
 
-    default void registerAll(@Nullable Collection<T> items) {
+    default void registerAll(@Nullable Collection<? extends T> items) {
         if (items != null) {
             items.forEach(this::register);
         }
@@ -21,7 +21,7 @@ public interface IRegister<T> {
         unregisterAll(null);
     }
 
-    void unregisterAll(@Nullable Predicate<T> predicate);
+    void unregisterAll(@Nullable Predicate<? super T> predicate);
 
     default boolean isEmpty() {
         return findFirst() == null;
@@ -39,7 +39,7 @@ public interface IRegister<T> {
     }
 
     @Nonnull
-    Collection<T> listAll(@Nullable Predicate<T> predicate);
+    Collection<T> listAll(@Nullable Predicate<? super T> predicate);
 
     @Nullable
     default T findFirst() {
@@ -47,5 +47,5 @@ public interface IRegister<T> {
     }
 
     @Nullable
-    T findFirst(@Nullable Predicate<T> predicate);
+    T findFirst(@Nullable Predicate<? super T> predicate);
 }

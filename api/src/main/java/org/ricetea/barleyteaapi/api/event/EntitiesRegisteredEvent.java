@@ -13,9 +13,9 @@ public final class EntitiesRegisteredEvent extends Event {
 
     private static final @Nonnull Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
-    private final @Nonnull Collection<CustomEntity> entities;
+    private final @Nonnull Collection<? extends CustomEntity> entities;
 
-    public EntitiesRegisteredEvent(@Nonnull Collection<CustomEntity> entities) {
+    public EntitiesRegisteredEvent(@Nonnull Collection<? extends CustomEntity> entities) {
         this.entities = CollectionUtil.toUnmodifiableSet(entities);
     }
 
@@ -25,7 +25,7 @@ public final class EntitiesRegisteredEvent extends Event {
     }
 
     @Nonnull
-    public Collection<CustomEntity> getEntities() {
+    public Collection<? extends CustomEntity> getEntities() {
         return entities;
     }
 

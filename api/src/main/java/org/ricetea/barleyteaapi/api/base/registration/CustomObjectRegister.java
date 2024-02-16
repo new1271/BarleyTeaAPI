@@ -16,7 +16,7 @@ public interface CustomObjectRegister<T extends CustomObject<F>, F extends Featu
     }
 
     @Nonnull
-    <R extends F> Collection<R> listAllOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<R> predicate);
+    <R extends F> Collection<R> listAllOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate);
 
     @Nullable
     default <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz) {
@@ -24,5 +24,5 @@ public interface CustomObjectRegister<T extends CustomObject<F>, F extends Featu
     }
 
     @Nullable
-    <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<R> predicate);
+    <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate);
 }

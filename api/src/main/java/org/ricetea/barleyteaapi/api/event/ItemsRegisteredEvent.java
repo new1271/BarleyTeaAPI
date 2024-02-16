@@ -13,9 +13,9 @@ public final class ItemsRegisteredEvent extends Event {
 
     private static final @Nonnull Lazy<HandlerList> lazyHandlerList = Lazy.create(HandlerList::new);
 
-    private final @Nonnull Collection<CustomItem> items;
+    private final @Nonnull Collection<? extends CustomItem> items;
 
-    public ItemsRegisteredEvent(@Nonnull Collection<CustomItem> items) {
+    public ItemsRegisteredEvent(@Nonnull Collection<? extends CustomItem> items) {
         this.items = CollectionUtil.toUnmodifiableSet(items);
     }
 
@@ -25,7 +25,7 @@ public final class ItemsRegisteredEvent extends Event {
     }
 
     @Nonnull
-    public Collection<CustomItem> getItems() {
+    public Collection<? extends CustomItem> getItems() {
         return items;
     }
 

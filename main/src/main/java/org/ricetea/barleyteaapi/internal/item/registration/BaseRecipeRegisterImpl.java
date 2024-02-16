@@ -101,7 +101,7 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegis
     }
 
     @Override
-    public void unregisterAll(@Nullable Predicate<T> predicate) {
+    public void unregisterAll(@Nullable Predicate<? super T> predicate) {
         if (predicate == null)
             unregisterAll();
         else {
