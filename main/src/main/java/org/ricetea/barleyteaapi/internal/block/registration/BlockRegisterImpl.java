@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -139,7 +140,13 @@ public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBloc
     }
 
     private void refreshCustomBlocks(@Nonnull Collection<RefreshCustomBlockRecord> records) {
-        if (records.stream().anyMatch(RefreshCustomBlockRecord::needOperate)) {
+        Function<Collection<RefreshCustomBlockRecord>, Stream<RefreshCustomBlockRecord>> streamFunction;
+        if (records.size() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
+            streamFunction = Collection::parallelStream;
+        } else {
+            streamFunction = Collection::stream;
+        }
+        if (streamFunction.apply(records).anyMatch(RefreshCustomBlockRecord::needOperate)) {
             ChunkStorage chunkStorage = ChunkStorage.getInstance();
             for (World world : Bukkit.getWorlds()) {
                 for (Chunk chunk : world.getLoadedChunks()) {
@@ -150,7 +157,7 @@ public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBloc
                         NamespacedKey key = BlockHelper.getBlockID(entry.getValue());
                         if (key == null)
                             continue;
-                        records.stream()
+                        streamFunction.apply(records)
                                 .filter(record -> key.equals(record.key()))
                                 .findAny()
                                 .ifPresent(record -> BlockFeatureLinker.refreshBlock(block, record));
