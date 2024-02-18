@@ -26,7 +26,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
@@ -34,7 +33,6 @@ import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.util.MinecraftKeyCombinedIterator;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.util.NMSCommandArgument;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.util.NMSCommandUtil;
-import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -136,10 +134,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                                 _entity -> _entity != null
                                         && feature.handleCommandSummon(
                                         new DataCommandSummon(_entity, nbt.toString())))) {
-                            EntityFeatureLinker.loadEntity(entityType, bukkitEntity);
-                            if (entityType instanceof FeatureEntityTick) {
-                                EntityTickTask.getInstance().addEntity(bukkitEntity);
-                            }
+                            EntityFeatureLinker.loadEntity(entityType, bukkitEntity, false);
                         } else {
                             bukkitEntity.remove();
                             throw summonFailedMessage.create();
@@ -219,6 +214,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
             return suggestionsBuilder.buildFuture();
         }
 
+        @Nonnull
         @Override
         public Iterator<ResourceLocation> iterator() {
             List<ResourceLocation> customKeys = this.customKeys;

@@ -13,7 +13,6 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
@@ -28,7 +27,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
-import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -62,9 +60,7 @@ public final class EntitySpawnListener implements Listener {
             return;
         }
         if (!event.isCancelled()) {
-            CustomEntity entityType = CustomEntity.get(entity);
-            if (entityType instanceof FeatureEntityTick)
-                EntityTickTask.getInstance().addEntity(entity);
+            EntityFeatureLinker.loadEntity(entity, false);
         }
     }
 
@@ -73,7 +69,6 @@ public final class EntitySpawnListener implements Listener {
         EntityRegister register = EntityRegister.getInstanceUnsafe();
         if (register == null || reason.equals(SpawnReason.CUSTOM) || reason.equals(SpawnReason.COMMAND) || reason.equals(SpawnReason.DEFAULT))
             return;
-        Entity entity = event.getEntity();
         RandomProvider rnd = RandomProvider.getInstance();
         Lazy<DataNaturalSpawnPosibility> dataLazy = Lazy.create(() ->
                 new DataNaturalSpawnPosibility(event.getLocation(), event.getSpawnReason()));
@@ -89,7 +84,6 @@ public final class EntitySpawnListener implements Listener {
                         return;
                     switch (result) {
                         case Handled -> {
-                            EntityFeatureLinker.loadEntity(entityType, entity);
                             return;
                         }
                         case Cancelled -> {

@@ -13,6 +13,7 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -174,11 +175,7 @@ public final class EntityTickTask extends LoopTaskBase {
             if (entityType == null)
                 return true;
             if (entityType instanceof FeatureEntityTick feature) {
-                try {
-                    feature.handleTick(entity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                ObjectUtil.tryCall(entity, feature::handleTick);
                 return true;
             }
             return false;

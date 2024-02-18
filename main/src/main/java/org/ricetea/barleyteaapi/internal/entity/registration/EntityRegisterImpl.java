@@ -4,11 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
-import org.ricetea.barleyteaapi.api.entity.feature.*;
+import org.ricetea.barleyteaapi.api.entity.feature.EntityFeature;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureSlimeSplit;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
@@ -17,10 +19,9 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
-import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker.RefreshCustomEntityRecord;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +31,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -160,70 +162,25 @@ public final class EntityRegisterImpl extends CustomObjectRegisterBase<CustomEnt
     }
 
     private void refreshCustomEntities(@Nonnull Collection<RefreshCustomEntityRecord> records) {
-        if (records.stream().anyMatch(RefreshCustomEntityRecord::needOperate)) {
+        Function<Collection<RefreshCustomEntityRecord>, Stream<RefreshCustomEntityRecord>> streamFunction;
+        if (records.size() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
+            streamFunction = Collection::parallelStream;
+        } else {
+            streamFunction = Collection::stream;
+        }
+        if (streamFunction.apply(records).anyMatch(RefreshCustomEntityRecord::needOperate)) {
             for (World world : Bukkit.getWorlds()) {
                 for (Entity entity : world.getEntities()) {
                     NamespacedKey key = EntityHelper.getEntityID(entity);
                     if (key == null)
                         continue;
-                    records.stream()
+                    streamFunction.apply(records)
                             .filter(record -> key.equals(record.key()))
                             .findAny()
-                            .ifPresent(record -> {
-                                BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();
-                                if (plugin != null) {
-                                    BukkitScheduler scheduler = Bukkit.getScheduler();
-                                    FeatureEntityLoad feature = record.oldFeature();
-                                    if (feature != null) {
-                                        final FeatureEntityLoad finalFeature = feature;
-                                        scheduler.scheduleSyncDelayedTask(plugin,
-                                                () -> EntityFeatureLinker.unloadEntity(finalFeature, entity));
-                                    }
-                                    feature = record.newFeature();
-                                    if (feature != null) {
-                                        final FeatureEntityLoad finalFeature = feature;
-                                        scheduler.scheduleSyncDelayedTask(plugin,
-                                                () -> EntityFeatureLinker.loadEntity(finalFeature, entity));
-                                    }
-                                }
-                                boolean hasTickingOld = record.hasTickingOld();
-                                boolean hasTickingNew = record.hasTickingNew();
-                                if (hasTickingOld != hasTickingNew) {
-                                    if (hasTickingOld) {
-                                        EntityTickTask task = EntityTickTask.getInstanceUnsafe();
-                                        if (task != null) {
-                                            task.removeEntity(entity);
-                                        }
-                                    } else {
-                                        EntityTickTask.getInstance().addEntity(entity);
-                                    }
-                                }
-                            });
+                            .ifPresent(record -> EntityFeatureLinker.refreshEntity(entity, record));
                 }
             }
         }
         refreshCachedSize();
-    }
-
-    private record RefreshCustomEntityRecord(@Nullable NamespacedKey key,
-                                             @Nullable FeatureEntityLoad oldFeature,
-                                             @Nullable FeatureEntityLoad newFeature,
-                                             boolean hasTickingOld, boolean hasTickingNew) {
-
-        @Nullable
-        public static RefreshCustomEntityRecord create(@Nullable CustomEntity oldEntity, @Nullable CustomEntity newEntity) {
-            CustomEntity compareBlock = newEntity == null ? oldEntity : newEntity;
-            if (compareBlock == null)
-                return null;
-            return new RefreshCustomEntityRecord(compareBlock.getKey(),
-                    ObjectUtil.tryCast(oldEntity, FeatureEntityLoad.class),
-                    ObjectUtil.tryCast(newEntity, FeatureEntityLoad.class),
-                    oldEntity instanceof FeatureEntityTick,
-                    newEntity instanceof FeatureEntityTick);
-        }
-
-        public boolean needOperate() {
-            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
-        }
     }
 }

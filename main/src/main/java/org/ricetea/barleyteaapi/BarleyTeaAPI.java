@@ -13,7 +13,6 @@ import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounter;
 import org.ricetea.barleyteaapi.api.entity.counter.TickCounterTrigger;
 import org.ricetea.barleyteaapi.api.entity.counter.TickingService;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
@@ -207,10 +206,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
             public <T extends Entity> boolean tryRegisterEntityAfterSpawn
                     (@Nonnull CustomEntity entityType, @Nonnull T entity, @Nullable Predicate<T> predicate) {
                 if (EntityHelper.tryRegister(entityType, entity, predicate)) {
-                    EntityFeatureLinker.loadEntity(entityType, entity);
-                    if (entityType instanceof FeatureEntityTick) {
-                        EntityTickTask.getInstance().addEntity(entity);
-                    }
+                    EntityFeatureLinker.loadEntity(entityType, entity, false);
                     return true;
                 } else {
                     entity.remove();

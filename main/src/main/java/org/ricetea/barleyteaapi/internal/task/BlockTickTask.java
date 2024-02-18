@@ -15,6 +15,7 @@ import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
 import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -201,11 +202,7 @@ public final class BlockTickTask extends LoopTaskBase {
             if (blockType == null)
                 return true;
             if (blockType instanceof FeatureBlockTick feature) {
-                try {
-                    feature.handleTick(block);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                ObjectUtil.tryCall(block, feature::handleTick);
                 return true;
             }
             return false;

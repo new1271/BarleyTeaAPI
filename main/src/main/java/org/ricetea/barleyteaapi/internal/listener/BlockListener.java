@@ -11,7 +11,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.CustomBlockType;
-import org.ricetea.barleyteaapi.api.block.feature.*;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockExplode;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockMove;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockPlace;
 import org.ricetea.barleyteaapi.api.block.feature.data.*;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
@@ -20,7 +23,6 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerPlace;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlock;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
-import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -65,11 +67,7 @@ public final class BlockListener implements Listener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        CustomBlock blockType = CustomBlock.get(block);
-        BlockFeatureLinker.loadBlock(blockType, block);
-        if (blockType instanceof FeatureBlockTick) {
-            BlockTickTask.getInstance().addBlock(event.getBlock());
-        }
+        BlockFeatureLinker.loadBlock(block, false);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -92,9 +90,6 @@ public final class BlockListener implements Listener {
             }
         }
         BlockFeatureLinker.unloadBlock(blockType, block);
-        if (blockType instanceof FeatureBlockTick) {
-            BlockTickTask.getInstance().removeBlock(block);
-        }
         ChunkStorage.getInstance().removeBlockDataContainer(block);
         if (event.isDropItems()) {
             PrepareToDrops.put(event.getBlock().getLocation(), blockType.getKey());
@@ -145,9 +140,6 @@ public final class BlockListener implements Listener {
                 }
             }
             BlockFeatureLinker.unloadBlock(blockType, block);
-            if (blockType instanceof FeatureBlockTick) {
-                BlockTickTask.getInstance().removeBlock(block);
-            }
             ChunkStorage.getInstance().removeBlockDataContainer(block);
             PrepareToDrops.put(block.getLocation(), blockType.getKey());
         }
@@ -172,10 +164,7 @@ public final class BlockListener implements Listener {
         }
         Block to = event.getToBlock();
         ChunkStorage.getInstance().setBlockDataContainer(to, container);
-        if (blockType instanceof FeatureBlockLoad feature) {
-            BlockFeatureLinker.unloadBlock(feature, from);
-            BlockFeatureLinker.loadBlock(feature, to);
-        }
+        BlockFeatureLinker.moveBlock(blockType, from, to);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -70,7 +70,7 @@ public interface RandomProvider {
     }
 
     default float nextFloat() {
-        return nextFloat(Float.MIN_VALUE, Float.MAX_VALUE);
+        return nextFloat(0, 1);
     }
 
     default float nextFloat(float bound) {
@@ -82,7 +82,7 @@ public interface RandomProvider {
     }
 
     default double nextDouble() {
-        return nextDouble(Double.MIN_VALUE, Double.MAX_VALUE);
+        return nextDouble(0, 1);
     }
 
     default double nextDouble(double bound) {

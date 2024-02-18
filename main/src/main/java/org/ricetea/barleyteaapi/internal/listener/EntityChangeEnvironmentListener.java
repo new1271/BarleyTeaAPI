@@ -18,7 +18,6 @@ import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockEntityChange;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockFalling;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockBreakByEntityExplode;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockDropByEntity;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockEntityChange;
@@ -34,7 +33,6 @@ import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.entity.BarleyFallingBlock;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
-import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
@@ -87,9 +85,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                     return;
                 }
             }
-            if (blockType instanceof FeatureBlockTick) {
-                BlockTickTask.getInstance().removeBlock(block);
-            }
+            BlockFeatureLinker.unloadBlock(blockType, block);
             ChunkStorage.getInstance().removeBlockDataContainer(block);
             if (blockType instanceof FeatureBlockBreak) {
                 var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
@@ -128,9 +124,6 @@ public final class EntityChangeEnvironmentListener implements Listener {
                     if (container != null)
                         BarleyFallingBlock.setBlockDataContainer(entity, container);
                     BlockFeatureLinker.unloadBlock(blockType, block);
-                    if (blockType instanceof FeatureBlockTick) {
-                        BlockTickTask.getInstance().removeBlock(block);
-                    }
                     chunkStorage.removeBlockDataContainer(block);
                 } else {
                     EntityRegister entityRegister = EntityRegister.getInstanceUnsafe();
@@ -154,10 +147,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                BlockFeatureLinker.loadBlock(blockType, block);
-                                if (blockType instanceof FeatureBlockTick) {
-                                    BlockTickTask.getInstance().addBlock(block);
-                                }
+                                BlockFeatureLinker.loadBlock(blockType, block, false);
                             }
                         }
                     }
@@ -177,9 +167,6 @@ public final class EntityChangeEnvironmentListener implements Listener {
                     }
                 }
                 BlockFeatureLinker.unloadBlock(blockType, block);
-                if (blockType instanceof FeatureBlockTick) {
-                    BlockTickTask.getInstance().removeBlock(block);
-                }
                 ChunkStorage.getInstance().removeBlockDataContainer(block);
                 if (blockType instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
                     var list = PrepareToDrops.computeIfAbsent(event.getEntity(), k -> new ArrayList<>());

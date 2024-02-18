@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.linker;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -8,7 +9,11 @@ import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.EntityFeature;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
+import org.ricetea.barleyteaapi.util.SyncUtil;
+import org.ricetea.utils.ChainedRunable;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -103,27 +108,28 @@ public final class EntityFeatureLinker {
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, entity));
     }
 
-    public static void loadEntity(@Nonnull Entity entity) {
+    public static void loadEntity(@Nonnull Entity entity, boolean loadOnly) {
         CustomEntity entityType = CustomEntity.get(entity);
         if (entityType == null)
             return;
-        loadEntity(entity);
+        loadEntity(entityType, entity, loadOnly);
     }
 
-    public static void loadEntity(@Nonnull CustomEntity entityType, @Nonnull Entity entity) {
-        if (entityType instanceof FeatureEntityLoad feature) {
-            loadEntity(feature, entity);
-        }
-    }
-
-    public static void loadEntity(@Nonnull FeatureEntityLoad feature, @Nonnull Entity entity) {
+    public static void loadEntity(@Nonnull CustomEntity entityType, @Nonnull Entity entity, boolean loadOnly) {
         if (entity.isDead())
+            return;
+        FeatureEntityLoad feature = entityType.getFeature(FeatureEntityLoad.class);
+        boolean needTick = !loadOnly && entityType.getFeature(FeatureEntityTick.class) != null;
+        if (feature == null && !needTick)
             return;
         synchronized (loadedEntitys) {
             if (!loadedEntitys.add(entity))
                 return;
         }
-        ObjectUtil.tryCall(() -> feature.handleEntityLoaded(entity));
+        ObjectUtil.tryCall(feature, _feature ->
+                SyncUtil.callInMainThread(() -> _feature.handleEntityLoaded(entity)));
+        if (needTick)
+            EntityTickTask.getInstance().addEntity(entity);
     }
 
     public static void unloadEntity(@Nonnull Entity entity) {
@@ -134,16 +140,82 @@ public final class EntityFeatureLinker {
     }
 
     public static void unloadEntity(@Nonnull CustomEntity entityType, @Nonnull Entity entity) {
-        if (entityType instanceof FeatureEntityLoad feature) {
-            unloadEntity(feature, entity);
-        }
-    }
-
-    public static void unloadEntity(@Nonnull FeatureEntityLoad feature, @Nonnull Entity entity) {
         synchronized (loadedEntitys) {
             if (!loadedEntitys.remove(entity))
                 return;
         }
-        ObjectUtil.tryCall(() -> feature.handleEntityUnloaded(entity));
+        ObjectUtil.tryCall(entityType.getFeature(FeatureEntityLoad.class), _feature ->
+                SyncUtil.callInMainThread(() -> _feature.handleEntityUnloaded(entity)));
+        if (entityType.getFeature(FeatureEntityTick.class) != null) {
+            ObjectUtil.tryCall(EntityTickTask.getInstanceUnsafe(),
+                    task -> task.removeEntity(entity));
+        }
+    }
+
+    public static void refreshEntity(@Nonnull Entity entity, @Nonnull RefreshCustomEntityRecord record) {
+        FeatureEntityLoad oldLoadFeature = record.oldLoadFeature();
+        FeatureEntityLoad newLoadFeature = record.newLoadFeature();
+        boolean hasTickingOld = record.hasTickingOld();
+        boolean hasTickingNew = record.hasTickingNew();
+        synchronized (loadedEntitys) {
+            if (oldLoadFeature == null) {
+                if (newLoadFeature == null) {
+                    loadedEntitys.remove(entity);
+                } else {
+                    if (!loadedEntitys.add(entity))
+                        return;
+                }
+            } else {
+                if (newLoadFeature == null) {
+                    if (!loadedEntitys.remove(entity))
+                        return;
+                }
+            }
+        }
+        ChainedRunable chainedRunable = new ChainedRunable();
+        if (oldLoadFeature != null)
+            chainedRunable.attach(() -> oldLoadFeature.handleEntityUnloaded(entity));
+        if (newLoadFeature != null)
+            chainedRunable.attach(() -> newLoadFeature.handleEntityLoaded(entity));
+        if (!chainedRunable.isEmpty())
+            SyncUtil.callInMainThread(chainedRunable);
+        if (hasTickingOld) {
+            if (!hasTickingNew) {
+                ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(),
+                        task -> task.removeEntity(entity));
+            }
+        } else {
+            if (hasTickingNew) {
+                EntityTickTask.getInstance().addEntity(entity);
+            }
+        }
+    }
+
+    public record RefreshCustomEntityRecord(@Nullable NamespacedKey key,
+                                            @Nullable FeatureEntityLoad oldLoadFeature,
+                                            @Nullable FeatureEntityLoad newLoadFeature,
+                                            boolean hasTickingOld, boolean hasTickingNew) {
+
+        @Nullable
+        public static RefreshCustomEntityRecord create(@Nullable CustomEntity oldEntity, @Nullable CustomEntity newEntity) {
+            CustomEntity compareBlock = newEntity == null ? oldEntity : newEntity;
+            if (compareBlock == null)
+                return null;
+            return new RefreshCustomEntityRecord(compareBlock.getKey(),
+                    ObjectUtil.tryMap(oldEntity, _entity -> _entity.getFeature(FeatureEntityLoad.class)),
+                    ObjectUtil.tryMap(newEntity, _entity -> _entity.getFeature(FeatureEntityLoad.class)),
+                    ObjectUtil.tryMap(oldEntity,
+                            _entity -> _entity.getFeature(FeatureEntityTick.class) != null,
+                            false
+                    ),
+                    ObjectUtil.tryMap(newEntity,
+                            _entity -> _entity.getFeature(FeatureEntityTick.class) != null,
+                            false
+                    ));
+        }
+
+        public boolean needOperate() {
+            return hasTickingOld || hasTickingNew || oldLoadFeature != null || newLoadFeature != null;
+        }
     }
 }

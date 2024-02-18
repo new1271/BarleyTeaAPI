@@ -5,13 +5,10 @@ import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
-import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.event.BlocksRegisteredEvent;
@@ -21,10 +18,9 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
-import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
+import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker.RefreshCustomBlockRecord;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -157,62 +153,11 @@ public final class BlockRegisterImpl extends CustomObjectRegisterBase<CustomBloc
                         records.stream()
                                 .filter(record -> key.equals(record.key()))
                                 .findAny()
-                                .ifPresent(record -> {
-                                    BarleyTeaAPI plugin = BarleyTeaAPI.getInstanceUnsafe();
-                                    if (plugin != null) {
-                                        BukkitScheduler scheduler = Bukkit.getScheduler();
-                                        FeatureBlockLoad feature = record.oldFeature();
-                                        if (feature != null) {
-                                            final FeatureBlockLoad finalFeature = feature;
-                                            scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> BlockFeatureLinker.unloadBlock(finalFeature, block));
-                                        }
-                                        feature = record.newFeature;
-                                        if (feature != null) {
-                                            final FeatureBlockLoad finalFeature = feature;
-                                            scheduler.scheduleSyncDelayedTask(plugin,
-                                                    () -> BlockFeatureLinker.loadBlock(finalFeature, block));
-                                        }
-                                    }
-                                    boolean hasTickingOld = record.hasTickingOld();
-                                    boolean hasTickingNew = record.hasTickingNew();
-                                    if (hasTickingOld != hasTickingNew) {
-                                        if (hasTickingOld) {
-                                            BlockTickTask task = BlockTickTask.getInstanceUnsafe();
-                                            if (task != null) {
-                                                task.removeBlock(block);
-                                            }
-                                        } else {
-                                            BlockTickTask.getInstance().addBlock(block);
-                                        }
-                                    }
-                                });
+                                .ifPresent(record -> BlockFeatureLinker.refreshBlock(block, record));
                     }
                 }
             }
         }
         refreshCachedSize();
-    }
-
-    private record RefreshCustomBlockRecord(@Nullable NamespacedKey key,
-                                            @Nullable FeatureBlockLoad oldFeature,
-                                            @Nullable FeatureBlockLoad newFeature,
-                                            boolean hasTickingOld, boolean hasTickingNew) {
-
-        @Nullable
-        public static RefreshCustomBlockRecord create(@Nullable CustomBlock oldBlock, @Nullable CustomBlock newBlock) {
-            CustomBlock compareBlock = newBlock == null ? oldBlock : newBlock;
-            if (compareBlock == null)
-                return null;
-            return new RefreshCustomBlockRecord(compareBlock.getKey(),
-                    ObjectUtil.tryCast(oldBlock, FeatureBlockLoad.class),
-                    ObjectUtil.tryCast(newBlock, FeatureBlockLoad.class),
-                    oldBlock instanceof FeatureBlockTick,
-                    newBlock instanceof FeatureBlockTick);
-        }
-
-        public boolean needOperate() {
-            return hasTickingOld || hasTickingNew || oldFeature != null || newFeature != null;
-        }
     }
 }

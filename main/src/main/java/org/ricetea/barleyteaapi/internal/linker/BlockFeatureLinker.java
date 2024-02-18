@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.linker;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -8,6 +9,10 @@ import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
+import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
+import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
+import org.ricetea.barleyteaapi.util.SyncUtil;
+import org.ricetea.utils.ChainedRunable;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -102,27 +107,28 @@ public final class BlockFeatureLinker {
         ObjectUtil.tryCall(() -> featureFunc.accept(feature, block));
     }
 
-    public static void loadBlock(@Nonnull Block block) {
+    public static void loadBlock(@Nonnull Block block, boolean loadOnly) {
         CustomBlock blockType = CustomBlock.get(block);
         if (blockType == null)
             return;
-        loadBlock(block);
+        loadBlock(blockType, block, loadOnly);
     }
 
-    public static void loadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
-        if (blockType instanceof FeatureBlockLoad feature) {
-            loadBlock(feature, block);
-        }
-    }
-
-    public static void loadBlock(@Nonnull FeatureBlockLoad feature, @Nonnull Block block) {
+    public static void loadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block, boolean loadOnly) {
         if (block.isEmpty())
+            return;
+        FeatureBlockLoad feature = blockType.getFeature(FeatureBlockLoad.class);
+        boolean needTick = !loadOnly && blockType.getFeature(FeatureBlockTick.class) != null;
+        if (feature == null && !needTick)
             return;
         synchronized (loadedBlocks) {
             if (!loadedBlocks.add(block))
                 return;
         }
-        ObjectUtil.tryCall(() -> feature.handleBlockLoaded(block));
+        ObjectUtil.tryCall(feature, _feature ->
+                SyncUtil.callInMainThread(() -> _feature.handleBlockLoaded(block)));
+        if (needTick)
+            BlockTickTask.getInstance().addBlock(block);
     }
 
     public static void unloadBlock(@Nonnull Block block) {
@@ -133,16 +139,100 @@ public final class BlockFeatureLinker {
     }
 
     public static void unloadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
-        if (blockType instanceof FeatureBlockLoad feature) {
-            unloadBlock(feature, block);
-        }
-    }
-
-    public static void unloadBlock(@Nonnull FeatureBlockLoad feature, @Nonnull Block block) {
         synchronized (loadedBlocks) {
             if (!loadedBlocks.remove(block))
                 return;
         }
-        ObjectUtil.tryCall(() -> feature.handleBlockUnloaded(block));
+        ObjectUtil.tryCall(blockType.getFeature(FeatureBlockLoad.class), _feature ->
+                SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
+        if (blockType.getFeature(FeatureBlockTick.class) != null)
+            ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+    }
+
+    public static void moveBlock(@Nonnull CustomBlock blockType, @Nonnull Block blockFrom, @Nonnull Block blockTo) {
+        synchronized (loadedBlocks) {
+            if (!loadedBlocks.remove(blockFrom) || !loadedBlocks.add(blockTo))
+                return;
+        }
+        ObjectUtil.tryCall(blockType.getFeature(FeatureBlockLoad.class),
+                _feature -> SyncUtil.callInMainThread(() -> {
+                    _feature.handleBlockUnloaded(blockFrom);
+                    _feature.handleBlockLoaded(blockTo);
+                }));
+        if (blockType.getFeature(FeatureBlockTick.class) != null) {
+            BlockTickTask task = BlockTickTask.getInstance();
+            task.removeBlock(blockFrom);
+            task.addBlock(blockTo);
+        }
+    }
+
+    public static void refreshBlock(@Nonnull Block block, @Nonnull RefreshCustomBlockRecord record) {
+        FeatureBlockLoad oldLoadFeature = record.oldLoadFeature();
+        FeatureBlockLoad newLoadFeature = record.newLoadFeature();
+        boolean hasTickingOld = record.hasTickingOld();
+        boolean hasTickingNew = record.hasTickingNew();
+        synchronized (loadedBlocks) {
+            if (oldLoadFeature == null) {
+                if (newLoadFeature == null) {
+                    loadedBlocks.remove(block);
+                } else {
+                    if (!loadedBlocks.add(block))
+                        return;
+                }
+            } else {
+                if (newLoadFeature == null) {
+                    if (!loadedBlocks.remove(block))
+                        return;
+                }
+            }
+        }
+        ChainedRunable chainedRunable = new ChainedRunable();
+        if (oldLoadFeature != null)
+            chainedRunable.attach(() -> oldLoadFeature.handleBlockUnloaded(block));
+        if (newLoadFeature != null)
+            chainedRunable.attach(() -> newLoadFeature.handleBlockLoaded(block));
+        if (!chainedRunable.isEmpty())
+            SyncUtil.callInMainThread(chainedRunable);
+        if (hasTickingOld) {
+            if (!hasTickingNew) {
+                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(),
+                        task -> task.removeBlock(block));
+            }
+        } else {
+            if (hasTickingNew) {
+                BlockTickTask.getInstance().addBlock(block);
+            }
+        }
+    }
+
+
+    public record RefreshCustomBlockRecord(@Nullable NamespacedKey key,
+                                           @Nullable FeatureBlockLoad oldLoadFeature,
+                                           @Nullable FeatureBlockLoad newLoadFeature,
+                                           boolean hasTickingOld, boolean hasTickingNew) {
+
+        @Nullable
+        public static RefreshCustomBlockRecord create(@Nullable CustomBlock oldBlock, @Nullable CustomBlock newBlock) {
+            CustomBlock compareBlock = newBlock == null ? oldBlock : newBlock;
+            if (compareBlock == null)
+                return null;
+            return new RefreshCustomBlockRecord(compareBlock.getKey(),
+                    ObjectUtil.tryMap(oldBlock, _block -> _block.getFeature(FeatureBlockLoad.class)),
+                    ObjectUtil.tryMap(newBlock, _block -> _block.getFeature(FeatureBlockLoad.class)),
+                    ObjectUtil.tryMap(
+                            newBlock,
+                            _block -> _block.getFeature(FeatureBlockTick.class) != null,
+                            false
+                    ),
+                    ObjectUtil.tryMap(
+                            newBlock,
+                            _block -> _block.getFeature(FeatureBlockTick.class) != null,
+                            false
+                    ));
+        }
+
+        public boolean needOperate() {
+            return hasTickingOld || hasTickingNew || oldLoadFeature != null || newLoadFeature != null;
+        }
     }
 }
