@@ -32,6 +32,16 @@ public interface Property<T> extends UnaryOperator<T>, Supplier<T>, Consumer<T> 
     @Nonnull
     PropertyType getPropertyType();
 
+    @Nullable
+    default T operate(@Nonnull UnaryOperator<T> operator) {
+        return set(operator.apply(get()));
+    }
+
+    @Nullable
+    default T safeOperate(@Nonnull UnaryOperator<T> operator) {
+        return ObjectUtil.safeMap(ObjectUtil.safeMap(get(), operator), this::set);
+    }
+
     default T apply(T obj) {
         return set(obj);
     }

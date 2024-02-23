@@ -6,10 +6,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
+import org.ricetea.utils.Box;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
@@ -24,7 +26,7 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
             throw new UnsupportedOperationException("'colCount' can't lower than 1 or greater then 3!");
         }
         int length = ingredientMatrix.length;
-        if (length <= 0) {
+        if (length == 0) {
             throw new UnsupportedOperationException("'ingredientMatrix' can't be empty!");
         } else {
             int remain = length % colCount;
@@ -39,13 +41,50 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
                 this.rowCount = rowCount;
             }
         }
-        this.ingredientMatrix = ingredientMatrix;
+        if (Arrays.stream(ingredientMatrix).anyMatch(Objects::isNull)) {
+            this.ingredientMatrix = Arrays.stream(ingredientMatrix)
+                    .map(type -> ObjectUtil.letNonNull(type, CustomItemType::empty))
+                    .toArray(CustomItemType[]::new);
+        } else {
+            this.ingredientMatrix = ingredientMatrix;
+        }
+    }
+
+    public ShapedCraftingRecipe(@Nonnull NamespacedKey key, @Nonnull CustomItemType[][] ingredientMatrix,
+                                @Nonnull CustomItemType result) {
+        super(key, result);
+        int length = ingredientMatrix.length;
+        if (length == 0) {
+            throw new UnsupportedOperationException("'ingredientMatrix' can't be empty!");
+        } else {
+            CustomItemType[] matrixTranslated;
+            int colCount = 0;
+            int rowCount = Math.min(3, length);
+            for (int i = 0; i < rowCount; i++) {
+                colCount = Math.max(colCount, ingredientMatrix[i].length);
+            }
+            final int finalColCount = Math.min(3, colCount);
+            matrixTranslated = Arrays.stream(ingredientMatrix)
+                    .limit(3)
+                    .map(innerArray -> {
+                        if (innerArray.length < finalColCount) {
+                            return Arrays.copyOf(innerArray, finalColCount);
+                        } else {
+                            return innerArray;
+                        }
+                    })
+                    .flatMap(Stream::of)
+                    .map(type -> ObjectUtil.letNonNull(type, CustomItemType::empty))
+                    .toArray(CustomItemType[]::new);
+            this.ingredientMatrix = matrixTranslated;
+            this.colCount = colCount;
+            this.rowCount = rowCount;
+        }
     }
 
     @Nonnull
     public List<CustomItemType> getIngredientMatrix() {
-        return ObjectUtil.letNonNull(Collections.unmodifiableList(Arrays.asList(getIngredientMatrix0())),
-                Collections::emptyList);
+        return ObjectUtil.letNonNull(List.of(getIngredientMatrix0()), Collections::emptyList);
     }
 
     @Nonnull
@@ -123,23 +162,21 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     public ShapedRecipe toBukkitRecipe(@Nonnull NamespacedKey key) {
         ShapedRecipe result = new ShapedRecipe(key,
                 new ItemStack(getResult().getOriginalType()));
-        HashMap<Material, Character> collectMap = new HashMap<>();
-        char c = 'a';
+        EnumMap<Material, Character> collectMap = new EnumMap<>(Material.class);
+        Box<Character> characterBox = Box.box('a');
         int colCount = getColumnCount();
         String[] shape = new String[getRowCount()];
         int currentIndex = 0;
         for (CustomItemType type : getIngredientMatrix()) {
             Material material = type.getOriginalType();
-            Character ct = collectMap.get(material);
-            if (ct == null) {
-                collectMap.put(material, ct = c++);
-            }
+            char c = collectMap.computeIfAbsent(material,
+                    (ignored) -> Objects.requireNonNull(characterBox.safeOperate(_c -> ++_c)));
             int currentRowIndex = currentIndex / colCount;
             String shapeLet = shape[currentRowIndex];
             if (shapeLet == null) {
-                shape[currentRowIndex] = Character.toString(ct);
+                shape[currentRowIndex] = Character.toString(c);
             } else {
-                shape[currentRowIndex] = shapeLet + ct;
+                shape[currentRowIndex] = shapeLet + c;
             }
             currentIndex++;
         }
