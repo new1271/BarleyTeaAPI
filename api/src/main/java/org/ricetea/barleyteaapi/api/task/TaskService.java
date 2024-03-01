@@ -20,11 +20,14 @@ public interface TaskService {
     }
 
     @Nonnull
-    Future<?> runTask(@Nonnull Runnable runnable);
+    Future<?> runTask(@Nonnull Runnable runnable, @Nullable TaskOption... options);
 
     @Nonnull
-    Future<?> runTaskLater(@Nonnull Runnable runnable, @Nonnegative long delay);
+    Future<?> runTaskLater(@Nonnull Runnable runnable, @Nonnegative long delay, @Nullable TaskOption... options);
 
     @Nonnull
-    Future<?> runTaskTimer(@Nonnull Runnable runnable, @Nonnegative long initialDelay, @Nonnegative long interval);
+    Future<?> runTaskTimer(@Nonnull Runnable runnable, @Nonnegative long initialDelay,
+                           @Nonnegative long interval, @Nullable TaskOption... options);
+
+    void shutdown();
 }
