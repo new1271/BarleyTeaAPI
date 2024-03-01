@@ -34,9 +34,9 @@ public final class TaskServiceImpl implements TaskService {
     @Nonnull
     @Override
     public Future<?> runTaskTimer(@Nonnull Runnable runnable, @Nonnegative long initialDelay, @Nonnegative long interval) {
-        ScheduledTask task = new ScheduledTask(pool, runnable, interval);
+        Runnable task = interval == 0 ? runnable : new ScheduledTask(pool, runnable, interval);
         if (initialDelay == 0)
-            return pool.submit(task);
+            return runTask(task);
         return runTaskLater(task, initialDelay);
     }
 
