@@ -282,7 +282,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
         ObjectUtil.safeCall(TickingService.syncServiceUnsafe(), TickingService::shutdown);
         ObjectUtil.safeCall(TickingService.asyncServiceUnsafe(), TickingService::shutdown);
-        ObjectUtil.safeCall(TaskService.getInstance(), TaskService::shutdown);
         Bukkit.getServicesManager().unregisterAll(this);
         Bukkit.getScheduler().cancelTasks(this);
         _inst = null;
