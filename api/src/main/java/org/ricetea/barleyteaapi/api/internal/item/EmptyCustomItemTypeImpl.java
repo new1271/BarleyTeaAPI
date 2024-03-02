@@ -56,4 +56,17 @@ public class EmptyCustomItemTypeImpl implements CustomItemType {
     public void call(@Nonnull Consumer<Material> materialConsumer, @Nonnull Consumer<CustomItem> customBlockConsumer) {
         materialConsumer.accept(Material.AIR);
     }
+
+    @Override
+    public boolean equals(Object another) {
+        if (another instanceof CustomItemType itemType)
+            return itemType.isEmpty();
+        return super.equals(another);
+    }
+
+    @Nonnull
+    @Override
+    public String toString() {
+        return "CustomItemType{" + getKey() + "}";
+    }
 }

@@ -109,8 +109,13 @@ public class Either<L, R> implements EitherOperation<L, R> {
 
     public boolean equals(Object another) {
         if (!super.equals(another) && another instanceof Either<?, ?> either) {
-            return Objects.equals(left(), either.left()) &&
-                    Objects.equals(right(), either.right());
+            L left = left();
+            if (left != null)
+                return Objects.equals(left,either.left());
+            R right = right();
+            if (right != null)
+                return Objects.equals(right, either.right());
+            return either.isEmpty();
         }
         return true;
     }

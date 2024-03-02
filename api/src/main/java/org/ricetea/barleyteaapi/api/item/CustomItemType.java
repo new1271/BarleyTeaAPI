@@ -11,9 +11,19 @@ import org.ricetea.utils.EitherOperation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 public interface CustomItemType extends EitherOperation<Material, CustomItem>, Keyed {
+
+    BiPredicate<CustomItemType, CustomItemType> EQUALS = (a, b) -> {
+        if (a == null)
+            a = CustomItemType.empty();
+        if (b == null)
+            b = CustomItemType.empty();
+        return Objects.equals(a.getKey(), b.getKey());
+    };
 
     @Nonnull
     static CustomItemType empty() {

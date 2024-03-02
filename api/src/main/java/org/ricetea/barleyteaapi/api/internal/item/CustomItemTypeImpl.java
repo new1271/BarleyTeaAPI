@@ -82,4 +82,17 @@ public class CustomItemTypeImpl extends Either<Material, CustomItem> implements 
     public boolean isEmpty() {
         return false;
     }
+
+    @Override
+    public boolean equals(Object another) {
+        if (another instanceof CustomItemType itemType)
+            return EQUALS.test(this, itemType);
+        return super.equals(another);
+    }
+
+    @Nonnull
+    @Override
+    public String toString() {
+        return "CustomItemType{" + getKey() + "}";
+    }
 }

@@ -114,40 +114,43 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
             if (sqrt % 1.0 == 1.0) {
                 lengthForSide = (int) sqrt;
             } else {
-                lengthForSide = 0;
+                return false;
             }
         }
-        int colCount = getColumnCount();
-        int rowCount = getRowCount();
-        if (lengthForSide > 0 && lengthForSide >= colCount && lengthForSide >= rowCount) {
-            for (int i = lengthForSide; i >= colCount; i--) {
-                for (int j = lengthForSide; j >= rowCount; j--) {
-                    boolean found = true;
-                    for (int col = 0; col < colCount; col++) {
-                        for (int row = 0; row < rowCount; row++) {
-                            int colIndex = lengthForSide - i + col;
-                            int rowIndex = lengthForSide - j + row;
-                            CustomItemType predictedIngredient = ObjectUtil.letNonNull(
-                                    ingredientMatrix[row * colCount + col],
-                                    CustomItemType::empty);
-                            CustomItemType actualIngredient = ObjectUtil.letNonNull(
-                                    matrix[rowIndex * lengthForSide + colIndex],
-                                    CustomItemType::empty);
-                            if (!predictedIngredient.equals(actualIngredient)) {
-                                found = false;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            break;
-                        }
-                    }
-                    if (found)
-                        return true;
+        int countOfI = lengthForSide - colCount, countOfJ = lengthForSide - rowCount;
+        if (countOfI < 0 || countOfJ < 0)
+            return false;
+        for (int i = 0; i <= countOfI; i++) {
+            for (int j = 0; j <= countOfJ; j++) {
+                if (flatCompare(matrix, ingredientMatrix, lengthForSide, lengthForSide, i, j)) {
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    private boolean flatCompare(@Nonnull CustomItemType[] largeMatrix,
+                                @Nonnull CustomItemType[] smallMatrix,
+                                int totalColumn, int totalRow,
+                                int startColumn, int startRow) {
+        int rowOfSmall = rowCount;
+        int colOfSmall = colCount;
+        if (totalColumn < colOfSmall || totalRow < rowOfSmall)
+            return false;
+        if (startColumn + colOfSmall > totalColumn || startRow + rowOfSmall > totalRow)
+            return false;
+        for (int i = 0; i < colOfSmall; i++) {
+            for (int j = 0; j < rowOfSmall; j++) {
+                int indexOfSmall = j * colOfSmall + i;
+                int indexOfLarge = (j + startRow) * totalColumn + (i + startColumn);
+                CustomItemType itemTypeOfSmall = ObjectUtil.letNonNull(smallMatrix[indexOfSmall], CustomItemType::empty);
+                CustomItemType itemTypeOfLarge = ObjectUtil.letNonNull(largeMatrix[indexOfLarge], CustomItemType::empty);
+                if (!itemTypeOfSmall.equals(itemTypeOfLarge))
+                    return false;
+            }
+        }
+        return true;
     }
 
     @Override
