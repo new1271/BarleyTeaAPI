@@ -8,27 +8,27 @@ import java.util.*;
 public final class CachedSet<T> implements Set<T> {
     private final Class<T> clazz;
     private T[] _array;
-    private HashSet<T> _list;
+    private HashSet<T> _set;
 
     public CachedSet(Class<T> clazz) {
-        _list = new HashSet<>();
+        _set = new HashSet<>();
         this.clazz = clazz;
     }
 
     public CachedSet(Class<T> clazz, int initialCapacity) {
-        _list = new HashSet<>(initialCapacity);
+        _set = new HashSet<>(initialCapacity);
         this.clazz = clazz;
     }
 
     public CachedSet(Class<T> clazz, Collection<? extends T> collection) {
-        _list = new HashSet<>(collection);
+        _set = new HashSet<>(collection);
         this.clazz = clazz;
     }
 
     @Override
     public int size() {
-        if (_list != null)
-            return _list.size();
+        if (_set != null)
+            return _set.size();
         if (_array != null)
             return _array.length;
         return 0;
@@ -36,8 +36,8 @@ public final class CachedSet<T> implements Set<T> {
 
     @Override
     public boolean isEmpty() {
-        if (_list != null)
-            return _list.isEmpty();
+        if (_set != null)
+            return _set.isEmpty();
         if (_array != null)
             return _array.length <= 0;
         return true;
@@ -45,8 +45,8 @@ public final class CachedSet<T> implements Set<T> {
 
     @Override
     public boolean contains(Object o) {
-        if (_list != null)
-            return _list.contains(o);
+        if (_set != null)
+            return _set.contains(o);
         if (_array != null) {
             T[] array = _array;
             for (int i = 0, length = _array.length; i < length; i++) {
@@ -65,8 +65,8 @@ public final class CachedSet<T> implements Set<T> {
     @Nonnull
     @Override
     public Iterator<T> iterator() {
-        if (_list != null)
-            return _list.iterator();
+        if (_set != null)
+            return _set.iterator();
         if (_array != null)
             return new Iterator<>() {
                 final T[] array = _array;
@@ -92,45 +92,53 @@ public final class CachedSet<T> implements Set<T> {
     @Nonnull
     @Override
     public Object[] toArray() {
-        return ObjectUtil.letNonNull(listToArray(), () -> new Object[0]);
+        return ObjectUtil.letNonNull(setToArray(), EmptyArrays::emptyArray);
     }
 
     @Nonnull
     @Override
     public <L> L[] toArray(@Nonnull L[] a) {
+        Set<T> set = _set;
+        if (set != null && set.isEmpty()) {
+            return EmptyArrays.emptyArray();
+        } else {
+            T[] array = _array;
+            if (array != null && array.length == 0)
+                return EmptyArrays.emptyArray();
+        }
         return arrayToSet().toArray(a);
     }
 
     @Nullable
     public T[] toArrayCasted() {
-        return listToArray();
+        return setToArray();
     }
 
     @Override
     public boolean add(T e) {
-        HashSet<T> list = _list;
-        if (list == null)
-            list = arrayToSet();
-        return list.add(e);
+        HashSet<T> set = _set;
+        if (set == null)
+            set = arrayToSet();
+        return set.add(e);
     }
 
     @Override
     public boolean remove(Object o) {
-        HashSet<T> list = _list;
-        if (list == null)
-            list = arrayToSet();
-        if (list.isEmpty())
+        HashSet<T> set = _set;
+        if (set == null)
+            set = arrayToSet();
+        if (set.isEmpty())
             return false;
         else
-            return list.remove(o);
+            return set.remove(o);
     }
 
     @Override
     public boolean containsAll(@Nullable Collection<?> c) {
         if (c == null)
             return false;
-        if (_list != null)
-            return _list.containsAll(c);
+        if (_set != null)
+            return _set.containsAll(c);
         if (_array != null) {
             T[] array = _array;
             for (var iterator = c.iterator(); iterator.hasNext(); ) {
@@ -162,58 +170,62 @@ public final class CachedSet<T> implements Set<T> {
     public boolean addAll(@Nullable Collection<? extends T> c) {
         if (c == null)
             return false;
-        HashSet<T> list = _list;
-        if (list == null)
-            list = arrayToSet();
-        return list.addAll(c);
+        HashSet<T> set = _set;
+        if (set == null)
+            set = arrayToSet();
+        return set.addAll(c);
     }
 
     @Override
     public boolean removeAll(@Nullable Collection<?> c) {
         if (c == null)
             return false;
-        HashSet<T> list = _list;
-        if (list == null)
-            list = arrayToSet();
-        if (list.isEmpty())
+        HashSet<T> set = _set;
+        if (set == null)
+            set = arrayToSet();
+        if (set.isEmpty())
             return false;
         else
-            return list.removeAll(c);
+            return set.removeAll(c);
     }
 
     @Override
     public boolean retainAll(@Nullable Collection<?> c) {
         if (c == null)
             return false;
-        HashSet<T> list = _list;
-        if (list == null)
-            list = arrayToSet();
-        if (list.isEmpty())
+        HashSet<T> set = _set;
+        if (set == null)
+            set = arrayToSet();
+        if (set.isEmpty())
             return false;
         else
-            return list.retainAll(c);
+            return set.retainAll(c);
     }
 
     @Override
     public void clear() {
-        if (_list != null)
-            _list.clear();
+        if (_set != null)
+            _set.clear();
         if (_array != null)
             _array = null;
     }
 
     @Nullable
     @SuppressWarnings("unchecked")
-    private T[] listToArray() {
+    private T[] setToArray() {
         if (_array == null) {
-            if (_list != null) {
-                int count = _list.size();
-                _array = (T[]) Array.newInstance(clazz, count);
-                Iterator<T> iterator = _list.iterator();
-                for (int i = 0; i < count && iterator.hasNext(); i++) {
-                    _array[i] = iterator.next();
+            if (_set != null) {
+                int count = _set.size();
+                if (count == 0) {
+                    _array = EmptyArrays.emptyArray();
+                } else {
+                    _array = (T[]) Array.newInstance(clazz, count);
+                    Iterator<T> iterator = _set.iterator();
+                    for (int i = 0; i < count && iterator.hasNext(); i++) {
+                        _array[i] = iterator.next();
+                    }
                 }
-                _list = null;
+                _set = null;
             }
         }
         return _array;
@@ -221,15 +233,15 @@ public final class CachedSet<T> implements Set<T> {
 
     @Nonnull
     private HashSet<T> arrayToSet() {
-        HashSet<T> list = _list;
-        if (list == null) {
-            if (_array == null) {
-                list = new HashSet<>(0);
+        HashSet<T> set = _set;
+        if (set == null) {
+            if (_array == null || _array.length == 0) {
+                set = new HashSet<>(0);
             } else {
-                list = new HashSet<>(Arrays.asList(_array));
+                set = new HashSet<>(Arrays.asList(_array));
                 _array = null;
             }
         }
-        return _list = list;
+        return _set = set;
     }
 }

@@ -5,6 +5,7 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 
 public interface LoopTask extends Runnable {
@@ -17,6 +18,11 @@ public interface LoopTask extends Runnable {
     boolean isStarted();
 
     void setStarted(boolean started);
+
+    @Nullable
+    default TaskOption[] getOptions() {
+        return null;
+    }
 
     @Nonnull
     default Stopwatch getStopwatch() {
@@ -53,9 +59,9 @@ public interface LoopTask extends Runnable {
             long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
             long stepTime = getStepTime();
             if (elapsed < stepTime) {
-                service.runTaskLater(this, stepTime - elapsed);
+                service.runTaskLater(this, stepTime - elapsed, getOptions());
             } else {
-                service.runTask(this);
+                service.runTask(this, getOptions());
             }
         }
     }

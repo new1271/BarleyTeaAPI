@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.internal.task;
 
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.task.TaskOption;
 import org.ricetea.barleyteaapi.api.task.TaskService;
@@ -11,6 +10,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,11 +55,6 @@ public final class TaskServiceImpl implements TaskService {
                         yield task;
                     }
                 }
-                case 2 -> {
-                    FutureTask<Void> task = new FutureTask<>(runnable, null);
-                    task.run();
-                    yield task;
-                }
                 default -> runTask(runnable, false, longRunning);
             };
         }
@@ -92,7 +88,9 @@ public final class TaskServiceImpl implements TaskService {
         if (longRunning) {
             return executorServiceLazy.get().schedule(runnable, delay, TimeUnit.MILLISECONDS);
         } else {
-            return pool.submit(new DelayTask(pool, runnable, delay));
+            FutureWatcher watcher = new FutureWatcher();
+            watcher.addFuture(pool, new DelayTask(watcher, pool, runnable, delay));
+            return watcher;
         }
     }
 
@@ -128,13 +126,15 @@ public final class TaskServiceImpl implements TaskService {
             return executorServiceLazy.get()
                     .scheduleAtFixedRate(runnable, initialDelay, interval, TimeUnit.MILLISECONDS);
         } else {
-            return pool.submit(
-                    new DelayTask(
+            FutureWatcher watcher = new FutureWatcher();
+            watcher.addFuture(pool,
+                    new DelayTask(watcher,
                             pool,
-                            new ScheduledTask(pool, runnable, interval),
+                            new ScheduledTask(watcher, pool, runnable, interval),
                             initialDelay
                     )
             );
+            return watcher;
         }
     }
 
@@ -184,11 +184,14 @@ public final class TaskServiceImpl implements TaskService {
 
     private static final class DelayTask implements Runnable {
 
+        private final FutureWatcher watcher;
         private final ForkJoinPool pool;
         private final Runnable laterRunning;
         private final long delay;
 
-        public DelayTask(@Nonnull final ForkJoinPool pool, @Nonnull final Runnable laterRunning, final long delay) {
+        public DelayTask(@Nonnull final FutureWatcher watcher, @Nonnull final ForkJoinPool pool,
+                         @Nonnull final Runnable laterRunning, final long delay) {
+            this.watcher = watcher;
             this.pool = pool;
             this.laterRunning = laterRunning;
             this.delay = delay;
@@ -196,37 +199,99 @@ public final class TaskServiceImpl implements TaskService {
 
         @Override
         public void run() {
-            if (Bukkit.isPrimaryThread()) {
-                pool.submit(this);
-            } else {
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException ignored) {
-                }
-                pool.submit(laterRunning);
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException ignored) {
             }
+            watcher.addFuture(pool, laterRunning);
         }
     }
 
     private static final class ScheduledTask implements Runnable {
 
+        private final FutureWatcher watcher;
         private final DelayTask delayTask;
         private final ForkJoinPool pool;
         private final Runnable laterRunning;
 
-        public ScheduledTask(@Nonnull final ForkJoinPool pool, @Nonnull final Runnable laterRunning, final long interval) {
+        public ScheduledTask(@Nonnull final FutureWatcher watcher, @Nonnull final ForkJoinPool pool,
+                             @Nonnull final Runnable laterRunning, final long interval) {
+            this.watcher = watcher;
             this.pool = pool;
             this.laterRunning = laterRunning;
-            this.delayTask = new DelayTask(pool, this, interval);
+            this.delayTask = new DelayTask(watcher, pool, this, interval);
         }
 
         @Override
         public void run() {
-            if (Bukkit.isPrimaryThread()) {
-                pool.submit(this);
-            } else {
-                pool.submit(laterRunning);
-                pool.submit(delayTask);
+            watcher.addFuture(pool, laterRunning);
+            watcher.addFuture(pool, delayTask);
+        }
+    }
+
+    private static final class FutureWatcher implements Future<Void> {
+
+        @Nonnull
+        private final Map<Runnable, Future<?>> futureList = new ConcurrentHashMap<>();
+
+        public void addFuture(@Nonnull ExecutorService service, @Nonnull Runnable runnable) {
+            futureList.computeIfAbsent(runnable, _runnable -> service.submit(new WatchedRunnable(runnable)));
+        }
+
+        public void removeFuture(@Nonnull Runnable runnable) {
+            futureList.remove(runnable);
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return futureList.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .allMatch(future -> future.cancel(mayInterruptIfRunning));
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return futureList.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .allMatch(Future::isCancelled);
+        }
+
+        @Override
+        public boolean isDone() {
+            return futureList.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .allMatch(Future::isDone);
+        }
+
+        @Override
+        public Void get() {
+            return null;
+        }
+
+        @Override
+        public Void get(long timeout, @Nonnull TimeUnit unit) {
+            return null;
+        }
+
+        private class WatchedRunnable implements Runnable {
+
+            @Nonnull
+            private final Runnable runnable;
+
+            WatchedRunnable(@Nonnull Runnable runnable) {
+                this.runnable = runnable;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    runnable.run();
+                } finally {
+                    FutureWatcher.this.removeFuture(runnable);
+                }
             }
         }
     }

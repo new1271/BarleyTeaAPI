@@ -90,7 +90,7 @@ public final class ChunkStorageImpl implements ChunkStorage {
 
     public void removeAllBlockDataContainersFromChunk(@Nonnull Chunk chunk) {
         PersistentDataContainer container = chunk.getPersistentDataContainer();
-        for (NamespacedKey key : container.getKeys().toArray(new NamespacedKey[0])) {
+        for (NamespacedKey key : container.getKeys().toArray(NamespacedKey[]::new)) {
             if (key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI) && key.getKey().startsWith("block.")) {
                 container.remove(key);
             }

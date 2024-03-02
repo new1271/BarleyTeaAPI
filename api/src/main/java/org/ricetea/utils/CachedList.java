@@ -93,12 +93,20 @@ public final class CachedList<T> implements List<T> {
     @Override
     public Object[] toArray() {
         Object[] result = listToArray();
-        return Objects.requireNonNullElseGet(result, () -> new Object[0]);
+        return Objects.requireNonNullElseGet(result, EmptyArrays::emptyArray);
     }
 
     @Nonnull
     @Override
     public <L> L[] toArray(@Nonnull L[] a) {
+        List<T> list = _list;
+        if (list != null && list.isEmpty()) {
+            return EmptyArrays.emptyArray();
+        } else {
+            T[] array = _array;
+            if (array != null && array.length == 0)
+                return EmptyArrays.emptyArray();
+        }
         return arrayToList().toArray(a);
     }
 
@@ -326,9 +334,13 @@ public final class CachedList<T> implements List<T> {
         if (_array == null) {
             if (_list != null) {
                 int count = _list.size();
+                if (count == 0) {
+                    _array = EmptyArrays.emptyArray();
+                } else {
                 _array = (T[]) Array.newInstance(clazz, count);
                 for (int i = 0; i < count; i++) {
                     _array[i] = _list.get(i);
+                }
                 }
                 _list = null;
             }
@@ -340,7 +352,7 @@ public final class CachedList<T> implements List<T> {
     private ArrayList<T> arrayToList() {
         ArrayList<T> list = _list;
         if (list == null) {
-            if (_array == null) {
+            if (_array == null || _array.length == 0) {
                 list = new ArrayList<>(0);
             } else {
                 list = new ArrayList<>(Arrays.asList(_array));
