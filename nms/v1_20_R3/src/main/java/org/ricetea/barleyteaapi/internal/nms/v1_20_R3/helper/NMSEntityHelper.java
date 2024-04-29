@@ -9,16 +9,15 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.Fireball;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.*;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
-import org.bukkit.entity.Trident;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,104 +64,76 @@ public final class NMSEntityHelper {
         return new DamageSource(holder, attacker);
     }
 
+    @Nonnull
     private static ResourceKey<DamageType> toDamageTypeResourceKey(@Nullable DamageCause cause, @Nullable Entity attacker) {
-        /*
-        net.minecraft.resources.ResourceKey IN_FIRE -> a
-        net.minecraft.resources.ResourceKey LIGHTNING_BOLT -> b
-        net.minecraft.resources.ResourceKey ON_FIRE -> c
-        net.minecraft.resources.ResourceKey LAVA -> d
-        net.minecraft.resources.ResourceKey HOT_FLOOR -> e
-        net.minecraft.resources.ResourceKey IN_WALL -> f
-        net.minecraft.resources.ResourceKey CRAMMING -> g
-        net.minecraft.resources.ResourceKey DROWN -> h
-        net.minecraft.resources.ResourceKey STARVE -> i
-        net.minecraft.resources.ResourceKey CACTUS -> j
-        net.minecraft.resources.ResourceKey FALL -> k
-        net.minecraft.resources.ResourceKey FLY_INTO_WALL -> l
-        net.minecraft.resources.ResourceKey FELL_OUT_OF_WORLD -> m
-        net.minecraft.resources.ResourceKey GENERIC -> n
-        net.minecraft.resources.ResourceKey MAGIC -> o
-        net.minecraft.resources.ResourceKey WITHER -> p
-        net.minecraft.resources.ResourceKey DRAGON_BREATH -> q
-        net.minecraft.resources.ResourceKey DRY_OUT -> r
-        net.minecraft.resources.ResourceKey SWEET_BERRY_BUSH -> s
-        net.minecraft.resources.ResourceKey FREEZE -> t
-        net.minecraft.resources.ResourceKey STALAGMITE -> u
-        net.minecraft.resources.ResourceKey FALLING_BLOCK -> v
-        net.minecraft.resources.ResourceKey FALLING_ANVIL -> w
-        net.minecraft.resources.ResourceKey FALLING_STALACTITE -> x
-        net.minecraft.resources.ResourceKey STING -> y
-        net.minecraft.resources.ResourceKey MOB_ATTACK -> z
-        net.minecraft.resources.ResourceKey MOB_ATTACK_NO_AGGRO -> A
-        net.minecraft.resources.ResourceKey PLAYER_ATTACK -> B
-        net.minecraft.resources.ResourceKey ARROW -> C
-        net.minecraft.resources.ResourceKey TRIDENT -> D
-        net.minecraft.resources.ResourceKey MOB_PROJECTILE -> E
-        net.minecraft.resources.ResourceKey FIREWORKS -> F
-        net.minecraft.resources.ResourceKey FIREBALL -> G
-        net.minecraft.resources.ResourceKey UNATTRIBUTED_FIREBALL -> H
-        net.minecraft.resources.ResourceKey WITHER_SKULL -> I
-        net.minecraft.resources.ResourceKey THROWN -> J
-        net.minecraft.resources.ResourceKey INDIRECT_MAGIC -> K
-        net.minecraft.resources.ResourceKey THORNS -> L
-        net.minecraft.resources.ResourceKey EXPLOSION -> M
-        net.minecraft.resources.ResourceKey PLAYER_EXPLOSION -> N
-        net.minecraft.resources.ResourceKey SONIC_BOOM -> O
-        net.minecraft.resources.ResourceKey BAD_RESPAWN_POINT -> P
-        net.minecraft.resources.ResourceKey OUTSIDE_BORDER -> Q
-        net.minecraft.resources.ResourceKey GENERIC_KILL -> R
-         */
-        if (cause != null) {
-            boolean attackerIsPlayer = attacker instanceof Player;
-            return switch (cause) {
-                case BLOCK_EXPLOSION -> DamageTypes.EXPLOSION;
-                case CONTACT -> DamageTypes.CACTUS;
-                case CRAMMING -> DamageTypes.CRAMMING;
-                case CUSTOM, SUICIDE -> DamageTypes.GENERIC;
-                case DRAGON_BREATH -> DamageTypes.DRAGON_BREATH;
-                case DROWNING -> DamageTypes.DROWN;
-                case DRYOUT, MELTING -> DamageTypes.DRY_OUT;
-                case ENTITY_ATTACK -> attackerIsPlayer ? DamageTypes.PLAYER_ATTACK : DamageTypes.MOB_ATTACK;
-                case ENTITY_EXPLOSION -> attackerIsPlayer ? DamageTypes.PLAYER_EXPLOSION : DamageTypes.EXPLOSION;
-                case ENTITY_SWEEP_ATTACK ->
-                        attackerIsPlayer ? DamageTypes.PLAYER_ATTACK : DamageTypes.MOB_ATTACK_NO_AGGRO;
-                case FALL -> DamageTypes.FALL;
-                case FALLING_BLOCK -> DamageTypes.FALLING_BLOCK;
-                case FIRE -> DamageTypes.ON_FIRE;
-                case FIRE_TICK -> DamageTypes.IN_FIRE;
-                case FLY_INTO_WALL -> DamageTypes.FLY_INTO_WALL;
-                case FREEZE -> DamageTypes.FREEZE;
-                case HOT_FLOOR -> DamageTypes.HOT_FLOOR;
-                case KILL -> DamageTypes.GENERIC_KILL;
-                case LAVA -> DamageTypes.LAVA;
-                case LIGHTNING -> DamageTypes.LIGHTNING_BOLT;
-                case MAGIC -> DamageTypes.MAGIC;
-                case POISON -> DamageTypes.INDIRECT_MAGIC;
-                case PROJECTILE -> getProjectileDamageType(attacker);
-                case SONIC_BOOM -> DamageTypes.SONIC_BOOM;
-                case STARVATION -> DamageTypes.STARVE;
-                case SUFFOCATION -> DamageTypes.IN_WALL;
-                case THORNS -> DamageTypes.THORNS;
-                case VOID -> DamageTypes.FELL_OUT_OF_WORLD;
-                case WITHER -> DamageTypes.WITHER;
-                case WORLD_BORDER -> DamageTypes.OUTSIDE_BORDER;
-                default -> DamageTypes.GENERIC;
-            };
+        if (cause == null) {
+            return DamageTypes.GENERIC;
         }
-        return DamageTypes.GENERIC;
+        boolean attackerIsPlayer = attacker instanceof Player;
+        return switch (cause) {
+            case BLOCK_EXPLOSION, ENTITY_EXPLOSION ->
+                    attackerIsPlayer ? DamageTypes.PLAYER_EXPLOSION : DamageTypes.EXPLOSION;
+            case CONTACT -> DamageTypes.CACTUS;
+            case CRAMMING -> DamageTypes.CRAMMING;
+            case DRAGON_BREATH -> DamageTypes.DRAGON_BREATH;
+            case DROWNING, MELTING -> DamageTypes.DROWN;
+            case DRYOUT -> DamageTypes.DRY_OUT;
+            case ENTITY_ATTACK -> attackerIsPlayer ? DamageTypes.PLAYER_ATTACK : DamageTypes.MOB_ATTACK;
+            case ENTITY_SWEEP_ATTACK -> attackerIsPlayer ? DamageTypes.PLAYER_ATTACK : DamageTypes.MOB_ATTACK_NO_AGGRO;
+            case FALL -> DamageTypes.FALL;
+            case FALLING_BLOCK -> {
+                Material material;
+                if (attacker instanceof FallingBlockEntity fallingBlock) {
+                    try {
+                        material = fallingBlock.getBlockState().getBukkitMaterial();
+                    } catch (Exception e) {
+                        material = Material.AIR;
+                    }
+                } else {
+                    material = Material.AIR;
+                }
+                yield switch (material) {
+                    case ANVIL -> DamageTypes.FALLING_ANVIL;
+                    case POINTED_DRIPSTONE -> DamageTypes.FALLING_STALACTITE;
+                    default -> DamageTypes.FALLING_BLOCK;
+                };
+            }
+            case FIRE -> DamageTypes.IN_FIRE;
+            case FIRE_TICK -> DamageTypes.ON_FIRE;
+            case FLY_INTO_WALL -> DamageTypes.FLY_INTO_WALL;
+            case FREEZE -> DamageTypes.FREEZE;
+            case HOT_FLOOR -> DamageTypes.HOT_FLOOR;
+            case KILL -> DamageTypes.GENERIC_KILL;
+            case LAVA -> DamageTypes.LAVA;
+            case LIGHTNING -> DamageTypes.LIGHTNING_BOLT;
+            case MAGIC, POISON -> DamageTypes.MAGIC;
+            case PROJECTILE -> getProjectileDamageType(attacker);
+            case SONIC_BOOM -> DamageTypes.SONIC_BOOM;
+            case STARVATION -> DamageTypes.STARVE;
+            case SUFFOCATION -> DamageTypes.IN_WALL;
+            case THORNS -> DamageTypes.THORNS;
+            case VOID -> DamageTypes.FELL_OUT_OF_WORLD;
+            case WITHER -> DamageTypes.WITHER;
+            case WORLD_BORDER -> DamageTypes.OUTSIDE_BORDER;
+            default -> DamageTypes.GENERIC;
+        };
     }
 
-    private static ResourceKey<DamageType> getProjectileDamageType(Entity attacker) {
+    @Nonnull
+    private static ResourceKey<DamageType> getProjectileDamageType(@Nullable Entity attacker) {
         if (attacker instanceof Arrow)
             return DamageTypes.ARROW;
-        else if (attacker instanceof Fireball)
-            return DamageTypes.FIREBALL;
-        else if (attacker instanceof FireworkRocketEntity)
+        if (attacker instanceof FireworkRocketEntity)
             return DamageTypes.FIREWORKS;
-        else if (attacker instanceof Trident)
+        if (attacker instanceof ThrownTrident)
             return DamageTypes.TRIDENT;
-        else if (attacker instanceof WitherSkull)
-            return DamageTypes.WITHER_SKULL;
-        return DamageTypes.MOB_PROJECTILE;
+        if (attacker instanceof ShulkerBullet)
+            return DamageTypes.MOB_PROJECTILE;
+        boolean hasOwner = ObjectUtil.safeMap(ObjectUtil.tryCast(attacker, Projectile.class), Projectile::getOwner) != null;
+        if (attacker instanceof Fireball)
+            return hasOwner ? DamageTypes.FIREBALL : DamageTypes.UNATTRIBUTED_FIREBALL;
+        if (attacker instanceof WitherSkull)
+            return hasOwner ? DamageTypes.WITHER_SKULL : DamageTypes.MAGIC;
+        return DamageTypes.MOB_ATTACK_NO_AGGRO;
     }
 }
