@@ -43,6 +43,13 @@ public final class NMSEntityHelper {
         DamageSource damageSource = buildDamageSource(world.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE),
                 toDamageTypeResourceKey(cause, nmsDamager),
                 nmsDamager, withoutScaling);
+        if (cause != null) {
+            switch (cause) {
+                case ENTITY_SWEEP_ATTACK -> damageSource.sweep();
+                case POISON -> damageSource.poison();
+                case MELTING -> damageSource.melting();
+            }
+        }
         return nmsDamagee.hurt(damageSource, damage);
     }
 
