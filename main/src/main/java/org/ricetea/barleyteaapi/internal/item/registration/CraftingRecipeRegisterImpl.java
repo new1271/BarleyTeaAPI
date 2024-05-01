@@ -1,6 +1,7 @@
 package org.ricetea.barleyteaapi.internal.item.registration;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.*;
@@ -14,6 +15,7 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,6 +50,12 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     private NamespacedKey findShapedDummyRecipeKey(@Nonnull ShapedCraftingRecipe recipe) {
         int column = recipe.getColumnCount();
         int row = recipe.getRowCount();
+        if (column == 1 && row == 1) {
+            List<CustomItemType> matrix = recipe.getIngredientMatrix();
+            if (matrix.size() == 1) {
+                return findSingleItemDummyRecipeKey(matrix.get(0));
+            }
+        }
         ItemStack[] ingredients = recipe.getIngredientMatrix().stream()
                 .map(this::generateTestOnlyItemStack)
                 .toArray(ItemStack[]::new);
@@ -103,7 +111,11 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
 
     @Nullable
     private NamespacedKey findShapelessDummyRecipeKey(@Nonnull ShapelessCraftingRecipe recipe) {
-        List<ItemStack> ingredients = recipe.getIngredients().stream()
+        List<CustomItemType> ingredientTypes = recipe.getIngredients();
+        if (ingredientTypes.size() == 1) {
+            return findSingleItemDummyRecipeKey(ingredientTypes.get(0));
+        }
+        List<ItemStack> ingredients = ingredientTypes.stream()
                 .map(this::generateTestOnlyItemStack)
                 .filter(Objects::nonNull)
                 .toList();
@@ -131,6 +143,37 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
 
             if (craftIngredients.isEmpty() && modifiableIngredients.isEmpty())
                 return craftRecipe.getKey();
+        }
+        return null;
+    }
+
+    @Nullable
+    private NamespacedKey findSingleItemDummyRecipeKey(@Nonnull CustomItemType itemType) {
+        for (var iterator = Bukkit.recipeIterator(); iterator.hasNext(); ) {
+            Recipe recipe = iterator.next();
+            RecipeChoice recipeChoice = null;
+            if (recipe instanceof ShapelessRecipe shapelessRecipe) {
+                List<RecipeChoice> choiceList = shapelessRecipe.getChoiceList();
+                if (choiceList.size() == 1)
+                    recipeChoice = choiceList.get(0);
+            } else if (recipe instanceof ShapedRecipe shapedRecipe) {
+                String[] shapes = shapedRecipe.getShape();
+                if (shapes != null && shapes.length == 1) {
+                    String shape = shapes[0];
+                    if (shape != null && shape.length() == 1) {
+                        recipeChoice = shapedRecipe.getChoiceMap().get(shape.charAt(0));
+                    }
+                }
+            }
+            if (recipeChoice == null)
+                continue;
+            ItemStack testItemStack = generateTestOnlyItemStack(itemType);
+            if (testItemStack == null || !recipeChoice.test(testItemStack))
+                continue;
+            NamespacedKey result = ObjectUtil.tryMap(ObjectUtil.tryCast(recipe, Keyed.class), Keyed::getKey);
+            if (result == null)
+                continue;
+            return result;
         }
         return null;
     }
