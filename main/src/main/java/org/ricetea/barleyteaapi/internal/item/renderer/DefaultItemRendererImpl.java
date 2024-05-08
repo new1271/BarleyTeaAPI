@@ -6,6 +6,7 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -15,9 +16,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
@@ -109,17 +112,18 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         CustomItemType itemType = CustomItemType.get(itemStack);
 
         boolean isTool = itemType.nonNullMap(ItemHelper::materialIsTool, CustomItem::isTool);
-
+        boolean hasEnchants = false;
         double toolDamage = 0, toolSpeed = 0;
-
-        if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
-            final boolean isBedrockPlayer;
+        Lazy<Boolean> isBedrockPlayerLazy = Lazy.create(() -> {
             if (player != null && apiInstance.getSoftDependRegister().get(BulitInSoftDepend.Geyser)
                     instanceof GeyserConnector connector) {
-                isBedrockPlayer = connector.isBedrockPlayer(player);
+                return connector.isBedrockPlayer(player);
             } else {
-                isBedrockPlayer = false;
+                return false;
             }
+        });
+
+        if (meta.hasEnchants() && !meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
             final Map<Enchantment, Integer> enchantmentMap = meta.getEnchants();
             final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
             final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
@@ -146,7 +150,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                     component = component.fallback(connector.getEnchantmentName(enchantment));
                     style = connector.getEnchantmentTierStyleUnsafe(enchantment, defaultEnchantTextStyleLazy);
                 } else {
-                    if (isBedrockPlayer)
+                    if (isBedrockPlayerLazy.get())
                         return;
                     style = (enchantment.isCursed() ? cursedEnchantTextStyleLazy : defaultEnchantTextStyleLazy).get();
                 }
@@ -163,8 +167,63 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 enchantLoreStack.offer(component);
             });
             toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
-            renderLoreStack.addAll(enchantLoreStack);
-            enchantLoreStack.clear();
+            if (!enchantLoreStack.isEmpty()) {
+                renderLoreStack.addAll(enchantLoreStack);
+                hasEnchants = true;
+                enchantLoreStack.clear();
+            }
+        }
+
+        if (!meta.hasItemFlag(ItemFlag.HIDE_ITEM_SPECIFICS)) {
+            if (meta instanceof EnchantmentStorageMeta esMeta && esMeta.hasStoredEnchants()) {
+                if (hasEnchants)
+                    renderLoreStack.add(Component.empty());
+                final Map<Enchantment, Integer> enchantmentMap = esMeta.getStoredEnchants();
+                final Queue<Component> enchantLoreStack = renderLoreStackList.get(1).get();
+                final Box<Double> toolDamageIncreaseBox = Box.box(0.0);
+                final SoftDependConnector excellentEnchantsConnector = apiInstance.getSoftDependRegister()
+                        .get(BulitInSoftDepend.ExcellentEnchants);
+                boolean isToolFinal = isTool;
+                enchantmentMap.forEach((enchantment, boxedLevel) -> {
+                    if (boxedLevel == null)
+                        return;
+                    final int level = boxedLevel;
+                    final NamespacedKey key = enchantment.getKey();
+                    final String enchantName = "enchantment." + key.getNamespace() + "." + key.getKey();
+                    if (isToolFinal && enchantment.equals(Enchantment.DAMAGE_ALL)) {
+                        if (level > 0) {
+                            double value = ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
+                            value += (1 + (0.5) * (level - 1));
+                            toolDamageIncreaseBox.set(value);
+                        }
+                    }
+                    TranslatableComponent component = Component.translatable(enchantName);
+                    Style style;
+                    if (excellentEnchantsConnector instanceof ExcellentEnchantsConnector connector &&
+                            connector.isExcellentEnchant(enchantment)) {
+                        component = component.fallback(connector.getEnchantmentName(enchantment));
+                        style = connector.getEnchantmentTierStyleUnsafe(enchantment, defaultEnchantTextStyleLazy);
+                    } else {
+                        if (isBedrockPlayerLazy.get())
+                            return;
+                        style = (enchantment.isCursed() ? cursedEnchantTextStyleLazy : defaultEnchantTextStyleLazy).get();
+                    }
+                    component = component.style(style);
+                    if (level != 1 || enchantment.getMaxLevel() != 1) {
+                        Component levelComponent;
+                        levelComponent = Component.translatable("enchantment.level." + level,
+                                Integer.toString(level));
+                        component = component
+                                .append(Component.space())
+                                .append(levelComponent)
+                                .style(style);
+                    }
+                    enchantLoreStack.offer(component);
+                });
+                toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
+                renderLoreStack.addAll(enchantLoreStack);
+                enchantLoreStack.clear();
+            }
         }
 
         var lore = meta.lore();
@@ -234,22 +293,25 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                 });
                 toolDamage += ObjectUtil.letNonNull(toolDamageIncreaseBox.get(), 0.0);
                 toolSpeed += ObjectUtil.letNonNull(toolSpeedIncreaseBox.get(), 0.0);
+                INMSItemHelper helper = Bukkit.getServicesManager().load(INMSItemHelper.class);
                 for (EquipmentSlot slot : slots) {
                     if (slot == null)
                         continue;
                     TreeMap<Attribute, double[]> attributeOperationMap = slotAttributeMap.get(slot);
                     if (attributeOperationMap == null || attributeOperationMap.isEmpty())
                         continue;
-                    String slotStringKey = switch (slot) {
-                        case CHEST -> "item.modifiers.chest";
-                        case FEET -> "item.modifiers.feet";
-                        case HAND -> "item.modifiers.mainhand";
-                        case HEAD -> "item.modifiers.head";
-                        case LEGS -> "item.modifiers.legs";
-                        case OFF_HAND -> "item.modifiers.offhand";
-                        default -> "item.modifiers." +
-                                slot.toString().toLowerCase().replace("_", "");
-                    };
+                    String slotStringKey = helper == null ? switch (slot) {
+                        case HAND -> "mainhand";
+                        case OFF_HAND -> "offhand";
+                        case FEET -> "feet";
+                        case LEGS -> "legs";
+                        case CHEST -> "chest";
+                        case HEAD -> "head";
+                        default -> slot.name().replace("_", "");
+                    } : helper.getNMSEquipmentSlotName(slot);
+                    if (slotStringKey == null)
+                        continue;
+                    slotStringKey = "item.modifiers." + slotStringKey;
                     slotAttributeLoreStack.offer(Component.translatable(slotStringKey)
                             .color(NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false));
@@ -387,7 +449,10 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         meta.displayName(data != null ? data.getDisplayName() : displayName);
         meta.lore(output);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ATTRIBUTES);
+        if (meta instanceof EnchantmentStorageMeta)
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS);
+        else
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(meta);
         return itemStack;
     }

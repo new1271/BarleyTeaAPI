@@ -7,8 +7,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.craftbukkit.v1_20_R3.CraftEquipmentSlot;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.ServicesManager;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
@@ -76,6 +78,14 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
             @Override
             public ItemStack createItemStackFromNbtString(@Nonnull String nbt) {
                 return NMSItemHelper.createItemStackFromNbtString(nbt);
+            }
+
+            @Nullable
+            @Override
+            public String getNMSEquipmentSlotName(@Nullable EquipmentSlot slot) {
+                if (slot == null)
+                    return null;
+                return CraftEquipmentSlot.getNMS(EquipmentSlot.HAND).getName();
             }
         }, INMSItemHelper.class);
         apiInst.loadApiImplementation(servicesManager, new INBTItemHelper() {

@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,4 +18,7 @@ public interface INMSItemHelper extends IHelper {
 
     @Nullable
     ItemStack createItemStackFromNbtString(@Nonnull String nbt);
+
+    @Nullable
+    String getNMSEquipmentSlotName(@Nullable EquipmentSlot slot);
 }
