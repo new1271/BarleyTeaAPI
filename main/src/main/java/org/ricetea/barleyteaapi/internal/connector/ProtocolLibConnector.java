@@ -29,11 +29,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
@@ -297,39 +297,39 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             if (itemStack == null)
                 return null;
             ItemMeta meta = itemStack.getItemMeta();
+            if (meta == null)
+                return new WithFlag<>(itemStack, false);
             boolean isDirty = false;
-            if (meta != null) {
-                Component displayName = ObjectUtil.tryMapSilently(meta::displayName);
-                if (displayName != null) {
-                    meta.displayName(applyTranslateFallbacks(translator, displayName, locale));
-                    isDirty = true;
-                }
-                List<Component> lore = ObjectUtil.tryMapSilently(meta::lore);
-                if (lore != null) {
-                    meta.lore(lore.stream()
-                            .map(loreLine -> applyTranslateFallbacks(translator, loreLine, locale))
-                            .toList());
-                    isDirty = true;
-                }
-                if (meta instanceof BlockStateMeta blockMeta) {
-                    if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
-                        var inventory = shulkerBox.getInventory();
-                        Box<Boolean> flag = Box.box(false);
-                        for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
-                            WithFlag<ItemStack> result = applyTranslateFallbacks(translator, iterator.next(), locale);
-                            if (result != null && result.flag()) {
-                                flag.set(true);
-                                iterator.set(result.obj());
-                            }
+            Component displayName = ObjectUtil.tryMapSilently(meta::displayName);
+            if (displayName != null) {
+                meta.displayName(applyTranslateFallbacks(translator, displayName, locale));
+                isDirty = true;
+            }
+            List<Component> lore = ObjectUtil.tryMapSilently(meta::lore);
+            if (lore != null) {
+                meta.lore(lore.stream()
+                        .map(loreLine -> applyTranslateFallbacks(translator, loreLine, locale))
+                        .toList());
+                isDirty = true;
+            }
+            if (meta instanceof BlockStateMeta blockMeta) {
+                if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
+                    var inventory = shulkerBox.getInventory();
+                    Box<Boolean> flag = Box.box(false);
+                    for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
+                        WithFlag<ItemStack> result = applyTranslateFallbacks(translator, iterator.next(), locale);
+                        if (result != null && result.flag()) {
+                            flag.set(true);
+                            iterator.set(result.obj());
                         }
-                        if (!isDirty)
-                            isDirty = ObjectUtil.letNonNull(flag.get(), false);
-                        blockMeta.setBlockState(shulkerBox);
                     }
+                    if (!isDirty)
+                        isDirty = ObjectUtil.letNonNull(flag.get(), false);
+                    blockMeta.setBlockState(shulkerBox);
                 }
-                if (isDirty) {
-                    itemStack.setItemMeta(meta);
-                }
+            }
+            if (isDirty) {
+                itemStack.setItemMeta(meta);
             }
             return new WithFlag<>(itemStack, isDirty);
         }

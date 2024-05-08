@@ -347,6 +347,12 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
                             .decoration(TextDecoration.ITALIC, false));
                 }
             }
+
+            if (meta.isUnbreakable()) {
+                renderLoreStack.offer(Component.translatable("item.unbreakable", NamedTextColor.BLUE)
+                        .decoration(TextDecoration.ITALIC, false));
+            }
+
             renderLoreStack.offer(Component.text(customItem.getKey().toString(), NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
         }
@@ -381,7 +387,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         meta.displayName(data != null ? data.getDisplayName() : displayName);
         meta.lore(output);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(meta);
         return itemStack;
     }

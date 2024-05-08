@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.listener;
+package org.ricetea.barleyteaapi.internal.listener.monitor;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,9 +12,13 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureKillEntity;
+import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDamagedByEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityDeath;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataKillPlayer;
+import org.ricetea.barleyteaapi.api.entity.feature.monitor.FeatureMonitorEntityDamage;
+import org.ricetea.barleyteaapi.api.entity.feature.monitor.FeatureMonitorEntityDeath;
+import org.ricetea.barleyteaapi.api.entity.feature.monitor.FeatureMonitorKillEntity;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityDeath;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityKill;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityDeath;
@@ -33,18 +37,18 @@ import javax.inject.Singleton;
 
 @Singleton
 @ApiStatus.Internal
-public final class EntityDeathListener implements Listener {
-    private static final Lazy<EntityDeathListener> inst = Lazy.create(EntityDeathListener::new);
+public final class EntityDeathMonitor implements Listener {
+    private static final Lazy<EntityDeathMonitor> inst = Lazy.create(EntityDeathMonitor::new);
 
-    private EntityDeathListener() {
+    private EntityDeathMonitor() {
     }
 
     @Nonnull
-    public static EntityDeathListener getInstance() {
+    public static EntityDeathMonitor getInstance() {
         return inst.get();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void listenEntityDeath(EntityDeathEvent event) {
         if (event == null || event.isCancelled())
             return;
@@ -58,54 +62,19 @@ public final class EntityDeathListener implements Listener {
         }
     }
 
-    @SuppressWarnings("DataFlowIssue")
     private void onEntityDeath(@Nonnull EntityDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
         Entity entity = event.getEntity();
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
-                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityKill.class,
-                FeatureItemHoldEntityKill::handleItemHoldEntityKillEntity, DataItemHoldEntityKillEntity::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!EntityFeatureLinker.doFeatureCancellable(damager, event, lastDamageEvent, FeatureKillEntity.class,
-                FeatureKillEntity::handleKillEntity, DataKillEntity::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(entity, LivingEntity.class),
-                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityDeath.class,
-                FeatureItemHoldEntityDeath::handleItemHoldEntityDeath, DataItemHoldEntityDeath::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!EntityFeatureLinker.doFeatureCancellable(entity, event, lastDamageEvent, FeatureEntityDeath.class,
-                FeatureEntityDeath::handleEntityDeath, DataEntityDeath::new)) {
-            event.setCancelled(true);
-            return;
-        }
+        EntityFeatureLinker.doFeature(damager, event, lastDamageEvent, FeatureMonitorKillEntity.class,
+                FeatureMonitorKillEntity::monitorKillEntity, DataKillEntity::new);
+        EntityFeatureLinker.doFeature(entity, event, lastDamageEvent, FeatureMonitorEntityDeath.class,
+                FeatureMonitorEntityDeath::monitorEntityDeath, DataEntityDeath::new);
+        EntityFeatureLinker.unloadEntity(entity);
     }
 
-    @SuppressWarnings("DataFlowIssue")
     private void onPlayerDeath(@Nonnull PlayerDeathEvent event, @Nullable EntityDamageByEntityEvent lastDamageEvent) {
-        Player player = event.getPlayer();
         Entity damager = ObjectUtil.safeMap(lastDamageEvent, EntityDamageByEntityEvent::getDamager);
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(ObjectUtil.tryCast(damager, LivingEntity.class),
-                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityKill.class,
-                FeatureItemHoldEntityKill::handleItemHoldEntityKillPlayer, DataItemHoldEntityKillPlayer::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!EntityFeatureLinker.doFeatureCancellable(damager, event, lastDamageEvent, FeatureKillEntity.class,
-                FeatureKillEntity::handleKillPlayer, DataKillPlayer::new)) {
-            event.setCancelled(true);
-            return;
-        }
-        if (!ItemFeatureLinker.forEachEquipmentCancellable(player,
-                event, lastDamageEvent, Constants.ALL_SLOTS, FeatureItemHoldEntityDeath.class,
-                FeatureItemHoldEntityDeath::handleItemHoldPlayerDeath, DataItemHoldPlayerDeath::new)) {
-            event.setCancelled(true);
-            return;
-        }
+        EntityFeatureLinker.doFeature(damager, event, lastDamageEvent, FeatureMonitorKillEntity.class,
+                FeatureMonitorKillEntity::monitorKillPlayer, DataKillPlayer::new);
     }
 }

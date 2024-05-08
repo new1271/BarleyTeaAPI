@@ -42,6 +42,7 @@ import org.ricetea.barleyteaapi.internal.item.registration.*;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.listener.*;
+import org.ricetea.barleyteaapi.internal.listener.monitor.*;
 import org.ricetea.barleyteaapi.internal.localization.LocalizationRegisterImpl;
 import org.ricetea.barleyteaapi.internal.misc.ThreadLocalRandomProviderImpl;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
@@ -134,8 +135,9 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 SupplierUtil.fromConstuctor(GeyserConnector.class));
         this.softDependRegister = softDependRegister;
         softDependRegister.reloadAll();
-        logger.info("registering listeners");
+        logger.info("registering event listeners");
         registerEventListeners();
+        registerEventMonitors();
         logger.info("BarleyTeaAPI successfully loaded!");
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPILoadEvent());
     }
@@ -160,6 +162,19 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(ProjectileListener.getInstance(), this);
         pluginManager.registerEvents(SlimeSplitListener.getInstance(), this);
         pluginManager.registerEvents(SmithingListener.getInstance(), this);
+    }
+
+    private void registerEventMonitors() {
+        PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(EntityDamageMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityDeathMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityMountMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityMoveMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityTameMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityDamageMonitor.getInstance(), this);
+        pluginManager.registerEvents(EntityTransformMonitor.getInstance(), this);
+        pluginManager.registerEvents(ProjectileMonitor.getInstance(), this);
+        pluginManager.registerEvents(SlimeSplitMonitor.getInstance(), this);
     }
 
     private void loadApiImplementations() {
