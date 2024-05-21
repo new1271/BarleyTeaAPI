@@ -4,6 +4,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.jetbrains.annotations.ApiStatus;
@@ -21,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -32,10 +32,12 @@ import java.util.stream.Collectors;
 abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegisterBase<T> implements RecipeKeyedRegister<T> {
 
     @Nonnull
-    private final Multimap<NamespacedKey, NamespacedKey> collidingTable = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable =
+            Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
 
     @Nonnull
-    private final ConcurrentHashMap<NamespacedKey, NamespacedKey> collidingTable_revert = new ConcurrentHashMap<>();
+    private final Multimap<NamespacedKey, NamespacedKey> collidingTable_revert =
+            Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create());
 
     @Nonnull
     private final AtomicInteger flowNumber = new AtomicInteger(0);
@@ -59,12 +61,15 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegis
         NamespacedKey recipeKey = recipe.getKey();
         if (getLookupMap().put(recipeKey, recipe) != null)
             unlinkMap(recipeKey);
-        NamespacedKey dummyKey = findDummyRecipeKey(recipe);
-        if (dummyKey == null) {
-            dummyKey = nextDummyRecipeKey();
+        Collection<NamespacedKey> dummyKeys = findDummyRecipeKeys(recipe);
+        if (dummyKeys == null || dummyKeys.isEmpty()) {
+            NamespacedKey dummyKey = nextDummyRecipeKey();
             createDummyRecipe(recipe, dummyKey);
+            linkMap(recipeKey, dummyKey);
+        } else {
+            for (NamespacedKey dummyKey : dummyKeys)
+                linkMap(recipeKey, dummyKey);
         }
-        linkMap(recipeKey, dummyKey);
         afterRegisterRecipe(recipe);
     }
 
@@ -127,17 +132,32 @@ abstract class BaseRecipeRegisterImpl<T extends BaseRecipe> extends NSKeyedRegis
     }
 
     protected void unlinkMap(@Nonnull NamespacedKey recipeKey) {
-        NamespacedKey header = collidingTable_revert.remove(recipeKey);
-        if (header != null &&
-                collidingTable.remove(header, recipeKey) &&
-                !collidingTable.containsKey(header) &&
-                header.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI) &&
-                header.getKey().startsWith(dummyRecipePrefix))
-            Bukkit.removeRecipe(header);
+        Collection<NamespacedKey> headers = collidingTable_revert.removeAll(recipeKey);
+        if (headers.isEmpty())
+            return;
+        for (NamespacedKey header : headers) {
+            if (collidingTable.remove(header, recipeKey) &&
+                    isDummyRecipe(header) &&
+                    !collidingTable.containsKey(header)) {
+                Bukkit.removeRecipe(header);
+            }
+        }
     }
 
     @Nullable
-    protected abstract NamespacedKey findDummyRecipeKey(@Nonnull T recipe);
+    protected abstract Collection<NamespacedKey> findDummyRecipeKeys(@Nonnull T recipe);
+
+    @SuppressWarnings("unused")
+    protected final boolean isDummyRecipe(@Nonnull Recipe recipe) {
+        if (recipe instanceof Keyed keyedRecipe)
+            return isDummyRecipe(keyedRecipe.getKey());
+        return false;
+    }
+
+    protected final boolean isDummyRecipe(@Nonnull NamespacedKey key) {
+        return key.getNamespace().equals(NamespacedKeyUtil.BarleyTeaAPI) &&
+                key.getKey().startsWith(dummyRecipePrefix);
+    }
 
     protected void createDummyRecipe(@Nonnull T recipe, @Nonnull NamespacedKey dummyKey) {
         Recipe bukkitRecipe = recipe.toBukkitRecipe(dummyKey);

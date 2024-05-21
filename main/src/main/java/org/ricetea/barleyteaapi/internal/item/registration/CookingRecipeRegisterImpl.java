@@ -12,6 +12,8 @@ import org.ricetea.barleyteaapi.api.item.registration.CookingRecipeRegister;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 @Singleton
@@ -24,7 +26,7 @@ public final class CookingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Base
 
     @Override
     @Nullable
-    protected NamespacedKey findDummyRecipeKey(@Nonnull BaseCookingRecipe recipe) {
+    protected Collection<NamespacedKey> findDummyRecipeKeys(@Nonnull BaseCookingRecipe recipe) {
         boolean isCampfireRecipe = recipe instanceof CampfireRecipe;
         boolean isSmokingRecipe = recipe instanceof SmokingRecipe;
         boolean isBlastingRecipe = recipe instanceof BlastingRecipe;
@@ -34,25 +36,25 @@ public final class CookingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Base
             if (isCampfireRecipe) {
                 if (iteratingRecipe instanceof org.bukkit.inventory.CampfireRecipe iteratingRecipe1) {
                     if (iteratingRecipe1.getInputChoice().test(originalItem)) {
-                        return iteratingRecipe1.getKey();
+                        return Collections.singleton(iteratingRecipe1.getKey());
                     }
                 }
             } else {
                 if (iteratingRecipe instanceof org.bukkit.inventory.FurnaceRecipe iteratingRecipe1) {
                     if (iteratingRecipe1.getInputChoice().test(originalItem)) {
-                        return iteratingRecipe1.getKey();
+                        return Collections.singleton(iteratingRecipe1.getKey());
                     }
                 } else {
                     if (isSmokingRecipe) {
                         if (iteratingRecipe instanceof org.bukkit.inventory.SmokingRecipe iteratingRecipe1) {
                             if (iteratingRecipe1.getInputChoice().test(originalItem)) {
-                                return iteratingRecipe1.getKey();
+                                return Collections.singleton(iteratingRecipe1.getKey());
                             }
                         }
                     } else if (isBlastingRecipe) {
                         if (iteratingRecipe instanceof org.bukkit.inventory.BlastingRecipe iteratingRecipe1) {
                             if (iteratingRecipe1.getInputChoice().test(originalItem)) {
-                                return iteratingRecipe1.getKey();
+                                return Collections.singleton(iteratingRecipe1.getKey());
                             }
                         }
                     }

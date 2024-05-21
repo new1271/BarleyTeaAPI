@@ -15,15 +15,13 @@ import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapedCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.recipe.ShapelessCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
+import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Singleton
@@ -36,9 +34,9 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
 
     @Override
     @Nullable
-    protected NamespacedKey findDummyRecipeKey(@Nonnull BaseCraftingRecipe recipe) {
+    protected Collection<NamespacedKey> findDummyRecipeKeys(@Nonnull BaseCraftingRecipe recipe) {
         if (recipe instanceof ShapedCraftingRecipe shapedRecipe) {
-            return findShapedDummyRecipeKey(shapedRecipe);
+            return Collections.singleton(findShapedDummyRecipeKey(shapedRecipe));
         } else if (recipe instanceof ShapelessCraftingRecipe shapelessRecipe) {
             return findShapelessDummyRecipeKey(shapelessRecipe);
         } else {
@@ -110,40 +108,100 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     }
 
     @Nullable
-    private NamespacedKey findShapelessDummyRecipeKey(@Nonnull ShapelessCraftingRecipe recipe) {
+    private Collection<NamespacedKey> findShapelessDummyRecipeKey(@Nonnull ShapelessCraftingRecipe recipe) {
         List<CustomItemType> ingredientTypes = recipe.getIngredients();
         if (ingredientTypes.size() == 1) {
-            return findSingleItemDummyRecipeKey(ingredientTypes.get(0));
+            return Collections.singleton(findSingleItemDummyRecipeKey(ingredientTypes.get(0)));
         }
-        List<ItemStack> ingredients = ingredientTypes.stream()
+        List<ItemStack> ingredientList = ingredientTypes.stream()
                 .map(this::generateTestOnlyItemStack)
                 .filter(Objects::nonNull)
                 .toList();
+        Lazy<List<NamespacedKey>> resultLazy = Lazy.create(() -> new ArrayList<>(2));
         for (var iterator = Bukkit.recipeIterator(); iterator.hasNext(); ) {
-            if (!(iterator.next() instanceof ShapelessRecipe craftRecipe))
+            Recipe bukkitRecipe = iterator.next();
+            if (!(bukkitRecipe instanceof CraftingRecipe))
+                continue;
+            NamespacedKey iterationResult;
+            if (bukkitRecipe instanceof ShapedRecipe shapedRecipe)
+                iterationResult = findShapelessDummyRecipeKey(ingredientList, shapedRecipe);
+            else if (bukkitRecipe instanceof ShapelessRecipe shapelessRecipe)
+                iterationResult = findShapelessDummyRecipeKey(ingredientList, shapelessRecipe);
+            else
+                iterationResult = null;
+
+            if (iterationResult == null)
                 continue;
 
-            List<RecipeChoice> craftIngredients = craftRecipe.getChoiceList();
-            if (ingredients.size() != craftIngredients.size())
-                continue;
+            resultLazy.get().add(iterationResult);
+        }
+        return resultLazy.getUnsafe();
+    }
 
-            craftIngredients = new ArrayList<>(craftIngredients);
-            ArrayList<ItemStack> modifiableIngredients = new ArrayList<>(ingredients);
-
-            for (var iterator2 = modifiableIngredients.listIterator(); iterator2.hasNext(); ) {
-                ItemStack itemStack = iterator2.next();
-                for (var iterator3 = craftIngredients.listIterator(); iterator3.hasNext(); ) {
-                    if (iterator3.next().test(itemStack)) {
-                        iterator3.remove();
-                        iterator2.remove();
-                        break;
+    @Nullable
+    private NamespacedKey findShapelessDummyRecipeKey(@Nonnull List<ItemStack> ingredientList,
+                                                      @Nonnull ShapedRecipe bukkitRecipe) {
+        String[] shape = bukkitRecipe.getShape();
+        Map<Character, RecipeChoice> choiceMap = bukkitRecipe.getChoiceMap();
+        List<RecipeChoice> craftIngredients = new ArrayList<>(9);
+        for (String shapeLine : shape) {
+            for (int i = 0, length = shapeLine.length(); i < length; i++) {
+                RecipeChoice choice = choiceMap.get(shapeLine.charAt(i));
+                if (choice == null)
+                    continue;
+                if (choice instanceof RecipeChoice.MaterialChoice materialChoice) {
+                    List<Material> choices = materialChoice.getChoices();
+                    if (choices.size() == 1 && Boolean.TRUE.equals(ObjectUtil.safeMap(choices.get(0), Material::isAir))) {
+                        continue;
                     }
                 }
+                craftIngredients.add(choice);
             }
-
-            if (craftIngredients.isEmpty() && modifiableIngredients.isEmpty())
-                return craftRecipe.getKey();
         }
+        if (ingredientList.size() != craftIngredients.size())
+            return null;
+
+        craftIngredients = new ArrayList<>(craftIngredients);
+        ArrayList<ItemStack> modifiableIngredients = new ArrayList<>(ingredientList);
+
+        for (var iterator2 = modifiableIngredients.listIterator(); iterator2.hasNext(); ) {
+            ItemStack itemStack = iterator2.next();
+            for (var iterator3 = craftIngredients.listIterator(); iterator3.hasNext(); ) {
+                if (iterator3.next().test(itemStack)) {
+                    iterator3.remove();
+                    iterator2.remove();
+                    break;
+                }
+            }
+        }
+
+        if (craftIngredients.isEmpty() && modifiableIngredients.isEmpty())
+            return bukkitRecipe.getKey();
+        return null;
+    }
+
+    @Nullable
+    private NamespacedKey findShapelessDummyRecipeKey(@Nonnull List<ItemStack> ingredientList,
+                                                      @Nonnull ShapelessRecipe bukkitRecipe) {
+        List<RecipeChoice> craftIngredients = bukkitRecipe.getChoiceList();
+        if (ingredientList.size() != craftIngredients.size())
+            return null;
+        craftIngredients = new ArrayList<>(craftIngredients);
+        ArrayList<ItemStack> modifiableIngredients = new ArrayList<>(ingredientList);
+
+        for (var iterator2 = modifiableIngredients.listIterator(); iterator2.hasNext(); ) {
+            ItemStack itemStack = iterator2.next();
+            for (var iterator3 = craftIngredients.listIterator(); iterator3.hasNext(); ) {
+                if (iterator3.next().test(itemStack)) {
+                    iterator3.remove();
+                    iterator2.remove();
+                    break;
+                }
+            }
+        }
+
+        if (craftIngredients.isEmpty() && modifiableIngredients.isEmpty())
+            return bukkitRecipe.getKey();
         return null;
     }
 

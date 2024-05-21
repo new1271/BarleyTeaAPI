@@ -18,6 +18,8 @@ import org.ricetea.utils.CollectionUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 @Singleton
@@ -30,7 +32,7 @@ public final class SmithingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
 
     @Override
     @Nullable
-    protected NamespacedKey findDummyRecipeKey(@Nonnull BaseSmithingRecipe recipe) {
+    protected Collection<NamespacedKey> findDummyRecipeKeys(@Nonnull BaseSmithingRecipe recipe) {
         ItemStack originalItem = new ItemStack(recipe.getOriginal().getOriginalType());
         ItemStack templateItem = new ItemStack(
                 CollectionUtil.firstOrDefault(recipe.getTemplates(), CustomItemType.empty())
@@ -44,13 +46,13 @@ public final class SmithingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
                 if (iteratingSmithingRecipe.getBase().test(originalItem)
                         && iteratingSmithingRecipe.getTemplate().test(templateItem)
                         && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                    return iteratingSmithingRecipe.getKey();
+                    return Collections.singleton(iteratingSmithingRecipe.getKey());
                 }
             } else if (iteratingRecipe instanceof SmithingTrimRecipe iteratingSmithingRecipe) {
                 if (iteratingSmithingRecipe.getBase().test(originalItem)
                         && iteratingSmithingRecipe.getTemplate().test(templateItem)
                         && iteratingSmithingRecipe.getAddition().test(additionItem)) {
-                    return iteratingSmithingRecipe.getKey();
+                    return Collections.singleton(iteratingSmithingRecipe.getKey());
                 }
             }
         }
