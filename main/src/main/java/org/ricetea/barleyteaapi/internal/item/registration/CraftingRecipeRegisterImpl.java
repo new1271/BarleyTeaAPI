@@ -36,7 +36,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     @Nullable
     protected Collection<NamespacedKey> findDummyRecipeKeys(@Nonnull BaseCraftingRecipe recipe) {
         if (recipe instanceof ShapedCraftingRecipe shapedRecipe) {
-            return Collections.singleton(findShapedDummyRecipeKey(shapedRecipe));
+            return findShapedDummyRecipeKey(shapedRecipe);
         } else if (recipe instanceof ShapelessCraftingRecipe shapelessRecipe) {
             return findShapelessDummyRecipeKey(shapelessRecipe);
         } else {
@@ -45,7 +45,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     }
 
     @Nullable
-    private NamespacedKey findShapedDummyRecipeKey(@Nonnull ShapedCraftingRecipe recipe) {
+    private Collection<NamespacedKey> findShapedDummyRecipeKey(@Nonnull ShapedCraftingRecipe recipe) {
         int column = recipe.getColumnCount();
         int row = recipe.getRowCount();
         if (column == 1 && row == 1) {
@@ -102,7 +102,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
             }
             if (flag)
                 continue;
-            return craftRecipe.getKey();
+            return Collections.singleton(craftRecipe.getKey());
         }
         return null;
     }
@@ -111,7 +111,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     private Collection<NamespacedKey> findShapelessDummyRecipeKey(@Nonnull ShapelessCraftingRecipe recipe) {
         List<CustomItemType> ingredientTypes = recipe.getIngredients();
         if (ingredientTypes.size() == 1) {
-            return Collections.singleton(findSingleItemDummyRecipeKey(ingredientTypes.get(0)));
+            return findSingleItemDummyRecipeKey(ingredientTypes.get(0));
         }
         List<ItemStack> ingredientList = ingredientTypes.stream()
                 .map(this::generateTestOnlyItemStack)
@@ -206,7 +206,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     }
 
     @Nullable
-    private NamespacedKey findSingleItemDummyRecipeKey(@Nonnull CustomItemType itemType) {
+    private Collection<NamespacedKey> findSingleItemDummyRecipeKey(@Nonnull CustomItemType itemType) {
         for (var iterator = Bukkit.recipeIterator(); iterator.hasNext(); ) {
             Recipe recipe = iterator.next();
             RecipeChoice recipeChoice = null;
@@ -231,7 +231,7 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
             NamespacedKey result = ObjectUtil.tryMap(ObjectUtil.tryCast(recipe, Keyed.class), Keyed::getKey);
             if (result == null)
                 continue;
-            return result;
+            return Collections.singleton(result);
         }
         return null;
     }

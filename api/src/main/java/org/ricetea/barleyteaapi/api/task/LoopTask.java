@@ -34,7 +34,7 @@ public interface LoopTask extends Runnable {
             TaskService service = TaskService.getInstanceUnsafe();
             if (service != null) {
                 setStarted(true);
-                service.runTask(this);
+                service.runTask(this, getOptions());
             }
         }
     }
