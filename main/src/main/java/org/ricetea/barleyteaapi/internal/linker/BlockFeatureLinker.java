@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
@@ -12,14 +13,14 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockLoad;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockTick;
 import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
-import org.ricetea.utils.ChainedRunable;
+import org.ricetea.utils.BlockLocation;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -27,8 +28,12 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public final class BlockFeatureLinker {
+
     @Nonnull
-    private static final Set<Block> loadedBlocks = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Map<BlockLocation, LoadBlockData> loadedBlocks = new ConcurrentHashMap<>();
+
+    private record LoadBlockData(@Nullable FeatureBlockLoad loadFeature, boolean ticking) {
+    }
 
     public static <TEvent extends Event, TData extends BaseFeatureData<TEvent>, TFeature extends BlockFeature> boolean doFeatureCancellable(
             @Nullable Block block, @Nullable TEvent event, @Nonnull Class<TFeature> featureClass,
@@ -117,14 +122,20 @@ public final class BlockFeatureLinker {
     public static void loadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block, boolean loadOnly) {
         if (block.isEmpty())
             return;
+        BlockLocation location = new BlockLocation(block);
         FeatureBlockLoad feature = blockType.getFeature(FeatureBlockLoad.class);
         boolean needTick = !loadOnly && blockType.getFeature(FeatureBlockTick.class) != null;
+        LoadBlockData newBlockData = new LoadBlockData(feature, needTick);
+        LoadBlockData oldBlockData = loadedBlocks.put(location, newBlockData);
+        if (oldBlockData != null) {
+            ObjectUtil.tryCall(oldBlockData.loadFeature, _feature ->
+                    SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
+            if (oldBlockData.ticking && !needTick) {
+                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+            }
+        }
         if (feature == null && !needTick)
             return;
-        synchronized (loadedBlocks) {
-            if (!loadedBlocks.add(block))
-                return;
-        }
         ObjectUtil.tryCall(feature, _feature ->
                 SyncUtil.callInMainThread(() -> _feature.handleBlockLoaded(block)));
         if (needTick)
@@ -139,70 +150,46 @@ public final class BlockFeatureLinker {
     }
 
     public static void unloadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
-        synchronized (loadedBlocks) {
-            if (!loadedBlocks.remove(block))
-                return;
-        }
-        ObjectUtil.tryCall(blockType.getFeature(FeatureBlockLoad.class), _feature ->
-                SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
-        if (blockType.getFeature(FeatureBlockTick.class) != null)
-            ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+        BlockLocation location = new BlockLocation(block);
+        loadedBlocks.computeIfPresent(location, (loc, oldBlockData) -> {
+            BarleyTeaAPI.getInstance().getLogger().info("UNLOAD");
+            LoadBlockData result = oldBlockData;
+            FeatureBlockLoad oldFeature = oldBlockData.loadFeature;
+            if (Objects.equals(ObjectUtil.tryCast(oldFeature, CustomBlock.class), blockType)) {
+                BarleyTeaAPI.getInstance().getLogger().info("UNLOAD Loc=" + location.toLocation() + ", TYPE=" + blockType.getKey());
+                ObjectUtil.tryCall(oldFeature, _feature ->
+                        SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
+                result = null;
+            }
+            if (oldBlockData.ticking) {
+                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+            }
+            return result;
+        });
     }
 
     public static void moveBlock(@Nonnull CustomBlock blockType, @Nonnull Block blockFrom, @Nonnull Block blockTo) {
-        synchronized (loadedBlocks) {
-            if (!loadedBlocks.remove(blockFrom) || !loadedBlocks.add(blockTo))
-                return;
-        }
-        ObjectUtil.tryCall(blockType.getFeature(FeatureBlockLoad.class),
-                _feature -> SyncUtil.callInMainThread(() -> {
-                    _feature.handleBlockUnloaded(blockFrom);
-                    _feature.handleBlockLoaded(blockTo);
-                }));
-        if (blockType.getFeature(FeatureBlockTick.class) != null) {
-            BlockTickTask task = BlockTickTask.getInstance();
-            task.removeBlock(blockFrom);
-            task.addBlock(blockTo);
-        }
+        unloadBlock(blockType, blockFrom);
+        loadBlock(blockType, blockTo, false);
     }
 
     public static void refreshBlock(@Nonnull Block block, @Nonnull RefreshCustomBlockRecord record) {
-        FeatureBlockLoad oldLoadFeature = record.oldLoadFeature();
-        FeatureBlockLoad newLoadFeature = record.newLoadFeature();
-        boolean hasTickingOld = record.hasTickingOld();
-        boolean hasTickingNew = record.hasTickingNew();
-        synchronized (loadedBlocks) {
-            if (oldLoadFeature == null) {
-                if (newLoadFeature == null) {
-                    loadedBlocks.remove(block);
-                } else {
-                    if (!loadedBlocks.add(block))
-                        return;
-                }
-            } else {
-                if (newLoadFeature == null) {
-                    if (!loadedBlocks.remove(block))
-                        return;
+        BlockLocation location = new BlockLocation(block);
+        loadedBlocks.compute(location, (loc, oldBlockData) -> {
+            if (oldBlockData != null) {
+                ObjectUtil.tryCall(oldBlockData.loadFeature, _feature ->
+                        SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
+                if (oldBlockData.ticking && !record.hasTickingNew) {
+                    ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(),
+                            task -> task.removeBlock(block));
                 }
             }
-        }
-        ChainedRunable chainedRunable = new ChainedRunable();
-        if (oldLoadFeature != null)
-            chainedRunable.attach(() -> oldLoadFeature.handleBlockUnloaded(block));
-        if (newLoadFeature != null)
-            chainedRunable.attach(() -> newLoadFeature.handleBlockLoaded(block));
-        if (!chainedRunable.isEmpty())
-            SyncUtil.callInMainThread(chainedRunable);
-        if (hasTickingOld) {
-            if (!hasTickingNew) {
-                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(),
-                        task -> task.removeBlock(block));
-            }
-        } else {
-            if (hasTickingNew) {
+            ObjectUtil.tryCall(record.newLoadFeature, _feature ->
+                    SyncUtil.callInMainThread(() -> _feature.handleBlockLoaded(block)));
+            if (record.hasTickingNew)
                 BlockTickTask.getInstance().addBlock(block);
-            }
-        }
+            return new LoadBlockData(record.newLoadFeature, record.hasTickingNew);
+        });
     }
 
 

@@ -9,31 +9,33 @@ import javax.annotation.Nullable;
 
 public class SyncUtil {
 
-    public static void callInMainThread(@Nonnull Runnable runnable) {
-        callInMainThread(runnable, true);
+    public static boolean callInMainThread(@Nonnull Runnable runnable) {
+        return callInMainThread(runnable, true);
     }
 
-    public static void callInMainThread(@Nullable Plugin plugin, @Nonnull Runnable runnable) {
-        callInMainThread(runnable, true);
+    public static boolean callInMainThread(@Nullable Plugin plugin, @Nonnull Runnable runnable) {
+        return callInMainThread(runnable, true);
     }
 
-    public static void callInMainThread(@Nonnull Runnable runnable, boolean force) {
-        callInMainThread(null, runnable, force);
+    public static boolean callInMainThread(@Nonnull Runnable runnable, boolean force) {
+        return callInMainThread(null, runnable, force);
     }
 
-    public static void callInMainThread(@Nullable Plugin plugin, @Nonnull Runnable runnable, boolean force) {
+    public static boolean callInMainThread(@Nullable Plugin plugin, @Nonnull Runnable runnable, boolean force) {
         if (Bukkit.isPrimaryThread()) {
             runnable.run();
-            return;
+            return true;
         }
         if (plugin == null && (plugin = BarleyTeaAPI.getInstanceUnsafe()) == null)
-            return;
+            return true;
         if (plugin.isEnabled()) {
             Bukkit.getScheduler().runTask(plugin, runnable);
-            return;
+            return true;
         }
         if (!force) {
             runnable.run();
+            return true;
         }
+        return false;
     }
 }

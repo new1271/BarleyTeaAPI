@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.ApiStatus;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.CustomBlockType;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
@@ -76,6 +77,7 @@ public final class BlockListener implements Listener {
             return;
         Block block = event.getBlock();
         CustomBlock blockType = CustomBlock.get(block);
+        BarleyTeaAPI.getInstance().getLogger().info("BREAK BLOCK: Loc=" + block.getLocation() + " ,Type=" + CustomBlockType.get(block));
         if (blockType == null)
             return;
         if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
