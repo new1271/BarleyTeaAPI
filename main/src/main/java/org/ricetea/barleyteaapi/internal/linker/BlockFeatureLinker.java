@@ -152,11 +152,9 @@ public final class BlockFeatureLinker {
     public static void unloadBlock(@Nonnull CustomBlock blockType, @Nonnull Block block) {
         BlockLocation location = new BlockLocation(block);
         loadedBlocks.computeIfPresent(location, (loc, oldBlockData) -> {
-            BarleyTeaAPI.getInstance().getLogger().info("UNLOAD");
             LoadBlockData result = oldBlockData;
             FeatureBlockLoad oldFeature = oldBlockData.loadFeature;
             if (Objects.equals(ObjectUtil.tryCast(oldFeature, CustomBlock.class), blockType)) {
-                BarleyTeaAPI.getInstance().getLogger().info("UNLOAD Loc=" + location.toLocation() + ", TYPE=" + blockType.getKey());
                 ObjectUtil.tryCall(oldFeature, _feature ->
                         SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
                 result = null;

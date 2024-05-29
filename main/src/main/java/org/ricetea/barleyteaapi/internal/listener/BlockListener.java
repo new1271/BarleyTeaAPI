@@ -77,7 +77,6 @@ public final class BlockListener implements Listener {
             return;
         Block block = event.getBlock();
         CustomBlock blockType = CustomBlock.get(block);
-        BarleyTeaAPI.getInstance().getLogger().info("BREAK BLOCK: Loc=" + block.getLocation() + " ,Type=" + CustomBlockType.get(block));
         if (blockType == null)
             return;
         if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
