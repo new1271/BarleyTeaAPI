@@ -7,9 +7,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.ApiStatus;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.CustomBlockType;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockBreak;
@@ -20,8 +20,8 @@ import org.ricetea.barleyteaapi.api.block.feature.data.*;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
-import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerPlace;
-import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlock;
+import org.ricetea.barleyteaapi.api.item.feature.*;
+import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
@@ -76,6 +76,17 @@ public final class BlockListener implements Listener {
         if (event == null || event.isCancelled())
             return;
         Block block = event.getBlock();
+        ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
+        try {
+            if (!ItemFeatureLinker.doFeatureCancellable(itemStack, event,
+                    FeatureItemHoldPlayerBreak.class, FeatureItemHoldPlayerBreak::handleItemHoldPlayerBreakBlock,
+                    DataItemHoldPlayerBreakBlock::new)) {
+                event.setCancelled(true);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         CustomBlock blockType = CustomBlock.get(block);
         if (blockType == null)
             return;
