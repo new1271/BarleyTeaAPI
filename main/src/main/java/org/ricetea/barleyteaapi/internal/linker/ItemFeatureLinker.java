@@ -7,6 +7,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
@@ -236,6 +237,21 @@ public final class ItemFeatureLinker {
                                     upperItemDamage + lowerItemDamage - maxDura - maxDura / 20
                                     , 0, maxDura);
                             feature.setDurabilityDamage(itemStackResult, newDamage);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (itemStackResult.getItemMeta() instanceof Damageable damageableR &&
+                            itemStackA.getItemMeta() instanceof Damageable damageableA &&
+                            itemStackB.getItemMeta() instanceof Damageable damageableB) {
+                        try {
+                            int maxDura = itemStackResult.getType().getMaxDurability();
+                            int upperItemDamage = damageableA.getDamage();
+                            int lowerItemDamage = damageableB.getDamage();
+                            int newDamage = MathHelper.between(
+                                    upperItemDamage + lowerItemDamage - maxDura - maxDura / 20
+                                    , 0, maxDura);
+                            damageableR.setDamage(newDamage);
+                            itemStackResult.setItemMeta(damageableR);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
