@@ -85,7 +85,7 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
             public String getNMSEquipmentSlotName(@Nullable EquipmentSlot slot) {
                 if (slot == null)
                     return null;
-                return CraftEquipmentSlot.getNMS(EquipmentSlot.HAND).getName();
+                return CraftEquipmentSlot.getNMS(slot).getName();
             }
         }, INMSItemHelper.class);
         apiInst.loadApiImplementation(servicesManager, new INBTItemHelper() {
