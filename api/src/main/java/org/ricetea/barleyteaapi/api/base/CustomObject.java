@@ -27,4 +27,8 @@ public interface CustomObject<F extends Feature> extends Keyed, Translatable {
 
     @Nonnull
     Collection<Class<? extends F>> getFeatures();
+
+    default <T extends F> boolean hasFeature(@Nonnull Class<T> featureClass) {
+        return getFeature(featureClass) != null;
+    }
 }

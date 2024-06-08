@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 
@@ -22,9 +23,9 @@ public abstract class BaseRecipe implements Keyed {
                         "'result' cannot be an air!");
             }
         }, right -> {
-            if (!(right instanceof FeatureItemGive)) {
+            if (!FeatureHelper.hasFeature(right, FeatureItemGive.class)) {
                 throw new UnsupportedOperationException(
-                        "'result' must implement FeatureItemGive interface!");
+                        "'result' must has FeatureItemGive feature!");
             }
         });
         this.result = result;

@@ -40,12 +40,13 @@ public abstract class RegularItem extends DefaultItem implements FeatureCommandG
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return;
-        if (this instanceof FeatureItemCustomDurability customDurabilityFeature) {
+        FeatureItemCustomDurability feature = this.getFeature(FeatureItemCustomDurability.class);
+        if (feature != null) {
             if (meta instanceof Damageable damageable) {
                 if (damage == 0) {
                     damageable.setDamage(0);
                 } else {
-                    int maxDura = customDurabilityFeature.getMaxDurability(itemStack);
+                    int maxDura = feature.getMaxDurability(itemStack);
                     int maxDuraVisual = itemStack.getType().getMaxDurability();
                     if (damage == maxDura) {
                         damageable.setDamage(maxDuraVisual);
@@ -69,7 +70,8 @@ public abstract class RegularItem extends DefaultItem implements FeatureCommandG
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return 0;
-        if (this instanceof FeatureItemCustomDurability)
+        FeatureItemCustomDurability feature = this.getFeature(FeatureItemCustomDurability.class);
+        if (feature != null)
             return meta.getPersistentDataContainer().getOrDefault(ItemAlternateDamageNamespacedKey,
                     PersistentDataType.INTEGER,
                     0);
@@ -82,7 +84,8 @@ public abstract class RegularItem extends DefaultItem implements FeatureCommandG
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return;
-        if (this instanceof FeatureItemCustomDurability)
+        FeatureItemCustomDurability feature = this.getFeature(FeatureItemCustomDurability.class);
+        if (feature != null)
             meta.getPersistentDataContainer().set(ItemAlternateDamageNamespacedKey, PersistentDataType.INTEGER, damage);
         else if (meta instanceof Damageable damageable)
             damageable.setDamage(damage);

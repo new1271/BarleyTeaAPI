@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
@@ -127,10 +128,12 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                         itemLimit, itemstack.getDisplayName()));
                 return 0;
             }
-            if (customItemType instanceof FeatureCommandGive commandGiveType) {
+            FeatureCommandGive feature = FeatureHelper.getFeatureUnsafe(
+                    customItemType, FeatureCommandGive.class);
+            if (feature != null) {
                 org.bukkit.inventory.ItemStack bukkitStack = itemstack.asBukkitMirror();
                 if (ItemHelper.tryRegister(customItemType, bukkitStack,
-                        _itemStack -> _itemStack != null && commandGiveType
+                        _itemStack -> _itemStack != null && feature
                                 .handleCommandGive(
                                         new DataCommandGive(_itemStack, ObjectUtil.safeMap(nbt, CompoundTag::toString))))) {
                     itemstack = Objects.requireNonNull(NMSItemHelper.getNmsItem(bukkitStack));
@@ -216,7 +219,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                         ItemRegister register = ItemRegister.getInstanceUnsafe();
                         if (register != null) {
                             this.customKeys = customKeys = register
-                                    .listAll(type -> type instanceof FeatureCommandGive)
+                                    .listAll(type -> FeatureHelper.hasFeature(type, FeatureCommandGive.class))
                                     .stream()
                                     .map(CustomItem::getKey)
                                     .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
@@ -246,7 +249,7 @@ public final class NMSGiveCommand extends NMSRegularCommand {
                 ItemRegister register = ItemRegister.getInstanceUnsafe();
                 if (register != null) {
                     this.customKeys = customKeys = register
-                            .listAll(type -> type instanceof FeatureCommandGive)
+                            .listAll(type -> FeatureHelper.hasFeature(type, FeatureCommandGive.class))
                             .stream()
                             .map(CustomItem::getKey)
                             .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))

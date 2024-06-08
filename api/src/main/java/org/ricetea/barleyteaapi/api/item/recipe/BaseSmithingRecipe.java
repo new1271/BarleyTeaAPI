@@ -2,9 +2,9 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
-import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,8 +43,11 @@ public abstract class BaseSmithingRecipe extends BaseRecipe implements SmithingF
     @Nullable
     public ItemStack apply(@Nonnull ItemStack original, @Nonnull ItemStack template, @Nonnull ItemStack addition) {
         return getResult().map(ItemStack::new, right ->
-                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                FeatureHelper.mapIfHasFeature(
+                        right,
+                        FeatureItemGive.class,
+                        feature -> feature.handleItemGive(1)
+                )
         );
     }
 }

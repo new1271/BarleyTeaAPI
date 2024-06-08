@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
@@ -53,8 +54,11 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements Function<I
     @Nonnull
     public ItemStack apply(@Nonnull ItemStack source) {
         return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right ->
-                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                FeatureHelper.mapIfHasFeature(
+                        right,
+                        FeatureItemGive.class,
+                        feature -> feature.handleItemGive(1)
+                )
         ), () -> new ItemStack(Material.AIR));
     }
 

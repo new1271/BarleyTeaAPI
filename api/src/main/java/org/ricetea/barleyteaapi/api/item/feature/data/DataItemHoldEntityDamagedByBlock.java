@@ -13,6 +13,7 @@ import org.ricetea.utils.Lazy;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@SuppressWarnings("deprecation")
 public final class DataItemHoldEntityDamagedByBlock extends BaseItemHoldEntityFeatureData<EntityDamageByBlockEvent> {
     @Nonnull
     private final Lazy<CustomBlockType> blockType;
@@ -33,12 +34,28 @@ public final class DataItemHoldEntityDamagedByBlock extends BaseItemHoldEntityFe
         return blockType.get();
     }
 
+    public double getBaseDamage() {
+        return event.getDamage(EntityDamageEvent.DamageModifier.BASE);
+    }
+
+    public double getDamage(@Nonnull EntityDamageEvent.DamageModifier modifier) {
+        return event.getDamage(modifier);
+    }
+
     public double getDamage() {
         return event.getDamage();
     }
 
+    public void setDamage(@Nonnull EntityDamageEvent.DamageModifier modifier, double damage) {
+        event.setDamage(modifier, damage);
+    }
+
     public void setDamage(double damage) {
         event.setDamage(damage);
+    }
+
+    public void setBaseDamage(double damage) {
+        event.setDamage(EntityDamageEvent.DamageModifier.BASE, damage);
     }
 
     public double getFinalDamage() {

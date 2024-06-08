@@ -22,6 +22,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
 import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
@@ -72,26 +73,26 @@ public final class EntitySpawnListener implements Listener {
         RandomProvider rnd = RandomProvider.getInstance();
         Lazy<DataNaturalSpawnPosibility> dataLazy = Lazy.create(() ->
                 new DataNaturalSpawnPosibility(event.getLocation(), event.getSpawnReason()));
-        for (CustomEntity entityType : register.listAll(e -> e instanceof FeatureNaturalSpawn
-                && e.getOriginalType().equals(event.getEntityType()))) {
-            if (entityType instanceof FeatureNaturalSpawn feature) {
-                double posibility = ObjectUtil.tryMap(() ->
-                        feature.getSpawnPosibility(dataLazy.get()), 0.0);
-                if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
-                    StateNaturalSpawn result = ObjectUtil.tryMap(() ->
-                            feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateNaturalSpawn.Skipped);
-                    if (event.isCancelled())
+        for (CustomEntity entityType : register.listAll(e -> e.getOriginalType().equals(event.getEntityType()))) {
+            FeatureNaturalSpawn feature = FeatureHelper.getFeatureUnsafe(entityType, FeatureNaturalSpawn.class);
+            if (feature == null)
+                continue;
+            double posibility = ObjectUtil.tryMap(() ->
+                    feature.getSpawnPosibility(dataLazy.get()), 0.0);
+            if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
+                StateNaturalSpawn result = ObjectUtil.tryMap(() ->
+                        feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateNaturalSpawn.Skipped);
+                if (event.isCancelled())
+                    return;
+                switch (result) {
+                    case Handled -> {
                         return;
-                    switch (result) {
-                        case Handled -> {
-                            return;
-                        }
-                        case Cancelled -> {
-                            event.setCancelled(true);
-                            return;
-                        }
-                        case Skipped -> {
-                        }
+                    }
+                    case Cancelled -> {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    case Skipped -> {
                     }
                 }
             }

@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.nms.INBTItemHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
@@ -28,18 +29,18 @@ public final class SmithingHelper {
             return null;
         int damage = ObjectUtil.letNonNull(
                 recipe.getOriginal().map(
-                        left -> {
-                            if (original.getItemMeta() instanceof Damageable meta) {
-                                return meta.getDamage();
-                            }
-                            return 0;
-                        },
-                        right -> {
-                            if (right instanceof FeatureItemCustomDurability feature) {
-                                return feature.getDurabilityDamage(original);
-                            }
-                            return 0;
-                        }),
+                        left ->
+                                ObjectUtil.safeMap(
+                                        ObjectUtil.tryCast(original.getItemMeta(), Damageable.class),
+                                        Damageable::getDamage
+                                ),
+                        right ->
+                                FeatureHelper.mapIfHasFeature(
+                                        right,
+                                        FeatureItemCustomDurability.class,
+                                        feature -> feature.getDurabilityDamage(original)
+                                )
+                ),
                 0);
         INBTItemHelper helper = Bukkit.getServicesManager().load(INBTItemHelper.class);
         {
@@ -62,8 +63,13 @@ public final class SmithingHelper {
                     meta.setDamage(damage);
                     result.setItemMeta(meta);
                 }
-            } else if (resultType.asCustomItem() instanceof FeatureItemCustomDurability feature) {
-                feature.setDurabilityDamage(result, damage);
+            } else {
+                ItemStack finalResult = result;
+                FeatureHelper.callIfHasFeature(
+                        resultType.asCustomItem(),
+                        FeatureItemCustomDurability.class,
+                        feature -> feature.setDurabilityDamage(finalResult, damage)
+                );
             }
         }
         return result;

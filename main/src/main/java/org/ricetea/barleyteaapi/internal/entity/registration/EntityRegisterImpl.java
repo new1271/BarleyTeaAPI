@@ -15,6 +15,7 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
@@ -96,15 +97,15 @@ public final class EntityRegisterImpl extends CustomObjectRegisterBase<CustomEnt
         Class<? extends Entity> originalClazz = entity.getOriginalType().getEntityClass();
         if (originalClazz == null)
             return;
-        if (entity instanceof FeatureNaturalSpawn &&
+        if (FeatureHelper.hasFeature(entity, FeatureNaturalSpawn.class) &&
                 !(Mob.class.isAssignableFrom(originalClazz) || Creature.class.isAssignableFrom(originalClazz)))
             logger.warning(entity.getKey()
                     + " isn't based on an entity that can be spawned naturally, so FeatureNaturalSpawn won't triggered!");
-        if (entity instanceof FeatureSlimeSplit &&
+        if (FeatureHelper.hasFeature(entity, FeatureSlimeSplit.class) &&
                 !Slime.class.isAssignableFrom(originalClazz))
             logger.warning(entity.getKey()
                     + " isn't based on a slime-type mob, so FeatureSlimeSplit won't triggered!");
-        if (entity instanceof FeatureProjectile &&
+        if (FeatureHelper.hasFeature(entity, FeatureProjectile.class) &&
                 !Projectile.class.isAssignableFrom(originalClazz))
             logger.warning(entity.getKey()
                     + " isn't based on a projectile entity, so FeatureProjectile won't triggered!");

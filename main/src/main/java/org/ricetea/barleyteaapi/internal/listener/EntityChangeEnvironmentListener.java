@@ -28,6 +28,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityExplode;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
 import org.ricetea.barleyteaapi.internal.entity.BarleyFallingBlock;
@@ -70,11 +71,10 @@ public final class EntityChangeEnvironmentListener implements Listener {
             CustomBlock blockType = CustomBlock.get(block);
             if (blockType == null)
                 continue;
-            if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
+            FeatureBlockBreak feature = blockType.getFeature(FeatureBlockBreak.class);
+            if (feature != null) {
                 try {
-                    if (!blockBreakFeature
-                            .handleBlockBreakByEntityExplode(
-                                    new DataBlockBreakByEntityExplode(event, block))) {
+                    if (!feature.handleBlockBreakByEntityExplode(new DataBlockBreakByEntityExplode(event, block))) {
                         iterator.remove();
                         continue;
                     }
@@ -87,10 +87,8 @@ public final class EntityChangeEnvironmentListener implements Listener {
             }
             BlockFeatureLinker.unloadBlock(blockType, block);
             ChunkStorage.getInstance().removeBlockDataContainer(block);
-            if (blockType instanceof FeatureBlockBreak) {
-                var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
-                list.add(blockType);
-            }
+            var list = PrepareToDrops.computeIfAbsent(event.getEntity(), ignored -> new ArrayList<>());
+            list.add(blockType);
         }
     }
 
@@ -109,9 +107,10 @@ public final class EntityChangeEnvironmentListener implements Listener {
                     CustomBlock blockType = CustomBlock.get(block);
                     if (blockType == null)
                         return;
-                    if (blockType instanceof FeatureBlockFalling blockFallingFeature) {
+                    FeatureBlockFalling feature = blockType.getFeature(FeatureBlockFalling.class);
+                    if (feature != null) {
                         try {
-                            if (!blockFallingFeature.handleBlockStartFall(block)) {
+                            if (!feature.handleBlockStartFall(block)) {
                                 event.setCancelled(true);
                                 return;
                             }
@@ -137,15 +136,17 @@ public final class EntityChangeEnvironmentListener implements Listener {
                                 PersistentDataContainer previousDataContainer = chunkStorage.getBlockDataContainer(
                                         block, false);
                                 chunkStorage.setBlockDataContainer(block, container);
-                                try {
-                                    if (blockType instanceof FeatureBlockFalling blockFallingFeature
-                                            && !blockFallingFeature.handleBlockFallToGround(block)) {
-                                        event.setCancelled(true);
-                                        chunkStorage.setBlockDataContainer(block, previousDataContainer);
-                                        return;
+                                FeatureBlockFalling feature = blockType.getFeature(FeatureBlockFalling.class);
+                                if (feature != null) {
+                                    try {
+                                        if (!feature.handleBlockFallToGround(block)) {
+                                            event.setCancelled(true);
+                                            chunkStorage.setBlockDataContainer(block, previousDataContainer);
+                                            return;
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
                                 }
                                 BlockFeatureLinker.loadBlock(blockType, block, false);
                             }
@@ -157,7 +158,8 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 CustomBlock blockType = CustomBlock.get(block);
                 if (blockType == null)
                     return;
-                if (blockType instanceof FeatureBlockEntityChange feature) {
+                FeatureBlockEntityChange feature = blockType.getFeature(FeatureBlockEntityChange.class);
+                if (feature != null) {
                     try {
                         if (!feature.handleBlockEntityChange(new DataBlockEntityChange(event)) || event.isCancelled()) {
                             return;
@@ -168,7 +170,7 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 }
                 BlockFeatureLinker.unloadBlock(blockType, block);
                 ChunkStorage.getInstance().removeBlockDataContainer(block);
-                if (blockType instanceof FeatureBlockBreak && entityType.equals(EntityType.WITHER)) {
+                if (blockType.getFeature(FeatureBlockBreak.class) != null && entityType.equals(EntityType.WITHER)) {
                     var list = PrepareToDrops.computeIfAbsent(event.getEntity(), k -> new ArrayList<>());
                     list.add(blockType);
                 }
@@ -190,7 +192,8 @@ public final class EntityChangeEnvironmentListener implements Listener {
                         NamespacedKey id = container.get(BlockHelper.DefaultNamespacedKey, ExtraPersistentDataType.NAMESPACED_KEY);
                         if (id != null) {
                             CustomBlock baseBlock = BlockRegister.getInstance().lookup(id);
-                            if (baseBlock instanceof FeatureBlockFalling feature) {
+                            FeatureBlockFalling feature = FeatureHelper.getFeatureUnsafe(baseBlock, FeatureBlockFalling.class);
+                            if (feature != null) {
                                 try {
                                     if (!feature.handleBlockFallDropItem(container, Objects.requireNonNull(event.getItemDrop()))
                                             || event.isCancelled()) {
@@ -211,21 +214,22 @@ public final class EntityChangeEnvironmentListener implements Listener {
                 if (list != null) {
                     for (var iterator = list.iterator(); iterator.hasNext(); ) {
                         CustomBlock baseBlock = iterator.next();
-                        if (baseBlock.getOriginalType().equals(itemStack.getType())
-                                && baseBlock instanceof FeatureBlockBreak blockBreakFeature) {
-                            iterator.remove();
-                            try {
-                                boolean result = blockBreakFeature
-                                        .handleBlockDropByEntity(new DataBlockDropByEntity(event));
-                                if (!result) {
-                                    event.setCancelled(true);
-                                    return;
+                        if (baseBlock.getOriginalType().equals(itemStack.getType())) {
+                            FeatureBlockBreak feature = baseBlock.getFeature(FeatureBlockBreak.class);
+                            if (feature != null) {
+                                iterator.remove();
+                                try {
+                                    boolean result = feature.handleBlockDropByEntity(new DataBlockDropByEntity(event));
+                                    if (!result) {
+                                        event.setCancelled(true);
+                                        return;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                if (event.isCancelled())
+                                    return;
                             }
-                            if (event.isCancelled())
-                                return;
                         }
                     }
                     if (list.isEmpty()) {

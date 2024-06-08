@@ -174,7 +174,8 @@ public final class EntityTickTask extends LoopTaskBase {
             CustomEntity entityType = CustomEntity.get(entity);
             if (entityType == null)
                 return true;
-            if (entityType instanceof FeatureEntityTick feature) {
+            FeatureEntityTick feature = entityType.getFeature(FeatureEntityTick.class);
+            if (feature != null) {
                 ObjectUtil.tryCall(entity, feature::handleTick);
                 return true;
             }

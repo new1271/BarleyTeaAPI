@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemAnvil;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemEnchant;
@@ -98,7 +99,8 @@ public final class InventoryEventListener implements Listener {
         CustomItem itemType = CustomItem.get(itemStack);
         if (itemType == null)
             return;
-        if (itemType instanceof FeatureItemEnchant feature) {
+        FeatureItemEnchant feature = itemType.getFeature(FeatureItemEnchant.class);
+        if (feature != null) {
             DataItemEnchant data = new DataItemEnchant(event);
             feature.handleItemEnchant(data);
             Consumer<ItemStack> job = data.getJobAfterItemEnchant();
@@ -130,7 +132,8 @@ public final class InventoryEventListener implements Listener {
                 final ItemStack oldResultItem = resultItem;
                 if (ItemHelper.isCertainItem(itemType, lowerItem)) {
                     resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
-                    if (itemType instanceof FeatureItemGrindstone feature) {
+                    FeatureItemGrindstone feature = itemType.getFeature(FeatureItemGrindstone.class);
+                    if (feature != null) {
                         if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
                             resultItem = event.getResult();
                         } else {
@@ -154,7 +157,8 @@ public final class InventoryEventListener implements Listener {
             CustomItem itemType = CustomItem.get(item);
             if (itemType != null) {
                 final ItemStack oldResultItem = resultItem;
-                if (CustomItem.get(item) instanceof FeatureItemGrindstone feature) {
+                FeatureItemGrindstone feature = FeatureHelper.getFeatureUnsafe(CustomItem.get(item), FeatureItemGrindstone.class);
+                if (feature != null) {
                     if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
                         resultItem = event.getResult();
                     } else {
@@ -190,7 +194,8 @@ public final class InventoryEventListener implements Listener {
             } else {
                 final ItemStack oldResultItem = resultItem;
                 if (ItemHelper.isCertainItem(itemType, secondItem)) {
-                    if (itemType instanceof FeatureItemAnvil feature) {
+                    FeatureItemAnvil feature = itemType.getFeature(FeatureItemAnvil.class);
+                    if (feature != null) {
                         if (feature.handleItemAnvilRepair(new DataItemAnvilRepair(event))) {
                             resultItem = event.getResult();
                         } else {
@@ -198,7 +203,8 @@ public final class InventoryEventListener implements Listener {
                         }
                     }
                 } else if (ItemHelper.isCertainItem(itemType, resultItem)) {
-                    if (itemType instanceof FeatureItemAnvil feature) {
+                    FeatureItemAnvil feature = itemType.getFeature(FeatureItemAnvil.class);
+                    if (feature != null) {
                         if (secondItem != null && !secondItem.getType().isAir()) { //Combine mode
                             if (feature.handleItemAnvilCombine(new DataItemAnvilCombine(event))) {
                                 resultItem = event.getResult();

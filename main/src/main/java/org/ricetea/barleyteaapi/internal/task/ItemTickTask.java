@@ -8,6 +8,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
@@ -58,8 +59,9 @@ public final class ItemTickTask extends LoopTaskBase {
                             for (EquipmentSlot slot : Constants.ALL_SLOTS) {
                                 if (slot != null) {
                                     ItemStack itemStack = inv.getItem(slot);
-                                    CustomItem itemType = CustomItem.get(itemStack);
-                                    if (itemType instanceof FeatureItemTick feature) {
+                                    FeatureItemTick feature = FeatureHelper.getFeatureUnsafe(
+                                            CustomItem.get(itemStack), FeatureItemTick.class);
+                                    if (feature != null) {
                                         scheduler.scheduleSyncDelayedTask(api,
                                                 () -> feature.handleTickOnEquipment(player, inv,
                                                         itemStack, slot));
@@ -69,8 +71,9 @@ public final class ItemTickTask extends LoopTaskBase {
                             for (int i = 0, count = inv.getSize(); i < count; i++) {
                                 final int slot = i;
                                 ItemStack itemStack = inv.getItem(slot);
-                                CustomItem itemType = CustomItem.get(itemStack);
-                                if (itemType instanceof FeatureItemTick feature) {
+                                FeatureItemTick feature = FeatureHelper.getFeatureUnsafe(
+                                        CustomItem.get(itemStack), FeatureItemTick.class);
+                                if (feature != null) {
                                     scheduler.scheduleSyncDelayedTask(api,
                                             () -> feature.handleTickOnInventory(player, inv,
                                                     itemStack, slot));

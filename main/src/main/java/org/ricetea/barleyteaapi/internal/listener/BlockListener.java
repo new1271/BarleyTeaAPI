@@ -19,12 +19,16 @@ import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockPlace;
 import org.ricetea.barleyteaapi.api.block.feature.data.*;
 import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
-import org.ricetea.barleyteaapi.api.item.feature.*;
-import org.ricetea.barleyteaapi.api.item.feature.data.*;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerBreak;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerPlace;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerBreakBlock;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerPlaceBlock;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
@@ -90,17 +94,20 @@ public final class BlockListener implements Listener {
         CustomBlock blockType = CustomBlock.get(block);
         if (blockType == null)
             return;
-        if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
-            try {
-                if (!blockBreakFeature.handleBlockBreakByPlayer(new DataBlockBreakByPlayer(event))
-                        || event.isCancelled()) {
-                    event.setCancelled(true);
-                    return;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        FeatureHelper.callIfHasFeature(
+                blockType,
+                FeatureBlockBreak.class,
+                feature -> {
+                    try {
+                        if (!feature.handleBlockBreakByPlayer(new DataBlockBreakByPlayer(event))
+                                || event.isCancelled()) {
+                            event.setCancelled(true);
+                            return;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
         BlockFeatureLinker.unloadBlock(blockType, block);
         ChunkStorage.getInstance().removeBlockDataContainer(block);
         if (event.isDropItems()) {
@@ -114,8 +121,12 @@ public final class BlockListener implements Listener {
             return;
         Block block = event.getBlock();
         NamespacedKey id = PrepareToDrops.remove(block.getLocation());
-        if (id != null && BlockRegister.getInstance().lookup(id) instanceof FeatureBlockBreak feature) {
-            feature.handleBlockDropByPlayer(new DataBlockDropByPlayer(event));
+        if (id != null) {
+            FeatureHelper.callIfHasFeature(
+                    BlockRegister.getInstance().lookup(id),
+                    FeatureBlockBreak.class,
+                    feature -> feature.handleBlockDropByPlayer(new DataBlockDropByPlayer(event))
+            );
             return;
         }
     }
@@ -136,11 +147,10 @@ public final class BlockListener implements Listener {
             CustomBlock blockType = CustomBlock.get(block);
             if (blockType == null)
                 continue;
-            if (blockType instanceof FeatureBlockBreak blockBreakFeature) {
+            FeatureBlockBreak feature = blockType.getFeature(FeatureBlockBreak.class);
+            if (feature != null) {
                 try {
-                    if (!blockBreakFeature
-                            .handleBlockBreakByBlockExplode(
-                                    new DataBlockBreakByBlockExplode(event, block))) {
+                    if (!feature.handleBlockBreakByBlockExplode(new DataBlockBreakByBlockExplode(event, block))) {
                         iterator.remove();
                         continue;
                     }
@@ -165,8 +175,9 @@ public final class BlockListener implements Listener {
         CustomBlock blockType = CustomBlockType.get(from).asCustomBlock();
         if (blockType == null)
             return;
-        if (blockType instanceof FeatureBlockMove blockMoveFeature
-                && !blockMoveFeature.handleBlockMove(new DataBlockMove(event)) || event.isCancelled()) {
+        if (Boolean.TRUE.equals(
+                ObjectUtil.safeMap(blockType.getFeature(FeatureBlockMove.class),
+                        feature -> !feature.handleBlockMove(new DataBlockMove(event)))) || event.isCancelled()) {
             event.setCancelled(true);
             return;
         }

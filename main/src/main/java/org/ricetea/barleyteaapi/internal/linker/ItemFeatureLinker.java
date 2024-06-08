@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
@@ -220,15 +221,16 @@ public final class ItemFeatureLinker {
             }
         } else {
             if (ItemHelper.isCertainItem(itemType, itemStackB)) {
-                if (itemStackResult == null && itemType instanceof FeatureItemGive itemGiveFeature) {
+                if (itemStackResult == null) {
                     try {
-                        itemStackResult = itemGiveFeature.handleItemGive(1);
+                        itemStackResult = FeatureHelper.mapIfHasFeature(itemType, FeatureItemGive.class, feature -> feature.handleItemGive(1));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
                 if (itemStackResult != null && !itemStackResult.getType().isAir()) {
-                    if (itemType instanceof FeatureItemCustomDurability feature) {
+                    FeatureItemCustomDurability feature = itemType.getFeature(FeatureItemCustomDurability.class);
+                    if (feature != null) {
                         try {
                             int maxDura = feature.getMaxDurability(itemStackA);
                             int upperItemDamage = feature.getDurabilityDamage(itemStackA);

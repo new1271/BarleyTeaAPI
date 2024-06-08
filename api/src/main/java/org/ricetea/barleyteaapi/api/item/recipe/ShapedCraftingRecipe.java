@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.Box;
@@ -156,8 +157,11 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
     @Override
     public ItemStack apply(@Nonnull ItemStack[] matrix) {
         return getResult().map(ItemStack::new, right ->
-                ObjectUtil.safeMap(ObjectUtil.tryCast(right, FeatureItemGive.class),
-                        itemGiveFeature -> itemGiveFeature.handleItemGive(1))
+                FeatureHelper.mapIfHasFeature(
+                        right,
+                        FeatureItemGive.class,
+                        feature -> feature.handleItemGive(1)
+                )
         );
     }
 

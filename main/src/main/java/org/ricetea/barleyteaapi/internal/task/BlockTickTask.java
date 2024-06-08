@@ -201,7 +201,8 @@ public final class BlockTickTask extends LoopTaskBase {
             CustomBlock blockType = CustomBlock.get(block);
             if (blockType == null)
                 return true;
-            if (blockType instanceof FeatureBlockTick feature) {
+            FeatureBlockTick feature = blockType.getFeature(FeatureBlockTick.class);
+            if (feature != null) {
                 ObjectUtil.tryCall(block, feature::handleTick);
                 return true;
             }

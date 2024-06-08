@@ -30,7 +30,7 @@ tasks {
     jar {
         logger.lifecycle("[jar] Building JAR")
         duplicatesStrategy = DuplicatesStrategy.WARN
-        val layoutDir = File(project.buildDir.path, "libs")
+        val layoutDir = File(layout.buildDirectory.asFile.get().path, "libs")
         if (!layoutDir.exists())
             layoutDir.mkdir()
         logger.lifecycle("[jar] " + File(layoutDir, archiveFileName.get()).path)
@@ -39,11 +39,13 @@ tasks {
         }.filter(Objects::nonNull).forEach {
             dependsOn(it)
             it.doLast {
-                val projectBuildDir = File(it.project.buildDir.path, "libs")
+                val projectLayoutDir = it.project.layout.buildDirectory.asFile.get()
+                val projectBuildDir = File(projectLayoutDir.path, "libs")
                 val projectPath = it.project.path
                 logger.lifecycle("[jar] Include $projectPath")
                 projectBuildDir.listFiles()?.forEach {
-                    if (it.isFile && (!projectPath.startsWith(":nms:") || !it.name.endsWith("dev.jar"))) {
+                    if (it.isFile && (!projectPath.startsWith(":nms:") ||
+                                    !(it.name.endsWith("dev.jar") || !it.name.endsWith("reobf.jar")))) {
                         logger.lifecycle("[jar] Include ${it.path}")
                         from(zipTree(it))
                     }
@@ -59,7 +61,7 @@ tasks {
         val lastDotIndex = filename.lastIndexOf('.')
         if (lastDotIndex != -1)
             archiveFileName = filename.substring(0, lastDotIndex) + "-mojang-mapped.jar"
-        val layoutDir = File(project.buildDir.path, "libs")
+        val layoutDir = File(layout.buildDirectory.asFile.get().path, "libs")
         if (!layoutDir.exists())
             layoutDir.mkdir()
         logger.lifecycle("[mojangMappingJar] " + File(layoutDir, archiveFileName.get()).path)
@@ -68,11 +70,13 @@ tasks {
         }.filter(Objects::nonNull).forEach {
             dependsOn(it)
             it.doLast {
-                val projectBuildDir = File(it.project.buildDir.path, "libs")
+                val projectLayoutDir = it.project.layout.buildDirectory.asFile.get()
+                val projectBuildDir = File(projectLayoutDir.path, "libs")
                 val projectPath = it.project.path
                 logger.lifecycle("[mojangMappingJar] Include $projectPath")
                 projectBuildDir.listFiles()?.forEach {
-                    if (it.isFile && (!projectPath.startsWith(":nms:") || it.name.endsWith("dev.jar"))) {
+                    if (it.isFile && (!projectPath.startsWith(":nms:") || !it.name.endsWith("reobf.jar") ||
+                                    it.name.endsWith("dev.jar"))) {
                         logger.lifecycle("[mojangMappingJar] Include ${it.path}")
                         from(zipTree(it))
                     }

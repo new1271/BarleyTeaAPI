@@ -10,6 +10,7 @@ import org.ricetea.utils.Constants;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,9 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
         if (getCachedSize() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
             stream = stream.parallel();
         }
-        var stream2 = stream.map(clazz::cast);
+        var stream2 = stream
+                .filter(Objects::nonNull)
+                .map(val -> val.getFeature(clazz));
         if (predicate != null) {
             stream2 = stream2.filter(predicate);
         }
@@ -38,7 +41,8 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
     public <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate) {
         var stream = featureMultiMap.get(clazz)
                 .stream()
-                .map(clazz::cast);
+                .filter(Objects::nonNull)
+                .map(val -> val.getFeature(clazz));
         if (predicate != null) {
             stream = stream.filter(predicate);
         }

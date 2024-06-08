@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
@@ -240,11 +241,12 @@ public final class CraftingRecipeRegisterImpl extends BaseRecipeRegisterImpl<Bas
     private ItemStack generateTestOnlyItemStack(@Nullable CustomItemType itemType) {
         if (itemType == null || itemType.isEmpty())
             return null;
-        ItemStack result = null;
         CustomItem customItem = itemType.asCustomItem();
-        if (customItem instanceof FeatureItemGive feature) {
-            result = feature.handleItemGive(1);
-        }
+        ItemStack result = FeatureHelper.mapIfHasFeature(
+                customItem,
+                FeatureItemGive.class,
+                feature -> feature.handleItemGive(1)
+        );
         if (result == null) {
             result = new ItemStack(itemType.getOriginalType());
             if (customItem != null) {

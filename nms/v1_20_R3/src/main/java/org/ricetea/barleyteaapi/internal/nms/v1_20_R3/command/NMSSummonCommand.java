@@ -29,6 +29,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataCommandSummon;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.util.MinecraftKeyCombinedIterator;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R3.util.NMSCommandArgument;
@@ -113,7 +114,8 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                 if (register != null) {
                     NamespacedKey key = new NamespacedKey(namespace, entityKey.getPath());
                     CustomEntity entityType = register.lookup(key);
-                    if (entityType instanceof FeatureCommandSummon feature) {
+                    FeatureCommandSummon feature = FeatureHelper.getFeatureUnsafe(entityType, FeatureCommandSummon.class);
+                    if (feature != null) {
                         CompoundTag CompoundTag1 = nbt.copy();
                         CompoundTag1.putString("id", entityType.getOriginalType().getKey().toString());
                         Entity entity = EntityType.loadEntityRecursive(CompoundTag1, worldserver, loadedEntity -> {
@@ -192,7 +194,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                         EntityRegister register = EntityRegister.getInstanceUnsafe();
                         if (register != null) {
                             this.customKeys = customKeys = register
-                                    .listAll(type -> type instanceof FeatureCommandSummon)
+                                    .listAll(type -> FeatureHelper.hasFeature(type, FeatureCommandSummon.class))
                                     .stream()
                                     .map(CustomEntity::getKey)
                                     .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))
@@ -222,7 +224,7 @@ public final class NMSSummonCommand extends NMSRegularCommand {
                 EntityRegister register = EntityRegister.getInstanceUnsafe();
                 if (register != null) {
                     this.customKeys = customKeys = register
-                            .listAll(type -> type instanceof FeatureCommandSummon)
+                            .listAll(type -> FeatureHelper.hasFeature(type, FeatureCommandSummon.class))
                             .stream()
                             .map(CustomEntity::getKey)
                             .map(key -> ResourceLocation.tryBuild(key.getNamespace(), key.getKey()))

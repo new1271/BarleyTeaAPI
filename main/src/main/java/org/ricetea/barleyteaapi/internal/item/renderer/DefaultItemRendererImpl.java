@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
@@ -398,12 +399,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
             }
             displayName = rarity.apply(displayName, isRenamed, false);
 
-            if (customItem instanceof FeatureItemCustomDurability feature) {
+            FeatureItemCustomDurability feature = customItem.getFeature(FeatureItemCustomDurability.class);
+            if (feature != null) {
                 int maxDura = feature.getMaxDurability(itemStack);
                 int dura = maxDura - feature.getDurabilityDamage(itemStack);
-                if (dura < maxDura ||
-                        feature instanceof FeatureItemCustomDurabilityExtra customDurabilityExtra &&
-                                customDurabilityExtra.isAlwaysShowDurabilityHint(itemStack)) {
+                if (dura < maxDura || Boolean.TRUE.equals(
+                        ObjectUtil.safeMap(
+                                customItem.getFeature(FeatureItemCustomDurabilityExtra.class),
+                                _feature -> _feature.isAlwaysShowDurabilityHint(itemStack)
+                        ))) {
                     renderLoreStack.offer(Component.translatable("item.durability", NamedTextColor.WHITE)
                             .args(Component.text(dura), Component.text(maxDura))
                             .decoration(TextDecoration.ITALIC, false));
@@ -423,7 +427,8 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         DataItemDisplay data = null;
 
-        if (customItem instanceof FeatureItemDisplay feature) {
+        FeatureItemDisplay feature = FeatureHelper.getFeatureUnsafe(customItem, FeatureItemDisplay.class);
+        if (feature != null) {
             data = new DataItemDisplay(player, itemStack, displayName, output);
             try {
                 feature.handleItemDisplay(data);

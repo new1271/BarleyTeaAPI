@@ -18,6 +18,7 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.block.feature.FeatureBlockClick;
 import org.ricetea.barleyteaapi.api.block.feature.data.DataBlockClicked;
 import org.ricetea.barleyteaapi.api.block.feature.state.StateBlockClicked;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.*;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
@@ -53,7 +54,8 @@ public final class PlayerEventListener implements Listener {
         CustomItem itemType = CustomItem.get(itemStack);
         if (itemType == null)
             return;
-        if (itemType instanceof FeatureItemDamage feature) {
+        FeatureItemDamage feature = itemType.getFeature(FeatureItemDamage.class);
+        if (feature != null) {
             try {
                 if (!feature.handleItemDamage(new DataItemDamage(event))) {
                     event.setCancelled(true);
@@ -63,11 +65,12 @@ public final class PlayerEventListener implements Listener {
                 e.printStackTrace();
             }
         }
-        if (itemType instanceof FeatureItemCustomDurability feature) {
+        FeatureItemCustomDurability feature2 = itemType.getFeature(FeatureItemCustomDurability.class);
+        if (feature2 != null) {
             try {
-                int newDamage = feature.getDurabilityDamage(itemStack) + event.getDamage();
-                if (newDamage < feature.getMaxDurability(itemStack)) {
-                    feature.setDurabilityDamage(itemStack, newDamage);
+                int newDamage = feature2.getDurabilityDamage(itemStack) + event.getDamage();
+                if (newDamage < feature2.getMaxDurability(itemStack)) {
+                    feature2.setDurabilityDamage(itemStack, newDamage);
                     event.setDamage(0);
                 } else {
                     event.setDamage(itemStack.getType().getMaxDurability()
@@ -87,13 +90,15 @@ public final class PlayerEventListener implements Listener {
         CustomItem itemType = CustomItem.get(itemStack);
         if (itemType == null)
             return;
-        if (itemType instanceof FeatureItemCustomDurability feature) {
+        FeatureItemCustomDurability feature = itemType.getFeature(FeatureItemCustomDurability.class);
+        if (feature != null) {
             int repairAmount = event.getExperienceOrb().getExperience() * 2;
             try {
                 int damage = feature.getDurabilityDamage(itemStack);
                 int newDamage = Math.max(damage - repairAmount, 0);
                 repairAmount = damage - newDamage;
-                if (itemType instanceof FeatureItemDamage feature2) {
+                FeatureItemDamage feature2 = itemType.getFeature(FeatureItemDamage.class);
+                if (feature2 != null) {
                     event.setRepairAmount(repairAmount);
                     if (feature2.handleItemMend(new DataItemMend(event))) {
                         if (event.isCancelled()) {
@@ -127,9 +132,10 @@ public final class PlayerEventListener implements Listener {
                         });
             }
         } else {
-            if (itemType instanceof FeatureItemDamage feature) {
+            FeatureItemDamage feature2 = itemType.getFeature(FeatureItemDamage.class);
+            if (feature2 != null) {
                 try {
-                    if (!feature.handleItemMend(new DataItemMend(event))) {
+                    if (!feature2.handleItemMend(new DataItemMend(event))) {
                         event.setCancelled(true);
                         return;
                     }
@@ -239,10 +245,14 @@ public final class PlayerEventListener implements Listener {
         CustomItem newItemType = CustomItem.get(newItem);
         if (Objects.equals(oldItemType, newItemType))
             return;
-        if (oldItemType instanceof FeatureItemWear feature)
-            feature.handleItemWearOff(new DataItemWearOff(event));
-        if (newItemType instanceof FeatureItemWear feature)
-            feature.handleItemWear(new DataItemWear(event));
+        FeatureHelper.callIfHasFeature(
+                oldItemType,
+                FeatureItemWear.class,
+                feature -> feature.handleItemWearOff(new DataItemWearOff(event)));
+        FeatureHelper.callIfHasFeature(
+                newItemType,
+                FeatureItemWear.class,
+                feature -> feature.handleItemWear(new DataItemWear(event)));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

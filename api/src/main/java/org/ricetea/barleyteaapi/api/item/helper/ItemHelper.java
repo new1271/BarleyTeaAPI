@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Unmodifiable;
+import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
@@ -146,9 +147,11 @@ public class ItemHelper {
             }
             return 0;
         }, type -> {
-            if (type instanceof FeatureItemCustomDurability feature)
-                return feature.getDurabilityDamage(itemStack);
-            return 0;
+            FeatureItemCustomDurability feature =
+                    FeatureHelper.getFeatureUnsafe(type, FeatureItemCustomDurability.class);
+            if (feature == null)
+                return 0;
+            return feature.getDurabilityDamage(itemStack);
         });
     }
 
@@ -163,8 +166,11 @@ public class ItemHelper {
                 itemStack.setItemMeta(damageable);
             }
         }, type -> {
-            if (type instanceof FeatureItemCustomDurability feature)
-                feature.setDurabilityDamage(itemStack, damage);
+            FeatureItemCustomDurability feature =
+                    FeatureHelper.getFeatureUnsafe(type, FeatureItemCustomDurability.class);
+            if (feature == null)
+                return;
+            feature.setDurabilityDamage(itemStack, damage);
         });
     }
 

@@ -1,11 +1,12 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.5.11"
+    id("io.papermc.paperweight.userdev") version "1.7.1"
 }
 
 group = "org.ricetea"
 version = "1.0"
 
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 java {
     // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
@@ -18,8 +19,6 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
-    // paperweight.foliaDevBundle("1.20.4-R0.1-SNAPSHOT")
-    // paperweight.devBundle("com.example.paperfork", "1.20.4-R0.1-SNAPSHOT")
     implementation(project(":api"))
     implementation(project(":main"))
 }
