@@ -26,9 +26,10 @@ public class FurnaceRecipe extends BaseCookingRecipe {
 
     @Override
     public boolean filterAcceptedBlock(@Nonnull Block block) {
-        Material blockType = block.getType();
-        return blockType.equals(Material.FURNACE) || blockType.equals(Material.BLAST_FURNACE)
-                || blockType.equals(Material.SMOKER);
+        return switch (block.getType()) {
+            case FURNACE -> true;
+            default -> false;
+        };
     }
 
 }

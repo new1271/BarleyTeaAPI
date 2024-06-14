@@ -1,6 +1,5 @@
 package org.ricetea.barleyteaapi.api.item.recipe;
 
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +25,9 @@ public class SmokingRecipe extends BaseCookingRecipe {
 
     @Override
     public boolean filterAcceptedBlock(@Nonnull Block block) {
-        return block.getType().equals(Material.SMOKER);
+        return switch (block.getType()) {
+            case SMOKER, FURNACE -> true;
+            default -> false;
+        };
     }
 }

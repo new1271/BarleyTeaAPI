@@ -15,6 +15,7 @@ import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.jetbrains.annotations.ApiStatus;
+import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
@@ -55,6 +56,7 @@ public final class CookListener implements Listener {
                 CookingRecipeRegister register = CookingRecipeRegister.getInstanceUnsafe();
                 if (register != null && !register.isEmpty()) {
                     for (BaseCookingRecipe recipe : register.listAllAssociatedWithDummyRecipe(recipeKey)) {
+                        BarleyTeaAPI.getInstance().getLogger().info("TEST " + recipe.getKey());
                         if (itemType.equals(recipe.getOriginal()) && recipe.filterAcceptedBlock(block)) {
                             result = recipe.apply(source);
                             allPassed = false;
@@ -64,6 +66,7 @@ public final class CookListener implements Listener {
                 }
                 if (allPassed) {
                     result = null;
+                    BarleyTeaAPI.getInstance().getLogger().info("ALL PASSED");
                 }
                 if (oldResult != result) {
                     event.setResult(result != null ? result : event.getSource());

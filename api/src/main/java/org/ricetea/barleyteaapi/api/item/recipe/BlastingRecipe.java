@@ -26,6 +26,9 @@ public class BlastingRecipe extends BaseCookingRecipe {
 
     @Override
     public boolean filterAcceptedBlock(@Nonnull Block block) {
-        return block.getType().equals(Material.BLAST_FURNACE);
+        return switch (block.getType()) {
+            case BLAST_FURNACE, FURNACE -> true;
+            default -> false;
+        };
     }
 }

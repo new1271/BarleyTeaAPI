@@ -10,6 +10,7 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Function;
 
 public abstract class BaseCookingRecipe extends BaseRecipe implements Function<ItemStack, ItemStack> {
@@ -51,15 +52,15 @@ public abstract class BaseCookingRecipe extends BaseRecipe implements Function<I
 
     public abstract boolean filterAcceptedBlock(@Nonnull Block block);
 
-    @Nonnull
+    @Nullable
     public ItemStack apply(@Nonnull ItemStack source) {
-        return ObjectUtil.letNonNull(getResult().map(ItemStack::new, right ->
+        return getResult().map(ItemStack::new, right ->
                 FeatureHelper.mapIfHasFeature(
                         right,
                         FeatureItemGive.class,
                         feature -> feature.handleItemGive(1)
                 )
-        ), () -> new ItemStack(Material.AIR));
+        );
     }
 
 }
