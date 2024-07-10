@@ -16,6 +16,7 @@ import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.api.internal.entity.EntityHelperInternals;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.utils.CollectionUtil;
@@ -50,9 +51,15 @@ public final class ChunkListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void listenEntitiesUnload(EntityRemoveFromWorldEvent event) {
-        if (event == null || !EntityRegister.hasRegistered())
+        if (event == null)
             return;
         Entity entity = event.getEntity();
+        EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
+        if (internals != null) {
+            internals.removeCachedEntity(entity);
+        }
+        if (!EntityRegister.hasRegistered())
+            return;
         CustomEntity entityType = CustomEntity.get(entity);
         if (entityType == null)
             return;

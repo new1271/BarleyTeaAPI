@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
+import org.ricetea.barleyteaapi.api.internal.entity.EntityHelperInternals;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSEntityHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Cache;
@@ -74,8 +75,20 @@ public class EntityHelper {
 
     @Nullable
     public static NamespacedKey getEntityID(@Nullable Entity entity) {
+        return getEntityID(entity, true);
+    }
+
+    @Nullable
+    public static NamespacedKey getEntityID(@Nullable Entity entity, boolean cached) {
         if (entity == null)
             return null;
+        EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
+        if (internals != null && cached) {
+            var box = internals.getCachedEntityID(entity);
+            if (box != null) {
+                return box.get();
+            }
+        }
         NamespacedKey result;
         PersistentDataContainer container = entity.getPersistentDataContainer();
         String namespacedKeyString = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
@@ -98,6 +111,9 @@ public class EntityHelper {
         } else {
             result = NamespacedKey.fromString(namespacedKeyString);
         }
+        if (internals != null) {
+            internals.setCachedEntityID(entity, result);
+        }
         return result;
     }
 
@@ -116,8 +132,12 @@ public class EntityHelper {
     public static <T extends Entity> void register(@Nullable CustomEntity entityType, @Nullable T entity,
                                                    @Nullable Consumer<T> afterEntityRegistered) {
         if (entityType != null && entity != null) {
-            entity.getPersistentDataContainer().set(DefaultNamespacedKey,
-                    PersistentDataType.STRING, entityType.getKey().toString());
+            NamespacedKey key = entityType.getKey();
+            entity.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
+            if (internals != null) {
+                internals.setCachedEntityID(entity, key);
+            }
             if (afterEntityRegistered != null) {
                 afterEntityRegistered.accept(entity);
             }
@@ -129,7 +149,12 @@ public class EntityHelper {
         if (entityType != null && entity != null) {
             PersistentDataContainer container = entity.getPersistentDataContainer();
             String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
-            container.set(DefaultNamespacedKey, PersistentDataType.STRING, entityType.getKey().toString());
+            NamespacedKey key = entityType.getKey();
+            entity.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
+            if (internals != null) {
+                internals.setCachedEntityID(entity, key);
+            }
             if (afterEntityRegistered != null) {
                 if (!afterEntityRegistered.test(entity)) {
                     if (!entity.isDead())

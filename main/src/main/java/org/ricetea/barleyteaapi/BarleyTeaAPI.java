@@ -18,6 +18,7 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
+import org.ricetea.barleyteaapi.api.internal.entity.EntityHelperInternals;
 import org.ricetea.barleyteaapi.api.internal.entity.counter.TickCounterConstuctors;
 import org.ricetea.barleyteaapi.api.internal.entity.counter.TickingServices;
 import org.ricetea.barleyteaapi.api.internal.misc.MiscInternalFunctions;
@@ -33,6 +34,7 @@ import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
 import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
+import org.ricetea.barleyteaapi.internal.entity.EntityHelperInternalsImpl;
 import org.ricetea.barleyteaapi.internal.entity.counter.AsyncTickingServiceImpl;
 import org.ricetea.barleyteaapi.internal.entity.counter.PersistentTickCounterImpl;
 import org.ricetea.barleyteaapi.internal.entity.counter.SyncTickingServiceImpl;
@@ -241,6 +243,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         loadApiImplementation(servicesManager, new ThreadLocalRandomProviderImpl(), RandomProvider.class);
         loadApiImplementation(servicesManager, new TaskServiceImpl(), TaskService.class);
         loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
+        loadApiImplementation(servicesManager, new EntityHelperInternalsImpl(), EntityHelperInternals.class);
     }
 
     public <T> void loadApiImplementation(@Nonnull ServicesManager servicesManager,
