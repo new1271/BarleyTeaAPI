@@ -11,10 +11,11 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class EntityHelperInternalsImpl implements EntityHelperInternals {
 
-    private final Map<Entity, Object> map = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Entity, Object> map = new ConcurrentHashMap<>();
 
     @Nullable
     @Override

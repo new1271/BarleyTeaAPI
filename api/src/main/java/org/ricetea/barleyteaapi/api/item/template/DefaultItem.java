@@ -17,10 +17,6 @@ import java.util.Collection;
 import java.util.WeakHashMap;
 
 public class DefaultItem implements CustomItem {
-
-    @Nonnull
-    private final WeakHashMap<Class<? extends ItemFeature>, Object> castedMap = new WeakHashMap<>();
-
     @Nonnull
     private final Lazy<Collection<Class<? extends ItemFeature>>> featuresLazy =
             Lazy.createThreadSafe(CustomItem.super::getFeatures);
@@ -86,13 +82,6 @@ public class DefaultItem implements CustomItem {
     public boolean isRarityUpgraded(@Nonnull ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         return meta != null && meta.hasEnchants();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public <T extends ItemFeature> T getFeature(@Nonnull Class<T> featureClass) {
-        return (T) castedMap.computeIfAbsent(featureClass, CustomItem.super::getFeature);
     }
 
     @Nonnull

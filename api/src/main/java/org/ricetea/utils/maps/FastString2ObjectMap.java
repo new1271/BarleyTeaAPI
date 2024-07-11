@@ -1,5 +1,6 @@
-package org.ricetea.utils.fast;
+package org.ricetea.utils.maps;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import org.ricetea.utils.Constants;
@@ -12,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public final class FastStringToObjectMap<V> implements Map<String, V> {
+public final class FastString2ObjectMap<V> implements Map<String, V> {
 
     private final boolean isAsciiString;
     @Nonnull
@@ -28,13 +29,13 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
     @Nonnegative
     private int size;
 
-    public FastStringToObjectMap(@Nonnull Class<V> clazz) {
+    public FastString2ObjectMap(@Nonnull Class<V> clazz) {
         this(clazz, false);
     }
 
-    public FastStringToObjectMap(@Nonnull Class<V> clazz, boolean isAsciiString) {
+    public FastString2ObjectMap(@Nonnull Class<V> clazz, boolean isAsciiString) {
         this.isAsciiString = isAsciiString;
-        innerMap = new Long2ObjectArrayMap<>();
+        innerMap = new Long2ObjectAVLTreeMap<>();
         this.clazz = clazz;
         mutableKeySetLazy = Lazy.create(MutableKeySet::new);
         mutableValueCollectionLazy = Lazy.create(MutableValueCollection::new);
@@ -77,12 +78,12 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         int length = list.size();
         if (length < Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
             for (InnerStruct<V> struct : list) {
-                if (fullStringCompare0(_key, struct.key))
+                if (_key.equals(struct.key))
                     return struct.value;
             }
         } else {
             return list.stream()
-                    .filter(val -> fullStringCompare0(_key, val.key))
+                    .filter(val -> _key.equals(val.key))
                     .findAny()
                     .map(InnerStruct::getValue)
                     .orElse(null);
@@ -103,7 +104,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
                 size++;
             }
             for (InnerStruct<V> struct : _list) {
-                if (fullStringCompare0(key, struct.key)) {
+                if (key.equals(struct.key)) {
                     struct.value = value;
                     return _list;
                 }
@@ -125,7 +126,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
             return null;
         InnerStruct<V> target = null;
         for (InnerStruct<V> struct : list) {
-            if (fullStringCompare0(_key, struct.key)) {
+            if (_key.equals(struct.key)) {
                 target = struct;
                 break;
             }
@@ -175,7 +176,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         int length = list.size();
         if (length > Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
             return list.parallelStream()
-                    .anyMatch(val -> fullStringCompare0(key, val.key));
+                    .anyMatch(val -> key.equals(val.key));
         } else {
             for (InnerStruct<V> struct : list) {
                 if (key.equals(struct.key)) {
@@ -300,29 +301,6 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         return f1 << 56 | f2 << 48 | l1 << 40 | l2 << 32 | l3 << 24 | l4 << 16 | (length & 0xFF);
     }
 
-    @SuppressWarnings("unused")
-    private boolean fullStringCompare(@Nullable String a, @Nullable String b) {
-        if (a == null)
-            return b == null;
-        return fullStringCompare0(a, b);
-    }
-
-    @SuppressWarnings("StringEquality")
-    private boolean fullStringCompare0(@Nonnull String a, @Nullable String b) {
-        if (a == b)
-            return true;
-        if (b == null)
-            return false;
-        int length = a.length();
-        if (length != b.length())
-            return false;
-        for (int i = 0; i < length; i++) {
-            if (a.charAt(i) != b.charAt(i))
-                return false;
-        }
-        return true;
-    }
-
     private boolean removeValueUnsafe(@Nullable Object value) {
         V castedObj = ObjectUtil.tryCast(value, clazz);
         if (castedObj == null)
@@ -374,19 +352,19 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
 
         @Override
         public boolean isEmpty() {
-            return FastStringToObjectMap.this.isEmpty();
+            return FastString2ObjectMap.this.isEmpty();
         }
 
         @Override
         public boolean contains(Object o) {
             if (o instanceof String _key)
-                return FastStringToObjectMap.this.containsKey0(_key);
+                return FastString2ObjectMap.this.containsKey0(_key);
             return false;
         }
 
         @Override
         public Stream<String> stream() {
-            return FastStringToObjectMap.this.innerMap
+            return FastString2ObjectMap.this.innerMap
                     .values()
                     .stream()
                     .flatMap(Collection::stream)
@@ -426,14 +404,14 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         @Override
         public boolean remove(Object o) {
             if (o instanceof String _key)
-                return FastStringToObjectMap.this.remove(_key) != null;
+                return FastString2ObjectMap.this.remove(_key) != null;
             return false;
         }
 
         @SuppressWarnings("SuspiciousMethodCalls")
         @Override
         public boolean containsAll(@Nonnull Collection<?> c) {
-            FastStringToObjectMap<V> map = FastStringToObjectMap.this;
+            FastString2ObjectMap<V> map = FastString2ObjectMap.this;
             return c.stream().allMatch(map::containsKey);
         }
 
@@ -450,13 +428,13 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         @SuppressWarnings("SuspiciousMethodCalls")
         @Override
         public boolean removeAll(@Nonnull Collection<?> c) {
-            FastStringToObjectMap<V> map = FastStringToObjectMap.this;
+            FastString2ObjectMap<V> map = FastString2ObjectMap.this;
             return c.stream().allMatch(val -> map.remove(val) != null);
         }
 
         @Override
         public void clear() {
-            FastStringToObjectMap.this.clear();
+            FastString2ObjectMap.this.clear();
         }
     }
 
@@ -469,17 +447,17 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
 
         @Override
         public boolean isEmpty() {
-            return FastStringToObjectMap.this.isEmpty();
+            return FastString2ObjectMap.this.isEmpty();
         }
 
         @Override
         public boolean contains(Object o) {
-            return FastStringToObjectMap.this.containsValue(o);
+            return FastString2ObjectMap.this.containsValue(o);
         }
 
         @Override
         public Stream<V> stream() {
-            return FastStringToObjectMap.this.innerMap
+            return FastString2ObjectMap.this.innerMap
                     .values()
                     .stream()
                     .flatMap(Collection::stream)
@@ -521,13 +499,13 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
             V castedObj = ObjectUtil.tryCast(o, clazz);
             if (castedObj == null)
                 return false;
-            return FastStringToObjectMap.this.removeValue(castedObj);
+            return FastString2ObjectMap.this.removeValue(castedObj);
         }
 
         @SuppressWarnings("SuspiciousMethodCalls")
         @Override
         public boolean containsAll(@Nonnull Collection<?> c) {
-            FastStringToObjectMap<V> map = FastStringToObjectMap.this;
+            FastString2ObjectMap<V> map = FastString2ObjectMap.this;
             return c.stream().allMatch(map::containsValue);
         }
 
@@ -543,13 +521,13 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
 
         @Override
         public boolean removeAll(@Nonnull Collection<?> c) {
-            FastStringToObjectMap<V> map = FastStringToObjectMap.this;
+            FastString2ObjectMap<V> map = FastString2ObjectMap.this;
             return c.stream().allMatch(map::removeValueUnsafe);
         }
 
         @Override
         public void clear() {
-            FastStringToObjectMap.this.clear();
+            FastString2ObjectMap.this.clear();
         }
     }
 
@@ -562,12 +540,12 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
 
         @Override
         public boolean isEmpty() {
-            return FastStringToObjectMap.this.isEmpty();
+            return FastString2ObjectMap.this.isEmpty();
         }
 
         @Override
         public Stream<Entry<String, V>> stream() {
-            return FastStringToObjectMap.this.innerMap
+            return FastString2ObjectMap.this.innerMap
                     .values()
                     .stream()
                     .flatMap(Collection::stream);
@@ -587,7 +565,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         public boolean contains(Object o) {
             if (!(o instanceof Entry<?, ?> entry))
                 return false;
-            V value = FastStringToObjectMap.this.get(entry.getKey());
+            V value = FastString2ObjectMap.this.get(entry.getKey());
             if (value == null)
                 return false;
             return Objects.equals(entry.getValue(), value);
@@ -617,7 +595,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
         public boolean remove(Object o) {
             if (!(o instanceof Entry<?, ?> entry))
                 return false;
-            return FastStringToObjectMap.this.remove(entry.getKey(), entry.getValue());
+            return FastString2ObjectMap.this.remove(entry.getKey(), entry.getValue());
         }
 
         @Override
@@ -642,7 +620,7 @@ public final class FastStringToObjectMap<V> implements Map<String, V> {
 
         @Override
         public void clear() {
-            FastStringToObjectMap.this.clear();
+            FastString2ObjectMap.this.clear();
         }
     }
 }

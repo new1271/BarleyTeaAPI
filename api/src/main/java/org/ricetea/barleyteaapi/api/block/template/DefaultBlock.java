@@ -15,9 +15,6 @@ import java.util.WeakHashMap;
 public class DefaultBlock implements CustomBlock {
 
     @Nonnull
-    private final WeakHashMap<Class<? extends BlockFeature>, Object> castedMap = new WeakHashMap<>();
-
-    @Nonnull
     private final Lazy<Collection<Class<? extends BlockFeature>>> featuresLazy =
             Lazy.createThreadSafe(CustomBlock.super::getFeatures);
 
@@ -52,13 +49,6 @@ public class DefaultBlock implements CustomBlock {
     @Override
     public Material getOriginalType() {
         return originalType;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public <T extends BlockFeature> T getFeature(@Nonnull Class<T> featureClass) {
-        return (T) castedMap.computeIfAbsent(featureClass, CustomBlock.super::getFeature);
     }
 
     @Nonnull
