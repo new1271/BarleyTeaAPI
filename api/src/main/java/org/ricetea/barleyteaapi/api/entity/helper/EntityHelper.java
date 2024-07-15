@@ -137,12 +137,12 @@ public class EntityHelper {
         if (entityType != null && entity != null) {
             NamespacedKey key = entityType.getKey();
             entity.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
+            if (afterEntityRegistered != null) {
+                afterEntityRegistered.accept(entity);
+            }
             EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
             if (internals != null) {
                 internals.setCachedEntityID(entity, key);
-            }
-            if (afterEntityRegistered != null) {
-                afterEntityRegistered.accept(entity);
             }
         }
     }
