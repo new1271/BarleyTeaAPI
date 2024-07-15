@@ -154,10 +154,6 @@ public class EntityHelper {
             String previousID = container.get(DefaultNamespacedKey, PersistentDataType.STRING);
             NamespacedKey key = entityType.getKey();
             entity.getPersistentDataContainer().set(DefaultNamespacedKey, PersistentDataType.STRING, key.toString());
-            EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
-            if (internals != null) {
-                internals.setCachedEntityID(entity, key);
-            }
             if (afterEntityRegistered != null) {
                 if (!afterEntityRegistered.test(entity)) {
                     if (!entity.isDead())
@@ -167,6 +163,10 @@ public class EntityHelper {
                             container.set(DefaultNamespacedKey, PersistentDataType.STRING, previousID);
                     return false;
                 }
+            }
+            EntityHelperInternals internals = EntityHelperInternals.getInstanceUnsafe();
+            if (internals != null) {
+                internals.setCachedEntityID(entity, key);
             }
             return true;
         }
