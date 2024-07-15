@@ -22,12 +22,15 @@ import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
 import org.ricetea.barleyteaapi.api.helper.ChatColorHelper;
 import org.ricetea.barleyteaapi.api.internal.entity.EntityHelperInternals;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSEntityHelper;
+import org.ricetea.barleyteaapi.api.task.TaskOption;
+import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Cache;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
