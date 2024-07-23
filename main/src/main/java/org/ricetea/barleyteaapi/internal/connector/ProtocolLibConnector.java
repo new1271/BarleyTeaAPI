@@ -27,11 +27,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
-import org.ricetea.barleyteaapi.util.NativeUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
@@ -113,15 +113,18 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         private static Component renderHoverEvent(@Nonnull Component component, @Nonnull Player player) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                ItemStack itemStack = NativeUtil.fromShowItem(showItem);
-                if (itemStack != null) {
-                    WithFlag<ItemStack> flag = ItemHelper.render(itemStack, player);
-                    if (flag.flag()) {
-                        itemStack = flag.obj();
-                        return itemStack.displayName()
-                                .hoverEvent(itemStack.asHoverEvent())
-                                .children(component.children());
-                    }
+                INMSItemHelper nmsItemHelper = INMSItemHelper.getInstanceUnsafe();
+                if (nmsItemHelper == null)
+                    return component;
+                ItemStack itemStack = nmsItemHelper.createItemStackFromShowItem(showItem);
+                if (itemStack == null)
+                    return component;
+                WithFlag<ItemStack> flag = ItemHelper.render(itemStack, player);
+                if (flag.flag()) {
+                    itemStack = flag.obj();
+                    return itemStack.displayName()
+                            .hoverEvent(itemStack.asHoverEvent())
+                            .children(component.children());
                 }
             }
             return component;
@@ -398,15 +401,18 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                                                                @Nonnull Component component, @Nonnull Locale locale) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                ItemStack itemStack = NativeUtil.fromShowItem(showItem);
-                if (itemStack != null) {
-                    var flag = applyTranslateFallbacks(translator, itemStack, locale);
-                    if (flag != null && flag.flag()) {
-                        itemStack = flag.obj();
-                        return itemStack.displayName()
-                                .hoverEvent(itemStack.asHoverEvent())
-                                .children(component.children());
-                    }
+                INMSItemHelper nmsItemHelper = INMSItemHelper.getInstanceUnsafe();
+                if (nmsItemHelper == null)
+                    return component;
+                ItemStack itemStack = nmsItemHelper.createItemStackFromShowItem(showItem);
+                if (itemStack == null)
+                    return component;
+                var flag = applyTranslateFallbacks(translator, itemStack, locale);
+                if (flag != null && flag.flag()) {
+                    itemStack = flag.obj();
+                    return itemStack.displayName()
+                            .hoverEvent(itemStack.asHoverEvent())
+                            .children(component.children());
                 }
             }
             return component;

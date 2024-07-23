@@ -1,6 +1,9 @@
 package org.ricetea.barleyteaapi.api.internal.nms;
 
 import com.google.common.collect.Multimap;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -29,6 +32,20 @@ public interface INMSItemHelper extends IHelper {
 
     @Nullable
     Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material);
+
+    @Nullable
+    default ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
+        Key item = showItem.item();
+        int count = showItem.count();
+        BinaryTagHolder tagHolder = showItem.nbt();
+        String nbt;
+        if (tagHolder == null) {
+            nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\"}";
+        } else {
+            nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\", \"nbt\":" + tagHolder.string() + "}";
+        }
+        return createItemStackFromNbtString(nbt);
+    }
 
     @Nullable
     ItemStack createItemStackFromNbtString(@Nonnull String nbt);

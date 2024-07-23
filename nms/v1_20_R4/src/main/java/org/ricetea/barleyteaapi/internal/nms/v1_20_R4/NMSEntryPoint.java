@@ -1,6 +1,11 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R4;
 
 import com.google.common.collect.Multimap;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.event.DataComponentValue;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.gson.GsonDataComponentValue;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -38,13 +43,11 @@ import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NMSEntityHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NMSItemHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
+import org.ricetea.utils.SoftCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -84,10 +87,67 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
         ServicesManager servicesManager = Bukkit.getServicesManager();
         apiInst.loadApiImplementation(servicesManager, NMSEntityHelper::damage, INMSEntityHelper.class);
         apiInst.loadApiImplementation(servicesManager, new INMSItemHelper() {
+            private final ThreadLocal<SoftCache<StringBuilder>> localBuilder = ThreadLocal.withInitial(() ->
+                    SoftCache.create(StringBuilder::new));
+
             @Nullable
             @Override
             public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material) {
                 return NMSItemHelper.getDefaultAttributeModifiers(material);
+            }
+
+            @Nullable
+            @Override
+            public ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
+                Key item = showItem.item();
+                int count = showItem.count();
+                Map<Key, DataComponentValue> map = showItem.dataComponents();
+                String nbt;
+                if (map.isEmpty()) {
+                    nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\"}";
+                } else {
+                    StringBuilder builder = localBuilder.get().get();
+                    builder.append("{\"id\":\"");
+                    builder.append(item);
+                    builder.append("\", \"count\":\"");
+                    builder.append(count);
+                    builder.append("\", \"components\":{");
+                    for (var entry : map.entrySet()) {
+                        DataComponentValue value = entry.getValue();
+                        switch (value) {
+                            case BinaryTagHolder holder -> {
+                                builder.append('"');
+                                builder.append(entry.getKey());
+                                builder.append('"');
+                                builder.append(':');
+                                builder.append(holder.string());
+                                builder.append(',');
+                            }
+                            case DataComponentValue.TagSerializable serializable -> {
+                                builder.append('"');
+                                builder.append(entry.getKey());
+                                builder.append('"');
+                                builder.append(':');
+                                builder.append(serializable.asBinaryTag().string());
+                                builder.append(',');
+                            }
+                            case GsonDataComponentValue gson -> {
+                                builder.append('"');
+                                builder.append(entry.getKey());
+                                builder.append('"');
+                                builder.append(':');
+                                builder.append(gson.element());
+                                builder.append(',');
+                            }
+                            default -> {
+                            }
+                        }
+                    }
+                    builder.append("}}");
+                    nbt = builder.toString();
+                    builder.setLength(0);
+                }
+                return createItemStackFromNbtString(nbt);
             }
 
             @Nullable

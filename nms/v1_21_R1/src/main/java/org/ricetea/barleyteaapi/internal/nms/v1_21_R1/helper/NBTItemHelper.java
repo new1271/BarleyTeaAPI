@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_21_R1.helper;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -16,7 +17,10 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public final class NBTItemHelper {
     @Nonnull
@@ -55,7 +59,7 @@ public final class NBTItemHelper {
             return null;
         if (tag.isEmpty())
             return DataComponentMap.EMPTY;
-        DataComponentMap.Builder builder = DataComponentMap.builder();
+        Map<DataComponentType<?>, Object> map = new HashMap<>();
         DataComponentType<CustomData> customDataType = DataComponents.CUSTOM_DATA;
         Lazy<CompoundTag> customNbtTagLazy = Lazy.create(CompoundTag::new);
         var registry = BuiltInRegistries.DATA_COMPONENT_TYPE;
@@ -80,12 +84,30 @@ public final class NBTItemHelper {
             Codec<?> codec = type.codec();
             if (codec == null)
                 continue;
-            codec.decode(NbtOps.INSTANCE, value).getOrThrow().getFirst();
+            Pair<?, Tag> decodedValue = ObjectUtil.tryMapSilently(() -> codec.decode(NbtOps.INSTANCE, value).getOrThrow());
+            if (decodedValue != null)
+                map.put(type, decodedValue.getFirst());
         }
         CompoundTag customNbtTag = customNbtTagLazy.getUnsafe();
         if (customNbtTag != null) {
-            builder.set(customDataType, CustomData.of(customNbtTag));
+            map.put(customDataType, CustomData.of(customNbtTag));
         }
-        return builder.build();
+        return new ResultMap(map);
+    }
+
+    private record ResultMap(@Nonnull Map<DataComponentType<?>, Object> map) implements DataComponentMap {
+
+        @SuppressWarnings("unchecked")
+        @Nullable
+        @Override
+        public <T> T get(@Nonnull DataComponentType<? extends T> type) {
+            return (T) map.get(type);
+        }
+
+        @Nonnull
+        @Override
+        public Set<DataComponentType<?>> keySet() {
+            return map.keySet();
+        }
     }
 }
