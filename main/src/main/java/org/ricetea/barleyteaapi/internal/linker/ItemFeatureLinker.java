@@ -43,7 +43,7 @@ public final class ItemFeatureLinker {
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
         for (EquipmentSlot slot : slots) {
-            if (slot != null) {
+            if (slot != null && ItemHelper.isSuitableForEntityType(slot, entity.getType())) {
                 ItemStack itemStack = equipment.getItem(slot);
                 ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 boolean result = ObjectUtil.tryMap(() ->
@@ -73,7 +73,7 @@ public final class ItemFeatureLinker {
             return true;
         boolean isCopy = !(equipment instanceof PlayerInventory);
         for (EquipmentSlot slot : slots) {
-            if (slot != null) {
+            if (slot != null && ItemHelper.isSuitableForEntityType(slot, entity.getType())) {
                 ItemStack itemStack = equipment.getItem(slot);
                 ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 boolean result = ObjectUtil.tryMap(() ->
@@ -102,7 +102,7 @@ public final class ItemFeatureLinker {
             return;
         boolean isCopy = !(equipment instanceof PlayerInventory);
         for (EquipmentSlot slot : slots) {
-            if (slot != null) {
+            if (slot != null && ItemHelper.isSuitableForEntityType(slot, entity.getType())) {
                 ItemStack itemStack = equipment.getItem(slot);
                 ItemStack itemStackMaybeModified = isCopy && ItemHelper.isCustomItem(itemStack) ? itemStack.clone() : itemStack;
                 ObjectUtil.tryCall(() ->

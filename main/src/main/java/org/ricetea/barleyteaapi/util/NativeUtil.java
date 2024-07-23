@@ -1,22 +1,35 @@
 package org.ricetea.barleyteaapi.util;
 
-import org.bukkit.Bukkit;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.event.HoverEvent;
+import org.bukkit.inventory.ItemStack;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NativeUtil {
-    @Nonnull
-    public static String getNMSVersion(){
-        Class<?> clazz;
-        try {
-            clazz = Class.forName("org.bukkit.craftbukkit");
-        } catch (Exception ignored) {
-            clazz = null;
+    @Nullable
+    public static ItemStack fromShowItem(@Nullable HoverEvent.ShowItem showItem) {
+        if (showItem == null)
+            return null;
+        BinaryTagHolder nbtHolder = showItem.nbt();
+        if (nbtHolder == null)
+            return null;
+        INMSItemHelper helper = INMSItemHelper.getInstanceUnsafe();
+        if (helper == null)
+            return null;
+        NMSVersion version = NMSVersion.getCurrent();
+        if (version == null || !version.isValid())
+            return null;
+        String rawNbt;
+        if (NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion()) {
+            rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
+                    + nbtHolder.string() + "}";
+        } else {
+            rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"components\": "
+                    + nbtHolder.string() + "}";
         }
-        if (clazz == null) {
-            String v = Bukkit.getServer().getClass().getPackage().getName();
-            return v.substring(v.lastIndexOf('.') + 1);
-        }
-        return Bukkit.getBukkitVersion();
+        return helper.createItemStackFromNbtString(rawNbt);
     }
 }

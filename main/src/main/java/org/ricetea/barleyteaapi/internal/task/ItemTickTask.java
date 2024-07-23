@@ -11,6 +11,7 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
+import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
@@ -57,7 +58,7 @@ public final class ItemTickTask extends LoopTaskBase {
                         if (player != null && !player.isDead()) {
                             PlayerInventory inv = player.getInventory();
                             for (EquipmentSlot slot : Constants.ALL_SLOTS) {
-                                if (slot != null) {
+                                if (slot != null && ItemHelper.isSuitableForPlayer(slot)) {
                                     ItemStack itemStack = inv.getItem(slot);
                                     FeatureItemTick feature = FeatureHelper.getFeatureUnsafe(
                                             CustomItem.get(itemStack), FeatureItemTick.class);

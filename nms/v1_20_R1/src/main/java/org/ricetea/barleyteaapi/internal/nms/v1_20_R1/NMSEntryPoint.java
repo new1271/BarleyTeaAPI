@@ -19,10 +19,7 @@ import org.ricetea.barleyteaapi.api.event.EntitiesRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.EntitiesUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
-import org.ricetea.barleyteaapi.api.internal.nms.INBTItemHelper;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSEntityHelper;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSEntryPoint;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.*;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSCommandRegisterImpl;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSGiveCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R1.command.NMSRegularCommand;
@@ -50,6 +47,12 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
         this.apiInst = apiInst;
     }
 
+    @Override
+    public NMSVersion getNMSVersion() {
+        return NMSVersion.v1_20_R1;
+    }
+
+    @Override
     public void onEnable() {
         Logger logger = apiInst.getLogger();
         logger.info("[NMS] registering command register...");
@@ -164,6 +167,7 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
         }, INBTItemHelper.class);
     }
 
+    @Override
     public void onDisable() {
         Logger logger = apiInst.getLogger();
         logger.info("unregistering command register...");

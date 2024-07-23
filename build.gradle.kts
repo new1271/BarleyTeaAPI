@@ -12,13 +12,17 @@ dependencies {
     project(":nms:v1_20_R1")
     project(":nms:v1_20_R2")
     project(":nms:v1_20_R3")
+    project(":nms:v1_20_R4")
+    project(":nms:v1_21_R1")
 }
 
 val allProjects = listOf(project(":api"),
         project(":main"),
         project(":nms:v1_20_R1"),
         project(":nms:v1_20_R2"),
-        project(":nms:v1_20_R3"))
+        project(":nms:v1_20_R3"),
+        project(":nms:v1_20_R4"),
+        project(":nms:v1_21_R1"))
 
 val allJar = project.tasks.register("allJar")
 val mojangMappingJar = project.tasks.register("mojangMappingJar", Jar::class)

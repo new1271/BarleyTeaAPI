@@ -11,7 +11,6 @@ import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers.ItemSlot;
 import com.comphenix.protocol.wrappers.Pair;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -19,7 +18,6 @@ import net.kyori.adventure.text.event.HoverEvent.ShowItem;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
-import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,11 +27,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
+import org.ricetea.barleyteaapi.util.NativeUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
@@ -115,22 +113,14 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         private static Component renderHoverEvent(@Nonnull Component component, @Nonnull Player player) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                BinaryTagHolder nbtHolder = showItem.nbt();
-                if (nbtHolder == null)
-                    return component;
-                String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
-                        + nbtHolder.string() + "}";
-                INMSItemHelper helper = Bukkit.getServicesManager().load(INMSItemHelper.class);
-                if (helper != null) {
-                    ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
-                    if (itemStack != null) {
-                        WithFlag<ItemStack> flag = ItemHelper.render(itemStack, player);
-                        if (flag.flag()) {
-                            itemStack = flag.obj();
-                            return itemStack.displayName()
-                                    .hoverEvent(itemStack.asHoverEvent())
-                                    .children(component.children());
-                        }
+                ItemStack itemStack = NativeUtil.fromShowItem(showItem);
+                if (itemStack != null) {
+                    WithFlag<ItemStack> flag = ItemHelper.render(itemStack, player);
+                    if (flag.flag()) {
+                        itemStack = flag.obj();
+                        return itemStack.displayName()
+                                .hoverEvent(itemStack.asHoverEvent())
+                                .children(component.children());
                     }
                 }
             }
@@ -408,22 +398,14 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                                                                @Nonnull Component component, @Nonnull Locale locale) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                BinaryTagHolder nbtHolder = showItem.nbt();
-                if (nbtHolder == null)
-                    return component;
-                String rawNbt = "{\"id\":\"" + showItem.item() + "\", \"Count\":" + showItem.count() + ", \"tag\": "
-                        + nbtHolder.string() + "}";
-                INMSItemHelper helper = Bukkit.getServicesManager().load(INMSItemHelper.class);
-                if (helper != null) {
-                    ItemStack itemStack = helper.createItemStackFromNbtString(rawNbt);
-                    if (itemStack != null) {
-                        var flag = applyTranslateFallbacks(translator, itemStack, locale);
-                        if (flag != null && flag.flag()) {
-                            itemStack = flag.obj();
-                            return itemStack.displayName()
-                                    .hoverEvent(itemStack.asHoverEvent())
-                                    .children(component.children());
-                        }
+                ItemStack itemStack = NativeUtil.fromShowItem(showItem);
+                if (itemStack != null) {
+                    var flag = applyTranslateFallbacks(translator, itemStack, locale);
+                    if (flag != null && flag.flag()) {
+                        itemStack = flag.obj();
+                        return itemStack.displayName()
+                                .hoverEvent(itemStack.asHoverEvent())
+                                .children(component.children());
                     }
                 }
             }

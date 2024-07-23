@@ -10,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.block.ShulkerBox;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -185,6 +186,17 @@ public class ItemHelper {
                     WOODEN_HOE, STONE_HOE, GOLDEN_HOE, IRON_HOE, DIAMOND_HOE, NETHERITE_HOE -> true;
             default -> false;
         };
+    }
+
+    public static boolean isSuitableForPlayer(@Nonnull EquipmentSlot slot){
+        return isSuitableForEntityType(slot, EntityType.PLAYER);
+    }
+
+    public static boolean isSuitableForEntityType(@Nonnull EquipmentSlot slot, @Nonnull EntityType type){
+        INMSItemHelper helper = INMSItemHelper.getInstanceUnsafe();
+        if (helper == null)
+            return true;
+        return helper.isSuitableForEntityType(slot, type);
     }
 
 

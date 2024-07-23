@@ -4,4 +4,6 @@ public interface INMSEntryPoint {
     void onEnable();
 
     void onDisable();
+
+    NMSVersion getNMSVersion();
 }

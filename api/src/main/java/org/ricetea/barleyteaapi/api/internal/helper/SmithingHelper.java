@@ -10,6 +10,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.nms.INBTItemHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseSmithingRecipe;
@@ -51,10 +52,19 @@ public final class SmithingHelper {
             result.setItemMeta(resultMeta);
         }
         if (helper != null) {
-            result = helper.copyNbt(original, result,
-                    "PublicBukkitValues", "AttributeModifiers", "Enchantments",
-                    "Damage", "CustomModelData");
-            result = helper.mergeNbt(original, result, "PublicBukkitValues");
+            NMSVersion nmsVersion = NMSVersion.getCurrent();
+            if (nmsVersion.getVersion() < NMSVersion.v1_20_R4.getVersion()) {
+                result = helper.copyNbt(original, result,
+                        "PublicBukkitValues", "AttributeModifiers", "Enchantments",
+                        "Damage", "CustomModelData");
+                result = helper.mergeNbt(original, result, "PublicBukkitValues");
+            }
+            else{
+                result = helper.copyNbt(original, result,
+                        "custom_data.PublicBukkitValues", "attribute_modifiers", "enchantments",
+                        "damage", "custom_model_data");
+                result = helper.mergeNbt(original, result, "custom_data.PublicBukkitValues");
+            }
         }
         if (damage > 0) {
             CustomItemType resultType = recipe.getResult();

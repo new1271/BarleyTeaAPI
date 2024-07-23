@@ -23,6 +23,7 @@ import org.ricetea.barleyteaapi.api.internal.entity.counter.TickCounterConstucto
 import org.ricetea.barleyteaapi.api.internal.entity.counter.TickingServices;
 import org.ricetea.barleyteaapi.api.internal.misc.MiscInternalFunctions;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSEntryPoint;
+import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.registration.*;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
@@ -51,7 +52,6 @@ import org.ricetea.barleyteaapi.internal.task.BlockTickTask;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.internal.task.TaskServiceImpl;
-import org.ricetea.barleyteaapi.util.NativeUtil;
 import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.SupplierUtil;
@@ -63,6 +63,7 @@ import java.util.Objects;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Singleton
@@ -82,6 +83,11 @@ public final class BarleyTeaAPI extends JavaPlugin {
     @Nullable
     public static BarleyTeaAPI getInstanceUnsafe() {
         return _inst;
+    }
+
+    @Nullable
+    public INMSEntryPoint getNMSEntryPoint() {
+        return nmsEntryPoint;
     }
 
     @Nullable
@@ -252,38 +258,36 @@ public final class BarleyTeaAPI extends JavaPlugin {
     }
 
     private void loadNMSFeature() {
-        String nmsVersion = NativeUtil.getNMSVersion();
+        NMSVersion nmsVersion = NMSVersion.getCurrent();
+        String nmsVersionInString = nmsVersion.toString();
+        String minecraftVersion = Bukkit.getMinecraftVersion();
         Logger logger = getLogger();
-        logger.info("Loading NMS Support for \"" + nmsVersion + "\" ...");
-        Exception ex = null;
-        if (nmsVersion.startsWith("v_")) {
-            nmsVersion = nmsVersion.replace("v_", "v");
+        if (!nmsVersion.isValid()) {
+            logger.info("Failed to loading NMS Support for \"" + minecraftVersion + "\", some features will be lost!");
+            return;
         }
-        final String finalNmsVersion = nmsVersion;
+        String className = "org.ricetea.barleyteaapi.internal.nms." + nmsVersionInString + ".NMSEntryPoint";
         Supplier<?> nmsSupplier = ObjectUtil.tryMap(() -> {
             try {
-                return SupplierUtil.fromConstuctor(
-                        Class.forName("org.ricetea.barleyteaapi.internal.nms." + finalNmsVersion + ".NMSEntryPoint"),
-                        this);
+                return SupplierUtil.fromConstuctor(Class.forName(className), this);
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                logger.log(Level.WARNING, "Cannot loaded NMS Support for " + minecraftVersion + "\", some feature will be lost!", e);
+                return null;
             }
         });
         if (nmsSupplier == null) {
-            ObjectUtil.safeCall(ex, Exception::printStackTrace);
-            logger.warning("Cannot loaded NMS Support for \"" + nmsVersion + "\", some feature will be lost!");
             return;
         }
         if (nmsSupplier.get() instanceof INMSEntryPoint entryPoint) {
+            logger.info("Found NMS Support Class '" + className + "', Loading...");
             try {
                 entryPoint.onEnable();
             } catch (Exception e) {
-                e.printStackTrace();
-                logger.warning("Cannot loaded NMS Support for \"" + nmsVersion + "\", some feature will be lost!");
+                logger.log(Level.WARNING, "Cannot loaded NMS Support for \"" + minecraftVersion + "\", some feature will be lost!", e);
                 return;
             }
             this.nmsEntryPoint = entryPoint;
-            logger.info("Successfully loaded NMS Support for \"" + nmsVersion + "\" !");
+            logger.info("Successfully loaded NMS Support for \"" + minecraftVersion + "\" !");
         }
     }
 
