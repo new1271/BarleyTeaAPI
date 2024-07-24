@@ -1,11 +1,5 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R4;
 
-import com.google.common.collect.Multimap;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.api.BinaryTagHolder;
-import net.kyori.adventure.text.event.DataComponentValue;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.serializer.gson.GsonDataComponentValue;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -16,14 +10,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.CustomData;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.CraftEquipmentSlot;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.ServicesManager;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
@@ -40,14 +28,17 @@ import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.command.NMSSummonCommand;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NBTItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NBTTagCompoundHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NMSEntityHelper;
-import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NMSItemHelper;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.impl.NMSItemHelper2Impl;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.impl.NMSItemHelperImpl;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
-import org.ricetea.utils.SoftCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -86,97 +77,8 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
     private void loadNmsImplementations() {
         ServicesManager servicesManager = Bukkit.getServicesManager();
         apiInst.loadApiImplementation(servicesManager, NMSEntityHelper::damage, INMSEntityHelper.class);
-        apiInst.loadApiImplementation(servicesManager, new INMSItemHelper() {
-            private final ThreadLocal<SoftCache<StringBuilder>> localBuilder = ThreadLocal.withInitial(() ->
-                    SoftCache.create(StringBuilder::new));
-
-            @Nullable
-            @Override
-            public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(@Nullable Material material) {
-                return NMSItemHelper.getDefaultAttributeModifiers(material);
-            }
-
-            @Nullable
-            @Override
-            public ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
-                Key item = showItem.item();
-                int count = showItem.count();
-                Map<Key, DataComponentValue> map = showItem.dataComponents();
-                String nbt;
-                if (map.isEmpty()) {
-                    nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\"}";
-                } else {
-                    StringBuilder builder = localBuilder.get().get();
-                    builder.append("{\"id\":\"");
-                    builder.append(item);
-                    builder.append("\", \"count\":\"");
-                    builder.append(count);
-                    builder.append("\", \"components\":{");
-                    for (var entry : map.entrySet()) {
-                        DataComponentValue value = entry.getValue();
-                        switch (value) {
-                            case BinaryTagHolder holder -> {
-                                builder.append('"');
-                                builder.append(entry.getKey());
-                                builder.append('"');
-                                builder.append(':');
-                                builder.append(holder.string());
-                                builder.append(',');
-                            }
-                            case DataComponentValue.TagSerializable serializable -> {
-                                builder.append('"');
-                                builder.append(entry.getKey());
-                                builder.append('"');
-                                builder.append(':');
-                                builder.append(serializable.asBinaryTag().string());
-                                builder.append(',');
-                            }
-                            case GsonDataComponentValue gson -> {
-                                builder.append('"');
-                                builder.append(entry.getKey());
-                                builder.append('"');
-                                builder.append(':');
-                                builder.append(gson.element());
-                                builder.append(',');
-                            }
-                            default -> {
-                            }
-                        }
-                    }
-                    builder.append("}}");
-                    nbt = builder.toString();
-                    builder.setLength(0);
-                }
-                return createItemStackFromNbtString(nbt);
-            }
-
-            @Nullable
-            @Override
-            public ItemStack createItemStackFromNbtString(@Nonnull String nbt) {
-                return NMSItemHelper.createItemStackFromNbtString(nbt);
-            }
-
-            @Nullable
-            @Override
-            public String getNMSEquipmentSlotName(@Nullable EquipmentSlot slot) {
-                if (slot == null)
-                    return null;
-                return CraftEquipmentSlot.getNMS(slot).getName();
-            }
-
-            @Override
-            public boolean isSuitableForEntityType(@Nonnull EquipmentSlot slot, @Nonnull EntityType entityType) {
-                return switch (slot) {
-                    case HAND, OFF_HAND, HEAD, CHEST, LEGS, FEET -> true;
-                    case BODY -> switch (entityType) {
-                        case HORSE, SKELETON_HORSE, ZOMBIE_HORSE, MULE, DONKEY,
-                                WOLF -> true;
-                        default -> false;
-                    };
-                    default -> false;
-                };
-            }
-        }, INMSItemHelper.class);
+        apiInst.loadApiImplementation(servicesManager, NMSItemHelperImpl.getInstance(), INMSItemHelper.class);
+        apiInst.loadApiImplementation(servicesManager, NMSItemHelper2Impl.getInstance(), INMSItemHelper2.class);
         apiInst.loadApiImplementation(servicesManager, new INBTItemHelper() {
             @Nonnull
             @Override

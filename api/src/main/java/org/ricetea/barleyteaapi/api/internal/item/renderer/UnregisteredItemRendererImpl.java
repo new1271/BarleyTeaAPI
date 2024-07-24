@@ -42,6 +42,13 @@ public final class UnregisteredItemRendererImpl implements ItemRenderer {
         return itemStack;
     }
 
+    @Nonnull
+    @Override
+    public ItemStack restore(@Nonnull ItemStack itemStack, @Nullable Player player) {
+        showWarning();
+        return itemStack;
+    }
+
     private void showWarning() {
         new Exception(getKey() + " isn't registered as a valid item renderer!").printStackTrace();
     }

@@ -71,6 +71,12 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     private static final List<Supplier<Deque<Component>>> DequeGenerators = Arrays.stream(DequeCapacities)
             .mapToObj(capacity -> (Supplier<Deque<Component>>) (() -> new ArrayDeque<>(capacity)))
             .toList();
+    public static final ItemFlag[] ITEM_FLAGS_FOR_ENCHANTMENT_STORAGE = {
+            ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS
+    };
+    public static final ItemFlag[] ITEM_FLAGS_FOR_NORMAL = {
+            ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES
+    };
     private final ThreadLocal<List<SoftCache<Deque<Component>>>> reusableRenderLoreStack = ThreadLocal.withInitial(() -> {
         int capacity = DequeCapacities.length;
         List<SoftCache<Deque<Component>>> result = new ArrayList<>(capacity);
@@ -454,11 +460,15 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
 
         meta.displayName(data != null ? data.getDisplayName() : displayName);
         meta.lore(output);
-        if (meta instanceof EnchantmentStorageMeta)
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS);
-        else
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
+        ItemFlag[] flags = meta instanceof EnchantmentStorageMeta ? ITEM_FLAGS_FOR_ENCHANTMENT_STORAGE : ITEM_FLAGS_FOR_NORMAL;
+        meta.addItemFlags(flags);
         itemStack.setItemMeta(meta);
         return itemStack;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack restore(@Nonnull ItemStack itemStack, @Nullable Player player) {
+        return AlternativeItemState.restore(itemStack);
     }
 }

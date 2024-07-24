@@ -43,6 +43,7 @@ import org.ricetea.barleyteaapi.internal.entity.counter.TransientTickCounterImpl
 import org.ricetea.barleyteaapi.internal.entity.registration.EntityRegisterImpl;
 import org.ricetea.barleyteaapi.internal.item.registration.*;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
+import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl2;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.listener.monitor.*;
@@ -248,8 +249,11 @@ public final class BarleyTeaAPI extends JavaPlugin {
         loadApiImplementation(servicesManager, new LocalizationRegisterImpl(), LocalizationRegister.class);
         loadApiImplementation(servicesManager, new ThreadLocalRandomProviderImpl(), RandomProvider.class);
         loadApiImplementation(servicesManager, new TaskServiceImpl(), TaskService.class);
-        loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
         loadApiImplementation(servicesManager, new EntityHelperInternalsImpl(), EntityHelperInternals.class);
+        if (NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion())
+            loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
+        else
+            loadApiImplementation(servicesManager, new DefaultItemRendererImpl2(), ItemRenderer.class);
     }
 
     public <T> void loadApiImplementation(@Nonnull ServicesManager servicesManager,

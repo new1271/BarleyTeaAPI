@@ -28,4 +28,12 @@ public interface ItemRenderer extends Keyed {
 
     @Nonnull
     ItemStack render(@Nonnull ItemStack itemStack, @Nullable Player player);
+
+    @Nonnull
+    default ItemStack restore(@Nonnull ItemStack itemStack) {
+        return restore(itemStack, null);
+    }
+
+    @Nonnull
+    ItemStack restore(@Nonnull ItemStack itemStack, @Nullable Player player);
 }

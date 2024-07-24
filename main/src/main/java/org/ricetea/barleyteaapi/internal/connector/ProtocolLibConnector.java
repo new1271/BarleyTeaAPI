@@ -30,7 +30,6 @@ import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
-import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
@@ -85,7 +84,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nullable
-        private static ItemStack restoreItem(@Nullable ItemStack itemStack) {
+        private static ItemStack restoreItem(@Nullable ItemStack itemStack, @Nullable Player player) {
             if (itemStack == null)
                 return null;
             ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
@@ -93,14 +92,14 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 renderer = ItemRenderer.getDefault();
             }
             if (renderer != null) {
-                AlternativeItemState.restore(itemStack);
+                renderer.restore(itemStack, player);
             }
             if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta && blockMeta.hasBlockState()) {
                 if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
                     var inventory = shulkerBox.getInventory();
                     for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
                         ItemStack item = iterator.next();
-                        iterator.set(restoreItem(item));
+                        iterator.set(restoreItem(item, player));
                     }
                     blockMeta.setBlockState(shulkerBox);
                 }
@@ -255,15 +254,16 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             PacketType packetType = event.getPacketType();
             if (packetType == null || packetType.isServer())
                 return;
+            Player player = event.getPlayer();
             PacketContainer container = event.getPacket();
             StructureModifier<ItemStack> itemModifier = container.getItemModifier();
             for (int i = 0, size = itemModifier.size(); i < size; i++) {
-                itemModifier.modify(i, ItemStackPrerenderingInjector::restoreItem);
+                itemModifier.modify(i, val -> restoreItem(val, player));
             }
             StructureModifier<List<ItemStack>> itemListModifier = container.getItemListModifier();
             for (int i = 0, size = itemListModifier.size(); i < size; i++) {
                 itemListModifier.modify(i, list -> {
-                    list.replaceAll(ItemStackPrerenderingInjector::restoreItem);
+                    list.replaceAll(val -> restoreItem(val, player));
                     return list;
                 });
             }

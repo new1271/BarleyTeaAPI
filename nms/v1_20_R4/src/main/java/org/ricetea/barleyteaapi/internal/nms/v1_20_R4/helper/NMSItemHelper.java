@@ -38,11 +38,9 @@ public final class NMSItemHelper {
     public static Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(
             @Nullable org.bukkit.Material material) {
         if (material != null) {
-            // net.minecraft.world.item.Item getItem() -> d
             net.minecraft.world.item.Item item = CraftMagicNumbers.getItem(material);
             if (item != null) {
-                ItemStack testItemStack = new ItemStack(item, 1);
-                var map = testItemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+                var map = item.components().get(DataComponents.ATTRIBUTE_MODIFIERS);
                 if (map == null)
                     return null;
                 Multimap<Attribute, AttributeModifier> result = LinkedHashMultimap.create();
