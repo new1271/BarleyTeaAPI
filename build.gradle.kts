@@ -9,6 +9,7 @@ version = "1.0-SNAPSHOT"
 dependencies {
     project(":api")
     project(":main")
+    project(":main_v2")
     project(":nms:v1_20_R1")
     project(":nms:v1_20_R2")
     project(":nms:v1_20_R3")
@@ -18,6 +19,7 @@ dependencies {
 
 val allProjects = listOf(project(":api"),
         project(":main"),
+        project(":main_v2"),
         project(":nms:v1_20_R1"),
         project(":nms:v1_20_R2"),
         project(":nms:v1_20_R3"),

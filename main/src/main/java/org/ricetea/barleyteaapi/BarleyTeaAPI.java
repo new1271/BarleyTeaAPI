@@ -17,6 +17,7 @@ import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPILoadEvent;
 import org.ricetea.barleyteaapi.api.event.BarleyTeaAPIUnloadEvent;
+import org.ricetea.barleyteaapi.api.internal.additional.IAdditionalPartEntryPoint;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.api.internal.entity.EntityHelperInternals;
 import org.ricetea.barleyteaapi.api.internal.entity.counter.TickCounterConstuctors;
@@ -54,13 +55,16 @@ import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.internal.task.TaskServiceImpl;
 import org.ricetea.barleyteaapi.util.connector.SoftDependRegister;
+import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.SupplierUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import java.util.ArrayDeque;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -70,11 +74,17 @@ import java.util.logging.Logger;
 @Singleton
 @ApiStatus.Internal
 public final class BarleyTeaAPI extends JavaPlugin {
+    private static final AdditionalPartRecord[] additionalParts = new AdditionalPartRecord[]{
+            new AdditionalPartRecord(NMSVersion.v1_21_R1, 2)
+    };
+
     private static BarleyTeaAPI _inst;
     @Nullable
     private SoftDependRegister<BarleyTeaAPI> softDependRegister;
     @Nullable
     private INMSEntryPoint nmsEntryPoint;
+    @Nonnull
+    private final Lazy<Queue<IAdditionalPartEntryPoint>> additionalPartEntryPointQueueLazy = Lazy.create(ArrayDeque::new);
 
     @Nonnull
     public static BarleyTeaAPI getInstance() {
@@ -130,11 +140,13 @@ public final class BarleyTeaAPI extends JavaPlugin {
     public void onEnable() {
         _inst = this;
         Logger logger = getLogger();
-        logger.info("initializing API...");
+        logger.info("loading API...");
         loadApiImplementations();
-        logger.info("initializing NMS Feature...");
+        logger.info("loading NMS Feature...");
         loadNMSFeature();
-        logger.info("initializing Soft-depends");
+        logger.info("loading Additional Features...");
+        loadAdditionalFeatures();
+        logger.info("loading Soft-depends");
         SoftDependRegister<BarleyTeaAPI> softDependRegister = new SoftDependRegister<>(this);
         softDependRegister.register(BulitInSoftDepend.ExcellentEnchants,
                 SupplierUtil.fromConstuctor(ExcellentEnchantsConnector.class));
@@ -267,7 +279,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         String minecraftVersion = Bukkit.getMinecraftVersion();
         Logger logger = getLogger();
         if (!nmsVersion.isValid()) {
-            logger.info("Failed to loading NMS Support for \"" + minecraftVersion + "\", some features will be lost!");
+            logger.info("[NMSFeature] Failed to loading NMS Support for '" + minecraftVersion + "'\"', some features will be lost!");
             return;
         }
         String className = "org.ricetea.barleyteaapi.internal.nms." + nmsVersionInString + ".NMSEntryPoint";
@@ -275,7 +287,11 @@ public final class BarleyTeaAPI extends JavaPlugin {
             try {
                 return SupplierUtil.fromConstuctor(Class.forName(className), this);
             } catch (ClassNotFoundException e) {
-                logger.log(Level.WARNING, "Cannot loaded NMS Support for " + minecraftVersion + "\", some feature will be lost!", e);
+                logger.log(
+                        Level.WARNING,
+                        "[NMSFeature] Cannot loaded NMS Support for '" + minecraftVersion + "', some feature will be lost!",
+                        e
+                );
                 return null;
             }
         });
@@ -283,35 +299,103 @@ public final class BarleyTeaAPI extends JavaPlugin {
             return;
         }
         if (nmsSupplier.get() instanceof INMSEntryPoint entryPoint) {
-            logger.info("Found NMS Support Class '" + className + "', Loading...");
+            logger.info("[NMSFeature] Found NMS Support Class '" + className + "', Loading...");
             try {
                 entryPoint.onEnable();
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Cannot loaded NMS Support for \"" + minecraftVersion + "\", some feature will be lost!", e);
+                logger.log(
+                        Level.WARNING,
+                        "[NMSFeature] Cannot loaded NMS Support for '" + minecraftVersion + "', some feature will be lost!",
+                        e
+                );
                 return;
             }
             this.nmsEntryPoint = entryPoint;
-            logger.info("Successfully loaded NMS Support for \"" + minecraftVersion + "\" !");
+            logger.info("[NMSFeature] Successfully loaded NMS Support for '" + minecraftVersion + "' !");
+        }
+    }
+
+    private void loadAdditionalFeatures() {
+        String minecraftVersion = Bukkit.getMinecraftVersion();
+        Logger logger = getLogger();
+        logger.info("[AdditionalFeature] Loading additional features for '" + minecraftVersion + "' ...");
+        int rawVersion = NMSVersion.getCurrent().getVersion();
+        for (AdditionalPartRecord additionalPart : additionalParts) {
+            if (rawVersion >= additionalPart.versionAtLeast().getVersion()) {
+                loadAdditionalFeature(additionalPart.classPath);
+            }
+        }
+    }
+
+    private void loadAdditionalFeature(@Nonnull String classPath) {
+        Logger logger = getLogger();
+        logger.info("[AdditionalFeature] Loading '" + classPath + "' ...");
+        Supplier<?> featureSupplier = ObjectUtil.tryMap(() -> {
+            try {
+                return SupplierUtil.fromConstuctor(Class.forName(classPath), this);
+            } catch (ClassNotFoundException e) {
+                logger.log(
+                        Level.WARNING,
+                        "[AdditionalFeature] Cannot loaded '" + classPath + "'",
+                        e
+                );
+                return null;
+            }
+        });
+        if (featureSupplier == null) {
+            return;
+        }
+        if (featureSupplier.get() instanceof IAdditionalPartEntryPoint entryPoint) {
+            try {
+                entryPoint.onEnable();
+            } catch (Exception e) {
+                logger.log(
+                        Level.WARNING,
+                        "[AdditionalFeature] Cannot loaded '" + classPath + "'",
+                        e
+                );
+                return;
+            }
+            logger.info("[AdditionalFeature] Successfully loaded '" + classPath + "' !");
+            additionalPartEntryPointQueueLazy.get().offer(entryPoint);
         }
     }
 
     @Override
     public void onDisable() {
-        ObjectUtil.safeCall(nmsEntryPoint, INMSEntryPoint::onDisable);
         Logger logger = getLogger();
-        logger.info("uninitializing API...");
-        Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
-        ObjectUtil.safeCall(softDependRegister, SoftDependRegister::unregisterAll);
-        ObjectUtil.safeCall(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
-        ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
-        ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
-        ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
-        ObjectUtil.safeCall(TickingService.syncServiceUnsafe(), TickingService::shutdown);
-        ObjectUtil.safeCall(TickingService.asyncServiceUnsafe(), TickingService::shutdown);
-        ObjectUtil.safeCall(TaskService.getInstanceUnsafe(), TaskService::shutdown);
+        logger.info("unregistering event listeners...");
         Bukkit.getServicesManager().unregisterAll(this);
+        logger.info("canceling all running tasks...");
         Bukkit.getScheduler().cancelTasks(this);
+        logger.info("unloading Additional Features...");
+        Queue<IAdditionalPartEntryPoint> additionalPartEntryPointQueue = additionalPartEntryPointQueueLazy.getUnsafe();
+        if (additionalPartEntryPointQueue != null) {
+            IAdditionalPartEntryPoint entryPoint;
+            while ((entryPoint = additionalPartEntryPointQueue.poll()) != null) {
+                ObjectUtil.tryCall(entryPoint, IAdditionalPartEntryPoint::onDisable);
+            }
+        }
+        logger.info("unloading NMS Feature...");
+        ObjectUtil.tryCall(nmsEntryPoint, INMSEntryPoint::onDisable);
+        logger.info("unloading API...");
+        Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
+        ObjectUtil.tryCall(softDependRegister, SoftDependRegister::unregisterAll);
+        ObjectUtil.tryCall(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
+        ObjectUtil.tryCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
+        ObjectUtil.tryCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
+        ObjectUtil.tryCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
+        ObjectUtil.tryCall(TickingService.syncServiceUnsafe(), TickingService::shutdown);
+        ObjectUtil.tryCall(TickingService.asyncServiceUnsafe(), TickingService::shutdown);
+        ObjectUtil.tryCall(TaskService.getInstanceUnsafe(), TaskService::shutdown);
         _inst = null;
         logger.info("BarleyTeaAPI successfully unloaded!");
+    }
+
+    private record AdditionalPartRecord(@Nonnull NMSVersion versionAtLeast, @Nonnull String classPath) {
+
+        public AdditionalPartRecord(@Nonnull NMSVersion versionAtLeast, int ver) {
+            this(versionAtLeast, "org.ricetea.barleyteaapi.internal.v" + ver + ".AdditionalPartEntryPoint");
+        }
     }
 }
