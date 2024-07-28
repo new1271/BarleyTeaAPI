@@ -10,8 +10,13 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.AdventureModePredicate;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -27,6 +32,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
+import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NBTItemHelper;
 import org.ricetea.barleyteaapi.internal.nms.v1_20_R4.helper.NMSItemHelper;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -58,61 +64,65 @@ public final class NMSItemHelperImpl implements INMSItemHelper {
     @Nullable
     @Override
     public ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
-        Key item = showItem.item();
-        int count = showItem.count();
-        Map<Key, DataComponentValue> map = showItem.dataComponents();
-        String nbt;
-        if (map.isEmpty()) {
-            nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\"}";
-        } else {
-            StringBuilder builder = localBuilder.get().get();
-            builder.append("{\"id\":\"");
-            builder.append(item);
-            builder.append("\", \"count\":\"");
-            builder.append(count);
-            builder.append("\", \"components\":{");
-            for (var entry : map.entrySet()) {
-                DataComponentValue value = entry.getValue();
-                switch (value) {
-                    case BinaryTagHolder holder -> {
-                        builder.append('"');
-                        builder.append(entry.getKey());
-                        builder.append('"');
-                        builder.append(':');
-                        builder.append(holder.string());
-                        builder.append(',');
-                    }
-                    case DataComponentValue.TagSerializable serializable -> {
-                        builder.append('"');
-                        builder.append(entry.getKey());
-                        builder.append('"');
-                        builder.append(':');
-                        builder.append(serializable.asBinaryTag().string());
-                        builder.append(',');
-                    }
-                    case GsonDataComponentValue gson -> {
-                        builder.append('"');
-                        builder.append(entry.getKey());
-                        builder.append('"');
-                        builder.append(':');
-                        builder.append(gson.element());
-                        builder.append(',');
-                    }
-                    default -> {
-                    }
-                }
+        Key key = showItem.item();
+        Item item = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(key.namespace(), key.value()))
+                .orElse(null);
+        if (item == null)
+            return null;
+        if (item instanceof AirItem)
+            return new ItemStack(Material.AIR);
+        net.minecraft.world.item.ItemStack nmsItemStack = new net.minecraft.world.item.ItemStack(item, showItem.count());
+        String nbt = ObjectUtil.safeMap(showItem.dataComponents(), this::serializeDataComponents);
+        if (nbt != null) {
+            try {
+                ObjectUtil.safeCall(NBTItemHelper.toComponentMap(TagParser.parseTag(nbt)), nmsItemStack::applyComponents);
+            } catch (Exception ignored) {
             }
-            builder.append("}}");
-            nbt = builder.toString();
-            builder.setLength(0);
         }
-        return createItemStackFromNbtString(nbt);
+        return nmsItemStack.asBukkitMirror();
     }
 
     @Nullable
-    @Override
-    public ItemStack createItemStackFromNbtString(@Nonnull String nbt) {
-        return NMSItemHelper.createItemStackFromNbtString(nbt);
+    private String serializeDataComponents(@Nullable Map<Key, DataComponentValue> map) {
+        if (map == null || map.isEmpty())
+            return null;
+        StringBuilder builder = localBuilder.get().get();
+        builder.append("{");
+        for (var entry : map.entrySet()) {
+            DataComponentValue value = entry.getValue();
+            switch (value) {
+                case BinaryTagHolder holder -> {
+                    builder.append('"');
+                    builder.append(entry.getKey());
+                    builder.append('"');
+                    builder.append(':');
+                    builder.append(holder.string());
+                    builder.append(',');
+                }
+                case DataComponentValue.TagSerializable serializable -> {
+                    builder.append('"');
+                    builder.append(entry.getKey());
+                    builder.append('"');
+                    builder.append(':');
+                    builder.append(serializable.asBinaryTag().string());
+                    builder.append(',');
+                }
+                case GsonDataComponentValue gson -> {
+                    builder.append('"');
+                    builder.append(entry.getKey());
+                    builder.append('"');
+                    builder.append(':');
+                    builder.append(gson.element());
+                    builder.append(',');
+                }
+                default -> {
+                }
+            }
+        }
+        builder.append("}");
+        String nbt = builder.toString();
+        builder.setLength(0);
+        return nbt;
     }
 
     @Nullable

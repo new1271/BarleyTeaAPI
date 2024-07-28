@@ -1,8 +1,17 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_20_R2;
 
 import com.google.common.collect.Multimap;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -78,8 +87,23 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
 
             @Nullable
             @Override
-            public ItemStack createItemStackFromNbtString(@Nonnull String nbt) {
-                return NMSItemHelper.createItemStackFromNbtString(nbt);
+            public ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
+                Key key = showItem.item();
+                Item item = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(key.namespace(), key.value()))
+                        .orElse(null);
+                if (item == null)
+                    return null;
+                if (item instanceof AirItem)
+                    return new ItemStack(Material.AIR);
+                net.minecraft.world.item.ItemStack nmsItemStack = new net.minecraft.world.item.ItemStack(item, showItem.count());
+                String nbtString = ObjectUtil.safeMap(showItem.nbt(), BinaryTagHolder::string);
+                if (nbtString != null) {
+                    try {
+                        nmsItemStack.setTag(TagParser.parseTag(nbtString));
+                    } catch (Exception ignored) {
+                    }
+                }
+                return nmsItemStack.asBukkitMirror();
             }
 
             @Nullable
@@ -150,6 +174,16 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
                     return NBTItemHelper.setNBT(result, compoundOfResult);
                 }
                 return result;
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack setNbt(@Nonnull ItemStack original, @Nonnull String nbt) {
+                try {
+                    return NBTItemHelper.setNBT(original, TagParser.parseTag(nbt));
+                } catch (CommandSyntaxException ignored) {
+                    return original;
+                }
             }
 
             private void merge(@Nonnull CompoundTag node, @Nonnull CompoundTag node2) {

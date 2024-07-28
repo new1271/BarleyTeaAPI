@@ -13,4 +13,7 @@ public interface INBTItemHelper extends IHelper {
 
     @Nonnull
     ItemStack mergeNbt(@Nonnull ItemStack original, @Nonnull ItemStack result, @Nullable String... tags);
+
+    @Nonnull
+    ItemStack setNbt(@Nonnull ItemStack original, @Nonnull String nbt);
 }

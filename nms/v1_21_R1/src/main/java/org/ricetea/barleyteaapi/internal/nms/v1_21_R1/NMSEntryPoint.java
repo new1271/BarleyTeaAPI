@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.nms.v1_21_R1;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -7,6 +8,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.CustomData;
 import org.bukkit.Bukkit;
@@ -148,6 +150,18 @@ public final class NMSEntryPoint implements Listener, INMSEntryPoint {
                     return NBTItemHelper.setComponentMap(result, builder.build());
                 }
                 return result;
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack setNbt(@Nonnull ItemStack original, @Nonnull String nbt) {
+                DataComponentMap map;
+                try {
+                    map = NBTItemHelper.toComponentMap(TagParser.parseTag(nbt));
+                } catch (CommandSyntaxException ignored) {
+                    return original;
+                }
+                return NBTItemHelper.setComponentMap(original, map);
             }
 
         }, INBTItemHelper.class);

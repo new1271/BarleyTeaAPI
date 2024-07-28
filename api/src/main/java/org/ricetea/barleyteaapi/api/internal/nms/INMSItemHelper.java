@@ -12,9 +12,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Objects;
 
 @ApiStatus.Internal
@@ -37,18 +39,22 @@ public interface INMSItemHelper extends IHelper {
     default ItemStack createItemStackFromShowItem(@Nonnull HoverEvent.ShowItem showItem) {
         Key item = showItem.item();
         int count = showItem.count();
-        BinaryTagHolder tagHolder = showItem.nbt();
-        String nbt;
-        if (tagHolder == null) {
-            nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\"}";
-        } else {
-            nbt = "{\"id\":\"" + item + "\", \"count\":\"" + count + "\", \"nbt\":" + tagHolder.string() + "}";
-        }
-        return createItemStackFromNbtString(nbt);
-    }
+        Material material = Arrays.stream(Material.values())
+                .parallel()
+                .filter(val -> Objects.equals(item, val.getKey()))
+                .findAny().orElse(Material.AIR);
 
-    @Nullable
-    ItemStack createItemStackFromNbtString(@Nonnull String nbt);
+        ItemStack result = new ItemStack(material, count);
+
+        String nbt = ObjectUtil.safeMap(showItem.nbt(), BinaryTagHolder::string);
+        if (nbt != null) {
+            INBTItemHelper helper = Bukkit.getServicesManager().load(INBTItemHelper.class);
+            if (helper != null) {
+                helper.setNbt(result, nbt);
+            }
+        }
+        return result;
+    }
 
     @Nullable
     String getNMSEquipmentSlotName(@Nullable EquipmentSlot slot);
