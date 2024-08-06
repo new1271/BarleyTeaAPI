@@ -26,11 +26,13 @@ import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.barleyteaapi.util.PlayerUtil;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 @Singleton
@@ -260,12 +262,14 @@ public final class PlayerEventListener implements Listener {
         if (event == null)
             return;
         Player player = event.getPlayer();
+        WeakReference<Player> playerRef = new WeakReference<>(player);
         Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(), () -> {
-            if (player.isOnline()) {
-                ItemFeatureLinker.forEachEquipment(player, event,
-                        Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
-                        FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
-            }
+            Player _player = playerRef.get();
+            if (_player == null || !_player.isOnline())
+                return;
+            ItemFeatureLinker.forEachEquipment(player, event,
+                    Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
+                    FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerJoin, DataItemHoldPlayerJoin::new);
         });
     }
 
@@ -273,8 +277,29 @@ public final class PlayerEventListener implements Listener {
     public void listenPlayerQuit(PlayerQuitEvent event) {
         if (event == null)
             return;
-        ItemFeatureLinker.forEachEquipment(event.getPlayer(), event,
-                Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
-                FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
+        Player player = event.getPlayer();
+        WeakReference<Player> playerRef = new WeakReference<>(player);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(BarleyTeaAPI.getInstance(), () -> {
+            Player _player = playerRef.get();
+            if (_player == null || !_player.isOnline())
+                return;
+            ItemFeatureLinker.forEachEquipment(player, event,
+                    Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
+                    FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
+        });
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void monitorPlayerJoin(PlayerJoinEvent event) {
+        if (event == null)
+            return;
+        PlayerUtil.updateOnlinePlayerSnapshot();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void monitorPlayerQuit(PlayerQuitEvent event) {
+        if (event == null)
+            return;
+        PlayerUtil.updateOnlinePlayerSnapshot();
     }
 }

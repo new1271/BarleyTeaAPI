@@ -16,4 +16,8 @@ public class PlayerUtil {
         return playerCache.get();
     }
 
+    public static void updateOnlinePlayerSnapshot() {
+        playerCache.reset();
+    }
+
 }
