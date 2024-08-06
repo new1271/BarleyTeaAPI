@@ -49,6 +49,11 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
         return stream.findFirst().orElse(null);
     }
 
+    @Override
+    public <R extends F> boolean hasFeature(@Nonnull Class<R> clazz) {
+        return featureMultiMap.containsKey(clazz);
+    }
+
     protected void registerFeatures(@Nonnull T object) {
         for (Class<? extends F> clazz : object.getFeatures()) {
             featureMultiMap.put(clazz, object);

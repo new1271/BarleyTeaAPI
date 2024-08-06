@@ -9,6 +9,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -144,7 +145,15 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                     if (helper != null) {
                         int maxDura = feature.getMaxDurability(itemStack);
                         int damage = feature.getDurabilityDamage(itemStack);
-                        helper.applyCustomDurabilityBar(meta, damage, maxDura);
+                        if (meta instanceof Damageable damageable)
+                            helper.applyCustomDurabilityBar(damageable, damage, maxDura);
+                        else {
+                            itemStack.setItemMeta(meta);
+                            itemStack = helper.applyCustomDurabilityBarSpecial(itemStack, damage, maxDura);
+                            meta = itemStack.getItemMeta();
+                            if (meta == null)
+                                return itemStack;
+                        }
                     }
                 }
             }
@@ -224,11 +233,16 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         if (meta == null)
             return itemStack;
         meta = AlternativeItemState.restore(meta);
+        restore0(meta);
         INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
         if (helper != null) {
-            helper.restoreCustomDurabilityBar(meta, itemStack.getType().getMaxDurability());
+            if (helper.isNeedSpecialRestore(itemStack)) {
+                itemStack.setItemMeta(meta);
+                return helper.restoreCustomDurabilityBarSpecial(itemStack);
+            } else if (meta instanceof Damageable damageable) {
+                helper.restoreCustomDurabilityBar(damageable, itemStack.getType().getMaxDurability());
+            }
         }
-        restore0(meta);
         itemStack.setItemMeta(meta);
         return itemStack;
     }

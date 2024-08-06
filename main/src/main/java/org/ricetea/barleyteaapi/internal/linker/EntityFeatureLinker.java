@@ -13,7 +13,7 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
-import org.ricetea.utils.ChainedRunable;
+import org.ricetea.utils.ChainedRunner;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -172,13 +172,12 @@ public final class EntityFeatureLinker {
                 }
             }
         }
-        ChainedRunable chainedRunable = new ChainedRunable();
+        ChainedRunner runner = ChainedRunner.create();
         if (oldLoadFeature != null)
-            chainedRunable.attach(() -> oldLoadFeature.handleEntityUnloaded(entity));
+            runner = runner.attach(() -> oldLoadFeature.handleEntityUnloaded(entity));
         if (newLoadFeature != null)
-            chainedRunable.attach(() -> newLoadFeature.handleEntityLoaded(entity));
-        if (!chainedRunable.isEmpty())
-            SyncUtil.callInMainThread(chainedRunable);
+            runner = runner.attach(() -> newLoadFeature.handleEntityLoaded(entity));
+        runner.freeze().run(SyncUtil::callInMainThread);
         if (hasTickingOld) {
             if (!hasTickingNew) {
                 ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(),

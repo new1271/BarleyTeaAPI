@@ -90,10 +90,10 @@ public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem,
     }
 
     private void refreshFeature() {
-        if (findFirstOfFeature(FeatureItemTick.class) == null) {
-            ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
-        } else {
+        if (hasFeature(FeatureItemTick.class)) {
             ItemTickTask.getInstance().start();
+        } else {
+            ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
         }
     }
 

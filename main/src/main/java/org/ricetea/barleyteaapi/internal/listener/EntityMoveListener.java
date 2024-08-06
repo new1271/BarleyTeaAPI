@@ -42,7 +42,7 @@ public final class EntityMoveListener implements Listener {
         if (!(event.getEntity() instanceof Player))
             return;
         ItemRegister register = ItemRegister.getInstanceUnsafe();
-        if (register == null || register.findFirstOfFeature(FeatureItemHoldEntityMove.class) == null)
+        if (register == null || !register.hasFeature(FeatureItemHoldEntityMove.class))
             return;
         if (!ItemFeatureLinker.forEachEquipmentCancellable(event.getEntity(), event,
                 Constants.ALL_SLOTS, FeatureItemHoldEntityMove.class,

@@ -2,8 +2,8 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public final class ChainedRunable implements Runnable {
@@ -12,7 +12,7 @@ public final class ChainedRunable implements Runnable {
     private final List<Runnable> runableList;
 
     public ChainedRunable() {
-        runableList = new LinkedList<>();
+        runableList = new ArrayList<>();
     }
 
     public ChainedRunable(@Nonnull Runnable... runnables) {

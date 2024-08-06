@@ -20,7 +20,8 @@ import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGrindstone;
 import org.ricetea.barleyteaapi.api.item.feature.data.*;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
-import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
+import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
+import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -86,9 +87,13 @@ public final class InventoryEventListener implements Listener {
     private static WithFlag<ItemStack> restoreItem(@Nullable ItemStack itemStack) {
         if (itemStack == null)
             return null;
-        if (!ItemHelper.isCustomItem(itemStack))
+        ItemRenderer renderer = ItemRenderHelper.getLastRenderer(itemStack);
+        if (renderer == null && ItemHelper.isCustomItem(itemStack)) {
+            renderer = ItemRenderer.getDefault();
+        }
+        if (renderer == null)
             return new WithFlag<>(itemStack);
-        return new WithFlag<>(AlternativeItemState.restore(itemStack), true);
+        return new WithFlag<>(renderer.restore(itemStack), true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -134,7 +139,7 @@ public final class InventoryEventListener implements Listener {
                     resultItem = ItemFeatureLinker.doItemRepair(upperItem, lowerItem, resultItem);
                     FeatureItemGrindstone feature = itemType.getFeature(FeatureItemGrindstone.class);
                     if (feature != null) {
-                        if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
+                        if (feature.handleItemGrindstone(new DataItemGrindstone(event, upperItem, lowerItem))) {
                             resultItem = event.getResult();
                         } else {
                             resultItem = null;
@@ -159,7 +164,7 @@ public final class InventoryEventListener implements Listener {
                 final ItemStack oldResultItem = resultItem;
                 FeatureItemGrindstone feature = FeatureHelper.getFeatureUnsafe(CustomItem.get(item), FeatureItemGrindstone.class);
                 if (feature != null) {
-                    if (feature.handleItemGrindstone(new DataItemGrindstone(event))) {
+                    if (feature.handleItemGrindstone(new DataItemGrindstone(event, item, null))) {
                         resultItem = event.getResult();
                     } else {
                         resultItem = null;

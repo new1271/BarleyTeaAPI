@@ -192,7 +192,7 @@ public final class PlayerEventListener implements Listener {
         Block clickedBlock = event.getClickedBlock();
         boolean isNothing = clickedBlock == null || clickedBlock.isEmpty();
         if (isNothing) {
-            if (!ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+            if (!ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event.getHand(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickNothing, DataItemClickNothing::new, true)) {
                 event.setUseInteractedBlock(Result.DENY);
                 event.setUseItemInHand(Result.DENY);
@@ -209,7 +209,7 @@ public final class PlayerEventListener implements Listener {
                 case Skipped -> {
                 }
             }
-            switch (ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event, FeatureItemClick.class,
+            switch (ItemFeatureLinker.doFeatureAndReturn(event.getItem(), event.getHand(), event, FeatureItemClick.class,
                     FeatureItemClick::handleItemClickBlock, DataItemClickBlock::new, StateItemClickBlock.Skipped)) {
                 case Cancelled -> {
                     event.setUseInteractedBlock(Result.DENY);

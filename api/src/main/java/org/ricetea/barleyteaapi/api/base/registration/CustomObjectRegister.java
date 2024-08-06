@@ -25,4 +25,8 @@ public interface CustomObjectRegister<T extends CustomObject<F>, F extends Featu
 
     @Nullable
     <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate);
+
+    default <R extends F> boolean hasFeature(@Nonnull Class<R> clazz) {
+        return findFirstOfFeature(clazz) != null;
+    }
 }
