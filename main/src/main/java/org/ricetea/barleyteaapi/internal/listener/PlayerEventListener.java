@@ -26,7 +26,6 @@ import org.ricetea.barleyteaapi.api.item.feature.state.StateItemClickBlock;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.internal.linker.BlockFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
-import org.ricetea.barleyteaapi.util.PlayerUtil;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
@@ -287,19 +286,5 @@ public final class PlayerEventListener implements Listener {
                     Constants.ALL_SLOTS, FeatureItemHoldPlayerJoinOrQuit.class,
                     FeatureItemHoldPlayerJoinOrQuit::handleItemHoldPlayerQuit, DataItemHoldPlayerQuit::new);
         });
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void monitorPlayerJoin(PlayerJoinEvent event) {
-        if (event == null)
-            return;
-        PlayerUtil.updateOnlinePlayerSnapshot();
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void monitorPlayerQuit(PlayerQuitEvent event) {
-        if (event == null)
-            return;
-        PlayerUtil.updateOnlinePlayerSnapshot();
     }
 }

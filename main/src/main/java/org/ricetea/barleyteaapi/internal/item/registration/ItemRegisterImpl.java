@@ -8,6 +8,7 @@ import org.ricetea.barleyteaapi.api.event.ItemsRegisteredEvent;
 import org.ricetea.barleyteaapi.api.event.ItemsUnregisteredEvent;
 import org.ricetea.barleyteaapi.api.internal.item.CustomItemTypeImpl;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerMove;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemTick;
 import org.ricetea.barleyteaapi.api.item.feature.ItemFeature;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
@@ -15,6 +16,7 @@ import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.api.task.LoopTask;
 import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
+import org.ricetea.barleyteaapi.internal.listener.PlayerMoveListener;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.Constants;
@@ -94,6 +96,11 @@ public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem,
             ItemTickTask.getInstance().start();
         } else {
             ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
+        }
+        if (hasFeature(FeatureItemHoldPlayerMove.class)) {
+            PlayerMoveListener.getInstance().tryRegisterEvents();
+        } else {
+            ObjectUtil.safeCall(PlayerMoveListener.getInstanceUnsafe(), PlayerMoveListener::tryUnregisterEvents);
         }
     }
 

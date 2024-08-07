@@ -1,18 +1,24 @@
 package org.ricetea.barleyteaapi.api.item.feature.data;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 
 import javax.annotation.Nonnull;
 
-public final class DataItemHoldEntityMove extends BaseItemHoldEntityFeatureData<EntityMoveEvent> {
+public final class DataItemHoldPlayerMove extends BaseItemHoldEntityFeatureData<PlayerMoveEvent> {
 
-    public DataItemHoldEntityMove(@Nonnull EntityMoveEvent event, @Nonnull ItemStack itemStack,
+    public DataItemHoldPlayerMove(@Nonnull PlayerMoveEvent event, @Nonnull ItemStack itemStack,
                                   @Nonnull EquipmentSlot equipmentSlot) {
-        super(event, event.getEntity(), itemStack, equipmentSlot);
+        super(event, event.getPlayer(), itemStack, equipmentSlot);
+    }
+
+    @Nonnull
+    public Player getPlayer() {
+        return event.getPlayer();
     }
 
     @Nonnull

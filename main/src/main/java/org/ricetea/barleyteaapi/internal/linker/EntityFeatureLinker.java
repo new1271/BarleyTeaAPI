@@ -9,8 +9,12 @@ import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.EntityFeature;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityLoad;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
+import org.ricetea.barleyteaapi.api.entity.feature.monitor.FeatureMonitorEntityMove;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
+import org.ricetea.barleyteaapi.internal.listener.EntityMoveListener;
+import org.ricetea.barleyteaapi.internal.listener.monitor.EntityMoveMonitor;
 import org.ricetea.barleyteaapi.internal.task.EntityTickTask;
 import org.ricetea.barleyteaapi.util.SyncUtil;
 import org.ricetea.utils.ChainedRunner;
@@ -118,6 +122,12 @@ public final class EntityFeatureLinker {
     public static void loadEntity(@Nonnull CustomEntity entityType, @Nonnull Entity entity, boolean loadOnly) {
         if (entity.isDead())
             return;
+        if (entityType.hasFeature(FeatureMonitorEntityMove.class)) {
+            EntityMoveMonitor.getInstance().addReference();
+        }
+        if (entityType.hasFeature(FeatureEntityMove.class)) {
+            EntityMoveListener.getInstance().addReference();
+        }
         FeatureEntityLoad feature = entityType.getFeature(FeatureEntityLoad.class);
         boolean needTick = !loadOnly && entityType.getFeature(FeatureEntityTick.class) != null;
         if (feature == null && !needTick)
@@ -143,6 +153,12 @@ public final class EntityFeatureLinker {
         synchronized (loadedEntitys) {
             if (!loadedEntitys.remove(entity))
                 return;
+        }
+        if (entityType.hasFeature(FeatureMonitorEntityMove.class)) {
+            ObjectUtil.safeCall(EntityMoveMonitor.getInstanceUnsafe(), EntityMoveMonitor::removeReference);
+        }
+        if (entityType.hasFeature(FeatureEntityMove.class)) {
+            ObjectUtil.safeCall(EntityMoveListener.getInstanceUnsafe(), EntityMoveListener::removeReference);
         }
         ObjectUtil.tryCall(entityType.getFeature(FeatureEntityLoad.class), _feature ->
                 SyncUtil.callInMainThread(() -> _feature.handleEntityUnloaded(entity)));

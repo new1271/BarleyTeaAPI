@@ -1,7 +1,5 @@
 package org.ricetea.barleyteaapi.internal.base.registration;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import org.ricetea.barleyteaapi.api.base.CustomObject;
 import org.ricetea.barleyteaapi.api.base.Feature;
 import org.ricetea.barleyteaapi.api.base.registration.CustomObjectRegister;
@@ -9,21 +7,25 @@ import org.ricetea.utils.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Feature> extends NSKeyedRegisterBase<T>
         implements CustomObjectRegister<T, F> {
 
     @Nonnull
-    private final Multimap<Class<? extends F>, T> featureMultiMap = HashMultimap.create();
+    private final Map<Class<? extends F>, Collection<T>> featureMultiMap = new ConcurrentHashMap<>();
 
     @Nonnull
     @Override
     public <R extends F> Collection<R> listAllOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate) {
-        var stream = featureMultiMap.get(clazz).stream();
+        Collection<T> collection = featureMultiMap.get(clazz);
+        if (collection == null)
+            return Collections.emptySet();
+        Stream<T> stream = collection.stream();
         if (getCachedSize() >= Constants.MIN_ITERATION_COUNT_FOR_PARALLEL) {
             stream = stream.parallel();
         }
@@ -39,7 +41,10 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
     @Nullable
     @Override
     public <R extends F> R findFirstOfFeature(@Nonnull Class<R> clazz, @Nullable Predicate<? super R> predicate) {
-        var stream = featureMultiMap.get(clazz)
+        Collection<T> collection = featureMultiMap.get(clazz);
+        if (collection == null)
+            return null;
+        Stream<R> stream = collection
                 .stream()
                 .filter(Objects::nonNull)
                 .map(val -> val.getFeature(clazz));
@@ -56,13 +61,21 @@ public class CustomObjectRegisterBase<T extends CustomObject<F>, F extends Featu
 
     protected void registerFeatures(@Nonnull T object) {
         for (Class<? extends F> clazz : object.getFeatures()) {
-            featureMultiMap.put(clazz, object);
+            featureMultiMap.compute(clazz, (val, obj) -> {
+                if (obj == null)
+                    obj = new HashSet<>(1);
+                obj.add(object);
+                return obj;
+            });
         }
     }
 
     protected void unregisterFeatures(@Nonnull T object) {
         for (Class<? extends F> clazz : object.getFeatures()) {
-            featureMultiMap.put(clazz, object);
+            featureMultiMap.computeIfPresent(clazz, (val, obj) -> {
+                obj.remove(object);
+                return obj.isEmpty() ? null : obj;
+            });
         }
     }
 }

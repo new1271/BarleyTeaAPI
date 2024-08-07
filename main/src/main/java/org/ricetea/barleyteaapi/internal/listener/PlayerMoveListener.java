@@ -1,70 +1,50 @@
 package org.ricetea.barleyteaapi.internal.listener;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
-import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityMove;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityMove;
-import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
+import org.ricetea.barleyteaapi.api.item.feature.FeatureItemHoldPlayerMove;
+import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldPlayerMove;
+import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 @ApiStatus.Internal
-public final class EntityMoveListener implements Listener {
+public final class PlayerMoveListener implements Listener {
     //This listener will cause lags, so it need lazy-loading
 
-    private static final Lazy<EntityMoveListener> inst = Lazy.create(EntityMoveListener::new);
+    private static final Lazy<PlayerMoveListener> inst = Lazy.create(PlayerMoveListener::new);
 
     private final Object _syncRoot = new Object();
 
     private final AtomicBoolean loaded;
 
-    private final AtomicInteger refCount;
-
-    private EntityMoveListener() {
+    private PlayerMoveListener() {
         loaded = new AtomicBoolean(false);
-        refCount = new AtomicInteger(0);
     }
 
     @Nonnull
-    public static EntityMoveListener getInstance() {
+    public static PlayerMoveListener getInstance() {
         return inst.get();
     }
 
     @Nullable
-    public static EntityMoveListener getInstanceUnsafe() {
+    public static PlayerMoveListener getInstanceUnsafe() {
         return inst.getUnsafe();
     }
 
-    public void addReference() {
-        int refCount = this.refCount.incrementAndGet();
-        if (refCount > 0)
-            tryRegisterEvents();
-    }
-
-    public void removeReference() {
-        int refCount = this.refCount.decrementAndGet();
-        if (refCount < 0) {
-            this.refCount.set(0);
-        }
-        if (refCount == 0) {
-            tryUnregisterEvents();
-        }
-    }
-
-    private void tryRegisterEvents() {
+    public void tryRegisterEvents() {
         if (loaded.get())
             return;
         synchronized (_syncRoot) {
@@ -79,7 +59,7 @@ public final class EntityMoveListener implements Listener {
         }
     }
 
-    private void tryUnregisterEvents() {
+    public void tryUnregisterEvents() {
         if (!loaded.get())
             return;
         synchronized (_syncRoot) {
@@ -92,11 +72,12 @@ public final class EntityMoveListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void listenEntityMove(EntityMoveEvent event) {
-        if (event == null || event.isCancelled() || event.getEntity() instanceof Player)
+    public void listenPlayerMove(PlayerMoveEvent event) {
+        if (event == null || event.isCancelled())
             return;
-        if (!EntityFeatureLinker.doFeatureCancellable(event.getEntity(), event, FeatureEntityMove.class,
-                FeatureEntityMove::handleEntityMove, DataEntityMove::new))
+        if (!ItemFeatureLinker.forEachEquipmentCancellable(event.getPlayer(), event,
+                Constants.ALL_SLOTS, FeatureItemHoldPlayerMove.class,
+                FeatureItemHoldPlayerMove::handleItemHoldPlayerMove, DataItemHoldPlayerMove::new))
             event.setCancelled(true);
     }
 }

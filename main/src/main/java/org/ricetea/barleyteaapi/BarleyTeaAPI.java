@@ -173,7 +173,6 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(EntityDamageListener.getInstance(), this);
         pluginManager.registerEvents(EntityDeathListener.getInstance(), this);
         pluginManager.registerEvents(EntityMountListener.getInstance(), this);
-        pluginManager.registerEvents(EntityMoveListener.getInstance(), this);
         pluginManager.registerEvents(EntitySpawnListener.getInstance(), this);
         pluginManager.registerEvents(EntityTameListener.getInstance(), this);
         pluginManager.registerEvents(EntityTargetListener.getInstance(), this);
@@ -194,6 +193,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
         pluginManager.registerEvents(EntityTameMonitor.getInstance(), this);
         pluginManager.registerEvents(EntityDamageMonitor.getInstance(), this);
         pluginManager.registerEvents(EntityTransformMonitor.getInstance(), this);
+        pluginManager.registerEvents(PlayerEventMonitor.getInstance(), this);
         pluginManager.registerEvents(ProjectileMonitor.getInstance(), this);
         pluginManager.registerEvents(SlimeSplitMonitor.getInstance(), this);
     }
