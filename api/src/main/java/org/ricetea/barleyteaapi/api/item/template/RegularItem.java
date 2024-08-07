@@ -82,7 +82,7 @@ public boolean handleItemSlotFilter(@Nonnull DataItemSlotFilter data) {
     EquipmentSlot[] defaultSlots = this.defaultSlots;
     int length = defaultSlots == null ? 0 : defaultSlots.length;
     return switch (length) {
-        case 0 -> comparator.compare(equipmentSlot, EquipmentSlot.HAND) == 0;
+        case 0 -> comparator.compare(equipmentSlot, getOriginalType().getEquipmentSlot()) == 0;
         case 1 -> comparator.compare(equipmentSlot, defaultSlots[0]) == 0;
         default -> {
             if (length < 4) {
