@@ -3,6 +3,7 @@ package org.ricetea.barleyteaapi.internal.v2.item.renderer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -130,7 +131,8 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                     .color(NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
                     .arguments(
-                            Component.translatable("namespace." + namespace, getFallbackNamespaceString(namespace)),
+                            Component.translatable("namespace." + namespace,
+                                    getFallbackNamespaceString(player, namespace)),
                             defaultNameComponent
                     ));
 
@@ -292,8 +294,14 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
     }
 
     @Nonnull
-    private static String getFallbackNamespaceString(@Nonnull String namespace) {
-        return literalNamespaceMap.computeIfAbsent(namespace, DefaultItemRendererImpl2::getFallbackNamespaceStringNoCached);
+    private static String getFallbackNamespaceString(@Nullable Player player, @Nonnull String namespace) {
+        if (namespace.isEmpty())
+            return "";
+        Locale locale = ObjectUtil.letNonNull(ObjectUtil.tryMapSilently(player, Player::locale), Locale::getDefault);
+        MessageFormat format = GlobalTranslator.translator().translate("namespace." + namespace, locale);
+        if (format == null)
+            return literalNamespaceMap.computeIfAbsent(namespace, DefaultItemRendererImpl2::getFallbackNamespaceStringNoCached);
+        return format.toPattern();
     }
 
     @Nonnull
