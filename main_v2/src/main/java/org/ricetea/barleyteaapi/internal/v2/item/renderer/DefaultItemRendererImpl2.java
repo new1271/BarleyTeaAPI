@@ -72,7 +72,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
             ThreadLocal.withInitial(() -> SoftCache.create(StringBuilder::new));
 
     @Nonnull
-    private static final Map<String, String> literalNamespaceMap = new ConcurrentHashMap<>();
+    private static final Map<Locale, Map<String, String>> literalNamespaceMap = new ConcurrentHashMap<>();
 
     public DefaultItemRendererImpl2() {
         super(NamespacedKeyUtil.BarleyTeaAPI("default_item_renderer"));
@@ -298,16 +298,17 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         if (namespace.isEmpty())
             return "";
         Locale locale = ObjectUtil.letNonNull(ObjectUtil.tryMapSilently(player, Player::locale), Locale::getDefault);
-        MessageFormat format = GlobalTranslator.translator().translate("namespace." + namespace, locale);
-        if (format == null)
-            return literalNamespaceMap.computeIfAbsent(namespace, DefaultItemRendererImpl2::getFallbackNamespaceStringNoCached);
-        return format.toPattern();
+        Map<String, String> map = literalNamespaceMap.computeIfAbsent(locale, val -> new ConcurrentHashMap<>());
+        return map.computeIfAbsent(namespace, val -> getFallbackNamespaceStringNoCached(locale, val));
     }
 
     @Nonnull
-    private static String getFallbackNamespaceStringNoCached(@Nonnull String namespace) {
+    private static String getFallbackNamespaceStringNoCached(@Nonnull Locale locale, @Nonnull String namespace) {
         if (namespace.isEmpty())
             return "";
+        MessageFormat format = GlobalTranslator.translator().translate("namespace." + namespace, locale);
+        if (format != null)
+            return format.toPattern();
         if (namespace.contains("_")) {
             String[] paths = namespace.split(Pattern.quote("_"));
             StringBuilder builder = localBuilderCache.get().get();
