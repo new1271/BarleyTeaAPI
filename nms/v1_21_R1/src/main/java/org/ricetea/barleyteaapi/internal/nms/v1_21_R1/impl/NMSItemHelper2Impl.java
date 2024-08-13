@@ -4,18 +4,25 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
+import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class NMSItemHelper2Impl implements INMSItemHelper2 {
     private static final Lazy<NMSItemHelper2Impl> _inst = Lazy.create(NMSItemHelper2Impl::new);
@@ -182,6 +189,24 @@ public final class NMSItemHelper2Impl implements INMSItemHelper2 {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    @Nonnull
+    @Override
+    public RecipeChoice getEmptyRecipeChoice() {
+        return RecipeChoice.empty();
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Nonnull
+    @Override
+    public AttributeModifier getDefaultAttributeModifier(@Nonnull Attribute attribute, double amount,
+                                                         @Nonnull AttributeModifier.Operation operation,
+                                                         @Nullable EquipmentSlot equipmentSlot) {
+        return new AttributeModifier(Constants.getDefaultAttributeModifierKey(attribute, equipmentSlot),
+                amount, operation,
+                ObjectUtil.letNonNull(ObjectUtil.safeMap(equipmentSlot, EquipmentSlot::getGroup),
+                        EquipmentSlotGroup.ANY));
     }
 
     @Nonnull

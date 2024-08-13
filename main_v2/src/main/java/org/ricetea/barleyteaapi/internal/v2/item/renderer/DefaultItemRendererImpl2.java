@@ -62,8 +62,8 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
 
     @Nonnull
     private static final NamespacedKey[] defaultAttributeKeys = new NamespacedKey[]{
-            NamespacedKey.minecraft("default_attack_damage"),
-            NamespacedKey.minecraft("default_attack_speed")
+            NamespacedKey.minecraft("base_attack_damage"),
+            NamespacedKey.minecraft("base_attack_speed")
     };
 
     @Nonnull
@@ -140,15 +140,17 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                     INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
                     if (helper != null) {
                         int maxDura = feature.getMaxDurability(itemStack);
-                        int damage = feature.getDurabilityDamage(itemStack);
-                        if (meta instanceof Damageable damageable)
-                            helper.applyCustomDurabilityBar(damageable, damage, maxDura);
-                        else {
-                            itemStack.setItemMeta(meta);
-                            itemStack = helper.applyCustomDurabilityBarSpecial(itemStack, damage, maxDura);
-                            meta = itemStack.getItemMeta();
-                            if (meta == null)
-                                return itemStack;
+                        if (maxDura > 0) {
+                            int damage = feature.getDurabilityDamage(itemStack);
+                            if (meta instanceof Damageable damageable)
+                                helper.applyCustomDurabilityBar(damageable, damage, maxDura);
+                            else {
+                                itemStack.setItemMeta(meta);
+                                itemStack = helper.applyCustomDurabilityBarSpecial(itemStack, damage, maxDura);
+                                meta = itemStack.getItemMeta();
+                                if (meta == null)
+                                    return itemStack;
+                            }
                         }
                     }
                 }
@@ -199,23 +201,27 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                 continue;
             AttributeModifier modifier = modifierCollection.stream()
                     .filter(Objects::nonNull)
-                    .filter(val -> EquipmentSlotGroup.HAND.equals(val.getSlotGroup()))
+                    .filter(val -> EquipmentSlotGroup.MAINHAND.equals(val.getSlotGroup()))
                     .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
                     .findAny()
                     .orElse(null);
             if (modifier == null)
                 continue;
+            NamespacedKey modifierKey = modifier.getKey();
+            NamespacedKey defaultKey = defaultAttributeKeys[i];
+            if (Objects.equals(defaultKey, modifierKey))
+                continue;
             NamespacedKey alterStoreKey = alternateAttributeKeys[i];
             try {
-                container.set(alterStoreKey, ExtraPersistentDataType.NAMESPACED_KEY, alterStoreKey);
+                container.set(alterStoreKey, ExtraPersistentDataType.NAMESPACED_KEY, modifierKey);
             } catch (Exception ignored) {
                 container.remove(alterStoreKey);
             }
             meta.removeAttributeModifier(attribute, modifier);
             meta.addAttributeModifier(attribute,
-                    new AttributeModifier(defaultAttributeKeys[i],
+                    new AttributeModifier(defaultKey,
                             modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
-                            EquipmentSlotGroup.HAND)
+                            EquipmentSlotGroup.MAINHAND)
             );
         }
     }
@@ -267,7 +273,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
             AttributeModifier modifier = modifierCollection.stream()
                     .filter(Objects::nonNull)
                     .filter(val -> restoreKey.equals(val.getKey()))
-                    .filter(val -> EquipmentSlotGroup.HAND.equals(val.getSlotGroup()))
+                    .filter(val -> EquipmentSlotGroup.MAINHAND.equals(val.getSlotGroup()))
                     .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
                     .findAny()
                     .orElse(null);
@@ -277,7 +283,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
             meta.addAttributeModifier(attribute,
                     new AttributeModifier(restoreKey,
                             modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
-                            EquipmentSlotGroup.HAND)
+                            EquipmentSlotGroup.MAINHAND)
             );
 
             ObjectUtil.tryCallSilently(altKey, container::remove);

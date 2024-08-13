@@ -1,11 +1,14 @@
 package org.ricetea.utils;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.EquipmentSlot;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.IntUnaryOperator;
+import java.util.regex.Pattern;
 
 public class Constants {
     @Nonnull
@@ -15,7 +18,7 @@ public class Constants {
     @Nonnull
     public static final String DEFAULT_ATTRIBUTE_MODIFIER_NAME = "default modifiers";
     @Nonnull
-    public static final NamespacedKey DEFAULT_ATTRIBUTE_MODIFIER_KEY = NamespacedKey.minecraft("default_modifiers");
+    public static final String DEFAULT_ATTRIBUTE_MODIFIER_KEY_HEADER = "default_";
     @Nonnull
     public static final IntUnaryOperator IncreaseOperator = i -> i + 1;
     @Nonnull
@@ -30,4 +33,18 @@ public class Constants {
             {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     public static final int MIN_ITERATION_COUNT_FOR_PARALLEL = Math.max(Runtime.getRuntime().availableProcessors() * 5, 8);
     public static final int MIN_ITERATION_COUNT_FOR_PARALLEL_VERY_SMALL_OPERATION = MIN_ITERATION_COUNT_FOR_PARALLEL * 10;
+
+    @Nonnull
+    public static NamespacedKey getDefaultAttributeModifierKey(@Nonnull Attribute attribute, @Nullable EquipmentSlot slot) {
+        NamespacedKey original = attribute.getKey();
+        String value = original.value();
+        if (value.contains(".")) {
+            String[] splits = value.split(Pattern.quote("."));
+            value = splits[splits.length - 1];
+        }
+        if (EquipmentSlot.HAND.equals(slot))
+            return new NamespacedKey(original.getNamespace(), DEFAULT_ATTRIBUTE_MODIFIER_KEY_HEADER + value);
+        return new NamespacedKey(original.getNamespace(), DEFAULT_ATTRIBUTE_MODIFIER_KEY_HEADER +
+                (slot == null ? "all" : slot.toString().toLowerCase()) + "_" + value);
+    }
 }

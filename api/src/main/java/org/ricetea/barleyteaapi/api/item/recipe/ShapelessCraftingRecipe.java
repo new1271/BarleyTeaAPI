@@ -88,6 +88,8 @@ public class ShapelessCraftingRecipe extends BaseCraftingRecipe {
                 new ItemStack(getResult().getOriginalType()));
         for (CustomItemType type : getIngredients()) {
             Material material = type.getOriginalType();
+            if (material.isAir())
+                continue;
             result.addIngredient(material);
         }
         return Objects.requireNonNull(result);

@@ -3,8 +3,10 @@ package org.ricetea.barleyteaapi.api.item.recipe;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemGive;
 import org.ricetea.utils.Box;
@@ -190,6 +192,8 @@ public class ShapedCraftingRecipe extends BaseCraftingRecipe {
 
         result = result.shape(shape);
         for (Map.Entry<Material, Character> entry : collectMap.entrySet()) {
+            if (entry.getKey().isAir())
+                continue;
             result = result.setIngredient(entry.getValue(), entry.getKey());
         }
         return Objects.requireNonNull(result);

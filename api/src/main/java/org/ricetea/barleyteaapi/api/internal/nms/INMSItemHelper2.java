@@ -1,7 +1,11 @@
 package org.ricetea.barleyteaapi.api.internal.nms;
 
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -59,4 +63,12 @@ public interface INMSItemHelper2 {
     ItemStack restoreCustomDurabilityBarSpecial(@Nonnull ItemStack itemStack);
 
     boolean isNeedSpecialRestore(@Nonnull ItemStack itemStack);
+
+    @Nonnull
+    RecipeChoice getEmptyRecipeChoice();
+
+    @Nonnull
+    AttributeModifier getDefaultAttributeModifier(@Nonnull Attribute attribute, double amount,
+                                                  @Nonnull AttributeModifier.Operation operation,
+                                                  @Nullable EquipmentSlot equipmentSlot);
 }

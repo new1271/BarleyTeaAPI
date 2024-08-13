@@ -22,7 +22,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Unmodifiable;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
-import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
+import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
@@ -135,12 +135,14 @@ public class ItemHelper {
         if (itemMeta == null || attribute == null || operation == null)
             return;
         itemMeta.removeAttributeModifier(attribute);
-        if (NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion())
-            itemMeta.addAttributeModifier(attribute, new AttributeModifier(UUID.randomUUID(),
-                    Constants.DEFAULT_ATTRIBUTE_MODIFIER_NAME, amount, operation, equipmentSlot));
-        else //After 1.20.5, uuid is no longer exists in attribute_modifiers
-            itemMeta.addAttributeModifier(attribute, new AttributeModifier(Constants.EMPTY_UUID,
-                    Constants.DEFAULT_ATTRIBUTE_MODIFIER_KEY.asString(), amount, operation, equipmentSlot));
+        AttributeModifier modifier;
+        INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
+        if (helper == null)
+            modifier = new AttributeModifier(UUID.randomUUID(),
+                    Constants.DEFAULT_ATTRIBUTE_MODIFIER_NAME, amount, operation, equipmentSlot);
+        else
+            modifier = helper.getDefaultAttributeModifier(attribute, amount, operation, equipmentSlot);
+        itemMeta.addAttributeModifier(attribute, modifier);
     }
 
     public static int getDurabilityDamage(@Nonnull CustomItemType itemType, @Nullable ItemStack itemStack) {
