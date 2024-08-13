@@ -142,7 +142,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                         int maxDura = feature.getMaxDurability(itemStack);
                         if (maxDura > 0) {
                             int damage = feature.getDurabilityDamage(itemStack);
-                            if (meta instanceof Damageable damageable)
+                            if (meta instanceof Damageable damageable && itemStack.getType().getMaxDurability() > 0)
                                 helper.applyCustomDurabilityBar(damageable, damage, maxDura);
                             else {
                                 itemStack.setItemMeta(meta);
@@ -236,11 +236,12 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         restore0(meta);
         INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
         if (helper != null) {
-            if (helper.isNeedSpecialRestore(itemStack)) {
+            int maxDura = itemStack.getType().getMaxDurability();
+            if (helper.isNeedSpecialRestore(meta) || maxDura <= 0) {
                 itemStack.setItemMeta(meta);
                 return helper.restoreCustomDurabilityBarSpecial(itemStack);
             } else if (meta instanceof Damageable damageable) {
-                helper.restoreCustomDurabilityBar(damageable, itemStack.getType().getMaxDurability());
+                helper.restoreCustomDurabilityBar(damageable, maxDura);
             }
         }
         itemStack.setItemMeta(meta);

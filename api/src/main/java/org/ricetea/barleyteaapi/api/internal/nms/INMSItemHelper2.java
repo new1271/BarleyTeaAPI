@@ -45,11 +45,11 @@ public interface INMSItemHelper2 {
 
     @Nonnull
     default ItemStack restoreCustomDurabilityBar(@Nonnull ItemStack itemStack) {
-        if (isNeedSpecialRestore(itemStack))
-            return restoreCustomDurabilityBarSpecial(itemStack);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return itemStack;
+        if (isNeedSpecialRestore(meta))
+            return restoreCustomDurabilityBarSpecial(itemStack);
         if (meta instanceof Damageable damageable) {
             restoreCustomDurabilityBar(damageable, itemStack.getType().getMaxDurability());
             itemStack.setItemMeta(meta);
@@ -62,7 +62,7 @@ public interface INMSItemHelper2 {
     @Nonnull
     ItemStack restoreCustomDurabilityBarSpecial(@Nonnull ItemStack itemStack);
 
-    boolean isNeedSpecialRestore(@Nonnull ItemStack itemStack);
+    boolean isNeedSpecialRestore(@Nonnull ItemMeta itemMeta);
 
     @Nonnull
     RecipeChoice getEmptyRecipeChoice();
