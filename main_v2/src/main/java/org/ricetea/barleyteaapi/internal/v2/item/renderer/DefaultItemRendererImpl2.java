@@ -1,4 +1,4 @@
-package org.ricetea.barleyteaapi.internal.item.renderer;
+package org.ricetea.barleyteaapi.internal.v2.item.renderer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -7,12 +7,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
@@ -29,6 +28,7 @@ import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
 import org.ricetea.barleyteaapi.api.persistence.ExtraPersistentDataType;
+import org.ricetea.barleyteaapi.internal.item.renderer.AbstractItemRendererImpl;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -50,14 +50,9 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
     public static final String ALTERNATE_ITEM_ID_FORMAT = "barleyteaapi.message.alternate_item_id_format";
 
     @Nonnull
-    private static final NamespacedKey[] alternateAttributeNameKeys = new NamespacedKey[]{
-            NamespacedKey.minecraft("default_attack_damage_real_name"),
-            NamespacedKey.minecraft("default_attack_speed_real_name"),
-    };
-    @Nonnull
-    private static final NamespacedKey[] alternateAttributeIDKeys = new NamespacedKey[]{
-            NamespacedKey.minecraft("default_attack_damage_real_id"),
-            NamespacedKey.minecraft("default_attack_speed_real_id"),
+    private static final NamespacedKey[] alternateAttributeKeys = new NamespacedKey[]{
+            NamespacedKey.minecraft("default_attack_damage_real_key"),
+            NamespacedKey.minecraft("default_attack_speed_real_key"),
     };
 
     @Nonnull
@@ -66,8 +61,9 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
     };
 
     @Nonnull
-    private static final String[] defaultAttributeNames = new String[]{
-            "minecraft:default_attack_damage", "minecraft:default_attack_speed"
+    private static final NamespacedKey[] defaultAttributeKeys = new NamespacedKey[]{
+            NamespacedKey.minecraft("default_attack_damage"),
+            NamespacedKey.minecraft("default_attack_speed")
     };
 
     @Nonnull
@@ -133,7 +129,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
             output.add(Component.translatable(ALTERNATE_ITEM_ID_FORMAT)
                     .color(NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
-                    .args(
+                    .arguments(
                             Component.translatable("namespace." + namespace, getFallbackNamespaceString(namespace)),
                             defaultNameComponent
                     ));
@@ -190,6 +186,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         return itemStack;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void render0(@Nonnull ItemMeta meta) {
         var modifiers = meta.getAttributeModifiers();
         if (modifiers == null)
@@ -202,26 +199,23 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                 continue;
             AttributeModifier modifier = modifierCollection.stream()
                     .filter(Objects::nonNull)
-                    .filter(val -> EquipmentSlot.HAND.equals(val.getSlot()))
+                    .filter(val -> EquipmentSlotGroup.HAND.equals(val.getSlotGroup()))
                     .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
                     .findAny()
                     .orElse(null);
             if (modifier == null)
                 continue;
-            NamespacedKey nameKey = alternateAttributeNameKeys[i];
-            NamespacedKey idKey = alternateAttributeIDKeys[i];
+            NamespacedKey alterStoreKey = alternateAttributeKeys[i];
             try {
-                container.set(nameKey, PersistentDataType.STRING, modifier.getName());
-                container.set(idKey, ExtraPersistentDataType.UUID_LONG_ARRAY, modifier.getUniqueId());
+                container.set(alterStoreKey, ExtraPersistentDataType.NAMESPACED_KEY, alterStoreKey);
             } catch (Exception ignored) {
-                container.remove(nameKey);
-                container.remove(idKey);
+                container.remove(alterStoreKey);
             }
             meta.removeAttributeModifier(attribute, modifier);
             meta.addAttributeModifier(attribute,
-                    new AttributeModifier(modifier.getUniqueId(), defaultAttributeNames[i],
+                    new AttributeModifier(defaultAttributeKeys[i],
                             modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
-                            EquipmentSlot.HAND)
+                            EquipmentSlotGroup.HAND)
             );
         }
     }
@@ -247,37 +241,33 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         return itemStack;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void restore0(@Nonnull ItemMeta meta) {
         var modifiers = meta.getAttributeModifiers();
         if (modifiers == null || modifiers.isEmpty())
             return;
         PersistentDataContainer container = meta.getPersistentDataContainer();
         for (int i = 0, length = targetAttributes.length; i < length; i++) {
-            NamespacedKey nameKey = alternateAttributeNameKeys[i];
-            NamespacedKey idKey = alternateAttributeIDKeys[i];
+            NamespacedKey altKey = alternateAttributeKeys[i];
 
-            String restoreName;
-            UUID restoreUUID;
+            NamespacedKey restoreKey;
             try {
-                restoreName = container.get(nameKey, PersistentDataType.STRING);
-                restoreUUID = container.get(idKey, ExtraPersistentDataType.UUID_LONG_ARRAY);
+                restoreKey = container.get(altKey, ExtraPersistentDataType.NAMESPACED_KEY);
             } catch (Exception ignored) {
                 continue;
             }
 
-            if (restoreName == null || restoreUUID == null)
+            if (restoreKey == null)
                 continue;
 
-            String storeName = defaultAttributeNames[i];
             Attribute attribute = targetAttributes[i];
             Collection<AttributeModifier> modifierCollection = modifiers.get(attribute);
             if (modifierCollection.isEmpty())
                 continue;
             AttributeModifier modifier = modifierCollection.stream()
                     .filter(Objects::nonNull)
-                    .filter(val -> storeName.equals(val.getName()))
-                    .filter(val -> restoreUUID.equals(val.getUniqueId()))
-                    .filter(val -> EquipmentSlot.HAND.equals(val.getSlot()))
+                    .filter(val -> restoreKey.equals(val.getKey()))
+                    .filter(val -> EquipmentSlotGroup.HAND.equals(val.getSlotGroup()))
                     .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
                     .findAny()
                     .orElse(null);
@@ -285,13 +275,12 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
                 continue;
             meta.removeAttributeModifier(attribute, modifier);
             meta.addAttributeModifier(attribute,
-                    new AttributeModifier(modifier.getUniqueId(), restoreName,
+                    new AttributeModifier(restoreKey,
                             modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
-                            EquipmentSlot.HAND)
+                            EquipmentSlotGroup.HAND)
             );
 
-            ObjectUtil.tryCallSilently(nameKey, container::remove);
-            ObjectUtil.tryCallSilently(idKey, container::remove);
+            ObjectUtil.tryCallSilently(altKey, container::remove);
         }
     }
 

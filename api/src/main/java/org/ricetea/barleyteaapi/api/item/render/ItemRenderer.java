@@ -16,6 +16,11 @@ public interface ItemRenderer extends Keyed {
         return Objects.requireNonNull(Bukkit.getServicesManager().load(ItemRenderer.class));
     }
 
+    @Nullable
+    static ItemRenderer getDefaultUnsafe() {
+        return Bukkit.getServicesManager().load(ItemRenderer.class);
+    }
+
     boolean isRegistered();
 
     @Nonnull

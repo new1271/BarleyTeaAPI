@@ -44,7 +44,6 @@ import org.ricetea.barleyteaapi.internal.entity.counter.TransientTickCounterImpl
 import org.ricetea.barleyteaapi.internal.entity.registration.EntityRegisterImpl;
 import org.ricetea.barleyteaapi.internal.item.registration.*;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
-import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl2;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.listener.monitor.*;
@@ -140,12 +139,14 @@ public final class BarleyTeaAPI extends JavaPlugin {
     public void onEnable() {
         _inst = this;
         Logger logger = getLogger();
-        logger.info("loading API...");
+        logger.info("loading API (part 1)...");
         loadApiImplementations();
         logger.info("loading NMS Feature...");
         loadNMSFeature();
         logger.info("loading Additional Features...");
         loadAdditionalFeatures();
+        logger.info("loading API (part 2)...");
+        loadApiImplementationsComplement();
         logger.info("loading Soft-depends");
         SoftDependRegister<BarleyTeaAPI> softDependRegister = new SoftDependRegister<>(this);
         softDependRegister.register(BulitInSoftDepend.ExcellentEnchants,
@@ -262,10 +263,12 @@ public final class BarleyTeaAPI extends JavaPlugin {
         loadApiImplementation(servicesManager, new ThreadLocalRandomProviderImpl(), RandomProvider.class);
         loadApiImplementation(servicesManager, new TaskServiceImpl(), TaskService.class);
         loadApiImplementation(servicesManager, new EntityHelperInternalsImpl(), EntityHelperInternals.class);
-        if (NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion())
+    }
+
+    private void loadApiImplementationsComplement() {
+        final ServicesManager servicesManager = Bukkit.getServicesManager();
+        if (ItemRenderer.getDefaultUnsafe() == null)
             loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
-        else
-            loadApiImplementation(servicesManager, new DefaultItemRendererImpl2(), ItemRenderer.class);
     }
 
     public <T> void loadApiImplementation(@Nonnull ServicesManager servicesManager,
