@@ -92,7 +92,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 renderer = ItemRenderer.getDefault();
             }
             if (renderer != null) {
-                renderer.restore(itemStack, player);
+                itemStack = renderer.restore(itemStack, player);
             }
             if (itemStack.getItemMeta() instanceof BlockStateMeta blockMeta && blockMeta.hasBlockState()) {
                 if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {

@@ -239,7 +239,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
         if (helper != null) {
             int maxDura = itemStack.getType().getMaxDurability();
-            if (helper.isNeedSpecialRestore(meta) || maxDura <= 0) {
+            if (helper.isNeedSpecialRestore(meta)) {
                 itemStack.setItemMeta(meta);
                 return helper.restoreCustomDurabilityBarSpecial(itemStack);
             } else if (meta instanceof Damageable damageable) {
