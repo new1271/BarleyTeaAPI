@@ -149,8 +149,10 @@ public final class BarleyTeaAPI extends JavaPlugin {
         loadApiImplementationsComplement();
         logger.info("loading Soft-depends");
         SoftDependRegister<BarleyTeaAPI> softDependRegister = new SoftDependRegister<>(this);
-        softDependRegister.register(BulitInSoftDepend.ExcellentEnchants,
-                SupplierUtil.fromConstuctor(ExcellentEnchantsConnector.class));
+        if (NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion()) {
+            softDependRegister.register(BulitInSoftDepend.ExcellentEnchants,
+                    SupplierUtil.fromConstuctor(ExcellentEnchantsConnector.class));
+        }
         softDependRegister.register(BulitInSoftDepend.ProtocolLib,
                 SupplierUtil.fromConstuctor(ProtocolLibConnector.class));
         softDependRegister.register(BulitInSoftDepend.Geyser,
