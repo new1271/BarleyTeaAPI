@@ -35,6 +35,7 @@ public final class NMSEntityHelper {
         return ((CraftEntity) entity).getHandle();
     }
 
+
     public static boolean damage(@Nonnull org.bukkit.entity.Entity damagee, @Nullable org.bukkit.entity.Entity damager,
                                  @Nullable DamageCause cause, float damage, boolean withoutScaling) {
         net.minecraft.world.entity.Entity nmsDamagee = getNmsEntity(damagee);
@@ -42,7 +43,7 @@ public final class NMSEntityHelper {
         var world = nmsDamagee.level();
         DamageSource damageSource = buildDamageSource(world.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE),
                 toDamageTypeResourceKey(cause, nmsDamager),
-                nmsDamager, withoutScaling);
+                nmsDamager, nmsDamagee instanceof Player && withoutScaling);
         if (cause != null) {
             switch (cause) {
                 case ENTITY_SWEEP_ATTACK -> damageSource.sweep();
@@ -54,19 +55,28 @@ public final class NMSEntityHelper {
     }
 
     @Nonnull
-    private static DamageSource buildDamageSource(HolderLookup.RegistryLookup<DamageType> registry, ResourceKey<DamageType> key,
-                                                  @Nullable Entity attacker, boolean withoutScaling) {
+    private static DamageSource buildDamageSource(@Nonnull HolderLookup.RegistryLookup<DamageType> registry,
+                                                  @Nonnull ResourceKey<DamageType> key,
+                                                  @Nullable Entity attacker,
+                                                  boolean withoutScaling) {
         return buildDamageSource(registry.getOrThrow(key), attacker, withoutScaling);
     }
 
     @Nonnull
-    private static DamageSource buildDamageSource(Holder<DamageType> holder,
-                                                  @Nullable Entity attacker, boolean withoutScaling) {
+    private static DamageSource buildDamageSource(@Nonnull Holder<DamageType> holder, @Nullable Entity attacker,
+                                                  boolean withoutScaling) {
         if (withoutScaling) {
             DamageType oldDamageType = holder.value();
-            if (!oldDamageType.scaling().equals(DamageScaling.NEVER))
-                holder = Holder.direct(new DamageType(oldDamageType.msgId(), DamageScaling.NEVER, oldDamageType.exhaustion(),
+            DamageScaling scaling = oldDamageType.scaling();
+            if (scaling.equals(DamageScaling.ALWAYS) ||
+                    (scaling.equals(DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER) && !(attacker instanceof Player))) {
+                holder = Holder.direct(new DamageType(oldDamageType.msgId(),
+                        DamageScaling.NEVER, oldDamageType.exhaustion(),
                         oldDamageType.effects(), oldDamageType.deathMessageType()));
+            }
+        }
+        if (attacker instanceof Projectile projectile) {
+            return new DamageSource(holder, attacker, projectile.getOwner());
         }
         return new DamageSource(holder, attacker);
     }

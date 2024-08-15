@@ -15,7 +15,6 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Constants;
@@ -24,7 +23,6 @@ import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.logging.Logger;
 
 public final class NMSItemHelper2Impl implements INMSItemHelper2 {
     private static final Lazy<NMSItemHelper2Impl> _inst = Lazy.create(NMSItemHelper2Impl::new);
