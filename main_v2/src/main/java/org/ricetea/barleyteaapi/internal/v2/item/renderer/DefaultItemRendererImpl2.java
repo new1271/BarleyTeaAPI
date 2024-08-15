@@ -1,5 +1,6 @@
 package org.ricetea.barleyteaapi.internal.v2.item.renderer;
 
+import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemRarity;
+import org.ricetea.barleyteaapi.api.item.CustomItemType;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemCustomDurability;
 import org.ricetea.barleyteaapi.api.item.feature.FeatureItemDisplay;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemDisplay;
@@ -94,8 +96,11 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return itemStack;
+
+        CustomItemType customitemType = CustomItemType.get(itemStack);
+
         meta = AlternativeItemState.store(AlternativeItemState.restore(meta));
-        render0(meta);
+        render0(customitemType, meta);
 
         DataItemDisplay data = null;
         Component displayName = meta.displayName();
@@ -103,7 +108,7 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         List<Component> lore = meta.lore();
         Lazy<List<Component>> outputLazy = Lazy.create(() -> lore == null ? new ArrayList<>() : new ArrayList<>(lore));
 
-        CustomItem itemType = CustomItem.get(itemStack);
+        CustomItem itemType = customitemType.asCustomItem();
         if (itemType != null) {
             List<Component> output = outputLazy.get();
 
@@ -191,40 +196,43 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private void render0(@Nonnull ItemMeta meta) {
-        var modifiers = meta.getAttributeModifiers();
-        if (modifiers == null)
-            return;
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        for (int i = 0, length = targetAttributes.length; i < length; i++) {
-            Attribute attribute = targetAttributes[i];
-            Collection<AttributeModifier> modifierCollection = modifiers.get(attribute);
-            if (modifierCollection.isEmpty())
-                continue;
-            AttributeModifier modifier = modifierCollection.stream()
-                    .filter(Objects::nonNull)
-                    .filter(val -> EquipmentSlotGroup.MAINHAND.equals(val.getSlotGroup()))
-                    .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
-                    .findAny()
-                    .orElse(null);
-            if (modifier == null)
-                continue;
-            NamespacedKey modifierKey = modifier.getKey();
-            NamespacedKey defaultKey = defaultAttributeKeys[i];
-            if (Objects.equals(defaultKey, modifierKey))
-                continue;
-            NamespacedKey alterStoreKey = alternateAttributeKeys[i];
-            try {
-                container.set(alterStoreKey, ExtraPersistentDataType.NAMESPACED_KEY, modifierKey);
-            } catch (Exception ignored) {
-                container.remove(alterStoreKey);
+    private void render0(@Nonnull CustomItemType itemType, @Nonnull ItemMeta meta) {
+        CustomItem customItem = itemType.asCustomItem();
+        if (customItem != null && customItem.isTool()) {
+            Multimap<Attribute, AttributeModifier> modifiers = meta.getAttributeModifiers();
+            if (modifiers == null)
+                return;
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            for (int i = 0, length = targetAttributes.length; i < length; i++) {
+                Attribute attribute = targetAttributes[i];
+                Collection<AttributeModifier> modifierCollection = modifiers.get(attribute);
+                if (modifierCollection.isEmpty())
+                    continue;
+                AttributeModifier modifier = modifierCollection.stream()
+                        .filter(Objects::nonNull)
+                        .filter(val -> EquipmentSlotGroup.MAINHAND.equals(val.getSlotGroup()))
+                        .filter(val -> AttributeModifier.Operation.ADD_NUMBER.equals(val.getOperation()))
+                        .findAny()
+                        .orElse(null);
+                if (modifier == null)
+                    continue;
+                NamespacedKey modifierKey = modifier.getKey();
+                NamespacedKey defaultKey = defaultAttributeKeys[i];
+                if (Objects.equals(defaultKey, modifierKey))
+                    continue;
+                NamespacedKey alterStoreKey = alternateAttributeKeys[i];
+                try {
+                    container.set(alterStoreKey, ExtraPersistentDataType.NAMESPACED_KEY, modifierKey);
+                } catch (Exception ignored) {
+                    container.remove(alterStoreKey);
+                }
+                meta.removeAttributeModifier(attribute, modifier);
+                meta.addAttributeModifier(attribute,
+                        new AttributeModifier(defaultKey,
+                                modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
+                                EquipmentSlotGroup.MAINHAND)
+                );
             }
-            meta.removeAttributeModifier(attribute, modifier);
-            meta.addAttributeModifier(attribute,
-                    new AttributeModifier(defaultKey,
-                            modifier.getAmount(), AttributeModifier.Operation.ADD_NUMBER,
-                            EquipmentSlotGroup.MAINHAND)
-            );
         }
     }
 

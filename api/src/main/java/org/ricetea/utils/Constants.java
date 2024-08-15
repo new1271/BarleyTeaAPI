@@ -38,9 +38,8 @@ public class Constants {
     public static NamespacedKey getDefaultAttributeModifierKey(@Nonnull Attribute attribute, @Nullable EquipmentSlot slot) {
         NamespacedKey original = attribute.getKey();
         String value = original.value();
-        if (value.contains(".")) {
-            String[] splits = value.split(Pattern.quote("."));
-            value = splits[splits.length - 1];
+        if (value.startsWith("generic.")) {
+            value = value.substring("generic.".length());
         }
         if (EquipmentSlot.HAND.equals(slot))
             return new NamespacedKey(original.getNamespace(), DEFAULT_ATTRIBUTE_MODIFIER_KEY_HEADER + value);
