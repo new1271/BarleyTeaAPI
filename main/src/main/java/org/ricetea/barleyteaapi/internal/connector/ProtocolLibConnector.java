@@ -28,6 +28,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper;
+import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
@@ -188,7 +189,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     modifier.modify(i, itemStack -> ObjectUtil.safeMap(ItemHelper.renderUnsafe(itemStack, player), WithFlag::obj));
                 }
             }
-            if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT)) {
+            if (packetType.equals(PacketType.Play.Server.ENTITY_EQUIPMENT) &&
+                    NMSVersion.getCurrent().getVersion() < NMSVersion.v1_20_R4.getVersion()) {
                 StructureModifier<List<Pair<ItemSlot, ItemStack>>> modifier = container.getSlotStackPairLists();
                 for (int i = 0, size = modifier.size(); i < size; i++) {
                     modifier.modify(i, itemStackList -> {

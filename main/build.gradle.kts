@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     compileOnly(dependencyNotation = "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.2.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0-SNAPSHOT")
     compileOnly("org.geysermc.geyser:api:2.2.0-SNAPSHOT")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation(project(":api"))
