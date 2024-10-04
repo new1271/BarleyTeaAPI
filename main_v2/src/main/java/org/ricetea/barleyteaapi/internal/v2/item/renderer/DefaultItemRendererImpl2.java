@@ -99,7 +99,10 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
 
         CustomItemType customitemType = CustomItemType.get(itemStack);
 
-        meta = AlternativeItemState.store(AlternativeItemState.restore(meta));
+        AlternativeItemState itemState = AlternativeItemState.getInstanceUnsafe();
+        if (itemState != null)
+            meta = itemState.store(itemState.restore(meta));
+
         render0(customitemType, meta);
 
         DataItemDisplay data = null;
@@ -114,20 +117,17 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
 
             Component defaultNameComponent = ItemHelper.getDefaultNameComponent(itemType);
 
-            boolean isRenamed;
-            if (displayName == null) {
-                displayName = defaultNameComponent;
-                isRenamed = false;
-            } else {
-                isRenamed = true;
-            }
+            boolean isRenamed = displayName != null;
 
             CustomItemRarity rarity = itemType.getRarity();
             if (itemType.isRarityUpgraded(itemStack)) {
                 rarity = rarity.upgrade();
             }
 
-            displayName = rarity.apply(displayName, isRenamed, false);
+            meta.itemName(rarity.apply(defaultNameComponent));
+
+            if (displayName != null)
+                displayName = rarity.apply(displayName, isRenamed, false);
 
             NamespacedKey itemTypeKey = itemType.getKey();
             String namespace = itemTypeKey.getNamespace();
@@ -242,7 +242,9 @@ public class DefaultItemRendererImpl2 extends AbstractItemRendererImpl {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return itemStack;
-        meta = AlternativeItemState.restore(meta);
+        AlternativeItemState itemState = AlternativeItemState.getInstanceUnsafe();
+        if (itemState != null)
+            meta = itemState.restore(meta);
         restore0(meta);
         INMSItemHelper2 helper = INMSItemHelper2.getInstanceUnsafe();
         if (helper != null) {

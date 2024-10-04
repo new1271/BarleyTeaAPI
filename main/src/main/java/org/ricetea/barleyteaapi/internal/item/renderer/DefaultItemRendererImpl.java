@@ -111,7 +111,9 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
         if (meta == null)
             return itemStack;
 
-        meta = AlternativeItemState.store(AlternativeItemState.restore(meta));
+        AlternativeItemState itemState = AlternativeItemState.getInstanceUnsafe();
+        if (itemState != null)
+            meta = itemState.store(itemState.restore(meta));
 
         List<SoftCache<Deque<Component>>> renderLoreStackList = reusableRenderLoreStack.get();
         Deque<Component> renderLoreStack = renderLoreStackList.get(0).get();
@@ -469,6 +471,7 @@ public class DefaultItemRendererImpl extends AbstractItemRendererImpl {
     @Nonnull
     @Override
     public ItemStack restore(@Nonnull ItemStack itemStack, @Nullable Player player) {
-        return AlternativeItemState.restore(itemStack);
+        AlternativeItemState itemState = AlternativeItemState.getInstanceUnsafe();
+        return itemState == null ? itemStack : itemState.restore(itemStack);
     }
 }

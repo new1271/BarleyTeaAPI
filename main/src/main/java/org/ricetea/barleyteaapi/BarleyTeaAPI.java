@@ -27,6 +27,7 @@ import org.ricetea.barleyteaapi.api.internal.nms.INMSEntryPoint;
 import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.registration.*;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
+import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.api.task.TaskService;
@@ -44,6 +45,7 @@ import org.ricetea.barleyteaapi.internal.entity.counter.TransientTickCounterImpl
 import org.ricetea.barleyteaapi.internal.entity.registration.EntityRegisterImpl;
 import org.ricetea.barleyteaapi.internal.item.registration.*;
 import org.ricetea.barleyteaapi.internal.item.renderer.DefaultItemRendererImpl;
+import org.ricetea.barleyteaapi.internal.item.renderer.util.AlternativeItemStateImpl;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.listener.*;
 import org.ricetea.barleyteaapi.internal.listener.monitor.*;
@@ -61,9 +63,9 @@ import org.ricetea.utils.SupplierUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -83,7 +85,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
     @Nullable
     private INMSEntryPoint nmsEntryPoint;
     @Nonnull
-    private final Lazy<Queue<IAdditionalPartEntryPoint>> additionalPartEntryPointQueueLazy = Lazy.create(ArrayDeque::new);
+    private final Lazy<List<IAdditionalPartEntryPoint>> additionalPartEntryPointListLazy = Lazy.create(ArrayList::new);
 
     @Nonnull
     public static BarleyTeaAPI getInstance() {
@@ -159,6 +161,13 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 SupplierUtil.fromConstuctor(GeyserConnector.class));
         this.softDependRegister = softDependRegister;
         softDependRegister.reloadAll();
+        List<IAdditionalPartEntryPoint> additionalPartEntryPoints = additionalPartEntryPointListLazy.getUnsafe();
+        if (additionalPartEntryPoints != null) {
+            logger.info("loading Soft-depends connector patches");
+            for (IAdditionalPartEntryPoint entryPoint : additionalPartEntryPoints) {
+                entryPoint.applyPatchs();
+            }
+        }
         logger.info("registering event listeners");
         registerEventListeners();
         registerEventMonitors();
@@ -271,6 +280,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
         final ServicesManager servicesManager = Bukkit.getServicesManager();
         if (ItemRenderer.getDefaultUnsafe() == null)
             loadApiImplementation(servicesManager, new DefaultItemRendererImpl(), ItemRenderer.class);
+        if (AlternativeItemState.getInstanceUnsafe() == null)
+            loadApiImplementation(servicesManager, new AlternativeItemStateImpl(), AlternativeItemState.class);
     }
 
     public <T> void loadApiImplementation(@Nonnull ServicesManager servicesManager,
@@ -362,7 +373,7 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 return;
             }
             logger.info("[AdditionalFeature] Successfully loaded '" + classPath + "' !");
-            additionalPartEntryPointQueueLazy.get().offer(entryPoint);
+            additionalPartEntryPointListLazy.get().add(entryPoint);
         }
     }
 
@@ -374,12 +385,12 @@ public final class BarleyTeaAPI extends JavaPlugin {
         logger.info("canceling all running tasks...");
         Bukkit.getScheduler().cancelTasks(this);
         logger.info("unloading Additional Features...");
-        Queue<IAdditionalPartEntryPoint> additionalPartEntryPointQueue = additionalPartEntryPointQueueLazy.getUnsafe();
-        if (additionalPartEntryPointQueue != null) {
-            IAdditionalPartEntryPoint entryPoint;
-            while ((entryPoint = additionalPartEntryPointQueue.poll()) != null) {
+        List<IAdditionalPartEntryPoint> additionalPartEntryPointList = additionalPartEntryPointListLazy.getUnsafe();
+        if (additionalPartEntryPointList != null) {
+            additionalPartEntryPointList.removeIf(entryPoint -> {
                 ObjectUtil.tryCall(entryPoint, IAdditionalPartEntryPoint::onDisable);
-            }
+                return true;
+            });
         }
         logger.info("unloading NMS Feature...");
         ObjectUtil.tryCall(nmsEntryPoint, INMSEntryPoint::onDisable);

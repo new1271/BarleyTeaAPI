@@ -364,7 +364,6 @@ public class ItemHelper {
         return render(itemStack, null);
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @Nonnull
     public static WithFlag<ItemStack> render(@Nonnull ItemStack itemStack, @Nullable Player player) {
         boolean modified = false;
@@ -382,7 +381,9 @@ public class ItemHelper {
                         Component displayName = meta.displayName();
                         List<Component> lore = meta.lore();
                         lore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
-                        itemStack = AlternativeItemState.store(AlternativeItemState.restore(itemStack));
+                        AlternativeItemState itemState = AlternativeItemState.getInstanceUnsafe();
+                        if (itemState != null)
+                            itemStack = itemState.store(itemState.restore(itemStack));
                         DataItemDisplay data = new DataItemDisplay(player, itemStack, displayName, lore);
                         for (ItemSubRenderer subRenderer : subRendererRegister.listAll()) {
                             try {

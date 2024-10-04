@@ -11,6 +11,7 @@ import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers.ItemSlot;
 import com.comphenix.protocol.wrappers.Pair;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -32,6 +33,7 @@ import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
+import org.ricetea.barleyteaapi.internal.connector.patch.ProtocolLibConnectorPatch;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
 import org.ricetea.utils.Converters;
@@ -41,9 +43,10 @@ import org.ricetea.utils.WithFlag;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @ApiStatus.Internal
 public final class ProtocolLibConnector implements SoftDependConnector {
@@ -51,6 +54,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
     private ProtocolManager protocolManager;
     private ComponentFallbackInjector fallbackInjector;
     private ItemStackPrerenderingInjector prerenderingInjector;
+    private final List<ProtocolLibConnectorPatch> patchList = new ArrayList<>();
+    private final ReadWriteLock patchListLock = new ReentrantReadWriteLock();
 
     @Override
     public void onEnable(@Nonnull Plugin plugin) {
@@ -70,6 +75,29 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         ObjectUtil.safeCall(prerenderingInjector, protocolManager::removePacketListener);
         fallbackInjector = null;
         prerenderingInjector = null;
+    }
+
+    public void addPatch(@Nonnull ProtocolLibConnectorPatch patch) {
+        Lock lock = patchListLock.writeLock();
+        lock.lock();
+        patchList.add(patch);
+        lock.unlock();
+    }
+
+    public void removePatch(@Nonnull ProtocolLibConnectorPatch patch) {
+        Lock lock = patchListLock.writeLock();
+        lock.lock();
+        patchList.remove(patch);
+        lock.unlock();
+    }
+
+    @Nonnull
+    public Collection<ProtocolLibConnectorPatch> getPatches() {
+        Lock lock = patchListLock.readLock();
+        lock.lock();
+        Collection<ProtocolLibConnectorPatch> result = ImmutableList.copyOf(patchList);
+        lock.unlock();
+        return result;
     }
 
     private static class ItemStackPrerenderingInjector extends PacketAdapter {
@@ -300,7 +328,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
     }
 
-    private static class ComponentFallbackInjector extends PacketAdapter {
+    private class ComponentFallbackInjector extends PacketAdapter {
 
         public ComponentFallbackInjector() {
             super(BarleyTeaAPI.getInstance(), ListenerPriority.HIGHEST,
@@ -349,7 +377,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketSending_Component(@Nonnull Player player, @Nonnull PacketContainer container) {
+        private void onPacketSending_Component(@Nonnull Player player, @Nonnull PacketContainer container) {
             GlobalTranslator translator = GlobalTranslator.translator();
             Locale locale = player.locale();
             StructureModifier<Component> modifier = container.getSpecificModifier(Component.class);
@@ -374,7 +402,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketSending_ItemStack(@Nonnull Player player, @Nonnull PacketContainer container) {
+        private void onPacketSending_ItemStack(@Nonnull Player player, @Nonnull PacketContainer container) {
             GlobalTranslator translator = GlobalTranslator.translator();
             Locale locale = player.locale();
             StructureModifier<ItemStack> modifier = container.getItemModifier();
@@ -384,7 +412,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketSending_ItemStackList(@Nonnull Player player, @Nonnull PacketContainer container) {
+        private void onPacketSending_ItemStackList(@Nonnull Player player, @Nonnull PacketContainer container) {
             GlobalTranslator translator = GlobalTranslator.translator();
             Locale locale = player.locale();
             StructureModifier<List<ItemStack>> modifier = container.getItemListModifier();
@@ -397,7 +425,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketSending_Equipment(@Nonnull Player player, @Nonnull PacketContainer container) {
+        private void onPacketSending_Equipment(@Nonnull Player player, @Nonnull PacketContainer container) {
             GlobalTranslator translator = GlobalTranslator.translator();
             Locale locale = player.locale();
             StructureModifier<List<Pair<ItemSlot, ItemStack>>> modifier = container.getSlotStackPairLists();
@@ -410,7 +438,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketSending_MerchantRecipeList(@Nonnull Player player, @Nonnull PacketContainer container) {
+        private void onPacketSending_MerchantRecipeList(@Nonnull Player player, @Nonnull PacketContainer container) {
             GlobalTranslator translator = GlobalTranslator.translator();
             Locale locale = player.locale();
             StructureModifier<List<MerchantRecipe>> modifier = container.getMerchantRecipeLists();
@@ -463,16 +491,16 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        private static void onPacketReceiving_ItemStack(@Nonnull PacketContainer container) {
+        private void onPacketReceiving_ItemStack(@Nonnull PacketContainer container) {
             StructureModifier<ItemStack> itemModifier = container.getItemModifier();
             for (int i = 0, size = itemModifier.size(); i < size; i++) {
-                itemModifier.modify(i, ComponentFallbackInjector::eraseTranslateFallbacks);
+                itemModifier.modify(i, this::eraseTranslateFallbacks);
             }
         }
 
         @Nullable
-        private static WithFlag<ItemStack> applyTranslateFallbacks(@Nonnull Translator translator, @Nullable ItemStack itemStack,
-                                                                   @Nonnull Locale locale) {
+        private WithFlag<ItemStack> applyTranslateFallbacks(@Nonnull Translator translator, @Nullable ItemStack itemStack,
+                                                            @Nonnull Locale locale) {
             if (itemStack == null)
                 return null;
             ItemMeta meta = itemStack.getItemMeta();
@@ -507,6 +535,9 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     blockMeta.setBlockState(shulkerBox);
                 }
             }
+            for (ProtocolLibConnectorPatch patch : ProtocolLibConnector.this.getPatches()){
+                isDirty |= patch.afterApplyTranslateFallbacks(translator, meta, locale, this::applyTranslateFallbacks);
+            }
             if (isDirty) {
                 itemStack.setItemMeta(meta);
             }
@@ -514,7 +545,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nullable
-        private static ItemStack eraseTranslateFallbacks(@Nullable ItemStack itemStack) {
+        private ItemStack eraseTranslateFallbacks(@Nullable ItemStack itemStack) {
             if (itemStack == null)
                 return null;
             ItemMeta meta = itemStack.getItemMeta();
@@ -528,7 +559,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                 List<Component> lore = meta.lore();
                 if (lore != null) {
                     meta.lore(lore.stream()
-                            .map(ComponentFallbackInjector::eraseTranslateFallbacks)
+                            .map(this::eraseTranslateFallbacks)
                             .toList());
                     isDirty = true;
                 }
@@ -543,6 +574,9 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                         blockMeta.setBlockState(shulkerBox);
                     }
                 }
+                for (ProtocolLibConnectorPatch patch : ProtocolLibConnector.this.getPatches()){
+                    isDirty |= patch.afterEraseTranslateFallbacks(meta, this::eraseTranslateFallbacks);
+                }
                 if (isDirty)
                     itemStack.setItemMeta(meta);
             }
@@ -550,7 +584,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nullable
-        private static Component applyTranslateFallbacks(@Nonnull Translator translator, @Nullable Component component,
+        private Component applyTranslateFallbacks(@Nonnull Translator translator, @Nullable Component component,
                                                          @Nonnull Locale locale) {
             if (component == null)
                 return null;
@@ -583,7 +617,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nonnull
-        private static Component processChatMessageHoverEvents(@Nonnull Translator translator,
+        private Component processChatMessageHoverEvents(@Nonnull Translator translator,
                                                                @Nonnull Component component, @Nonnull Locale locale) {
             HoverEvent<?> hoverEvent = component.hoverEvent();
             if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
@@ -605,14 +639,14 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         }
 
         @Nonnull
-        private static Component eraseTranslateFallbacks(@Nonnull Component component) {
+        private Component eraseTranslateFallbacks(@Nonnull Component component) {
             Component result;
             if (component instanceof TranslatableComponent translatableComponent) {
                 TranslatableComponent translatableResult = translatableComponent.fallback(null);
                 translatableResult = translatableResult
                         .args(translatableResult.args()
                                 .stream()
-                                .map(ComponentFallbackInjector::eraseTranslateFallbacks)
+                                .map(this::eraseTranslateFallbacks)
                                 .toList());
                 result = translatableResult;
             } else {
@@ -621,7 +655,7 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             return result
                     .children(component.children()
                             .stream()
-                            .map(ComponentFallbackInjector::eraseTranslateFallbacks)
+                            .map(this::eraseTranslateFallbacks)
                             .toList());
         }
     }

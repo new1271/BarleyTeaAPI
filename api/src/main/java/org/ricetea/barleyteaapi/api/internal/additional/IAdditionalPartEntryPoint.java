@@ -4,5 +4,7 @@ public interface IAdditionalPartEntryPoint {
 
     void onEnable();
 
+    void applyPatchs();
+
     void onDisable();
 }
