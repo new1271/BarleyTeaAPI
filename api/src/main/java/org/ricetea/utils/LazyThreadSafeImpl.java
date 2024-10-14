@@ -2,21 +2,19 @@ package org.ricetea.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 class LazyThreadSafeImpl<T> implements Lazy<T> {
 
     @Nonnull
-    protected final Object syncRoot = new Object();
+    protected final AtomicReference<T> objReference;
     @Nonnull
     private final Supplier<T> supplier;
-    @Nullable
-    protected T obj;
 
     LazyThreadSafeImpl(@Nonnull Supplier<T> supplier) {
         this.supplier = supplier;
-        obj = null;
+        objReference = new AtomicReference<>(null);
     }
 
     @Nonnull
@@ -28,22 +26,18 @@ class LazyThreadSafeImpl<T> implements Lazy<T> {
     @Nonnull
     @Override
     public T get() {
-        T obj = this.obj;
-        if (obj == null) {
-            synchronized (syncRoot) {
-                UnsafeHelper.getUnsafe().fullFence();
-                obj = this.obj;
-                if (obj == null) {
-                    this.obj = obj = Objects.requireNonNull(supplier.get());
-                }
-            }
-        }
-        return obj;
+        return objReference.updateAndGet(this::update);
     }
 
     @Nullable
     @Override
     public T getUnsafe() {
-        return obj;
+        return objReference.get();
+    }
+
+    private T update(T old) {
+        if (old == null)
+            return supplier.get();
+        return old;
     }
 }
