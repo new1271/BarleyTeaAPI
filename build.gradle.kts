@@ -8,6 +8,7 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     project(":api")
+    project(":api_v2")
     project(":main")
     project(":main_v2")
     project(":nms:v1_20_R1")

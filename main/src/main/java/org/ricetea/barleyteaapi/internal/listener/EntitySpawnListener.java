@@ -10,16 +10,15 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityShoot;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureProjectile;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataEntityShoot;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawnPosibility;
-import org.ricetea.barleyteaapi.api.entity.feature.data.DataProjectileLaunch;
-import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.FeatureSpawnerSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.data.*;
+import org.ricetea.barleyteaapi.api.entity.feature.state.StateEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
@@ -28,17 +27,25 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
+import org.ricetea.barleyteaapi.internal.listener.patch.EntitySpawnListenerPatch;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 @ApiStatus.Internal
 public final class EntitySpawnListener implements Listener {
     private static final Lazy<EntitySpawnListener> inst = Lazy.create(EntitySpawnListener::new);
+    private final List<EntitySpawnListenerPatch> patchList = new ArrayList<>();
+    private final ReadWriteLock patchListLock = new ReentrantReadWriteLock();
 
     private EntitySpawnListener() {
     }
@@ -48,6 +55,20 @@ public final class EntitySpawnListener implements Listener {
         return inst.get();
     }
 
+    public void addPatch(@Nonnull EntitySpawnListenerPatch patch) {
+        Lock lock = patchListLock.writeLock();
+        lock.lock();
+        patchList.add(patch);
+        lock.unlock();
+    }
+
+    public void removePatch(@Nonnull EntitySpawnListenerPatch patch) {
+        Lock lock = patchListLock.writeLock();
+        lock.lock();
+        patchList.remove(patch);
+        lock.unlock();
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     public void listenEntitySpawn(EntitySpawnEvent event) {
         if (event == null || event.isCancelled())
@@ -55,9 +76,18 @@ public final class EntitySpawnListener implements Listener {
         Entity entity = event.getEntity();
         if (event instanceof CreatureSpawnEvent creatureSpawnEvent) {
             onCreatureSpawn(creatureSpawnEvent);
+        } else if (event instanceof SpawnerSpawnEvent spawnerSpawnEvent) {
+            onSpawnerSpawn(spawnerSpawnEvent);
         } else if (event instanceof ProjectileLaunchEvent projectileLaunchEvent) {
             onProjectileLaunch(projectileLaunchEvent);
         } else {
+            Lock lock = patchListLock.readLock();
+            lock.lock();
+            for (EntitySpawnListenerPatch patch : patchList) {
+                if (patch.listenEntitySpawnInOtherCase(event))
+                    break;
+            }
+            lock.unlock();
             return;
         }
         if (!event.isCancelled()) {
@@ -80,8 +110,41 @@ public final class EntitySpawnListener implements Listener {
             double posibility = ObjectUtil.tryMap(() ->
                     feature.getSpawnPosibility(dataLazy.get()), 0.0);
             if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
-                StateNaturalSpawn result = ObjectUtil.tryMap(() ->
-                        feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateNaturalSpawn.Skipped);
+                StateEntitySpawn result = ObjectUtil.tryMap(() ->
+                        feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateEntitySpawn.Skipped);
+                if (event.isCancelled())
+                    return;
+                switch (result) {
+                    case Handled -> {
+                        return;
+                    }
+                    case Cancelled -> {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    case Skipped -> {
+                    }
+                }
+            }
+        }
+    }
+
+    private void onSpawnerSpawn(@Nonnull SpawnerSpawnEvent event) {
+        EntityRegister register = EntityRegister.getInstanceUnsafe();
+        if (register == null)
+            return;
+        RandomProvider rnd = RandomProvider.getInstance();
+        Lazy<DataSpawnerSpawnPosibility> dataLazy = Lazy.create(() ->
+                new DataSpawnerSpawnPosibility(event.getLocation(), event.getSpawner()));
+        for (CustomEntity entityType : register.listAll(e -> e.getOriginalType().equals(event.getEntityType()))) {
+            FeatureSpawnerSpawn feature = FeatureHelper.getFeatureUnsafe(entityType, FeatureSpawnerSpawn.class);
+            if (feature == null)
+                continue;
+            double posibility = ObjectUtil.tryMap(() ->
+                    feature.getSpawnPosibility(dataLazy.get()), 0.0);
+            if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
+                StateEntitySpawn result = ObjectUtil.tryMap(() ->
+                        feature.handleSpawnerSpawn(new DataSpawnerSpawn(event)), StateEntitySpawn.Skipped);
                 if (event.isCancelled())
                     return;
                 switch (result) {

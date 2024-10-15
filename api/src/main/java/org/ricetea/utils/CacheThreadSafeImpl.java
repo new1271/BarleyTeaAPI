@@ -11,6 +11,6 @@ class CacheThreadSafeImpl<T> extends LazyThreadSafeImpl<T> implements Cache<T> {
 
     @Override
     public void reset() {
-        obj = null;
+        objReference.set(null);
     }
 }

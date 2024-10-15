@@ -2,13 +2,13 @@ package org.ricetea.barleyteaapi.api.entity.feature;
 
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataNaturalSpawnPosibility;
-import org.ricetea.barleyteaapi.api.entity.feature.state.StateNaturalSpawn;
+import org.ricetea.barleyteaapi.api.entity.feature.state.StateEntitySpawn;
 
 import javax.annotation.Nonnull;
 
 public interface FeatureNaturalSpawn extends EntityFeature {
     @Nonnull
-    StateNaturalSpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data);
+    StateEntitySpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data);
 
     double getSpawnPosibility(@Nonnull DataNaturalSpawnPosibility data);
 }

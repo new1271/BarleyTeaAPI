@@ -17,6 +17,7 @@ java {
 dependencies {
     compileOnly(dependencyNotation = "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     implementation(project(":api"))
+    implementation(project(":api_v2"))
     implementation(project(":main"))
 }
 

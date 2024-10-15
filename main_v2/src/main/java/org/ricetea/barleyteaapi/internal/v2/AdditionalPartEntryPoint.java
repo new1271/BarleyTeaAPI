@@ -8,21 +8,20 @@ import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
-import org.ricetea.barleyteaapi.internal.connector.patch.ProtocolLibConnectorPatch;
-import org.ricetea.barleyteaapi.internal.v2.connector.handler.ProtocolLibConnectorPatchImpl;
+import org.ricetea.barleyteaapi.internal.listener.EntitySpawnListener;
+import org.ricetea.barleyteaapi.internal.v2.connector.patch.ProtocolLibConnectorPatchImpl;
 import org.ricetea.barleyteaapi.internal.v2.item.renderer.DefaultItemRendererImpl2;
 import org.ricetea.barleyteaapi.internal.v2.item.renderer.util.AlternativeItemStateImpl2;
 import org.ricetea.barleyteaapi.internal.v2.listener.CraftListener2;
+import org.ricetea.barleyteaapi.internal.v2.listener.patch.EntitySpawnListenerPatchImpl;
+import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public final class AdditionalPartEntryPoint implements IAdditionalPartEntryPoint {
 
     @Nonnull
     private final BarleyTeaAPI apiInst;
-    @Nullable
-    private Object protocolLibConnectorPatch;
 
     public AdditionalPartEntryPoint(@Nonnull BarleyTeaAPI apiInst) {
         this.apiInst = apiInst;
@@ -38,17 +37,18 @@ public final class AdditionalPartEntryPoint implements IAdditionalPartEntryPoint
 
     @Override
     public void applyPatchs() {
+        EntitySpawnListener.getInstance().addPatch(EntitySpawnListenerPatchImpl.getInstance());
         if (apiInst.getSoftDependRegister().get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
-            ProtocolLibConnectorPatchImpl impl = new ProtocolLibConnectorPatchImpl();
-            connector.addPatch(impl);
-            protocolLibConnectorPatch = impl;
+            connector.addPatch(ProtocolLibConnectorPatchImpl.getInstance());
         }
     }
 
     @Override
     public void onDisable() {
+        ObjectUtil.safeCall(EntitySpawnListenerPatchImpl.getInstanceUnsafe(), EntitySpawnListener.getInstance()::removePatch);
         if (apiInst.getSoftDependRegister().get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
-            if (protocolLibConnectorPatch instanceof ProtocolLibConnectorPatch patch)
+            ProtocolLibConnectorPatchImpl patch = ProtocolLibConnectorPatchImpl.getInstanceUnsafe();
+            if (patch != null)
                 connector.removePatch(patch);
         }
     }
