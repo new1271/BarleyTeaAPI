@@ -51,10 +51,10 @@ public final class EntitySpawnListenerPatchImpl implements EntitySpawnListenerPa
             if (feature == null)
                 continue;
             double posibility = ObjectUtil.tryMap(() ->
-                    feature.getSpawnPosibility(dataLazy.get()), 0.0);
+                    feature.getTrialSpawnerSpawnPosibility(dataLazy.get()), 0.0);
             if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
                 StateEntitySpawn result = ObjectUtil.tryMap(() ->
-                        feature.handleSpawnerSpawn(new DataTrialSpawnerSpawn(spawnEvent)), StateEntitySpawn.Skipped);
+                        feature.handleTrialSpawnerSpawn(new DataTrialSpawnerSpawn(spawnEvent)), StateEntitySpawn.Skipped);
                 if (event.isCancelled())
                     return true;
                 switch (result) {

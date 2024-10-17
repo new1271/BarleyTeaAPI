@@ -10,5 +10,5 @@ public interface FeatureNaturalSpawn extends EntityFeature {
     @Nonnull
     StateEntitySpawn handleNaturalSpawn(@Nonnull DataNaturalSpawn data);
 
-    double getSpawnPosibility(@Nonnull DataNaturalSpawnPosibility data);
+    double getNaturalSpawnPosibility(@Nonnull DataNaturalSpawnPosibility data);
 }

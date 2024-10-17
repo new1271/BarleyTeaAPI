@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 public interface FeatureTrialSpawnerSpawn extends EntityFeature {
     @Nonnull
-    StateEntitySpawn handleSpawnerSpawn(@Nonnull DataTrialSpawnerSpawn data);
+    StateEntitySpawn handleTrialSpawnerSpawn(@Nonnull DataTrialSpawnerSpawn data);
 
-    double getSpawnPosibility(@Nonnull DataTrialSpawnerSpawnPosibility data);
+    double getTrialSpawnerSpawnPosibility(@Nonnull DataTrialSpawnerSpawnPosibility data);
 }

@@ -10,5 +10,5 @@ public interface FeatureSpawnerSpawn extends EntityFeature {
     @Nonnull
     StateEntitySpawn handleSpawnerSpawn(@Nonnull DataSpawnerSpawn data);
 
-    double getSpawnPosibility(@Nonnull DataSpawnerSpawnPosibility data);
+    double getSpawnerSpawnPosibility(@Nonnull DataSpawnerSpawnPosibility data);
 }

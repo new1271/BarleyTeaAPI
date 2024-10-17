@@ -108,7 +108,7 @@ public final class EntitySpawnListener implements Listener {
             if (feature == null)
                 continue;
             double posibility = ObjectUtil.tryMap(() ->
-                    feature.getSpawnPosibility(dataLazy.get()), 0.0);
+                    feature.getNaturalSpawnPosibility(dataLazy.get()), 0.0);
             if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
                 StateEntitySpawn result = ObjectUtil.tryMap(() ->
                         feature.handleNaturalSpawn(new DataNaturalSpawn(event)), StateEntitySpawn.Skipped);
@@ -141,7 +141,7 @@ public final class EntitySpawnListener implements Listener {
             if (feature == null)
                 continue;
             double posibility = ObjectUtil.tryMap(() ->
-                    feature.getSpawnPosibility(dataLazy.get()), 0.0);
+                    feature.getSpawnerSpawnPosibility(dataLazy.get()), 0.0);
             if (posibility > 0 && (posibility >= 1 || rnd.nextDouble() < posibility)) {
                 StateEntitySpawn result = ObjectUtil.tryMap(() ->
                         feature.handleSpawnerSpawn(new DataSpawnerSpawn(event)), StateEntitySpawn.Skipped);
