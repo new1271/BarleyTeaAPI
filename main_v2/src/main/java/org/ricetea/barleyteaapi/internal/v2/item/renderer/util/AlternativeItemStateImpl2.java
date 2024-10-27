@@ -36,7 +36,17 @@ public final class AlternativeItemStateImpl2 implements AlternativeItemState {
     public ItemMeta restore(@Nonnull ItemMeta meta) {
         ItemMeta result;
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (container.getOrDefault(IsStoredKey, PersistentDataType.BOOLEAN, false)) {
+        boolean flag;
+        try {
+            flag = container.getOrDefault(IsStoredKey, PersistentDataType.BOOLEAN, false);
+        } catch (Exception ignored) {
+            try {
+                flag = container.getOrDefault(IsStoredKey, PersistentDataType.INTEGER, 0) > 0;
+            } catch (Exception ignored2) {
+                flag = false;
+            }
+        }
+        if (flag) {
             result = restoreLore(restoreCustomName(restoreItemName(meta)));
             container.remove(IsStoredKey);
         } else {
