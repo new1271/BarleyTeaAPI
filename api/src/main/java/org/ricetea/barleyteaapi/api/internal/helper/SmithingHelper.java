@@ -44,26 +44,29 @@ public final class SmithingHelper {
                 ),
                 0);
         INBTItemHelper helper = Bukkit.getServicesManager().load(INBTItemHelper.class);
+        boolean isNewerThan1_20_R3 = NMSVersion.getCurrent().getVersion() > NMSVersion.v1_20_R3.getVersion();
         {
             ItemMeta originalMeta = original.getItemMeta();
             ItemMeta resultMeta = result.getItemMeta();
-            copyAttributes(originalMeta, resultMeta);
+            if (isNewerThan1_20_R3) {
+                copyAttributes(originalMeta, resultMeta);
+            } else {
+                copyAttributesLegacy(originalMeta, resultMeta);
+            }
             copyEnchants(originalMeta, resultMeta);
             result.setItemMeta(resultMeta);
         }
         if (helper != null) {
-            NMSVersion nmsVersion = NMSVersion.getCurrent();
-            if (nmsVersion.getVersion() < NMSVersion.v1_20_R4.getVersion()) {
+            if (isNewerThan1_20_R3) {
+                result = helper.copyNbt(original, result,
+                        "minecraft:custom_data.PublicBukkitValues", "minecraft:attribute_modifiers",
+                        "minecraft:enchantments", "minecraft:damage", "minecraft:custom_model_data");
+                result = helper.mergeNbt(original, result, "minecraft:custom_data.PublicBukkitValues");
+            } else {
                 result = helper.copyNbt(original, result,
                         "PublicBukkitValues", "AttributeModifiers", "Enchantments",
                         "Damage", "CustomModelData");
                 result = helper.mergeNbt(original, result, "PublicBukkitValues");
-            }
-            else{
-                result = helper.copyNbt(original, result,
-                        "custom_data.PublicBukkitValues", "attribute_modifiers", "enchantments",
-                        "damage", "custom_model_data");
-                result = helper.mergeNbt(original, result, "custom_data.PublicBukkitValues");
             }
         }
         if (damage > 0) {
@@ -85,7 +88,7 @@ public final class SmithingHelper {
         return result;
     }
 
-    private static void copyAttributes(@Nullable ItemMeta original, @Nullable ItemMeta result) {
+    private static void copyAttributesLegacy(@Nullable ItemMeta original, @Nullable ItemMeta result) {
         if (original == null || result == null)
             return;
         Multimap<Attribute, AttributeModifier> attributes = original.getAttributeModifiers();
@@ -94,6 +97,26 @@ public final class SmithingHelper {
         Box<Boolean> flagBox = Box.box(false);
         attributes.forEach((attribute, attributeModifier) -> {
             if (attributeModifier.getName().equals(Constants.DEFAULT_ATTRIBUTE_MODIFIER_NAME))
+                return;
+            if (Boolean.FALSE.equals(flagBox.exchange(true))) {
+                for (Attribute _attribute : Attribute.values())
+                    result.removeAttributeModifier(_attribute);
+            }
+            result.addAttributeModifier(attribute, attributeModifier);
+        });
+    }
+
+    private static void copyAttributes(@Nullable ItemMeta original, @Nullable ItemMeta result) {
+        if (original == null || result == null)
+            return;
+        Multimap<Attribute, AttributeModifier> attributes = original.getAttributeModifiers();
+        if (attributes == null)
+            return;
+        Box<Boolean> flagBox = Box.box(false);
+        attributes.forEach((attribute, attributeModifier) -> {
+            String modName = attributeModifier.getName();
+            if (modName.startsWith(Constants.DEFAULT_ATTRIBUTE_MODIFIER_KEY_HEADER) ||
+                    modName.startsWith("base_"))
                 return;
             if (Boolean.FALSE.equals(flagBox.exchange(true))) {
                 for (Attribute _attribute : Attribute.values())
