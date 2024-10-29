@@ -7,8 +7,10 @@ import org.ricetea.barleyteaapi.api.internal.additional.IAdditionalPartEntryPoin
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.AlternativeItemState;
 import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
+import org.ricetea.barleyteaapi.internal.connector.InteractiveChatConnector;
 import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
 import org.ricetea.barleyteaapi.internal.listener.EntitySpawnListener;
+import org.ricetea.barleyteaapi.internal.v2.connector.patch.InteractiveChatConnectorPatchImpl;
 import org.ricetea.barleyteaapi.internal.v2.connector.patch.ProtocolLibConnectorPatchImpl;
 import org.ricetea.barleyteaapi.internal.v2.item.renderer.DefaultItemRendererImpl2;
 import org.ricetea.barleyteaapi.internal.v2.item.renderer.util.AlternativeItemStateImpl2;
@@ -38,16 +40,26 @@ public final class AdditionalPartEntryPoint implements IAdditionalPartEntryPoint
     @Override
     public void applyPatchs() {
         EntitySpawnListener.getInstance().addPatch(EntitySpawnListenerPatchImpl.getInstance());
-        if (apiInst.getSoftDependRegister().get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
+        var softDependRegister = apiInst.getSoftDependRegister();
+        if (softDependRegister.get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
             connector.addPatch(ProtocolLibConnectorPatchImpl.getInstance());
+        }
+        if (softDependRegister.get(BulitInSoftDepend.InteractiveChat) instanceof InteractiveChatConnector connector) {
+            connector.addPatch(InteractiveChatConnectorPatchImpl.getInstance());
         }
     }
 
     @Override
     public void onDisable() {
         ObjectUtil.safeCall(EntitySpawnListenerPatchImpl.getInstanceUnsafe(), EntitySpawnListener.getInstance()::removePatch);
-        if (apiInst.getSoftDependRegister().get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
+        var softDependRegister = apiInst.getSoftDependRegister();
+        if (softDependRegister.get(BulitInSoftDepend.ProtocolLib) instanceof ProtocolLibConnector connector) {
             ProtocolLibConnectorPatchImpl patch = ProtocolLibConnectorPatchImpl.getInstanceUnsafe();
+            if (patch != null)
+                connector.removePatch(patch);
+        }
+        if (softDependRegister.get(BulitInSoftDepend.InteractiveChat) instanceof InteractiveChatConnector connector) {
+            InteractiveChatConnectorPatchImpl patch = InteractiveChatConnectorPatchImpl.getInstanceUnsafe();
             if (patch != null)
                 connector.removePatch(patch);
         }

@@ -33,16 +33,16 @@ import org.ricetea.barleyteaapi.api.internal.nms.NMSVersion;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.render.ItemRenderer;
 import org.ricetea.barleyteaapi.api.item.render.util.ItemRenderHelper;
+import org.ricetea.barleyteaapi.internal.connector.patch.ApplyTranslateFallbacksFunction;
 import org.ricetea.barleyteaapi.internal.connector.patch.ProtocolLibConnectorPatch;
 import org.ricetea.barleyteaapi.util.connector.SoftDependConnector;
 import org.ricetea.utils.Box;
-import org.ricetea.utils.Converters;
+import org.ricetea.utils.Cache;
 import org.ricetea.utils.ObjectUtil;
 import org.ricetea.utils.WithFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -51,11 +51,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @ApiStatus.Internal
 public final class ProtocolLibConnector implements SoftDependConnector {
 
+    private final List<ProtocolLibConnectorPatch> patchList = new ArrayList<>();
+    private final ReadWriteLock patchListLock = new ReentrantReadWriteLock();
+    private final Cache<Collection<ProtocolLibConnectorPatch>> patchesCache =
+            Cache.createThreadSafe(this::getPatchesReal);
     private ProtocolManager protocolManager;
     private ComponentFallbackInjector fallbackInjector;
     private ItemStackPrerenderingInjector prerenderingInjector;
-    private final List<ProtocolLibConnectorPatch> patchList = new ArrayList<>();
-    private final ReadWriteLock patchListLock = new ReentrantReadWriteLock();
 
     @Override
     public void onEnable(@Nonnull Plugin plugin) {
@@ -77,10 +79,12 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         prerenderingInjector = null;
     }
 
+
     public void addPatch(@Nonnull ProtocolLibConnectorPatch patch) {
         Lock lock = patchListLock.writeLock();
         lock.lock();
         patchList.add(patch);
+        patchesCache.reset();
         lock.unlock();
     }
 
@@ -88,11 +92,17 @@ public final class ProtocolLibConnector implements SoftDependConnector {
         Lock lock = patchListLock.writeLock();
         lock.lock();
         patchList.remove(patch);
+        patchesCache.reset();
         lock.unlock();
     }
 
     @Nonnull
     public Collection<ProtocolLibConnectorPatch> getPatches() {
+        return patchesCache.get();
+    }
+
+    @Nonnull
+    private Collection<ProtocolLibConnectorPatch> getPatchesReal() {
         Lock lock = patchListLock.readLock();
         lock.lock();
         Collection<ProtocolLibConnectorPatch> result = ImmutableList.copyOf(patchList);
@@ -329,6 +339,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
     }
 
     private class ComponentFallbackInjector extends PacketAdapter {
+        private final ApplyTranslateFallbacksFunction applyTranslateFallbacksFunction =
+                ConnectorInternals.applyTranslateFallbacks(this::patchTranslateFallbacks);
 
         public ComponentFallbackInjector() {
             super(BarleyTeaAPI.getInstance(), ListenerPriority.HIGHEST,
@@ -391,13 +403,13 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                         Component component = serializer.deserialize(rawComponent.getJson());
                         rawComponent.setJson(serializer.serialize(
                                 Objects.requireNonNull(
-                                        applyTranslateFallbacks(translator, component, locale))));
+                                        applyTranslateFallbacksFunction.apply(translator, component, locale))));
                         return rawComponent;
                     });
                 }
             } else {
                 for (int i = 0; i < size; i++) {
-                    modifier.modify(i, component -> applyTranslateFallbacks(translator, component, locale));
+                    modifier.modify(i, component -> applyTranslateFallbacksFunction.apply(translator, component, locale));
                 }
             }
         }
@@ -408,7 +420,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             StructureModifier<ItemStack> modifier = container.getItemModifier();
             for (int i = 0, size = modifier.size(); i < size; i++) {
                 modifier.modify(i, itemStack ->
-                        ObjectUtil.safeMap(applyTranslateFallbacks(translator, itemStack, locale), WithFlag::obj));
+                        ObjectUtil.safeMap(ConnectorInternals.applyTranslateFallbacks(translator, itemStack,
+                                locale, this::patchTranslateFallbacks), WithFlag::obj));
             }
         }
 
@@ -419,7 +432,8 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             for (int i = 0, size = modifier.size(); i < size; i++) {
                 modifier.modify(i, itemStackList -> {
                     itemStackList.replaceAll(itemStack ->
-                            ObjectUtil.safeMap(applyTranslateFallbacks(translator, itemStack, locale), WithFlag::obj));
+                            ObjectUtil.safeMap(ConnectorInternals.applyTranslateFallbacks(translator, itemStack,
+                                    locale, this::patchTranslateFallbacks), WithFlag::obj));
                     return itemStackList;
                 });
             }
@@ -431,8 +445,9 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             StructureModifier<List<Pair<ItemSlot, ItemStack>>> modifier = container.getSlotStackPairLists();
             for (int i = 0, size = modifier.size(); i < size; i++) {
                 modifier.modify(i, itemStackList -> {
-                    itemStackList.forEach(pair -> pair.setSecond(
-                            ObjectUtil.safeMap(applyTranslateFallbacks(translator, pair.getSecond(), locale), WithFlag::obj)));
+                    itemStackList.forEach(pair -> pair.setSecond(ObjectUtil.safeMap(
+                            ConnectorInternals.applyTranslateFallbacks(translator, pair.getSecond(),
+                                    locale, this::patchTranslateFallbacks), WithFlag::obj)));
                     return itemStackList;
                 });
             }
@@ -450,14 +465,18 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                                 List<ItemStack> newIngredients = recipe.getIngredients()
                                         .stream()
                                         .map(itemStack -> {
-                                            WithFlag<ItemStack> newItem = applyTranslateFallbacks(translator, itemStack, locale);
+                                            WithFlag<ItemStack> newItem =
+                                                    ConnectorInternals.applyTranslateFallbacks(translator, itemStack,
+                                                            locale, this::patchTranslateFallbacks);
                                             if (newItem != null && newItem.flag())
                                                 flagBox.set(true);
                                             return ObjectUtil.safeMap(newItem, WithFlag::obj);
                                         })
                                         .toList();
                                 ItemStack oldResult = recipe.getResult();
-                                WithFlag<ItemStack> newResult = applyTranslateFallbacks(translator, oldResult, locale);
+                                WithFlag<ItemStack> newResult =
+                                        ConnectorInternals.applyTranslateFallbacks(translator, oldResult, locale,
+                                                this::patchTranslateFallbacks);
                                 if (newResult != null && newResult.flag()) {
                                     MerchantRecipe newRecipe = new MerchantRecipe(newResult.obj(), recipe.getUses(), recipe.getMaxUses(),
                                             recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier(),
@@ -498,50 +517,13 @@ public final class ProtocolLibConnector implements SoftDependConnector {
             }
         }
 
-        @Nullable
-        private WithFlag<ItemStack> applyTranslateFallbacks(@Nonnull Translator translator, @Nullable ItemStack itemStack,
-                                                            @Nonnull Locale locale) {
-            if (itemStack == null)
-                return null;
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta == null)
-                return new WithFlag<>(itemStack, false);
-            boolean isDirty = false;
-            Component displayName = ObjectUtil.tryMapSilently(meta::displayName);
-            if (displayName != null) {
-                meta.displayName(applyTranslateFallbacks(translator, displayName, locale));
-                isDirty = true;
+        private boolean patchTranslateFallbacks(@Nonnull Translator translator, @Nonnull ItemMeta itemMeta,
+                                                @Nonnull Locale locale) {
+            boolean result = false;
+            for (ProtocolLibConnectorPatch patch : getPatches()) {
+                result |= patch.afterApplyTranslateFallbacks(translator, itemMeta, locale, applyTranslateFallbacksFunction);
             }
-            List<Component> lore = ObjectUtil.tryMapSilently(meta::lore);
-            if (lore != null) {
-                meta.lore(lore.stream()
-                        .map(loreLine -> applyTranslateFallbacks(translator, loreLine, locale))
-                        .toList());
-                isDirty = true;
-            }
-            if (meta instanceof BlockStateMeta blockMeta) {
-                if (blockMeta.getBlockState() instanceof ShulkerBox shulkerBox) {
-                    var inventory = shulkerBox.getInventory();
-                    Box<Boolean> flag = Box.box(false);
-                    for (var iterator = inventory.iterator(); iterator.hasNext(); ) {
-                        WithFlag<ItemStack> result = applyTranslateFallbacks(translator, iterator.next(), locale);
-                        if (result != null && result.flag()) {
-                            flag.set(true);
-                            iterator.set(result.obj());
-                        }
-                    }
-                    if (!isDirty)
-                        isDirty = ObjectUtil.letNonNull(flag.get(), false);
-                    blockMeta.setBlockState(shulkerBox);
-                }
-            }
-            for (ProtocolLibConnectorPatch patch : ProtocolLibConnector.this.getPatches()){
-                isDirty |= patch.afterApplyTranslateFallbacks(translator, meta, locale, this::applyTranslateFallbacks);
-            }
-            if (isDirty) {
-                itemStack.setItemMeta(meta);
-            }
-            return new WithFlag<>(itemStack, isDirty);
+            return result;
         }
 
         @Nullable
@@ -581,61 +563,6 @@ public final class ProtocolLibConnector implements SoftDependConnector {
                     itemStack.setItemMeta(meta);
             }
             return itemStack;
-        }
-
-        @Nullable
-        private Component applyTranslateFallbacks(@Nonnull Translator translator, @Nullable Component component,
-                                                         @Nonnull Locale locale) {
-            if (component == null)
-                return null;
-            Component result;
-            if (component instanceof TranslatableComponent translatableComponent) {
-                TranslatableComponent translatableResult = translatableComponent;
-                if (translatableComponent.fallback() == null) {
-                    MessageFormat format = translator.translate(translatableComponent.key(), locale);
-                    if (format != null)
-                        translatableResult = translatableResult.fallback(Converters.toStringFormat(format));
-                }
-                translatableResult = translatableResult
-                        .args(translatableResult.args()
-                                .stream()
-                                .map(arg -> applyTranslateFallbacks(translator, arg, locale))
-                                .toList());
-                result = translatableResult;
-            } else {
-                result = component;
-            }
-            HoverEvent<?> hoverEvent = result.hoverEvent();
-            if (hoverEvent != null) {
-                result = processChatMessageHoverEvents(translator, result, locale);
-            }
-            return result
-                    .children(component.children()
-                            .stream()
-                            .map(arg -> applyTranslateFallbacks(translator, arg, locale))
-                            .toList());
-        }
-
-        @Nonnull
-        private Component processChatMessageHoverEvents(@Nonnull Translator translator,
-                                                               @Nonnull Component component, @Nonnull Locale locale) {
-            HoverEvent<?> hoverEvent = component.hoverEvent();
-            if (hoverEvent != null && hoverEvent.value() instanceof ShowItem showItem) {
-                INMSItemHelper nmsItemHelper = INMSItemHelper.getInstanceUnsafe();
-                if (nmsItemHelper == null)
-                    return component;
-                ItemStack itemStack = nmsItemHelper.createItemStackFromShowItem(showItem);
-                if (itemStack == null)
-                    return component;
-                var flag = applyTranslateFallbacks(translator, itemStack, locale);
-                if (flag != null && flag.flag()) {
-                    itemStack = flag.obj();
-                    return itemStack.displayName()
-                            .hoverEvent(itemStack.asHoverEvent())
-                            .children(component.children());
-                }
-            }
-            return component;
         }
 
         @Nonnull

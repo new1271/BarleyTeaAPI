@@ -9,14 +9,19 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://jitpack.io")
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.opencollab.dev/main/")
+    maven("https://repo.loohpjames.com/repository")
 }
 
 dependencies {
-    compileOnly(dependencyNotation = "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    implementation("net.kyori:adventure-api:4.17.0")
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("org.geysermc.geyser:api:2.2.0-SNAPSHOT")
+    compileOnly("com.loohp:InteractiveChat:4.2.12.0")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation(project(":api"))
 }

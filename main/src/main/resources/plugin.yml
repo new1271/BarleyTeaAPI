@@ -13,3 +13,4 @@ depend:
 softdepend:
   - "ExcellentEnchants"
   - "Geyser-Spigot"
+  - "InteractiveChat"

@@ -33,10 +33,7 @@ import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.api.task.TaskService;
 import org.ricetea.barleyteaapi.internal.block.registration.BlockRegisterImpl;
 import org.ricetea.barleyteaapi.internal.chunk.ChunkStorageImpl;
-import org.ricetea.barleyteaapi.internal.connector.BulitInSoftDepend;
-import org.ricetea.barleyteaapi.internal.connector.ExcellentEnchantsConnector;
-import org.ricetea.barleyteaapi.internal.connector.GeyserConnector;
-import org.ricetea.barleyteaapi.internal.connector.ProtocolLibConnector;
+import org.ricetea.barleyteaapi.internal.connector.*;
 import org.ricetea.barleyteaapi.internal.entity.EntityHelperInternalsImpl;
 import org.ricetea.barleyteaapi.internal.entity.counter.AsyncTickingServiceImpl;
 import org.ricetea.barleyteaapi.internal.entity.counter.PersistentTickCounterImpl;
@@ -159,6 +156,8 @@ public final class BarleyTeaAPI extends JavaPlugin {
                 SupplierUtil.fromConstuctor(ProtocolLibConnector.class));
         softDependRegister.register(BulitInSoftDepend.Geyser,
                 SupplierUtil.fromConstuctor(GeyserConnector.class));
+        softDependRegister.register(BulitInSoftDepend.InteractiveChat,
+                SupplierUtil.fromConstuctor(InteractiveChatConnector.class));
         this.softDependRegister = softDependRegister;
         softDependRegister.reloadAll();
         List<IAdditionalPartEntryPoint> additionalPartEntryPoints = additionalPartEntryPointListLazy.getUnsafe();
