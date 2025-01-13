@@ -135,6 +135,21 @@ public final class NMSItemHelperImpl implements INMSItemHelper {
     }
 
     @Override
+    public boolean materialIsTool(@Nonnull Material material) {
+        return switch (material) {
+            case WOODEN_SWORD, STONE_SWORD, GOLDEN_SWORD, IRON_SWORD,
+                    DIAMOND_SWORD, NETHERITE_SWORD, TRIDENT, WOODEN_AXE,
+                    STONE_AXE, GOLDEN_AXE, IRON_AXE, DIAMOND_AXE, NETHERITE_AXE,
+                    WOODEN_PICKAXE, STONE_PICKAXE, GOLDEN_PICKAXE, IRON_PICKAXE,
+                    DIAMOND_PICKAXE, NETHERITE_PICKAXE, WOODEN_SHOVEL, STONE_SHOVEL,
+                    GOLDEN_SHOVEL, IRON_SHOVEL, DIAMOND_SHOVEL, NETHERITE_SHOVEL,
+                    WOODEN_HOE, STONE_HOE, GOLDEN_HOE, IRON_HOE, DIAMOND_HOE, NETHERITE_HOE,
+                    MACE -> true;
+            default -> false;
+        };
+    }
+
+    @Override
     public boolean isSuitableForEntityType(@Nonnull EquipmentSlot slot, @Nonnull EntityType entityType) {
         return switch (slot) {
             case HAND, OFF_HAND, HEAD, CHEST, LEGS, FEET -> true;
