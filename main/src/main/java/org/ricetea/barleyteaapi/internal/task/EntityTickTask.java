@@ -8,7 +8,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
-import org.ricetea.barleyteaapi.api.entity.helper.EntityHelper;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
@@ -110,7 +109,7 @@ public final class EntityTickTask extends LoopTaskBase {
     }
 
     public void addEntity(@Nullable Entity entity) {
-        if (!EntityHelper.isCustomEntity(entity))
+        if (entity == null)
             return;
         addEntity(entity.getUniqueId());
     }
