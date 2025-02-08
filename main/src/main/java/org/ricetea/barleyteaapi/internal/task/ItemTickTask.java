@@ -16,10 +16,10 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemSlotFilter;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.util.PlayerUtil;
-import org.ricetea.utils.*;
+import org.ricetea.utils.ChainedRunner;
+import org.ricetea.utils.Constants;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.util.Collection;
 
@@ -27,21 +27,16 @@ import java.util.Collection;
 @ApiStatus.Internal
 public final class ItemTickTask extends LoopTaskBase {
     @Nonnull
-    private static final Lazy<ItemTickTask> _inst = Lazy.create(ItemTickTask::new);
+    private static final ItemTickTask _inst = new ItemTickTask();
     private int lastTick;
 
     private ItemTickTask() {
         super(50);
     }
 
-    @Nullable
-    public static ItemTickTask getInstanceUnsafe() {
-        return _inst.getUnsafe();
-    }
-
     @Nonnull
     public static ItemTickTask getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Override

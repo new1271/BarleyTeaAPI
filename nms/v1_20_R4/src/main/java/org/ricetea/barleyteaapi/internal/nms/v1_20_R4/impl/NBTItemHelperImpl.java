@@ -28,11 +28,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class NBTItemHelperImpl implements INBTItemHelper {
-    private static final Lazy<NBTItemHelperImpl> _inst = Lazy.create(NBTItemHelperImpl::new);
+    private static final NBTItemHelperImpl _inst = new NBTItemHelperImpl();
 
     @Nonnull
     public static NBTItemHelperImpl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nonnull

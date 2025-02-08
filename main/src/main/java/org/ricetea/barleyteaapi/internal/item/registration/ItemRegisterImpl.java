@@ -14,7 +14,6 @@ import org.ricetea.barleyteaapi.api.item.feature.ItemFeature;
 import org.ricetea.barleyteaapi.api.item.registration.ItemRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizationRegister;
 import org.ricetea.barleyteaapi.api.localization.LocalizedMessageFormat;
-import org.ricetea.barleyteaapi.api.task.LoopTask;
 import org.ricetea.barleyteaapi.internal.base.registration.CustomObjectRegisterBase;
 import org.ricetea.barleyteaapi.internal.listener.PlayerMoveListener;
 import org.ricetea.barleyteaapi.internal.task.ItemTickTask;
@@ -95,7 +94,7 @@ public final class ItemRegisterImpl extends CustomObjectRegisterBase<CustomItem,
         if (hasFeature(FeatureItemTick.class)) {
             ItemTickTask.getInstance().start();
         } else {
-            ObjectUtil.safeCall(ItemTickTask.getInstanceUnsafe(), LoopTask::stop);
+            ItemTickTask.getInstance().stop();
         }
         if (hasFeature(FeatureItemHoldPlayerMove.class)) {
             PlayerMoveListener.getInstance().tryRegisterEvents();

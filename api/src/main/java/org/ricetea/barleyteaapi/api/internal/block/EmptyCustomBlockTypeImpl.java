@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.CustomBlockType;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,14 +18,14 @@ import java.util.function.Function;
 public class EmptyCustomBlockTypeImpl implements CustomBlockType {
 
     @Nonnull
-    private static final Lazy<EmptyCustomBlockTypeImpl> _inst = Lazy.createThreadSafe(EmptyCustomBlockTypeImpl::new);
+    private static final EmptyCustomBlockTypeImpl _inst = new EmptyCustomBlockTypeImpl();
 
     private EmptyCustomBlockTypeImpl() {
     }
 
     @Nonnull
     public static EmptyCustomBlockTypeImpl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nonnull

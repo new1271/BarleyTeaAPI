@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.item.CustomItem;
 import org.ricetea.barleyteaapi.api.item.CustomItemType;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,14 +18,14 @@ import java.util.function.Function;
 public class EmptyCustomItemTypeImpl implements CustomItemType {
 
     @Nonnull
-    private static final Lazy<EmptyCustomItemTypeImpl> _inst = Lazy.createThreadSafe(EmptyCustomItemTypeImpl::new);
+    private static final EmptyCustomItemTypeImpl _inst = new EmptyCustomItemTypeImpl();
 
     private EmptyCustomItemTypeImpl() {
     }
 
     @Nonnull
     public static EmptyCustomItemTypeImpl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nonnull

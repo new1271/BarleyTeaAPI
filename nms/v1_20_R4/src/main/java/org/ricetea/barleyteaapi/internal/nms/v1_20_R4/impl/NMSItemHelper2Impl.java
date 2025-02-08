@@ -18,7 +18,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.ricetea.barleyteaapi.api.internal.nms.INMSItemHelper2;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
 import org.ricetea.utils.Constants;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -26,9 +25,9 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 public final class NMSItemHelper2Impl implements INMSItemHelper2 {
-    private static final Lazy<NMSItemHelper2Impl> _inst = Lazy.create(NMSItemHelper2Impl::new);
+    private static final NMSItemHelper2Impl _inst = new NMSItemHelper2Impl();
     private static final NamespacedKey OriginalItemDamageKey = NamespacedKeyUtil.BarleyTeaAPI("original_item_damage");
-    private static final NamespacedKey CustomDurabilityBarRestorePhaseKey = NamespacedKeyUtil.BarleyTeaAPI("custom_durability_bar_restore_phase");
+    //private static final NamespacedKey CustomDurabilityBarRestorePhaseKey = NamespacedKeyUtil.BarleyTeaAPI("custom_durability_bar_restore_phase");
     private static final NamespacedKey OldMaxStackSizeKey = NamespacedKeyUtil.BarleyTeaAPI("old_max_stack_size");
     private static final NamespacedKey OldDamageKey = NamespacedKeyUtil.BarleyTeaAPI("old_damage");
     private static final NamespacedKey OldMaxDamageKey = NamespacedKeyUtil.BarleyTeaAPI("old_max_damage");
@@ -38,7 +37,7 @@ public final class NMSItemHelper2Impl implements INMSItemHelper2 {
 
     @Nonnull
     public static NMSItemHelper2Impl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nonnull

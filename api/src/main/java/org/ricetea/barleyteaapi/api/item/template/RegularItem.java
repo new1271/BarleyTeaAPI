@@ -17,7 +17,6 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataCommandGive;
 import org.ricetea.barleyteaapi.api.item.feature.data.DataItemSlotFilter;
 import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -164,14 +163,14 @@ protected abstract boolean handleItemGive(@Nonnull ItemStack itemStack);
 
 private static class EquipmentSlotComparator implements Comparator<EquipmentSlot> {
 
-    private static final Lazy<EquipmentSlotComparator> _inst = Lazy.create(EquipmentSlotComparator::new);
+    private static final EquipmentSlotComparator _inst = new EquipmentSlotComparator();
 
     private EquipmentSlotComparator() {
     }
 
     @Nonnull
     public static EquipmentSlotComparator getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Override

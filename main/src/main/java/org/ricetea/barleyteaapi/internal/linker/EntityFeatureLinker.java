@@ -163,8 +163,7 @@ public final class EntityFeatureLinker {
         ObjectUtil.tryCall(entityType.getFeature(FeatureEntityLoad.class), _feature ->
                 SyncUtil.callInMainThread(() -> _feature.handleEntityUnloaded(entity)));
         if (entityType.getFeature(FeatureEntityTick.class) != null) {
-            ObjectUtil.tryCall(EntityTickTask.getInstanceUnsafe(),
-                    task -> task.removeEntity(entity));
+            EntityTickTask.getInstance().removeEntity(entity);
         }
     }
 
@@ -196,8 +195,7 @@ public final class EntityFeatureLinker {
         runner.freeze().run(SyncUtil::callInMainThread);
         if (hasTickingOld) {
             if (!hasTickingNew) {
-                ObjectUtil.safeCall(EntityTickTask.getInstanceUnsafe(),
-                        task -> task.removeEntity(entity));
+                EntityTickTask.getInstance().removeEntity(entity);
             }
         } else {
             if (hasTickingNew) {

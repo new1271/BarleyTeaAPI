@@ -14,7 +14,6 @@ import org.ricetea.barleyteaapi.api.block.helper.BlockHelper;
 import org.ricetea.barleyteaapi.api.block.registration.BlockRegister;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -30,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class BlockTickTask extends LoopTaskBase {
 
     @Nonnull
-    private static final Lazy<BlockTickTask> _inst = Lazy.create(BlockTickTask::new);
+    private static final BlockTickTask _inst = new BlockTickTask();
     @Nonnull
     private final Map<NamespacedKey, Map<BlockLocation, Optional<BukkitTask>>> tickingTable = new HashMap<>();
     @Nonnull
@@ -41,14 +40,9 @@ public final class BlockTickTask extends LoopTaskBase {
         super(50);
     }
 
-    @Nullable
-    public static BlockTickTask getInstanceUnsafe() {
-        return _inst.getUnsafe();
-    }
-
     @Nonnull
     public static BlockTickTask getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Override
@@ -183,10 +177,7 @@ public final class BlockTickTask extends LoopTaskBase {
         public void run() {
             if (doJob())
                 return;
-            BlockTickTask task = BlockTickTask.getInstanceUnsafe();
-            if (task == null)
-                return;
-            task.removeBlock(worldKey, location);
+            BlockTickTask.getInstance().removeBlock(worldKey, location);
         }
 
         private boolean doJob() {

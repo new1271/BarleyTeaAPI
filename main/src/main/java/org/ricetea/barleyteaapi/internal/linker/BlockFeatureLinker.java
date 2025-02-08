@@ -5,7 +5,6 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
-import org.ricetea.barleyteaapi.BarleyTeaAPI;
 import org.ricetea.barleyteaapi.api.base.data.BaseFeatureData;
 import org.ricetea.barleyteaapi.api.block.CustomBlock;
 import org.ricetea.barleyteaapi.api.block.feature.BlockFeature;
@@ -131,7 +130,7 @@ public final class BlockFeatureLinker {
             ObjectUtil.tryCall(oldBlockData.loadFeature, _feature ->
                     SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
             if (oldBlockData.ticking && !needTick) {
-                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+                BlockTickTask.getInstance().removeBlock(block);
             }
         }
         if (feature == null && !needTick)
@@ -160,7 +159,7 @@ public final class BlockFeatureLinker {
                 result = null;
             }
             if (oldBlockData.ticking) {
-                ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(), task -> task.removeBlock(block));
+                BlockTickTask.getInstance().removeBlock(block);
             }
             return result;
         });
@@ -178,8 +177,7 @@ public final class BlockFeatureLinker {
                 ObjectUtil.tryCall(oldBlockData.loadFeature, _feature ->
                         SyncUtil.callInMainThread(() -> _feature.handleBlockUnloaded(block)));
                 if (oldBlockData.ticking && !record.hasTickingNew) {
-                    ObjectUtil.safeCall(BlockTickTask.getInstanceUnsafe(),
-                            task -> task.removeBlock(block));
+                    BlockTickTask.getInstance().removeBlock(block);
                 }
             }
             ObjectUtil.tryCall(record.newLoadFeature, _feature ->

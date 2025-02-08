@@ -4,7 +4,6 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.ApiStatus;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.CustomEntityType;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,14 +18,14 @@ import java.util.function.Function;
 public class UnknownCustomEntityTypeImpl implements CustomEntityType {
 
     @Nonnull
-    private static final Lazy<UnknownCustomEntityTypeImpl> _inst = Lazy.createThreadSafe(UnknownCustomEntityTypeImpl::new);
+    private static final UnknownCustomEntityTypeImpl _inst = new UnknownCustomEntityTypeImpl();
 
     private UnknownCustomEntityTypeImpl() {
     }
 
     @Nonnull
     public static UnknownCustomEntityTypeImpl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nonnull

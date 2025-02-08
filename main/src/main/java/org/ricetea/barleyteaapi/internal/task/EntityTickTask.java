@@ -11,7 +11,6 @@ import org.ricetea.barleyteaapi.api.entity.feature.FeatureEntityTick;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.util.EnumUtil;
 import org.ricetea.utils.CollectionUtil;
-import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
@@ -27,7 +26,7 @@ import java.util.UUID;
 public final class EntityTickTask extends LoopTaskBase {
 
     @Nonnull
-    private static final Lazy<EntityTickTask> _inst = Lazy.create(EntityTickTask::new);
+    private static final EntityTickTask _inst = new EntityTickTask();
 
     @Nonnull
     private final Map<UUID, Optional<BukkitTask>> tickingTable = new HashMap<>();
@@ -39,14 +38,9 @@ public final class EntityTickTask extends LoopTaskBase {
         super(50);
     }
 
-    @Nullable
-    public static EntityTickTask getInstanceUnsafe() {
-        return _inst.getUnsafe();
-    }
-
     @Nonnull
     public static EntityTickTask getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Override
@@ -158,10 +152,7 @@ public final class EntityTickTask extends LoopTaskBase {
         public void run() {
             if (doJob())
                 return;
-            EntityTickTask task = EntityTickTask.getInstanceUnsafe();
-            if (task == null)
-                return;
-            task.removeEntity(uuid);
+            EntityTickTask.getInstance().removeEntity(uuid);
         }
 
         private boolean doJob() {

@@ -397,9 +397,9 @@ public final class BarleyTeaAPI extends JavaPlugin {
         Bukkit.getPluginManager().callEvent(new BarleyTeaAPIUnloadEvent());
         ObjectUtil.tryCall(softDependRegister, SoftDependRegister::unregisterAll);
         ObjectUtil.tryCall(CraftingRecipeRegister.getInstanceUnsafe(), CraftingRecipeRegister::unregisterAll);
-        ObjectUtil.tryCall(EntityTickTask.getInstanceUnsafe(), EntityTickTask::stop);
-        ObjectUtil.tryCall(ItemTickTask.getInstanceUnsafe(), ItemTickTask::stop);
-        ObjectUtil.tryCall(BlockTickTask.getInstanceUnsafe(), BlockTickTask::stop);
+        EntityTickTask.getInstance().stop();
+        ItemTickTask.getInstance().stop();
+        BlockTickTask.getInstance().stop();
         ObjectUtil.tryCall(TickingService.syncServiceUnsafe(), TickingService::shutdown);
         ObjectUtil.tryCall(TickingService.asyncServiceUnsafe(), TickingService::shutdown);
         ObjectUtil.tryCall(TaskService.getInstanceUnsafe(), TaskService::shutdown);

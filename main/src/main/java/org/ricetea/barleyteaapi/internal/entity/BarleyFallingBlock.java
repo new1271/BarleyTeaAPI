@@ -14,7 +14,6 @@ import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.entity.template.DefaultEntity;
 import org.ricetea.barleyteaapi.api.internal.chunk.ChunkStorage;
 import org.ricetea.barleyteaapi.util.NamespacedKeyUtil;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +23,7 @@ public final class BarleyFallingBlock extends DefaultEntity implements FeatureEn
     private static final NamespacedKey blockDataKey = NamespacedKeyUtil.BarleyTeaAPI("block_data");
 
     @Nonnull
-    private static final Lazy<BarleyFallingBlock> _inst = Lazy.create(BarleyFallingBlock::new);
+    private static final BarleyFallingBlock _inst = new BarleyFallingBlock();
 
     private BarleyFallingBlock() {
         super(NamespacedKeyUtil.BarleyTeaAPI("falling_block"), EntityType.FALLING_BLOCK);
@@ -33,7 +32,7 @@ public final class BarleyFallingBlock extends DefaultEntity implements FeatureEn
 
     @Nonnull
     public static BarleyFallingBlock getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     public static void setBlockDataContainer(@Nonnull Entity entity,

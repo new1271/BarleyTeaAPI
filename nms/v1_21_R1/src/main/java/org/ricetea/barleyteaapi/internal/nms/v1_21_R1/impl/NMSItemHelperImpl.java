@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public final class NMSItemHelperImpl implements INMSItemHelper {
-    private static final Lazy<NMSItemHelperImpl> _inst = Lazy.create(NMSItemHelperImpl::new);
+    private static final NMSItemHelperImpl _inst = new NMSItemHelperImpl();
     private final ThreadLocal<SoftCache<StringBuilder>> localBuilder = ThreadLocal.withInitial(() ->
             SoftCache.create(StringBuilder::new));
 
@@ -52,7 +52,7 @@ public final class NMSItemHelperImpl implements INMSItemHelper {
 
     @Nonnull
     public static NMSItemHelperImpl getInstance() {
-        return _inst.get();
+        return _inst;
     }
 
     @Nullable

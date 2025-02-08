@@ -18,24 +18,23 @@ import org.ricetea.barleyteaapi.api.item.helper.ItemHelper;
 import org.ricetea.barleyteaapi.api.item.recipe.BaseCraftingRecipe;
 import org.ricetea.barleyteaapi.api.item.registration.CraftingRecipeRegister;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
-import org.ricetea.utils.Lazy;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 
-@SuppressWarnings({"deprecated", "UnstableApiUsage"})
+@SuppressWarnings({"deprecated"})
 @Singleton
 @ApiStatus.Internal
 public final class CraftListener2 implements Listener {
 
-    private static final Lazy<CraftListener2> inst = Lazy.create(CraftListener2::new);
+    private static final CraftListener2 _inst = new CraftListener2();
 
     private CraftListener2() {
     }
 
     @Nonnull
     public static CraftListener2 getInstance() {
-        return inst.get();
+        return _inst;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
