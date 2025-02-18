@@ -2,7 +2,6 @@ package org.ricetea.barleyteaapi.internal.v2.listener.patch;
 
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.TrialSpawnerSpawnEvent;
-import org.jetbrains.annotations.NotNull;
 import org.ricetea.barleyteaapi.api.entity.CustomEntity;
 import org.ricetea.barleyteaapi.api.entity.feature.FeatureTrialSpawnerSpawn;
 import org.ricetea.barleyteaapi.api.entity.feature.data.DataTrialSpawnerSpawn;
@@ -11,33 +10,27 @@ import org.ricetea.barleyteaapi.api.entity.feature.state.StateEntitySpawn;
 import org.ricetea.barleyteaapi.api.entity.registration.EntityRegister;
 import org.ricetea.barleyteaapi.api.helper.FeatureHelper;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
-import org.ricetea.barleyteaapi.internal.listener.patch.EntitySpawnListenerPatch;
+import org.ricetea.barleyteaapi.internal.listener.filter.EntitySpawnListenerFilter;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public final class EntitySpawnListenerPatchImpl implements EntitySpawnListenerPatch {
+public final class EntitySpawnListenerFilterImpl implements EntitySpawnListenerFilter {
 
-    private static final Lazy<EntitySpawnListenerPatchImpl> _instLazy = Lazy.create(EntitySpawnListenerPatchImpl::new);
+    private static final EntitySpawnListenerFilterImpl _inst = new EntitySpawnListenerFilterImpl();
 
     @Nonnull
-    public static EntitySpawnListenerPatchImpl getInstance() {
-        return _instLazy.get();
+    public static EntitySpawnListenerFilterImpl getInstance() {
+        return _inst;
     }
 
-    @Nullable
-    public static EntitySpawnListenerPatchImpl getInstanceUnsafe() {
-        return _instLazy.getUnsafe();
-    }
-
-    private EntitySpawnListenerPatchImpl() {
+    private EntitySpawnListenerFilterImpl() {
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public boolean listenEntitySpawnInOtherCase(@NotNull EntitySpawnEvent event) {
+    public boolean listenEntitySpawnFirst(@Nonnull EntitySpawnEvent event) {
         if (!(event instanceof TrialSpawnerSpawnEvent spawnEvent))
             return false;
         EntityRegister register = EntityRegister.getInstanceUnsafe();

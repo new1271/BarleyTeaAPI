@@ -13,7 +13,7 @@ import org.ricetea.utils.Lazy;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("deprecation")
-public final class DataItemHoldEntityAttack extends BaseItemHoldEntityFeatureData<EntityDamageByEntityEvent> {
+public class DataItemHoldEntityAttack extends BaseItemHoldEntityFeatureData<EntityDamageByEntityEvent> {
 
     @Nonnull
     private final Lazy<CustomEntityType> damageeType;

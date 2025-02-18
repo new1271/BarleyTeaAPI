@@ -9,7 +9,7 @@ import org.ricetea.barleyteaapi.api.base.data.BaseItemHoldEntityFeatureData;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("deprecation")
-public final class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
+public class DataItemHoldEntityDamagedByNothing extends BaseItemHoldEntityFeatureData<EntityDamageEvent> {
 
     public DataItemHoldEntityDamagedByNothing(@Nonnull EntityDamageEvent event, @Nonnull ItemStack itemStack,
                                               @Nonnull EquipmentSlot equipmentSlot) {

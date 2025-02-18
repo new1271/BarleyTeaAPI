@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
-public final class DataEntityDamagedByBlock extends BaseEntityFeatureData<EntityDamageByBlockEvent> {
+public class DataEntityDamagedByBlock extends BaseEntityFeatureData<EntityDamageByBlockEvent> {
     @Nonnull
     private final Lazy<CustomBlockType> blockType;
 

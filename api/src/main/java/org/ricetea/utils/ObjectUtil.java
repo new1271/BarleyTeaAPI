@@ -24,23 +24,18 @@ public final class ObjectUtil {
     public static <T> T tryCast(@Nullable Object obj, @Nonnull Class<T> castClass) {
         if (obj == null)
             return null;
-        else {
-            if (castClass.isInstance(obj))
-                return castClass.cast(obj);
-            else if (castClass.equals(String.class))
-                return (T) obj;
-            else
-                return null;
-        }
+        if (castClass.isInstance(obj))
+            return castClass.cast(obj);
+        if (castClass.equals(String.class))
+            return (T) obj.toString();
+        return null;
     }
 
     @Nullable
     public static <T> T cast(@Nullable Object obj, @Nonnull Class<T> castClass) {
         if (obj == null)
             return null;
-        else {
-            return castClass.cast(obj);
-        }
+        return castClass.cast(obj);
     }
 
     @Nullable

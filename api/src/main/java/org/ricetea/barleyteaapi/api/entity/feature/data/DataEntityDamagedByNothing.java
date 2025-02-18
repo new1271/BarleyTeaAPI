@@ -6,7 +6,7 @@ import org.ricetea.barleyteaapi.api.base.data.BaseEntityFeatureData;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("deprecation")
-public final class DataEntityDamagedByNothing extends BaseEntityFeatureData<EntityDamageEvent> {
+public class DataEntityDamagedByNothing extends BaseEntityFeatureData<EntityDamageEvent> {
     public DataEntityDamagedByNothing(@Nonnull EntityDamageEvent event) {
         super(event);
     }

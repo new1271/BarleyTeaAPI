@@ -27,7 +27,7 @@ import org.ricetea.barleyteaapi.api.item.feature.data.DataItemHoldEntityShoot;
 import org.ricetea.barleyteaapi.api.misc.RandomProvider;
 import org.ricetea.barleyteaapi.internal.linker.EntityFeatureLinker;
 import org.ricetea.barleyteaapi.internal.linker.ItemFeatureLinker;
-import org.ricetea.barleyteaapi.internal.listener.patch.EntitySpawnListenerPatch;
+import org.ricetea.barleyteaapi.internal.listener.filter.EntitySpawnListenerFilter;
 import org.ricetea.utils.Constants;
 import org.ricetea.utils.Lazy;
 import org.ricetea.utils.ObjectUtil;
@@ -36,63 +36,54 @@ import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 @ApiStatus.Internal
 public final class EntitySpawnListener implements Listener {
-    private static final Lazy<EntitySpawnListener> inst = Lazy.create(EntitySpawnListener::new);
-    private final List<EntitySpawnListenerPatch> patchList = new ArrayList<>();
-    private final ReadWriteLock patchListLock = new ReentrantReadWriteLock();
+    private static final EntitySpawnListener _inst = new EntitySpawnListener();
+    private final List<EntitySpawnListenerFilter> filterList = new ArrayList<>();
 
     private EntitySpawnListener() {
     }
 
     @Nonnull
     public static EntitySpawnListener getInstance() {
-        return inst.get();
+        return _inst;
     }
 
-    public void addPatch(@Nonnull EntitySpawnListenerPatch patch) {
-        Lock lock = patchListLock.writeLock();
-        lock.lock();
-        patchList.add(patch);
-        lock.unlock();
+    public void addFilter(@Nonnull EntitySpawnListenerFilter filter) {
+        filterList.add(filter);
     }
 
-    public void removePatch(@Nonnull EntitySpawnListenerPatch patch) {
-        Lock lock = patchListLock.writeLock();
-        lock.lock();
-        patchList.remove(patch);
-        lock.unlock();
+    public void removeFilter(@Nonnull EntitySpawnListenerFilter filter) {
+        filterList.remove(filter);
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void listenEntitySpawn(EntitySpawnEvent event) {
+    public void listenEntitySpawnFirst(EntitySpawnEvent event) {
         if (event == null || event.isCancelled())
             return;
-        Entity entity = event.getEntity();
+        if (filterList.stream().anyMatch(_filter -> _filter.listenEntitySpawnFirst(event)))
+            return;
         if (event instanceof CreatureSpawnEvent creatureSpawnEvent) {
             onCreatureSpawn(creatureSpawnEvent);
-        } else if (event instanceof SpawnerSpawnEvent spawnerSpawnEvent) {
-            onSpawnerSpawn(spawnerSpawnEvent);
-        } else if (event instanceof ProjectileLaunchEvent projectileLaunchEvent) {
-            onProjectileLaunch(projectileLaunchEvent);
-        } else {
-            Lock lock = patchListLock.readLock();
-            lock.lock();
-            for (EntitySpawnListenerPatch patch : patchList) {
-                if (patch.listenEntitySpawnInOtherCase(event))
-                    break;
-            }
-            lock.unlock();
             return;
         }
-        if (!event.isCancelled()) {
-            EntityFeatureLinker.loadEntity(entity, false);
+        if (event instanceof SpawnerSpawnEvent spawnerSpawnEvent) {
+            onSpawnerSpawn(spawnerSpawnEvent);
+            return;
         }
+        if (event instanceof ProjectileLaunchEvent projectileLaunchEvent) {
+            onProjectileLaunch(projectileLaunchEvent);
+            return;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void listenEntitySpawnLast(EntitySpawnEvent event) {
+        if (event == null || event.isCancelled())
+            return;
+        EntityFeatureLinker.loadEntity(event.getEntity(), false);
     }
 
     private void onCreatureSpawn(@Nonnull CreatureSpawnEvent event) {
